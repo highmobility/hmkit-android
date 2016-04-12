@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothGattService;
@@ -26,8 +27,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 public class PeripheralActivity extends Activity {
 
@@ -37,6 +40,7 @@ public class PeripheralActivity extends Activity {
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     private BluetoothGattServer mGattServer;
+    private List<BluetoothDevice> mDevices = new ArrayList<>();
 
     BluetoothGattCharacteristic readCharacteristic;
     BluetoothGattCharacteristic writeCharacteristic;
@@ -98,7 +102,27 @@ public class PeripheralActivity extends Activity {
 
         initServer();
         startAdvertising();
+        mTest.run();
     }
+
+    Runnable mTest = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                byte[] value = new Random().nextBoolean() == true ? new byte[]{0x01, (byte) 0xff} : new byte[]{0x02, (byte) 0xff};
+                readCharacteristic.setValue(value);
+
+                Log.i(TAG, "size: " + mDevices.size());
+                for (BluetoothDevice device : mDevices) {
+                    mGattServer.notifyCharacteristicChanged(device, readCharacteristic, false);
+                }
+
+            } finally {
+                mHandler.postDelayed(mTest, 1000);
+            }
+        }
+    };
+
 
     @Override
     protected void onPause() {
@@ -120,10 +144,14 @@ public class PeripheralActivity extends Activity {
                         BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                         BluetoothGattCharacteristic.PERMISSION_READ);
 
+        UUID confUUUID = UUID.fromString("00002902-0000-1000-8000-00805F9B34FB");
+        readCharacteristic.addDescriptor(new BluetoothGattDescriptor(confUUUID, BluetoothGattDescriptor.PERMISSION_READ | BluetoothGattDescriptor.PERMISSION_WRITE));
+
         writeCharacteristic =
                 new BluetoothGattCharacteristic(Constants.WRITE_CHAR_UUID,
                         BluetoothGattCharacteristic.PROPERTY_WRITE,
                         BluetoothGattCharacteristic.PERMISSION_WRITE);
+
 
         service.addCharacteristic(readCharacteristic);
         service.addCharacteristic(writeCharacteristic);
@@ -206,6 +234,16 @@ public class PeripheralActivity extends Activity {
                         BluetoothGatt.GATT_SUCCESS,
                         0,
                         value);
+            }
+        }
+
+        @Override
+        public void onDescriptorWriteRequest(BluetoothDevice device, int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
+            super.onDescriptorWriteRequest(device, requestId, descriptor, preparedWrite, responseNeeded, offset, value);
+            Log.i(TAG, "descriptor change " + device.getAddress() + " " + Constants.hexFromBytes(value)); // 0100 on subscribe
+            if (responseNeeded) {
+                mDevices.add(device); // TODO: need to remove it on disconnect or set notify value false
+                mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
             }
         }
     };
