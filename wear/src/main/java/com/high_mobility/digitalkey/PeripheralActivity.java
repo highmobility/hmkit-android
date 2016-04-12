@@ -21,14 +21,15 @@ import android.os.Handler;
 import android.os.ParcelUuid;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
-import android.widget.ArrayAdapter;
+import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-public class MainActivity extends Activity {
+public class PeripheralActivity extends Activity {
 
     private static final String TAG = "PeripheralActivity";
 
@@ -37,14 +38,16 @@ public class MainActivity extends Activity {
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     private BluetoothGattServer mGattServer;
 
-    private ArrayList<BluetoothDevice> mConnectedDevices;
-    private ArrayAdapter<BluetoothDevice> mConnectedDevicesAdapter;
+    BluetoothGattCharacteristic readCharacteristic;
+    BluetoothGattCharacteristic writeCharacteristic;
 
     private TextView mTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        Log.i(TAG, "create");
 
         setContentView(R.layout.activity_main);
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
@@ -52,24 +55,16 @@ public class MainActivity extends Activity {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
                 mTextView = (TextView) stub.findViewById(R.id.text);
+                Log.i(TAG, "did inflate");
             }
         });
 
         ListView list = new ListView(this);
         setContentView(list);
 
-        mConnectedDevices = new ArrayList<BluetoothDevice>();
-        mConnectedDevicesAdapter = new ArrayAdapter<BluetoothDevice>(this,
-                android.R.layout.simple_list_item_1, mConnectedDevices);
-        list.setAdapter(mConnectedDevicesAdapter);
-
-        /*
-         * Bluetooth in Android 4.3+ is accessed via the BluetoothManager, rather than
-         * the old static BluetoothAdapter.getInstance()
-         */
         mBluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
         mBluetoothAdapter = mBluetoothManager.getAdapter();
-        mBluetoothAdapter.setName("666666A3");
+        mBluetoothAdapter.setName("666666A4"); // TODO: use random name
     }
 
     @Override
@@ -98,16 +93,6 @@ public class MainActivity extends Activity {
             return;
         }
 
-//        /*
-//         * Check for advertising support. Not all devices are enabled to advertise
-//         * Bluetooth LE data.
-//         */
-//        if (!mBluetoothAdapter.isMultipleAdvertisementSupported()) {
-//            Toast.makeText(this, "No Advertising Support.", Toast.LENGTH_SHORT).show();
-//            finish();
-//            return;
-//        }
-
         mBluetoothLeAdvertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
         mGattServer = mBluetoothManager.openGattServer(this, mGattServerCallback);
 
@@ -127,22 +112,21 @@ public class MainActivity extends Activity {
      * characteristics that should be exposed
      */
     private void initServer() {
-        BluetoothGattService service =new BluetoothGattService(DeviceProfile.SERVICE_UUID,
+        BluetoothGattService service =new BluetoothGattService(Constants.SERVICE_UUID,
                 BluetoothGattService.SERVICE_TYPE_PRIMARY);
 
-        BluetoothGattCharacteristic elapsedCharacteristic =
-                new BluetoothGattCharacteristic(DeviceProfile.CHARACTERISTIC_ELAPSED_UUID,
-                        //Read-only characteristic, supports notifications
+        readCharacteristic =
+                new BluetoothGattCharacteristic(Constants.READ_CHAR_UUID,
                         BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                         BluetoothGattCharacteristic.PERMISSION_READ);
-        BluetoothGattCharacteristic offsetCharacteristic =
-                new BluetoothGattCharacteristic(DeviceProfile.CHARACTERISTIC_OFFSET_UUID,
-                        //Read+write permissions
-                        BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_WRITE,
-                        BluetoothGattCharacteristic.PERMISSION_READ | BluetoothGattCharacteristic.PERMISSION_WRITE);
 
-        service.addCharacteristic(elapsedCharacteristic);
-        service.addCharacteristic(offsetCharacteristic);
+        writeCharacteristic =
+                new BluetoothGattCharacteristic(Constants.WRITE_CHAR_UUID,
+                        BluetoothGattCharacteristic.PROPERTY_WRITE,
+                        BluetoothGattCharacteristic.PERMISSION_WRITE);
+
+        service.addCharacteristic(readCharacteristic);
+        service.addCharacteristic(writeCharacteristic);
 
         mGattServer.addService(service);
     }
@@ -151,20 +135,12 @@ public class MainActivity extends Activity {
      * Terminate the server and any running callbacks
      */
     private void shutdownServer() {
-        mHandler.removeCallbacks(mNotifyRunnable);
+//        mHandler.removeCallbacks(mNotifyRunnable);
 
         if (mGattServer == null) return;
 
         mGattServer.close();
     }
-
-    private Runnable mNotifyRunnable = new Runnable() {
-        @Override
-        public void run() {
-            notifyConnectedDevices();
-            mHandler.postDelayed(this, 2000);
-        }
-    };
 
     /*
      * Callback handles all incoming requests from GATT clients.
@@ -175,8 +151,8 @@ public class MainActivity extends Activity {
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
             super.onConnectionStateChange(device, status, newState);
             Log.i(TAG, "onConnectionStateChange "
-                    + DeviceProfile.getStatusDescription(status) + " "
-                    + DeviceProfile.getStateDescription(newState));
+                    + Constants.getStatusDescription(status) + " "
+                    + Constants.getStateDescription(newState));
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 postDeviceChange(device, true);
@@ -194,20 +170,12 @@ public class MainActivity extends Activity {
             super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
             Log.i(TAG, "onCharacteristicReadRequest " + characteristic.getUuid().toString());
 
-            if (DeviceProfile.CHARACTERISTIC_ELAPSED_UUID.equals(characteristic.getUuid())) {
+            if (Constants.READ_CHAR_UUID.equals(characteristic.getUuid())) {
                 mGattServer.sendResponse(device,
                         requestId,
                         BluetoothGatt.GATT_SUCCESS,
                         0,
-                        getStoredValue());
-            }
-
-            if (DeviceProfile.CHARACTERISTIC_OFFSET_UUID.equals(characteristic.getUuid())) {
-                mGattServer.sendResponse(device,
-                        requestId,
-                        BluetoothGatt.GATT_SUCCESS,
-                        0,
-                        DeviceProfile.bytesFromInt(mTimeOffset));
+                        readCharacteristic.getValue());
             }
 
             /*
@@ -230,28 +198,14 @@ public class MainActivity extends Activity {
                                                  int offset,
                                                  byte[] value) {
             super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
-            Log.i(TAG, "onCharacteristicWriteRequest "+characteristic.getUuid().toString());
+            Log.i(TAG, "onCharacteristicWriteRequest : " + characteristic.getUuid().toString() + " v: " + Constants.hexFromBytes(value));
 
-            if (DeviceProfile.CHARACTERISTIC_OFFSET_UUID.equals(characteristic.getUuid())) {
-                int newOffset = DeviceProfile.unsignedIntFromBytes(value);
-                setStoredValue(newOffset);
-
-                if (responseNeeded) {
-                    mGattServer.sendResponse(device,
-                            requestId,
-                            BluetoothGatt.GATT_SUCCESS,
-                            0,
-                            value);
-                }
-
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(MainActivity.this, "Time Offset Updated", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-                notifyConnectedDevices();
+            if (responseNeeded) {
+                mGattServer.sendResponse(device,
+                        requestId,
+                        BluetoothGatt.GATT_SUCCESS,
+                        0,
+                        value);
             }
         }
     };
@@ -263,7 +217,7 @@ public class MainActivity extends Activity {
         if (mBluetoothLeAdvertiser == null) return;
 
         AdvertiseSettings settings = new AdvertiseSettings.Builder()
-                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
+                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
                 .setConnectable(true)
                 .setTimeout(0)
                 .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_MEDIUM)
@@ -271,10 +225,8 @@ public class MainActivity extends Activity {
 
         AdvertiseData data = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
-                .addServiceUuid(new ParcelUuid(DeviceProfile.SERVICE_UUID))
+                .addServiceUuid(new ParcelUuid(Constants.ADVERTISE_UUID))
                 .build();
-
-
 
         mBluetoothLeAdvertiser.startAdvertising(settings, data, mAdvertiseCallback);
     }
@@ -311,9 +263,9 @@ public class MainActivity extends Activity {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (mTextView != null) {
-                    mTextView.setText(message);
-                }
+            if (mTextView != null) {
+                mTextView.setText(message);
+            }
             }
         });
     }
@@ -322,46 +274,14 @@ public class MainActivity extends Activity {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                //This will add the item to our list and update the adapter at the same time.
-                if (toAdd) {
-                    mConnectedDevicesAdapter.add(device);
-                } else {
-                    mConnectedDevicesAdapter.remove(device);
-                }
-
-                //Trigger our periodic notification once devices are connected
-                mHandler.removeCallbacks(mNotifyRunnable);
-                if (!mConnectedDevices.isEmpty()) {
-                    mHandler.post(mNotifyRunnable);
+                if (mTextView != null) {
+                    if (toAdd) {
+                        mTextView.setText(device.getName());
+                    } else {
+                        mTextView.setText(null);
+                    }
                 }
             }
         });
-    }
-
-    /* Storage and access to local characteristic data */
-
-    private void notifyConnectedDevices() {
-        for (BluetoothDevice device : mConnectedDevices) {
-            BluetoothGattCharacteristic readCharacteristic = mGattServer.getService(DeviceProfile.SERVICE_UUID)
-                    .getCharacteristic(DeviceProfile.CHARACTERISTIC_ELAPSED_UUID);
-            readCharacteristic.setValue(getStoredValue());
-            mGattServer.notifyCharacteristicChanged(device, readCharacteristic, false);
-        }
-    }
-
-    private Object mLock = new Object();
-
-    private int mTimeOffset;
-
-    private byte[] getStoredValue() {
-        synchronized (mLock) {
-            return DeviceProfile.getShiftedTimeValue(mTimeOffset);
-        }
-    }
-
-    private void setStoredValue(int newOffset) {
-        synchronized (mLock) {
-            mTimeOffset = newOffset;
-        }
     }
 }
