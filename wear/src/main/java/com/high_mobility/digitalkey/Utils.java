@@ -10,21 +10,10 @@ import java.util.UUID;
 /**
  * Created by ttiganik on 08/04/16.
  */
-public class Constants {
+public class Utils {
     private static final byte[] appID = hexToBytes("***REMOVED***");
-    private static final byte[] issuer = hexToBytes("47494d4f");
-
-    public static UUID SERVICE_UUID = UUID.fromString("713D0100-503E-4C75-BA94-3148F18D941E");
-
-    public static UUID READ_CHAR_UUID = UUID.fromString("713D0102-503E-4C75-BA94-3148F18D941E");
-
-    public static UUID WRITE_CHAR_UUID = UUID.fromString("713D0103-503E-4C75-BA94-3148F18D941E");
-
-    public static UUID PING_CHAR_UUID = UUID.fromString("713D0104-503E-4C75-BA94-3148F18D941E");
-
+    private static final byte[] issuer = hexToBytes("47494D4F");
     public static UUID ADVERTISE_UUID = UUIDFromByteArray(concatBytes(issuer, appID));
-
-
 
     public static String getStateDescription(int state) {
 

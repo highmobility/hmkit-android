@@ -27,6 +27,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.high_mobility.digitalkey.MajesticLink.Constants;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -108,18 +110,18 @@ public class PeripheralActivity extends Activity {
     Runnable mTest = new Runnable() {
         @Override
         public void run() {
-            try {
-                byte[] value = new Random().nextBoolean() == true ? new byte[]{0x01, (byte) 0xff} : new byte[]{0x02, (byte) 0xff};
-                readCharacteristic.setValue(value);
+        try {
+            byte[] value = new Random().nextBoolean() == true ? new byte[]{0x01, (byte) 0xff} : new byte[]{0x02, (byte) 0xff};
+            readCharacteristic.setValue(value);
 
-                Log.i(TAG, "size: " + mDevices.size());
-                for (BluetoothDevice device : mDevices) {
-                    mGattServer.notifyCharacteristicChanged(device, readCharacteristic, false);
-                }
-
-            } finally {
-                mHandler.postDelayed(mTest, 1000);
+            Log.i(TAG, "devices size: " + mDevices.size());
+            for (BluetoothDevice device : mDevices) {
+                mGattServer.notifyCharacteristicChanged(device, readCharacteristic, false);
             }
+
+        } finally {
+            mHandler.postDelayed(mTest, 3000);
+        }
         }
     };
 
@@ -152,7 +154,6 @@ public class PeripheralActivity extends Activity {
                         BluetoothGattCharacteristic.PROPERTY_WRITE,
                         BluetoothGattCharacteristic.PERMISSION_WRITE);
 
-
         service.addCharacteristic(readCharacteristic);
         service.addCharacteristic(writeCharacteristic);
 
@@ -179,13 +180,15 @@ public class PeripheralActivity extends Activity {
         public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
             super.onConnectionStateChange(device, status, newState);
             Log.i(TAG, "onConnectionStateChange "
-                    + Constants.getStatusDescription(status) + " "
-                    + Constants.getStateDescription(newState));
+                    + Utils.getStatusDescription(status) + " "
+                    + Utils.getStateDescription(newState));
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 postDeviceChange(device, true);
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                Log.i(TAG, "remove device");
+                mDevices.remove(device);
                 postDeviceChange(device, false);
             }
         }
@@ -226,7 +229,7 @@ public class PeripheralActivity extends Activity {
                                                  int offset,
                                                  byte[] value) {
             super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
-            Log.i(TAG, "onCharacteristicWriteRequest : " + characteristic.getUuid().toString() + " v: " + Constants.hexFromBytes(value));
+            Log.i(TAG, "onCharacteristicWriteRequest : " + characteristic.getUuid().toString() + " v: " + Utils.hexFromBytes(value));
 
             if (responseNeeded) {
                 mGattServer.sendResponse(device,
@@ -240,9 +243,12 @@ public class PeripheralActivity extends Activity {
         @Override
         public void onDescriptorWriteRequest(BluetoothDevice device, int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
             super.onDescriptorWriteRequest(device, requestId, descriptor, preparedWrite, responseNeeded, offset, value);
-            Log.i(TAG, "descriptor change " + device.getAddress() + " " + Constants.hexFromBytes(value)); // 0100 on subscribe
+Log.i(TAG, device.getAddress());
             if (responseNeeded) {
-                mDevices.add(device); // TODO: need to remove it on disconnect or set notify value false
+                if (!mDevices.contains(device)) {
+                    mDevices.add(device);
+                }
+
                 mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
             }
         }
@@ -263,7 +269,7 @@ public class PeripheralActivity extends Activity {
 
         AdvertiseData data = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
-                .addServiceUuid(new ParcelUuid(Constants.ADVERTISE_UUID))
+                .addServiceUuid(new ParcelUuid(Utils.ADVERTISE_UUID))
                 .build();
 
         mBluetoothLeAdvertiser.startAdvertising(settings, data, mAdvertiseCallback);
