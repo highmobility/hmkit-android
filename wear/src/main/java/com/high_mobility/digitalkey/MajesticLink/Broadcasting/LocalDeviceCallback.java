@@ -1,4 +1,4 @@
-package com.high_mobility.digitalkey.MajesticLink.Sensing;
+package com.high_mobility.digitalkey.MajesticLink.Broadcasting;
 
 /**
  * Created by ttiganik on 13/04/16.

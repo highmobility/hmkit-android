@@ -1,10 +1,19 @@
 package com.high_mobility.digitalkey.MajesticLink.Shared;
 
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  * Created by ttiganik on 13/04/16.
  */
 public class Certificate {
     byte[] bytes;
+
+    public Certificate(byte[] bytes) {
+        this.bytes = bytes;
+    }
+
+    public Certificate(){}
 
     /// The certificate's data in binary format, without the signature
     public byte [] getCertificateData() {
@@ -21,46 +30,34 @@ public class Certificate {
         return bytes;
     }
 
-    /// Checks the certificate's signature
-    ///
-    /// - parameter CAPublicKey: The public key that the signature is checked with
-    /// - returns: True if the signature is valid for the provided public key
-    public boolean isSignatureValid(byte[] CAPublicKey){
-//        if let signature = signature {
-//            return HMCryptor.verifySignature(NSData(bytes: signature), forData: NSData(bytes:certificateData), publicKey: NSData(bytes:CAPublicKey))
-//        }
-// TODO:
+    public boolean isSignatureValid(byte[] CAPublicKey) {
+        byte[] signature = getSignature();
+        if (signature != null) {
+            // TODO: verify sig
+            return true;
+        }
+
         return false;
     }
 
-    // TODO:
-    /*
-    static func dateFromBytes(bytes: [UInt8]) -> NSDate {
-        let year = bytes[0], month = bytes[1], day = bytes[2], hour = bytes[3], minute = bytes[4]
-
-        let components = NSDateComponents()
-        components.year = 2000 | Int(year)
-
-        components.month = Int(month)
-        components.day = Int(day)
-        components.hour = Int(hour)
-        components.minute = Int(minute)
-        let date = NSCalendar.currentCalendar().dateFromComponents(components)!
-
-        return date
+    protected static Date dateFromBytes(byte[] bytes) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(0);
+        cal.set(2000 + bytes[0], bytes[1], bytes[2], bytes[3], bytes[4]);
+        return cal.getTime(); // get back a Date object
     }
 
-    static func bytesFromDate(date: NSDate) -> [UInt8] {
-        let components = NSCalendar.currentCalendar().components([NSCalendarUnit.Year, NSCalendarUnit.Month, NSCalendarUnit.Day, NSCalendarUnit.Hour, NSCalendarUnit.Minute], fromDate: date)
-        var bytes = [UInt8](count: 5, repeatedValue: 0x00)
+    protected static byte[] bytesFromDate(Date date) {
+        byte [] bytes = new byte[5];
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
 
-        bytes[0] = UInt8(components.year & 0xFF)
-        bytes[1] = UInt8(components.month)
-        bytes[2] = UInt8(components.day)
-        bytes[3] = UInt8(components.hour)
-        bytes[4] = UInt8(components.minute)
-
-        return bytes
+        bytes[0] = (byte)(calendar.get(Calendar.YEAR) - 2000);
+        bytes[1] = (byte)(calendar.get(Calendar.MONTH));
+        bytes[2] = (byte)(calendar.get(Calendar.DAY_OF_MONTH));
+        bytes[3] = (byte)(calendar.get(Calendar.HOUR));
+        bytes[4] = (byte)(calendar.get(Calendar.MINUTE));
+        // TODO: test
+        return bytes;
     }
-*/
 }

@@ -8,4 +8,5 @@ import com.high_mobility.digitalkey.MajesticLink.Shared.DeviceCertificate;
 public class Device {
     public DeviceCertificate certificate;
     public String name;
+
 }

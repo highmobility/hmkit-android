@@ -1,4 +1,4 @@
-package com.high_mobility.digitalkey.MajesticLink.Sensing;
+package com.high_mobility.digitalkey.MajesticLink.Broadcasting;
 
 import com.high_mobility.digitalkey.MajesticLink.Constants;
 

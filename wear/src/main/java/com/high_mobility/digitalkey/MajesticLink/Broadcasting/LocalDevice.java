@@ -1,4 +1,4 @@
-package com.high_mobility.digitalkey.MajesticLink.Sensing;
+package com.high_mobility.digitalkey.MajesticLink.Broadcasting;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 
@@ -19,6 +19,8 @@ public class LocalDevice {
     BluetoothGattCharacteristic readCharacteristic;
     BluetoothGattCharacteristic writeCharacteristic;
 
+    LocalDeviceCallback callback;
+
     static LocalDevice instance = null;
 
     public static LocalDevice getInstance() {
@@ -30,11 +32,12 @@ public class LocalDevice {
     }
 
     public void registerCallback(LocalDeviceCallback callback) {
-        // TODO:
+        this.callback = callback;
     }
 
     public void setDeviceCertificate(DeviceCertificate certificate, byte[] privateKey, byte[] publicKey) {
         // TODO:
+        Storage.getInstance().deviceCertificate = certificate;
     }
 
     public void startBroadcasting() {
