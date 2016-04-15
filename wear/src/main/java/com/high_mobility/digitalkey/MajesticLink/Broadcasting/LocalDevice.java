@@ -1,9 +1,11 @@
 package com.high_mobility.digitalkey.MajesticLink.Broadcasting;
 
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.content.Context;
 
 import com.high_mobility.digitalkey.MajesticLink.Shared.AccessCertificate;
 import com.high_mobility.digitalkey.MajesticLink.Shared.DeviceCertificate;
+import com.high_mobility.digitalkey.Utils;
 
 /**
  * Created by ttiganik on 12/04/16.
@@ -29,6 +31,10 @@ public class LocalDevice {
         }
 
         return instance;
+    }
+
+    public void setContext(Context ctx) {
+        Storage.getInstance().setContext(ctx);
     }
 
     public void registerCallback(LocalDeviceCallback callback) {

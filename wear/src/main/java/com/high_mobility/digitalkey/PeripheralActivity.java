@@ -27,6 +27,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.high_mobility.digitalkey.MajesticLink.Broadcasting.LocalDevice;
 import com.high_mobility.digitalkey.MajesticLink.Constants;
 
 import java.util.ArrayList;
@@ -46,6 +47,8 @@ public class PeripheralActivity extends Activity {
 
     BluetoothGattCharacteristic readCharacteristic;
     BluetoothGattCharacteristic writeCharacteristic;
+
+    LocalDevice device = LocalDevice.getInstance();
 
     private TextView mTextView;
 
@@ -67,6 +70,8 @@ public class PeripheralActivity extends Activity {
 
         ListView list = new ListView(this);
         setContentView(list);
+
+        device.setContext(getApplicationContext());
 
         mBluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
         mBluetoothAdapter = mBluetoothManager.getAdapter();

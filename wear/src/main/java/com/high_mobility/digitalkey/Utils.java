@@ -4,15 +4,14 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothProfile;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.UUID;
 
 /**
  * Created by ttiganik on 08/04/16.
  */
 public class Utils {
-    private static final byte[] appID = hexToBytes("***REMOVED***");
-    private static final byte[] issuer = hexToBytes("47494D4F");
+    private static final byte[] appID = bytesFromHex("***REMOVED***");
+    private static final byte[] issuer = bytesFromHex("47494D4F");
     public static UUID ADVERTISE_UUID = UUIDFromByteArray(concatBytes(issuer, appID));
 
     public static String getStateDescription(int state) {
@@ -59,7 +58,7 @@ public class Utils {
         return new String(hexChars);
     }
 
-    public static byte[] hexToBytes(String s) {
+    public static byte[] bytesFromHex(String s) {
         int len = s.length();
         byte[] data = new byte[len / 2];
 
