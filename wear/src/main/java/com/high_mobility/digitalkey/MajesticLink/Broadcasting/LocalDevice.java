@@ -13,10 +13,9 @@ import com.high_mobility.digitalkey.Utils;
 public class LocalDevice {
     public enum State { BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING}
 
-    public AccessCertificate[] registeredCertificates;
-    public AccessCertificate[] storedCertificates;
-
-    public Link[] links;
+    Storage storage;
+    byte[] privateKey;
+    byte[] CAPublicKey;
 
     BluetoothGattCharacteristic readCharacteristic;
     BluetoothGattCharacteristic writeCharacteristic;
@@ -33,17 +32,29 @@ public class LocalDevice {
         return instance;
     }
 
-    public void setContext(Context ctx) {
-        Storage.getInstance().setContext(ctx);
-    }
-
     public void registerCallback(LocalDeviceCallback callback) {
         this.callback = callback;
     }
 
-    public void setDeviceCertificate(DeviceCertificate certificate, byte[] privateKey, byte[] publicKey) {
-        // TODO:
-        Storage.getInstance().deviceCertificate = certificate;
+    public void setDeviceCertificate(DeviceCertificate certificate, byte[] privateKey, byte[] CAPublicKey, Context ctx) {
+        storage = new Storage(ctx);
+        storage.deviceCertificate = certificate;
+        this.privateKey = privateKey;
+        this.CAPublicKey = CAPublicKey;
+        storage = new Storage(ctx);
+    }
+
+    public AccessCertificate[] getRegisteredCertificates() {
+        return storage.getRegisteredCertificates();
+    }
+
+    public AccessCertificate[] getStoredCertificates() {
+        return storage.getStoredCertificates();
+    }
+
+    private Link[] links;
+    public Link[] getLinks() {
+        return links;
     }
 
     public void startBroadcasting() {

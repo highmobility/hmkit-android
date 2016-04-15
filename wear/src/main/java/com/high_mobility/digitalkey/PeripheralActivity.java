@@ -15,7 +15,9 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,15 +29,27 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.high_mobility.digitalkey.MajesticLink.Broadcasting.Link;
+import com.high_mobility.digitalkey.MajesticLink.Broadcasting.LinkCallback;
 import com.high_mobility.digitalkey.MajesticLink.Broadcasting.LocalDevice;
+import com.high_mobility.digitalkey.MajesticLink.Broadcasting.LocalDeviceCallback;
 import com.high_mobility.digitalkey.MajesticLink.Constants;
+import com.high_mobility.digitalkey.MajesticLink.Shared.DeviceCertificate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-public class PeripheralActivity extends Activity {
+public class PeripheralActivity extends Activity implements LocalDeviceCallback, LinkCallback {
+
+    private static final byte[] CA_PRIVATE_KEY = Utils.bytesFromHex("***REMOVED***");
+    private static final byte[] CA_PUBLIC_KEY = Utils.bytesFromHex("***REMOVED***");
+    private static final byte[] CA_APP_IDENTIFIER = Utils.bytesFromHex("***REMOVED***");
+    private static final byte[] CA_ISSUER = Utils.bytesFromHex("47494D4F");
+
+    private static final byte[] DEVICE_PUBLIC_KEY = Utils.bytesFromHex("***REMOVED***");
+    private static final byte[] DEVICE_PRIVATE_KEY = Utils.bytesFromHex("***REMOVED***");
 
     private static final String TAG = "PeripheralActivity";
 
@@ -71,7 +85,9 @@ public class PeripheralActivity extends Activity {
         ListView list = new ListView(this);
         setContentView(list);
 
-        device.setContext(getApplicationContext());
+        setDeviceCertificate();
+        device.registerCallback(this);
+        device.startBroadcasting();
 
         mBluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
         mBluetoothAdapter = mBluetoothManager.getAdapter();
@@ -136,6 +152,36 @@ public class PeripheralActivity extends Activity {
         super.onPause();
         stopAdvertising();
         shutdownServer();
+    }
+
+    private void setDeviceCertificate() {
+        DeviceCertificate cert = new DeviceCertificate(CA_ISSUER, CA_APP_IDENTIFIER, getSerial(), DEVICE_PUBLIC_KEY);
+        // TODO: add signature to cert
+
+        device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
+        // TODO: show the serial on screen
+    }
+
+    private byte[] getSerial() {
+        SharedPreferences settings;
+        SharedPreferences.Editor editor;
+
+        settings = getApplicationContext().getSharedPreferences("com.hm.wearable.UserPrefs",
+                Context.MODE_PRIVATE );
+        editor = settings.edit();
+
+
+        String serialKey = "serialUserDefaultsKey";
+
+        if (settings.contains(serialKey)) {
+            return Utils.bytesFromHex(settings.getString(serialKey, ""));
+        }
+        else {
+            byte[] serialBytes = new byte[9];
+            new Random().nextBytes(serialBytes);
+            editor.putString(serialKey, Utils.hexFromBytes(serialBytes));
+            return serialBytes;
+        }
     }
 
     /*
@@ -333,4 +379,40 @@ Log.i(TAG, device.getAddress());
             }
         });
     }
+
+    @Override
+    public void localDeviceStateChanged(LocalDevice.State state, LocalDevice.State oldState) {
+
+    }
+
+    @Override
+    public void localDeviceDidReceiveLink(Link link) {
+
+    }
+
+    @Override
+    public void localDeviceDidLoseLink(Link link) {
+
+    }
+
+    @Override
+    public void linkStateDidChange(Link link, Link.State oldState) {
+
+    }
+
+    @Override
+    public void linkDidExecuteCommand(Link link, Constants.Command command, Constants.Error error) {
+
+    }
+
+    @Override
+    public byte[] linkDidReceiveCustomCommand(Link link, byte[] bytes) {
+        return new byte[0];
+    }
+
+    @Override
+    public void linkDidReceivePairingRequest(Link link, byte[] serialNumber, Constants.ApprovedCallback approvedCallback, float timeout) {
+
+    }
+
 }

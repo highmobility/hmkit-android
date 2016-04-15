@@ -27,19 +27,9 @@ class Storage {
     private SharedPreferences settings;
     private SharedPreferences.Editor editor;
 
-    static Storage instance;
-
     DeviceCertificate deviceCertificate;
 
-    static Storage getInstance() {
-        if (instance == null) {
-            instance = new Storage();
-        }
-
-        return instance;
-    }
-
-    public void setContext(Context ctx) {
+    Storage(Context ctx) {
         settings = ctx.getSharedPreferences("com.hm.wearable.UserPrefs",
                 Context.MODE_PRIVATE );
         editor = settings.edit();
@@ -75,7 +65,8 @@ class Storage {
         editor.commit();
     }
 
-    AccessCertificate[] getRegisteredCertificates(byte[] serialNumber) {
+    AccessCertificate[] getRegisteredCertificates() {
+        byte[] serialNumber = deviceCertificate.getSerial();
         AccessCertificate[] certificates = getCertificates();
         ArrayList<AccessCertificate> storedCertificates = new ArrayList<>();
 
@@ -92,7 +83,8 @@ class Storage {
         return null;
     }
 
-    AccessCertificate[] getStoredCertificates(byte[] serialNumber) {
+    AccessCertificate[] getStoredCertificates() {
+        byte[] serialNumber = deviceCertificate.getSerial();
         AccessCertificate[] certificates = getCertificates();
         ArrayList<AccessCertificate> storedCertificates = new ArrayList<>();
 
