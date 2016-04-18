@@ -1,12 +1,13 @@
-package com.high_mobility.digitalkey.MajesticLink.Broadcasting;
+package com.high_mobility.digitalkey.HMLink.Broadcasting;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.high_mobility.digitalkey.MajesticLink.Shared.AccessCertificate;
-import com.high_mobility.digitalkey.MajesticLink.Shared.Certificate;
-import com.high_mobility.digitalkey.MajesticLink.Shared.DeviceCertificate;
+import com.high_mobility.digitalkey.HMLink.LinkException;
+import com.high_mobility.digitalkey.HMLink.Shared.AccessCertificate;
+import com.high_mobility.digitalkey.HMLink.Shared.Certificate;
+import com.high_mobility.digitalkey.HMLink.Shared.DeviceCertificate;
 import com.high_mobility.digitalkey.Utils;
 
 import java.util.ArrayList;
@@ -176,10 +177,10 @@ class Storage {
         return null;
     }
 
-    void storeCertificate(AccessCertificate certificate, byte[] CAPublicKey) throws Exception {
+    void storeCertificate(AccessCertificate certificate, byte[] CAPublicKey) throws LinkException {
         AccessCertificate[] certs = getCertificates();
 
-        if (certs.length >= 5) throw new Exception(); // TODO throw Error.StorageFull exception
+        if (certs.length >= 5) throw new LinkException(LinkException.LinkExceptionCode.STORAGE_FULL);
 
         for (int i = 0; i < certs.length; i++) {
             AccessCertificate cert = certs[i];

@@ -10,12 +10,13 @@ import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.high_mobility.digitalkey.MajesticLink.Broadcasting.Link;
-import com.high_mobility.digitalkey.MajesticLink.Broadcasting.LinkCallback;
-import com.high_mobility.digitalkey.MajesticLink.Broadcasting.LocalDevice;
-import com.high_mobility.digitalkey.MajesticLink.Broadcasting.LocalDeviceCallback;
-import com.high_mobility.digitalkey.MajesticLink.Constants;
-import com.high_mobility.digitalkey.MajesticLink.Shared.DeviceCertificate;
+import com.high_mobility.digitalkey.HMLink.Broadcasting.Link;
+import com.high_mobility.digitalkey.HMLink.Broadcasting.LinkCallback;
+import com.high_mobility.digitalkey.HMLink.Broadcasting.LocalDevice;
+import com.high_mobility.digitalkey.HMLink.Broadcasting.LocalDeviceCallback;
+import com.high_mobility.digitalkey.HMLink.Constants;
+import com.high_mobility.digitalkey.HMLink.LinkException;
+import com.high_mobility.digitalkey.HMLink.Shared.DeviceCertificate;
 
 import java.util.Random;
 
@@ -64,6 +65,13 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        Log.i(TAG, "on destroy");
+        device.stopBroadcasting();
+        super.onDestroy();
+    }
+
     private void setDeviceCertificate() {
         DeviceCertificate cert = new DeviceCertificate(CA_ISSUER, CA_APP_IDENTIFIER, getSerial(), DEVICE_PUBLIC_KEY);
         // TODO: add signature to cert
@@ -96,17 +104,17 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
 
     @Override
     public void localDeviceStateChanged(LocalDevice.State state, LocalDevice.State oldState) {
-
+        Log.i(TAG, "localDeviceStateChanged");
     }
 
     @Override
     public void localDeviceDidReceiveLink(Link link) {
-
+        Log.i(TAG, "localDeviceDidReceiveLink");
     }
 
     @Override
     public void localDeviceDidLoseLink(Link link) {
-
+        Log.i(TAG, "localDeviceDidLoseLink");
     }
 
     @Override
@@ -115,7 +123,7 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
     }
 
     @Override
-    public void linkDidExecuteCommand(Link link, Constants.Command command, Constants.Error error) {
+    public void linkDidExecuteCommand(Link link, Constants.Command command, LinkException exception) {
 
     }
 

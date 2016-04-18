@@ -1,8 +1,6 @@
-package com.high_mobility.digitalkey.MajesticLink.Shared;
+package com.high_mobility.digitalkey.HMLink.Shared;
 
 import com.high_mobility.digitalkey.Utils;
-
-import java.util.Date;
 
 /**
  * Created by ttiganik on 13/04/16.

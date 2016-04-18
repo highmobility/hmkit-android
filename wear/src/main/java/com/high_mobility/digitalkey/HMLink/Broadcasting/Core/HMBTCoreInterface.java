@@ -1,4 +1,4 @@
-package com.high_mobility.digitalkey.MajesticLink.Core;
+package com.high_mobility.digitalkey.HMLink.Broadcasting.Core;
 
 public interface HMBTCoreInterface {
 

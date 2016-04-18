@@ -1,4 +1,4 @@
-package com.high_mobility.digitalkey.MajesticLink.Shared;
+package com.high_mobility.digitalkey.HMLink.Shared;
 
 import com.high_mobility.digitalkey.Utils;
 
