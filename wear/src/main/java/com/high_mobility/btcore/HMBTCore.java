@@ -1,4 +1,6 @@
-package com.high_mobility.digitalkey.HMLink.Broadcasting.Core;
+package com.high_mobility.btcore;
+
+import com.high_mobility.digitalkey.HMLink.Broadcasting.Core.HMBTCoreInterface;
 
 /**
  * Created by ttiganik on 13/04/16.

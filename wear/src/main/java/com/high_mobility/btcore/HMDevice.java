@@ -1,4 +1,4 @@
-package com.high_mobility.digitalkey.HMLink.Broadcasting.Core;
+package com.high_mobility.btcore;
 
 /**
  * Created by ttiganik on 13/04/16.
