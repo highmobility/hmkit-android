@@ -21,7 +21,6 @@ import com.high_mobility.digitalkey.HMLink.Shared.DeviceCertificate;
 import java.util.Random;
 
 public class PeripheralActivity extends Activity implements LocalDeviceCallback, LinkCallback {
-
     private static final byte[] CA_PRIVATE_KEY = Utils.bytesFromHex("***REMOVED***");
     private static final byte[] CA_PUBLIC_KEY = Utils.bytesFromHex("***REMOVED***");
     private static final byte[] CA_APP_IDENTIFIER = Utils.bytesFromHex("***REMOVED***");
@@ -57,6 +56,7 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
 
         setDeviceCertificate();
         device.registerCallback(this);
+
         try {
             device.startBroadcasting();
         } catch (Exception e) {
@@ -67,13 +67,15 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
 
     @Override
     protected void onDestroy() {
-        Log.i(TAG, "on destroy");
         device.stopBroadcasting();
+        device.closeGATTServer();
+
         super.onDestroy();
     }
 
     private void setDeviceCertificate() {
         DeviceCertificate cert = new DeviceCertificate(CA_ISSUER, CA_APP_IDENTIFIER, getSerial(), DEVICE_PUBLIC_KEY);
+
         // TODO: add signature to cert
 
         device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
@@ -104,7 +106,7 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
 
     @Override
     public void localDeviceStateChanged(LocalDevice.State state, LocalDevice.State oldState) {
-        Log.i(TAG, "localDeviceStateChanged");
+
     }
 
     @Override

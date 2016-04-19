@@ -10,10 +10,6 @@ import java.util.UUID;
  * Created by ttiganik on 08/04/16.
  */
 public class Utils {
-    private static final byte[] appID = bytesFromHex("***REMOVED***");
-    private static final byte[] issuer = bytesFromHex("47494D4F");
-    public static UUID ADVERTISE_UUID = UUIDFromByteArray(concatBytes(issuer, appID));
-
     public static String getStateDescription(int state) {
 
         switch (state) {

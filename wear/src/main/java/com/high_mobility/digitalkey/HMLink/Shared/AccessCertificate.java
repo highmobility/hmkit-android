@@ -153,18 +153,18 @@ public class AccessCertificate extends Certificate {
 
         byte[] bytes = new byte[0];
 
-        Utils.concatBytes(bytes, gainerSerial);
-        Utils.concatBytes(bytes, gainingPublicKey);
-        Utils.concatBytes(bytes, providingSerial);
-        Utils.concatBytes(bytes, bytesFromDate(startDate));
-        Utils.concatBytes(bytes, bytesFromDate(endDate));
+        bytes = Utils.concatBytes(bytes, gainerSerial);
+        bytes = Utils.concatBytes(bytes, gainingPublicKey);
+        bytes = Utils.concatBytes(bytes, providingSerial);
+        bytes = Utils.concatBytes(bytes, bytesFromDate(startDate));
+        bytes = Utils.concatBytes(bytes, bytesFromDate(endDate));
 
         if (permissions.length > 0) {
-            Utils.concatBytes(bytes, new byte[] {(byte)permissions.length});
-            Utils.concatBytes(bytes, permissions);
+            bytes = Utils.concatBytes(bytes, new byte[] {(byte)permissions.length});
+            bytes = Utils.concatBytes(bytes, permissions);
         }
         else {
-            Utils.concatBytes(bytes, new byte[] {0x00});
+            bytes = Utils.concatBytes(bytes, new byte[] {0x00});
         }
 
         if (bytes.length < 93) {

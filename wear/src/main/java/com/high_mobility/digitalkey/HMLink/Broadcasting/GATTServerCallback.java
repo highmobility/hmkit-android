@@ -35,50 +35,59 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
     }
 
     @Override
-    public void onCharacteristicReadRequest(BluetoothDevice device,
-                                            int requestId,
+    public void onCharacteristicReadRequest(final BluetoothDevice device,
+                                            final int requestId,
                                             int offset,
-                                            BluetoothGattCharacteristic characteristic) {
+                                            final BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
         Log.i(TAG, "onCharacteristicReadRequest " + characteristic.getUuid().toString());
 
-        if (Constants.READ_CHAR_UUID.equals(characteristic.getUuid())) {
-            this.device.GATTServer.sendResponse(device,
-                    requestId,
-                    BluetoothGatt.GATT_SUCCESS,
-                    0,
-                    this.device.readCharacteristic.getValue());
-        }
+        final LocalDevice devicePointer = this.device;
+        devicePointer.mainThreadHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (Constants.READ_CHAR_UUID.equals(characteristic.getUuid())) {
+                    devicePointer.GATTServer.sendResponse(device,
+                            requestId,
+                            BluetoothGatt.GATT_SUCCESS,
+                            0,
+                            null);
+                    return;
+                }
 
-        this.device.GATTServer.sendResponse(device,
-                requestId,
-                BluetoothGatt.GATT_FAILURE,
-                0,
-                null);
+                devicePointer.GATTServer.sendResponse(device,
+                        requestId,
+                        BluetoothGatt.GATT_FAILURE,
+                        0,
+                        null);
+            }
+        });
     }
 
     @Override
-    public void onCharacteristicWriteRequest(BluetoothDevice device,
-                                             int requestId,
+    public void onCharacteristicWriteRequest(final BluetoothDevice device,
+                                             final int requestId,
                                              BluetoothGattCharacteristic characteristic,
                                              boolean preparedWrite,
                                              boolean responseNeeded,
-                                             int offset,
-                                             byte[] value) {
+                                             final int offset,
+                                             final byte[] value) {
         super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
-        Log.i(TAG, "onCharacteristicWriteRequest : " + characteristic.getUuid().toString() + " v: " + Utils.hexFromBytes(value));
+        Log.i(TAG, "onCharacteristicWriteRequest : " + device.getAddress() + " v: " + Utils.hexFromBytes(value));
 
         if (responseNeeded) {
-            this.device.GATTServer.sendResponse(device,
-                    requestId,
-                    BluetoothGatt.GATT_SUCCESS,
-                    0,
-                    value);
+            final LocalDevice devicePointer = this.device;
+            devicePointer.mainThreadHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    devicePointer.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
+                }
+            });
         }
     }
 
     @Override
-    public void onDescriptorWriteRequest(BluetoothDevice device, int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
+    public void onDescriptorWriteRequest(final BluetoothDevice device, final int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, final int offset, final byte[] value) {
         super.onDescriptorWriteRequest(device, requestId, descriptor, preparedWrite, responseNeeded, offset, value);
         Log.i(TAG, "onDescriptorWriteRequest: " + device.getAddress());
 
@@ -87,7 +96,8 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
                 this.device.stopBroadcasting();
             }
 
-            Link link = new Link(device, this.device);
+            // add a new link to the array
+            final Link link = new Link(device, this.device);
             Link[] newLinks = new Link[this.device.links.length + 1];
 
             for (int i = 0; i < this.device.links.length; i++) {
@@ -97,12 +107,18 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
             newLinks[this.device.links.length] = link;
             this.device.links = newLinks;
 
-            if (this.device.callback != null) {
-                // TODO: probably need to use main queue
-                this.device.callback.localDeviceDidReceiveLink(link);
-            }
+            final LocalDevice devicePointer = this.device;
+            devicePointer.mainThreadHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (devicePointer.callback != null) {
+                        devicePointer .callback.localDeviceDidReceiveLink(link);
+                    }
 
-            this.device.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
+                    devicePointer .GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
+                }
+            });
+
         }
     }
 
@@ -155,7 +171,7 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
             Link link = this.device.links[i];
             Log.i(TAG, "" + device.getAddress() + " " + link.btDevice.getAddress());
             if (link.btDevice.getAddress().equals(device.getAddress())) {
-                Log.i(TAG, "return " + i);
+                Log.i(TAG, "link index " + i);
                 return i;
             }
         }

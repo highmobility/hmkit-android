@@ -12,6 +12,7 @@ import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
 
@@ -50,6 +51,7 @@ public class LocalDevice extends Device {
 
     BluetoothGattCharacteristic readCharacteristic;
     BluetoothGattCharacteristic writeCharacteristic;
+    Handler mainThreadHandler;
 
     static LocalDevice instance = null;
     public State state = State.IDLE;
@@ -70,19 +72,22 @@ public class LocalDevice extends Device {
     public void setDeviceCertificate(DeviceCertificate certificate, byte[] privateKey, byte[] CAPublicKey, Context ctx) {
         this.ctx = ctx;
         storage = new Storage(ctx);
-        storage.deviceCertificate = certificate;
+        Log.i(TAG, "set cert " + Utils.hexFromBytes(certificate.getBytes()));
+
+        this.certificate = certificate;
         this.privateKey = privateKey;
         this.CAPublicKey = CAPublicKey;
         storage = new Storage(ctx);
         createAdapter();
+        mainThreadHandler = new Handler(ctx.getMainLooper());
     }
 
     public AccessCertificate[] getRegisteredCertificates() {
-        return storage.getRegisteredCertificates();
+        return storage.getRegisteredCertificates(certificate.getSerial());
     }
 
     public AccessCertificate[] getStoredCertificates() {
-        return storage.getStoredCertificates();
+        return storage.getStoredCertificates(certificate.getSerial());
     }
 
 
@@ -97,31 +102,49 @@ public class LocalDevice extends Device {
 
         checkIfBluetoothIsEnabled();
 
-        createGATTService(); // TODO: test start/stop
+        createGATTServer();
 
         // start advertising
-        if (mBluetoothLeAdvertiser == null) return;
+        if (mBluetoothLeAdvertiser == null) {
+            mBluetoothLeAdvertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
+        }
 
-        AdvertiseSettings settings = new AdvertiseSettings.Builder()
+        final AdvertiseSettings settings = new AdvertiseSettings.Builder()
                 .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
                 .setConnectable(true)
                 .setTimeout(0)
                 .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
                 .build();
 
-        AdvertiseData data = new AdvertiseData.Builder()
+        final UUID advertiseUUID = Utils.UUIDFromByteArray(Utils.concatBytes(certificate.getIssuer(), certificate.getAppIdentifier()));
+
+        final AdvertiseData data = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
-                .addServiceUuid(new ParcelUuid(Utils.ADVERTISE_UUID))
+                .addServiceUuid(new ParcelUuid(advertiseUUID))
                 .build();
 
         mBluetoothLeAdvertiser.startAdvertising(settings, data, advertiseCallback);
     }
 
     public void stopBroadcasting() {
-//        if (mBluetoothLeAdvertiser == null) return;
-//        mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
+    //        if (mBluetoothLeAdvertiser == null) return;
+    //        mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
+
         // TODO: this clears the GATT server as well and GATTServer.sendResponse fails with nullPointer.
-        // TODO: Figure out how to stop with working server
+        // or device disconnects automatically if on main thread
+        // Figure out how to stop advertise with a continually working server
+    }
+
+    public void closeGATTServer() {
+        // TODO: delete when stop broadcasting is fixed (will be stopped at some other time)
+        if (mBluetoothLeAdvertiser != null) {
+            mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
+        }
+        //
+
+        if (GATTServer != null) {
+            GATTServer.close();
+        }
     }
 
     public void registerCertificate(AccessCertificate certificate) throws LinkException {
@@ -167,9 +190,12 @@ public class LocalDevice extends Device {
         mBluetoothAdapter.setName(Utils.hexFromBytes(serialBytes));
     }
 
-    private void createGATTService() {
-        if (GATTServer.getService(Constants.SERVICE_UUID) == null) {
-            Log.i(TAG, "createGATTService");
+    private void createGATTServer() {
+        if (GATTServer == null) {
+            gattServerCallback = new GATTServerCallback(LocalDevice.getInstance());
+            GATTServer = mBluetoothManager.openGattServer(ctx, gattServerCallback);
+
+            Log.i(TAG, "createGATTServer");
             // create the service
             BluetoothGattService service = new BluetoothGattService(Constants.SERVICE_UUID,
                     BluetoothGattService.SERVICE_TYPE_PRIMARY);
@@ -193,18 +219,17 @@ public class LocalDevice extends Device {
             GATTServer.addService(service);
         }
         else {
-            Log.i(TAG, "createGATTService: service already exists");
+            Log.i(TAG, "createGATTServer: service already exists");
         }
     }
 
     private void createAdapter() {
-        mBluetoothManager = (BluetoothManager) ctx.getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = mBluetoothManager.getAdapter();
-        setAdapterName();
-
-        gattServerCallback = new GATTServerCallback(this);
-        mBluetoothLeAdvertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
-        GATTServer = mBluetoothManager.openGattServer(ctx, gattServerCallback);
+        if (mBluetoothManager == null) {
+            mBluetoothManager = (BluetoothManager) ctx.getSystemService(Context.BLUETOOTH_SERVICE);
+            mBluetoothAdapter = mBluetoothManager.getAdapter();
+            setAdapterName();
+            Log.i(TAG, "Create adapter " + mBluetoothAdapter.getName());
+        }
     }
 
     private void checkIfBluetoothIsEnabled() throws LinkException {

@@ -1,5 +1,7 @@
 package com.high_mobility.digitalkey.HMLink.Shared;
 
+import android.util.Log;
+
 import com.high_mobility.digitalkey.Utils;
 
 /**
@@ -99,10 +101,10 @@ public class DeviceCertificate extends Certificate {
         }
 
         byte[] bytes = new byte[0];
-        Utils.concatBytes(bytes, issuer);
-        Utils.concatBytes(bytes, appIdentifier);
-        Utils.concatBytes(bytes, serial);
-        Utils.concatBytes(bytes, publicKey);
+        bytes = Utils.concatBytes(bytes, issuer);
+        bytes = Utils.concatBytes(bytes, appIdentifier);
+        bytes = Utils.concatBytes(bytes, serial);
+        bytes = Utils.concatBytes(bytes, publicKey);
 
         this.bytes = bytes;
     }
