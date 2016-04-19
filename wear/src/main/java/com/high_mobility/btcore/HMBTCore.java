@@ -1,44 +1,42 @@
 package com.high_mobility.btcore;
 
-import com.high_mobility.digitalkey.HMLink.Broadcasting.Core.HMBTCoreInterface;
-
 /**
  * Created by ttiganik on 13/04/16.
  */
-public abstract class HMBTCore {
+public class HMBTCore {
     //Init core
     //interface is class reference what implements HMBTCoreInterface
     //TT
-    abstract void HMBTCoreInit(HMBTCoreInterface coreInterface);
+    public native void HMBTCoreInit(HMBTCoreInterface coreInterface);
     //Send clock beat to core
-    abstract void HMBTCoreClock();
+    public native void HMBTCoreClock();
 
     //CORE SENSING
 
-    abstract void HMBTCoreSensingReadNotification(byte[] mac);
-    abstract void HMBTCoreSensingReadResponse(byte[] data, int size, int offset, byte[] mac);
+    public native void HMBTCoreSensingReadNotification(byte[] mac);
+    public native void HMBTCoreSensingReadResponse(byte[] data, int size, int offset, byte[] mac);
 
-    abstract void HMBTCoreSensingWriteResponse(byte[] mac);
+    public native void HMBTCoreSensingWriteResponse(byte[] mac);
 
-    abstract void HMBTCoreSensingPingNotification(byte[] mac);
+    public native void HMBTCoreSensingPingNotification(byte[] mac);
 
-    abstract void HMBTCoreSensingProcessAdvertisement(byte[] mac, byte[] data, int size);
-    abstract void HMBTCoreSensingDiscoveryEvent(byte[] mac);
-    abstract void HMBTCoreSensingScanStart();
+    public native void HMBTCoreSensingProcessAdvertisement(byte[] mac, byte[] data, int size);
+    public native void HMBTCoreSensingDiscoveryEvent(byte[] mac);
+    public native void HMBTCoreSensingScanStart();
 
-    abstract void HMBTCoreSensingConnect(byte[] mac);
-    abstract void HMBTCoreSensingDisconnect(byte[] mac);
+    public native void HMBTCoreSensingConnect(byte[] mac);
+    public native void HMBTCoreSensingDisconnect(byte[] mac);
 
     //CORE LINK
 
     //Initialize link object in core
     //TT
-    abstract void HMBTCorelinkConnect(byte[] mac);
+    public native void HMBTCorelinkConnect(byte[] mac);
     //Delete link object in core
     //TT
-    abstract void HMBTCorelinkDisconnect(byte[] mac);
+    public native void HMBTCorelinkDisconnect(byte[] mac);
 
     //Forward link incoming data to core
     //TT
-    abstract void HMBTCorelinkIncomingData(byte[] data, int size, byte[] mac);
+    public native void HMBTCorelinkIncomingData(byte[] data, int size, byte[] mac);
 }

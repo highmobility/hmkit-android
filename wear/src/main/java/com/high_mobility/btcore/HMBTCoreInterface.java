@@ -1,7 +1,5 @@
 package com.high_mobility.btcore;
 
-import com.high_mobility.digitalkey.HMLink.Broadcasting.Core.HMDevice;
-
 public interface HMBTCoreInterface {
 
     //BT HAL
