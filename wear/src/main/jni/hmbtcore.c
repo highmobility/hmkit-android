@@ -1,19 +1,19 @@
 #include <jni.h>
 #include <stddef.h>
+#include "hm_bt_core.h"
 
 JNIEXPORT void JNICALL
 Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreInit(JNIEnv *env, jobject instance,
                                                      jobject coreInterface) {
+    hm_bt_core_init();
 
-    // TODO
-
+    //TODO store callback reference
 }
 
 JNIEXPORT void JNICALL
 Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreClock(JNIEnv *env, jobject instance) {
 
-    // TODO
-
+    hm_bt_core_clock();
 }
 
 JNIEXPORT void JNICALL
@@ -22,7 +22,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSensingReadNotification(JNIEnv *
                                                                         jbyteArray mac_) {
     jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
 
-    // TODO
+    hm_bt_core_sensing_read_notification(mac);
 
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
 }
@@ -34,7 +34,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSensingReadResponse(JNIEnv *env,
     jbyte *data = (*env)->GetByteArrayElements(env, data_, NULL);
     jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
 
-    // TODO
+    hm_bt_core_sensing_read_response(data,size,offset,mac);
 
     (*env)->ReleaseByteArrayElements(env, data_, data, 0);
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
@@ -45,7 +45,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSensingWriteResponse(JNIEnv *env
                                                                      jbyteArray mac_) {
     jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
 
-    // TODO
+    hm_bt_core_sensing_write_response(mac);
 
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
 }
@@ -56,7 +56,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSensingPingNotification(JNIEnv *
                                                                         jbyteArray mac_) {
     jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
 
-    // TODO
+    hm_bt_core_sensing_ping_notification(mac);
 
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
 }
@@ -70,7 +70,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSensingProcessAdvertisement(JNIE
     jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
     jbyte *data = (*env)->GetByteArrayElements(env, data_, NULL);
 
-    // TODO
+    hm_bt_core_sensing_process_advertisement(mac,data,size);
 
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
     (*env)->ReleaseByteArrayElements(env, data_, data, 0);
@@ -81,7 +81,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSensingDiscoveryEvent(JNIEnv *en
                                                                       jbyteArray mac_) {
     jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
 
-    // TODO
+    hm_bt_core_sensing_discovery_event(mac);
 
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
 }
@@ -89,7 +89,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSensingDiscoveryEvent(JNIEnv *en
 JNIEXPORT void JNICALL
 Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSensingScanStart(JNIEnv *env, jobject instance) {
 
-    // TODO
+    hm_bt_core_sensing_scan_start();
 
 }
 
@@ -98,7 +98,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSensingConnect(JNIEnv *env, jobj
                                                                jbyteArray mac_) {
     jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
 
-    // TODO
+    hm_bt_core_sensing_connect(mac);
 
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
 }
@@ -108,7 +108,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSensingDisconnect(JNIEnv *env, j
                                                                   jbyteArray mac_) {
     jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
 
-    // TODO
+    hm_bt_core_sensing_disconnect(mac);
 
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
 }
@@ -118,7 +118,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCorelinkConnect(JNIEnv *env, jobject
                                                             jbyteArray mac_) {
     jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
 
-    // TODO
+    hm_bt_core_link_connect(mac);
 
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
 }
@@ -128,7 +128,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCorelinkDisconnect(JNIEnv *env, jobj
                                                                jbyteArray mac_) {
     jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
 
-    // TODO
+    hm_bt_core_link_disconnect(mac);
 
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
 }
@@ -140,7 +140,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCorelinkIncomingData(JNIEnv *env, jo
     jbyte *data = (*env)->GetByteArrayElements(env, data_, NULL);
     jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
 
-    // TODO
+    hm_bt_core_link_incoming_data(data,size,mac);
 
     (*env)->ReleaseByteArrayElements(env, data_, data, 0);
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
