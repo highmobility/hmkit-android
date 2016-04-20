@@ -143,7 +143,9 @@ public class LocalDevice extends Device {
         //
 
         if (GATTServer != null) {
+            GATTServer.clearServices();
             GATTServer.close();
+            GATTServer = null;
         }
     }
 
@@ -219,7 +221,7 @@ public class LocalDevice extends Device {
             GATTServer.addService(service);
         }
         else {
-            Log.i(TAG, "createGATTServer: service already exists");
+            Log.i(TAG, "createGATTServer: already exists");
         }
     }
 

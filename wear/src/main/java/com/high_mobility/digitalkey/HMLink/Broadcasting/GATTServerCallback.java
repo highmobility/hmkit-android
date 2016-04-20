@@ -12,9 +12,12 @@ import com.high_mobility.digitalkey.HMLink.Constants;
 import com.high_mobility.digitalkey.HMLink.LinkException;
 import com.high_mobility.digitalkey.Utils;
 
+import java.util.Arrays;
+
 /**
  * Created by ttiganik on 15/04/16.
  */
+// TODO: test if main thread is necessary
 public class GATTServerCallback extends BluetoothGattServerCallback {
     private static final String TAG = "GATTServerCallback";
 
@@ -37,31 +40,31 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
     @Override
     public void onCharacteristicReadRequest(final BluetoothDevice device,
                                             final int requestId,
-                                            int offset,
+                                            final int offset,
                                             final BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
         Log.i(TAG, "onCharacteristicReadRequest " + characteristic.getUuid().toString());
 
-        final LocalDevice devicePointer = this.device;
-        devicePointer.mainThreadHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (Constants.READ_CHAR_UUID.equals(characteristic.getUuid())) {
-                    devicePointer.GATTServer.sendResponse(device,
-                            requestId,
-                            BluetoothGatt.GATT_SUCCESS,
-                            0,
-                            null);
-                    return;
-                }
 
-                devicePointer.GATTServer.sendResponse(device,
-                        requestId,
-                        BluetoothGatt.GATT_FAILURE,
-                        0,
-                        null);
-            }
-        });
+        if (Constants.READ_CHAR_UUID.equals(characteristic.getUuid())) {
+            // response to read here
+            byte[] value = characteristic.getValue();
+            byte[] offsetBytes = Arrays.copyOfRange(value, offset, value.length);
+
+            this.device.GATTServer.sendResponse(device,
+                    requestId,
+                    BluetoothGatt.GATT_SUCCESS,
+                    offset,
+                    offsetBytes);
+            return;
+        }
+
+        this.device.GATTServer.sendResponse(device,
+            requestId,
+            BluetoothGatt.GATT_FAILURE,
+            0,
+            null);
+
     }
 
     @Override
@@ -77,12 +80,14 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
 
         if (responseNeeded) {
             final LocalDevice devicePointer = this.device;
-            devicePointer.mainThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    devicePointer.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
-                }
-            });
+            devicePointer.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
+            Log.i(TAG, "sent response");
+
+            byte[] testResponseBytes = Utils.bytesFromHex("***REMOVED***");
+            devicePointer.readCharacteristic.setValue(testResponseBytes);
+
+            devicePointer.GATTServer.notifyCharacteristicChanged(device, devicePointer.readCharacteristic, false);
+            Log.i(TAG, "sent data");
         }
     }
 
@@ -107,6 +112,8 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
             newLinks[this.device.links.length] = link;
             this.device.links = newLinks;
 
+            this.device.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
+
             final LocalDevice devicePointer = this.device;
             devicePointer.mainThreadHandler.post(new Runnable() {
                 @Override
@@ -114,20 +121,17 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
                     if (devicePointer.callback != null) {
                         devicePointer .callback.localDeviceDidReceiveLink(link);
                     }
-
-                    devicePointer .GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
                 }
             });
-
         }
     }
 
-    private void loseLink(BluetoothDevice device) {
+    private void loseLink(final BluetoothDevice device) {
         Log.i(TAG, "lose link");
 
         int linkIndex = linkIndexForBTDevice(device);
         if (linkIndex > -1) {
-            Link link = this.device.links[linkIndex];
+            final Link link = this.device.links[linkIndex];
             // remove the link from the array
             Link[] newLinks = new Link[this.device.links.length - 1];
 
@@ -149,8 +153,13 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
 
             // invoke the listener callback
             if (this.device.callback != null) {
-                // TODO: probably need to use main queue
-                this.device.callback.localDeviceDidLoseLink(link);
+                final LocalDevice devicePointer = this.device;
+                devicePointer.mainThreadHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        devicePointer.callback.localDeviceDidLoseLink(link);
+                    }
+                });
             }
 
             if (this.device.state != LocalDevice.State.BROADCASTING) {
@@ -169,9 +178,8 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
     private int linkIndexForBTDevice(BluetoothDevice device) {
         for (int i = 0; i < this.device.links.length; i++) {
             Link link = this.device.links[i];
-            Log.i(TAG, "" + device.getAddress() + " " + link.btDevice.getAddress());
+
             if (link.btDevice.getAddress().equals(device.getAddress())) {
-                Log.i(TAG, "link index " + i);
                 return i;
             }
         }
