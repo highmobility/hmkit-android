@@ -35,7 +35,7 @@ uint32_t hm_bt_hal_write_data(uint8_t *mac, uint16_t length, uint8_t *data){
   jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
   (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jbyte*) mac );
 
-  jbyteArray data_ = (*envRef)->NewByteArray(envRef,250);
+  jbyteArray data_ = (*envRef)->NewByteArray(envRef,length);
   (*envRef)->SetByteArrayRegion(envRef, data_, 0, length, (const jbyte*) data );
 
   return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalWriteData, mac_, length, data_);
