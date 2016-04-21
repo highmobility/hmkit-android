@@ -1,13 +1,29 @@
 #include <jni.h>
 #include <stddef.h>
 #include "hm_bt_core.h"
+#include "hmbtcore.h"
 
 JNIEXPORT void JNICALL
 Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreInit(JNIEnv *env, jobject instance,
                                                      jobject coreInterface) {
-    hm_bt_core_init();
 
-    //TODO store callback reference
+    interfaceClassRef = (*env)->GetObjectClass(env, coreInterface);
+
+    interfaceMethodHMBTHalInit = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalInit","()I");
+    interfaceMethodHMBTHalScanStart = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalScanStart","()I");
+    interfaceMethodHMBTHalScanStop = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalScanStop","()I");
+    interfaceMethodHMBTHalAdvertisementStart = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalAdvertisementStart","()I");
+    interfaceMethodHMBTHalAdvertisementStop = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalAdvertisementStop","()I");
+    interfaceMethodHMBTHalConnect = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalConnect","([B)I");
+    interfaceMethodHMBTHalDisconnect = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalDisconnect","([B)I");
+    interfaceMethodHMBTHalServiceDiscovery = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalServiceDiscovery","([B)I");
+    interfaceMethodHMBTHalWriteData = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalWriteData","([BI[B)I");
+    interfaceMethodHMBTHalReadData = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalReadData","([BI)I");
+
+    envRef = env;
+    coreInterfaceRef = coreInterface;
+
+    hm_bt_core_init();
 }
 
 JNIEXPORT void JNICALL
@@ -141,6 +157,19 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCorelinkIncomingData(JNIEnv *env, jo
     jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
 
     hm_bt_core_link_incoming_data(data,size,mac);
+
+    (*env)->ReleaseByteArrayElements(env, data_, data, 0);
+    (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
+}
+
+JNIEXPORT void JNICALL
+Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSendCustomCommand(JNIEnv *env, jobject instance,
+                                                                  jbyteArray data_, jint size,
+                                                                  jbyteArray mac_) {
+    jbyte *data = (*env)->GetByteArrayElements(env, data_, NULL);
+    jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
+
+    // TODO
 
     (*env)->ReleaseByteArrayElements(env, data_, data, 0);
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);

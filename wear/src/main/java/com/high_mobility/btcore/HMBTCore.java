@@ -4,6 +4,11 @@ package com.high_mobility.btcore;
  * Created by ttiganik on 13/04/16.
  */
 public class HMBTCore {
+
+    static {
+        System.loadLibrary("hmbtcore");
+    }
+
     //Init core
     //interface is class reference what implements HMBTCoreInterface
     //TT
@@ -39,4 +44,6 @@ public class HMBTCore {
     //Forward link incoming data to core
     //TT
     public native void HMBTCorelinkIncomingData(byte[] data, int size, byte[] mac);
+
+    public native  void HMBTCoreSendCustomCommand(byte[] data, int size, byte[] mac);
 }

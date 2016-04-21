@@ -4,41 +4,68 @@
 
 #include "hm_conf_access.h"
 
+#include "hmbtcore.h"
+#include <unistd.h>
+
 #define BLE_GATT_HVX_NOTIFICATION 0x01
 #define MAX_CLIENTS 5
 
 void hm_bt_hal_delay_ms(uint32_t number_of_ms){
-
+  usleep(1000*number_of_ms);
 }
 
 uint32_t hm_bt_hal_scan_start(){
-  return 0;
+  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalScanStart);
 }
 
 uint32_t hm_bt_hal_scan_stop(){
-  return 0;
+  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalScanStop);
+}
+
+uint32_t hm_bt_hal_advertisement_start(){
+  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalAdvertisementStart);
+}
+
+uint32_t hm_bt_hal_advertisement_stop(){
+  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalAdvertisementStop);
 }
 
 uint32_t hm_bt_hal_write_data(uint8_t *mac, uint16_t length, uint8_t *data){
-  return 0;
+
+  jbyteArray mac_ = (*envRef)->NewByteArray(envRef,9);
+  (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 9, (const jbyte*) mac );
+
+  jbyteArray data_ = (*envRef)->NewByteArray(envRef,length);
+  (*envRef)->SetByteArrayRegion(envRef, mac_, 0, length, (const jbyte*) data );
+
+  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalWriteData, mac_, length, data_);
 }
 
 uint32_t hm_bt_hal_read_data(uint8_t *mac, uint16_t offset){
-  return 0;
+  jbyteArray mac_ = (*envRef)->NewByteArray(envRef,9);
+  (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 9, (const jbyte*) mac );
+
+  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalWriteData, mac_, offset);
 }
 
 uint32_t hm_bt_hal_service_discovery(uint8_t *mac){
-  return 0;
+  jbyteArray mac_ = (*envRef)->NewByteArray(envRef,9);
+  (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 9, (const jbyte*) mac );
+  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalServiceDiscovery, mac_);
 }
 
 uint32_t hm_bt_hal_init(){
-  return 0;
+  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalInit);
 }
 
 uint32_t hm_bt_hal_connect(const uint8_t *mac){
-  return 0;
+  jbyteArray mac_ = (*envRef)->NewByteArray(envRef,9);
+  (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 9, (const jbyte*) mac );
+  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalConnect, mac_);
 }
 
 uint32_t hm_bt_hal_disconnect(uint8_t *mac){
-  return 0;
+  jbyteArray mac_ = (*envRef)->NewByteArray(envRef,9);
+  (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 9, (const jbyte*) mac );
+  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalDisconnect, mac_);
 }
