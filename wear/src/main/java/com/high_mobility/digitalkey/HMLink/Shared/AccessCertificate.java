@@ -32,7 +32,6 @@ public class AccessCertificate extends Certificate {
     }
 
     public byte[] getGainerPublicKey() {
-        // TODO: public static void arraycopy (Object src, int srcPos, Object dst, int dstPos, int length)
         byte[] bytes = new byte[64];
         System.arraycopy(this.bytes, 9, bytes, 0, 64);
         return bytes;
@@ -45,15 +44,23 @@ public class AccessCertificate extends Certificate {
     }
 
     public Date getStartDate() {
+        return dateFromBytes(getStartDateBytes());
+    }
+
+    public byte[] getStartDateBytes() {
         byte[] bytes = new byte[5];
         System.arraycopy(this.bytes, 82, bytes, 0, 5);
-        return dateFromBytes(bytes);
+        return bytes;
     }
 
     public Date getEndDate() {
+        return dateFromBytes(getEndDateBytes());
+    }
+
+    public byte[] getEndDateBytes() {
         byte[] bytes = new byte[5];
         System.arraycopy(this.bytes, 87, bytes, 0, 5);
-        return dateFromBytes(bytes);
+        return bytes;
     }
 
     public byte[] getPermissions() {
@@ -75,7 +82,6 @@ public class AccessCertificate extends Certificate {
             length = (byte)permissions.length;
         }
 
-        // TODO: test this
         newBytes = new byte[93 + length];
         System.arraycopy(this.bytes, 0, newBytes, 0, 91);
         System.arraycopy(this.bytes, 92, new byte[] {length}, 0, 1);
@@ -146,8 +152,8 @@ public class AccessCertificate extends Certificate {
     public AccessCertificate(byte[] gainerSerial,
                              byte[] gainingPublicKey,
                              byte[] providingSerial,
-                             Date startDate,
-                             Date endDate,
+                             byte[] startDate,
+                             byte[] endDate,
                              byte[] permissions) throws IllegalArgumentException {
         super();
 
@@ -156,8 +162,8 @@ public class AccessCertificate extends Certificate {
         bytes = Utils.concatBytes(bytes, gainerSerial);
         bytes = Utils.concatBytes(bytes, gainingPublicKey);
         bytes = Utils.concatBytes(bytes, providingSerial);
-        bytes = Utils.concatBytes(bytes, bytesFromDate(startDate));
-        bytes = Utils.concatBytes(bytes, bytesFromDate(endDate));
+        bytes = Utils.concatBytes(bytes, startDate);
+        bytes = Utils.concatBytes(bytes, endDate);
 
         if (permissions.length > 0) {
             bytes = Utils.concatBytes(bytes, new byte[] {(byte)permissions.length});
@@ -174,71 +180,14 @@ public class AccessCertificate extends Certificate {
         this.bytes = bytes;
     }
 
-/*
-    public Certificate(byte[] gainerSerial, byte[] gainerPubKey,
-                       byte[] providerSN, byte[] permissions) {
-        // serials / keys
-        if (gainerSerial.length != 9) {
-            System.out.println("Invalid wearable serial");
-            return;
-        }
 
-        if (gainerPubKey.length != 64) {
-            System.out.println("Invalid wearable public key");
-            return;
-        }
 
-        if (providerSN.length != 9) {
-            System.out.println("Invalid car serial");
-            return;
-        }
-
-        Date startDate = new Date();
-        Date endDate = new Date(startDate.getTime() + 86400 * 1000);
-        SimpleDateFormat formatter = new SimpleDateFormat("YYMMddHHmm");
-
-        String startDateString = formatter.format(startDate);
-        String endDateString = formatter.format(endDate);
-
-        try {
-            File temp = new File("/tmp/hmcrypto");
-
-            Files.copy(CAMock.class.getResource("/global/resources/hmcrypto").openStream()
-                    , temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            temp.setExecutable(true);
-
-            ProcessBuilder builder = new ProcessBuilder(
-                    temp.getAbsolutePath(),
-                    "cert",
-                    Utils.byteArrayToHexString(gainerSerial),
-                    Utils.byteArrayToHexString(gainerPubKey),
-                    Utils.byteArrayToHexString(providerSN),
-                    startDateString,
-                    endDateString,
-                    permissions != null ? Utils.byteArrayToHexString(permissions) : "",
-                    "r");
-
-            builder.directory(new File(temp.getParent())); // this is where you set the root folder for the executable to run with
-            builder.redirectErrorStream(true);
-            Process process = builder.start();
-
-            Scanner s = new Scanner(process.getInputStream());
-            StringBuilder text = new StringBuilder();
-            while (s.hasNextLine()) {
-                text.append(s.nextLine());
-            }
-
-            s.close();
-            int result = process.waitFor();
-            byte[] certBytes = Utils.hexStringToByteArray(text.toString());
-
-            this.signature = CAMock.sign(certBytes);
-            this.bytes = Utils.concatBytes(certBytes, this.signature);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public AccessCertificate(byte[] gainerSerial,
+                             byte[] gainingPublicKey,
+                             byte[] providingSerial,
+                             Date startDate,
+                             Date endDate,
+                             byte[] permissions) throws IllegalArgumentException {
+        this(gainerSerial, gainingPublicKey, providingSerial, bytesFromDate(startDate), bytesFromDate(endDate), permissions);
     }
-
-
-    */
 }

@@ -30,16 +30,6 @@ public class Certificate {
         return bytes;
     }
 
-    public boolean isSignatureValid(byte[] CAPublicKey) {
-        byte[] signature = getSignature();
-        if (signature != null) {
-            // TODO: verify sig
-            return true;
-        }
-
-        return false;
-    }
-
     protected static Date dateFromBytes(byte[] bytes) {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(0);
@@ -57,7 +47,7 @@ public class Certificate {
         bytes[2] = (byte)(calendar.get(Calendar.DAY_OF_MONTH));
         bytes[3] = (byte)(calendar.get(Calendar.HOUR));
         bytes[4] = (byte)(calendar.get(Calendar.MINUTE));
-        // TODO: test
+
         return bytes;
     }
 }

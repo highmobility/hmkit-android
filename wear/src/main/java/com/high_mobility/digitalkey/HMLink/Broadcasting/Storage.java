@@ -173,7 +173,7 @@ class Storage {
         return null;
     }
 
-    void storeCertificate(AccessCertificate certificate, byte[] CAPublicKey) throws LinkException {
+    void storeCertificate(AccessCertificate certificate) throws LinkException {
         AccessCertificate[] certs = getCertificates();
 
         if (certs.length >= 5) throw new LinkException(LinkException.LinkExceptionCode.STORAGE_FULL);

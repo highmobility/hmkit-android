@@ -1,6 +1,7 @@
 package com.high_mobility.digitalkey.HMLink.Broadcasting;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServer;
@@ -16,6 +17,8 @@ import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+import com.high_mobility.digitalkey.HMLink.Broadcasting.Core.FakeCore;
+import com.high_mobility.digitalkey.HMLink.Broadcasting.Core.HMDevice;
 import com.high_mobility.digitalkey.HMLink.Constants;
 import com.high_mobility.digitalkey.HMLink.Device;
 import com.high_mobility.digitalkey.HMLink.LinkException;
@@ -49,9 +52,13 @@ public class LocalDevice extends Device {
     BluetoothGattServer GATTServer;
     GATTServerCallback gattServerCallback;
 
+
     BluetoothGattCharacteristic readCharacteristic;
     BluetoothGattCharacteristic writeCharacteristic;
     Handler mainThreadHandler;
+
+    BTCoreInterface coreInterface;
+    FakeCore core = new FakeCore();
 
     static LocalDevice instance = null;
     public State state = State.IDLE;
@@ -80,6 +87,8 @@ public class LocalDevice extends Device {
         storage = new Storage(ctx);
         createAdapter();
         mainThreadHandler = new Handler(ctx.getMainLooper());
+        coreInterface = new BTCoreInterface(this);
+        core.HMBTCoreInit(coreInterface);
     }
 
     public AccessCertificate[] getRegisteredCertificates() {
@@ -89,7 +98,6 @@ public class LocalDevice extends Device {
     public AccessCertificate[] getStoredCertificates() {
         return storage.getStoredCertificates(certificate.getSerial());
     }
-
 
     public Link[] getLinks() {
         return links;
@@ -127,26 +135,27 @@ public class LocalDevice extends Device {
     }
 
     public void stopBroadcasting() {
-    //        if (mBluetoothLeAdvertiser == null) return;
-    //        mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
+        // if (mBluetoothLeAdvertiser == null) return;
+        // mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
 
-        // TODO: this clears the GATT server as well and GATTServer.sendResponse fails with nullPointer.
+        // TODO:
+        // this clears the GATT server as well and GATTServer.sendResponse fails with nullPointer.
         // or device disconnects automatically if on main thread
         // Figure out how to stop advertise with a continually working server
     }
 
     public void closeGATTServer() {
-        // TODO: delete when stop broadcasting is fixed (will be stopped at some other time)
-        if (mBluetoothLeAdvertiser != null) {
-            mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
-        }
-        //
-
         if (GATTServer != null) {
             GATTServer.clearServices();
             GATTServer.close();
             GATTServer = null;
         }
+
+        // TODO: delete when stop broadcasting is fixed (will be stopped at some other time)
+        if (mBluetoothLeAdvertiser != null) {
+            mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
+        }
+        //
     }
 
     public void registerCertificate(AccessCertificate certificate) throws LinkException {
@@ -158,11 +167,11 @@ public class LocalDevice extends Device {
             throw new LinkException(LinkException.LinkExceptionCode.INTERNAL_ERROR);
         }
 
-        storage.storeCertificate(certificate, CAPublicKey);
+        storage.storeCertificate(certificate);
     }
 
     public void storeCertificate(AccessCertificate certificate) throws LinkException {
-        storage.storeCertificate(certificate, CAPublicKey);
+        storage.storeCertificate(certificate);
     }
 
     public void revokeCertificate(byte[] serial) throws LinkException {
@@ -177,7 +186,7 @@ public class LocalDevice extends Device {
 
     public void reset() {
         storage.resetStorage();
-        stopBroadcasting();
+        closeGATTServer();
 
         try {
             startBroadcasting();
@@ -186,10 +195,128 @@ public class LocalDevice extends Device {
         }
     }
 
+    void didReceiveCustomCommand(HMDevice device, int data, int length, int error) {
+        // TODO: implement when cleared
+    }
+
+    void didReceiveLink(HMDevice device) {
+        if (LocalDevice.ALLOWS_MULTIPLE_LINKS == false) {
+            stopBroadcasting();
+        }
+
+        // add a new link to the array
+        BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.mac);
+        final Link link = new Link(btDevice, this);
+        Link[] newLinks = new Link[links.length + 1];
+
+        for (int i = 0; i < links.length; i++) {
+            newLinks[i] = links[i];
+        }
+
+        newLinks[links.length] = link;
+        links = newLinks;
+
+        link.setState(Link.State.CONNECTED);
+
+        final LocalDevice devicePointer = this;
+        devicePointer.mainThreadHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (devicePointer.callback != null) {
+                    devicePointer .callback.localDeviceDidReceiveLink(link);
+                }
+            }
+        });
+    }
+
+    void didLoseLink(HMDevice device) {
+        Log.i(TAG, "lose link " + Utils.hexFromBytes(device.mac));
+
+        BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.mac);
+        int linkIndex = linkIndexForBTDevice(btDevice);
+
+        if (linkIndex > -1) {
+            // remove the link from the array
+            final Link link = links[linkIndex];
+            Link[] newLinks = new Link[links.length - 1];
+
+            for (int i = 0; i < links.length; i++) {
+                if (i < linkIndex) {
+                    newLinks[i] = links[i];
+                }
+                else if (i > linkIndex) {
+                    newLinks[i - 1] = links[i];
+                }
+            }
+
+            links = newLinks;
+
+            // set new adapter name
+            if (LocalDevice.ALLOWS_MULTIPLE_LINKS == false && getLinks() == null) {
+                setAdapterName();
+            }
+
+            // invoke the listener callback
+            if (callback != null) {
+                final LocalDevice devicePointer = this;
+                devicePointer.mainThreadHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        devicePointer.callback.localDeviceDidLoseLink(link);
+                    }
+                });
+            }
+
+            link.setState(Link.State.DISCONNECTED);
+
+            // start broadcasting again
+            if (state != LocalDevice.State.BROADCASTING) {
+                try {
+                    startBroadcasting();
+                } catch (LinkException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        else {
+            Log.e(TAG, "Internal lose link error");
+        }
+    }
+
+    private int linkIndexForBTDevice(BluetoothDevice device) {
+        for (int i = 0; i < links.length; i++) {
+            Link link = links[i];
+
+            if (link.btDevice.getAddress().equals(device.getAddress())) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+
     void setAdapterName() {
         byte[] serialBytes = new byte[4];
         new Random().nextBytes(serialBytes);
         mBluetoothAdapter.setName(Utils.hexFromBytes(serialBytes));
+    }
+
+    void writeData(byte[] mac, byte[] value) {
+        Link link = getLinkForMac(mac);
+        readCharacteristic.setValue(value);
+        GATTServer.notifyCharacteristicChanged(link.btDevice, readCharacteristic, false);
+    }
+
+    private Link getLinkForMac(byte[] mac) {
+        for (int i = 0; i < links.length; i++) {
+            Link link = links[i];
+            if (Arrays.equals(link.getAddressBytes(), mac)) {
+                return link;
+            }
+        }
+
+        return null;
     }
 
     private void createGATTServer() {

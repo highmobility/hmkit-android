@@ -54,7 +54,11 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
         ListView list = new ListView(this);
         setContentView(list);
 
-        setDeviceCertificate();
+        DeviceCertificate cert = new DeviceCertificate(CA_ISSUER, CA_APP_IDENTIFIER, getSerial(), DEVICE_PUBLIC_KEY);
+        cert.setSignature(Utils.bytesFromHex("***REMOVED***"));
+        device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
+        // TODO: show the serial on screen
+
         device.registerCallback(this);
 
         try {
@@ -71,15 +75,6 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
         device.closeGATTServer();
 
         super.onDestroy();
-    }
-
-    private void setDeviceCertificate() {
-        DeviceCertificate cert = new DeviceCertificate(CA_ISSUER, CA_APP_IDENTIFIER, getSerial(), DEVICE_PUBLIC_KEY);
-
-        // TODO: add signature to cert
-
-        device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
-        // TODO: show the serial on screen
     }
 
     private byte[] getSerial() {

@@ -39,4 +39,5 @@ public abstract class HMBTCore {
     //Forward link incoming data to core
     //TT
     abstract void HMBTCorelinkIncomingData(byte[] data, int size, byte[] mac);
+    abstract void HMBTCoreSendCustomCommand(byte[] data, Integer size, byte[] mac);
 }

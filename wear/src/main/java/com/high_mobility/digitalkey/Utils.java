@@ -74,4 +74,17 @@ public class Utils {
         System.arraycopy(b, 0, c, aLen, bLen);
         return c;
     }
+
+    public static byte[] bytesFromMacString(String mac) {
+        String[] macAddressParts = mac.split(":");
+
+        // convert hex string to byte values
+        byte[] macAddressBytes = new byte[6];
+        for(int i = 0; i < 6; i++){
+            Integer hex = Integer.parseInt(macAddressParts[i], 16);
+            macAddressBytes[i] = hex.byteValue();
+        }
+
+        return macAddressBytes;
+    }
 }
