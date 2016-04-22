@@ -16,7 +16,7 @@ public class Link {
     State state;
     public AccessCertificate certificate;
 
-    private LinkCallback callback;
+    LinkCallback callback;
 
     BluetoothDevice btDevice;
     LocalDevice device;

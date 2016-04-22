@@ -79,7 +79,6 @@ public class LocalDevice extends Device {
     public void setDeviceCertificate(DeviceCertificate certificate, byte[] privateKey, byte[] CAPublicKey, Context ctx) {
         this.ctx = ctx;
         storage = new Storage(ctx);
-        Log.i(TAG, "set cert " + Utils.hexFromBytes(certificate.getBytes()));
 
         this.certificate = certificate;
         this.privateKey = privateKey;
@@ -195,8 +194,18 @@ public class LocalDevice extends Device {
         }
     }
 
-    void didReceiveCustomCommand(HMDevice device, int data, int length, int error) {
+    void didReceiveCustomCommand(HMDevice device, byte[] data, int length, int error) {
         // TODO: implement when cleared
+        BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
+        int linkIndex = linkIndexForBTDevice(btDevice);
+
+        if (linkIndex > -1) {
+            Link link = links[linkIndex];
+            link.callback.linkDidReceiveCustomCommand(link, data);
+        }
+        else {
+            Log.e(TAG, "no link for custom command received");
+        }
     }
 
     void didReceiveLink(HMDevice device) {
@@ -205,7 +214,7 @@ public class LocalDevice extends Device {
         }
 
         // add a new link to the array
-        BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.mac);
+        BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
         final Link link = new Link(btDevice, this);
         Link[] newLinks = new Link[links.length + 1];
 
@@ -230,9 +239,9 @@ public class LocalDevice extends Device {
     }
 
     void didLoseLink(HMDevice device) {
-        Log.i(TAG, "lose link " + Utils.hexFromBytes(device.mac));
+        Log.i(TAG, "lose link " + Utils.hexFromBytes(device.getMac()));
 
-        BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.mac);
+        BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
 
         if (linkIndex > -1) {
@@ -279,8 +288,38 @@ public class LocalDevice extends Device {
             }
         }
         else {
-            Log.e(TAG, "Internal lose link error");
+            Log.e(TAG, "no link for lose device");
         }
+    }
+
+    int pairingResponse = -1;
+    int didReceivePairingRequest(HMDevice device, byte[] serialNumber) {
+        pairingResponse = -1;
+        BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
+        int linkIndex = linkIndexForBTDevice(btDevice);
+
+        if (linkIndex > -1) {
+            Link link = links[linkIndex];
+            link.callback.linkDidReceivePairingRequest(link, serialNumber, new Constants.ApprovedCallback() {
+                @Override
+                public void approve() {
+                    pairingResponse = 0;
+                }
+
+                @Override
+                public void decline() {
+                    pairingResponse = 0;
+                }
+            }, 10f);
+        }
+        else {
+            Log.e(TAG, "no link for pairing request");
+            return 1;
+        }
+
+        while(pairingResponse < 0) {}
+
+        return pairingResponse;
     }
 
     private int linkIndexForBTDevice(BluetoothDevice device) {
@@ -304,8 +343,13 @@ public class LocalDevice extends Device {
 
     void writeData(byte[] mac, byte[] value) {
         Link link = getLinkForMac(mac);
-        readCharacteristic.setValue(value);
-        GATTServer.notifyCharacteristicChanged(link.btDevice, readCharacteristic, false);
+        if (link != null) {
+            readCharacteristic.setValue(value);
+            GATTServer.notifyCharacteristicChanged(link.btDevice, readCharacteristic, false);
+        }
+        else {
+            Log.e(TAG, "link does not exist for write");
+        }
     }
 
     private Link getLinkForMac(byte[] mac) {

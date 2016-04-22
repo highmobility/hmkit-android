@@ -1,13 +1,13 @@
 package com.high_mobility.digitalkey;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.wearable.view.WatchViewStub;
+import android.support.wearable.activity.WearableActivity;
+import android.support.wearable.view.BoxInsetLayout;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.high_mobility.digitalkey.HMLink.Broadcasting.Link;
@@ -18,10 +18,12 @@ import com.high_mobility.digitalkey.HMLink.Constants;
 import com.high_mobility.digitalkey.HMLink.LinkException;
 import com.high_mobility.digitalkey.HMLink.Shared.DeviceCertificate;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Random;
 
-public class PeripheralActivity extends Activity implements LocalDeviceCallback, LinkCallback {
-    private static final byte[] CA_PRIVATE_KEY = Utils.bytesFromHex("***REMOVED***");
+public class PeripheralActivity extends WearableActivity implements LocalDeviceCallback, LinkCallback {
     private static final byte[] CA_PUBLIC_KEY = Utils.bytesFromHex("***REMOVED***");
     private static final byte[] CA_APP_IDENTIFIER = Utils.bytesFromHex("***REMOVED***");
     private static final byte[] CA_ISSUER = Utils.bytesFromHex("47494D4F");
@@ -33,6 +35,10 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
 
     LocalDevice device = LocalDevice.getInstance();
 
+    private static final SimpleDateFormat AMBIENT_DATE_FORMAT =
+            new SimpleDateFormat("HH:mm", Locale.US);
+
+    private BoxInsetLayout mContainerView;
     private TextView mTextView;
 
     @Override
@@ -42,27 +48,19 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
         Log.i(TAG, "create");
 
         setContentView(R.layout.activity_main);
-        final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
-        stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
-            @Override
-            public void onLayoutInflated(WatchViewStub stub) {
-                mTextView = (TextView) stub.findViewById(R.id.text);
-                Log.i(TAG, "did inflate");
-            }
-        });
 
-        ListView list = new ListView(this);
-        setContentView(list);
+        mContainerView = (BoxInsetLayout) findViewById(R.id.container);
+        mTextView = (TextView) findViewById(R.id.text);
 
         DeviceCertificate cert = new DeviceCertificate(CA_ISSUER, CA_APP_IDENTIFIER, getSerial(), DEVICE_PUBLIC_KEY);
         cert.setSignature(Utils.bytesFromHex("***REMOVED***"));
         device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
-        // TODO: show the serial on screen
 
         device.registerCallback(this);
 
         try {
             device.startBroadcasting();
+            mTextView.setText(device.name);
         } catch (Exception e) {
             e.printStackTrace();
             Log.e(TAG, "cannot start broadcasting");
