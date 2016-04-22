@@ -37,6 +37,8 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
     //LocalDevice device = LocalDevice.getInstance();
 
     private TextView mTextView;
+    private HMBTCore core;
+    byte[] mac = {1,2,3,4,5,6};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +59,7 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
         ListView list = new ListView(this);
         setContentView(list);
 
-        HMBTCore core = new HMBTCore();
+        core = new HMBTCore();
         core.HMBTCoreInit(this);
 
         /*setDeviceCertificate();
@@ -147,7 +149,13 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
 
     @Override
     public int HMBTHalInit() {
-        Log.d("CALLBACK","OK");
+        Log.d("CALLBACK", "OK");
+
+        core.HMBTCorelinkConnect(mac);
+
+        byte[] data = {0x00,0x30,(byte)0xff};
+
+        core.HMBTCorelinkIncomingData(data,3,mac);
         return 0;
     }
 
@@ -183,11 +191,13 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
 
     @Override
     public int HMBTHalServiceDiscovery(byte[] mac) {
+        Log.d("HMBTHalServiceDiscovery","OK");
         return 0;
     }
 
     @Override
     public int HMBTHalWriteData(byte[] mac, int length, byte[] data) {
+        Log.d("HMBTHalWriteData","OK");
         return 0;
     }
 
@@ -198,6 +208,17 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
 
     @Override
     public int HMPersistenceHalgetSerial(byte[] serial) {
+
+        serial[0] = 0x02;
+        serial[1] = 0x02;
+        serial[2] = 0x02;
+        serial[3] = 0x04;
+        serial[4] = 0x05;
+        serial[5] = 0x06;
+        serial[6] = 0x07;
+        serial[7] = 0x08;
+        serial[8] = 0x09;
+
         return 0;
     }
 
@@ -253,6 +274,11 @@ public class PeripheralActivity extends Activity implements LocalDeviceCallback,
 
     @Override
     public int HMCtwGetDeviceCertificateFailed(HMDevice device, int nonce) {
+        return 0;
+    }
+
+    @Override
+    public int HMCtwPairingRequested() {
         return 0;
     }
 }

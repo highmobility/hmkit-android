@@ -30,4 +30,6 @@ void hm_ctw_command_received(hm_device_t *device, uint8_t *data, uint8_t *length
 uint32_t hm_ctw_get_device_certificate_failed(hm_device_t *device, uint8_t *nonce); //ret false on, et ei jätka
 void hm_ctw_device_certificate_registered(hm_device_t *device, uint8_t *public_key, uint8_t error);
 
+uint32_t hm_ctw_pairing_requested();
+
 #endif /* HM_CTW_CUSTOMER_H_ */

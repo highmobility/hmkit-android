@@ -53,3 +53,8 @@ void hm_ctw_device_certificate_registered(hm_device_t *device, uint8_t *public_k
 {
 
 }
+
+uint32_t hm_ctw_pairing_requested(){
+
+    return 0;
+}
