@@ -21,4 +21,13 @@ jmethodID *interfaceMethodHMBTHalServiceDiscovery;
 jmethodID *interfaceMethodHMBTHalWriteData;
 jmethodID *interfaceMethodHMBTHalReadData;
 
+jmethodID *interfaceMethodHMPersistenceHalgetSerial;
+jmethodID *interfaceMethodHMPersistenceHalgetLocalPublicKey;
+jmethodID *interfaceMethodHMPersistenceHaladdPublicKey;
+jmethodID *interfaceMethodHMPersistenceHalgetPublicKey;
+jmethodID *interfaceMethodHMPersistenceHalremovePublicKey;
+jmethodID *interfaceMethodHMPersistenceHaladdStoredCertificate;
+jmethodID *interfaceMethodHMPersistenceHalgetStoredCertificate;
+jmethodID *interfaceMethodHMPersistenceHaleraseStoredCertificate;
+
 #endif //ANDROID_WEAR_DIGITAL_KEY_HMBTCORE_H
