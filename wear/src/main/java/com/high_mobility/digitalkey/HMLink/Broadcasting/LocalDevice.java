@@ -17,8 +17,8 @@ import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
 
-import com.high_mobility.digitalkey.HMLink.Broadcasting.Core.FakeCore;
-import com.high_mobility.digitalkey.HMLink.Broadcasting.Core.HMDevice;
+import com.high_mobility.btcore.HMBTCore;
+import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.digitalkey.HMLink.Constants;
 import com.high_mobility.digitalkey.HMLink.Device;
 import com.high_mobility.digitalkey.HMLink.LinkException;
@@ -58,7 +58,7 @@ public class LocalDevice extends Device {
     Handler mainThreadHandler;
 
     BTCoreInterface coreInterface;
-    FakeCore core = new FakeCore();
+    HMBTCore core = new HMBTCore();
 
     static LocalDevice instance = null;
     public State state = State.IDLE;

@@ -2,8 +2,8 @@ package com.high_mobility.digitalkey.HMLink.Broadcasting;
 
 import android.util.Log;
 
-import com.high_mobility.digitalkey.HMLink.Broadcasting.Core.HMBTCoreInterface;
-import com.high_mobility.digitalkey.HMLink.Broadcasting.Core.HMDevice;
+import com.high_mobility.btcore.HMBTCoreInterface;
+import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.digitalkey.HMLink.LinkException;
 import com.high_mobility.digitalkey.HMLink.Shared.AccessCertificate;
 
@@ -24,12 +24,12 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public int HMBTHalscan_start() {
+    public int HMBTHalScanStart() {
         return 0;
     }
 
     @Override
-    public int HMBTHalscan_stop() {
+    public int HMBTHalScanStop() {
         return 0;
     }
 
@@ -152,61 +152,6 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public int HMCryptoaesEcbBlockEncrypt(byte[] key, byte[] cleartext, byte[] ciphertext) {
-        return 0;
-    }
-
-    @Override
-    public int HMCryptoeccGetEcdh(byte[] serial, byte[] ecdh) {
-        return 0;
-    }
-
-    @Override
-    public int HMCryptoeccAddSignature(byte[] data, int size, byte[] signature) {
-        return 0;
-    }
-
-    @Override
-    public int HMCryptoeccValidateSignature(byte[] data, int size, byte[] signature, byte[] serial) {
-        return 0;
-    }
-
-    @Override
-    public int HMCryptoeccValidateAllSignatures(byte[] data, int size, byte[] signature) {
-        return 0;
-    }
-
-    @Override
-    public int HMCryptoeccValidateCaSignature(byte[] data, int size, byte[] signature) {
-        return 0;
-    }
-
-    @Override
-    public int HMCryptohmac(byte[] key, byte[] data, byte[] hmac) {
-        return 0;
-    }
-
-    @Override
-    public int HMCryptogenerateNonce(byte[] nonce) {
-        return 0;
-    }
-
-    @Override
-    public void HMDebug(String str) {
-        Log.i(TAG, str);
-    }
-
-    @Override
-    public void HMCtwInit() {
-
-    }
-
-    @Override
-    public void HMCtwPing() {
-
-    }
-
-    @Override
     public void HMCtwEnteredProximity(HMDevice device) {
         this.device.didReceiveLink(device);
     }
@@ -217,7 +162,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public void HMCtwCommandReceived(HMDevice device, byte[] data, int length, int error) {
+    public void HMCtwCustomCommandReceived(HMDevice device, byte[] data, int length, int error) {
         this.device.didReceiveCustomCommand(device, data, length, error);
     }
 
