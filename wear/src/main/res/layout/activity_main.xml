@@ -13,7 +13,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        app:layout_box="all" />
+        android:text="Hello"
+        app:layout_box="all"
+        android:background="#b76f6f" />
 
 
 </android.support.wearable.view.BoxInsetLayout>

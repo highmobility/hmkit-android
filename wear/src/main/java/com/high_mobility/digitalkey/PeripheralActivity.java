@@ -4,9 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
-import android.support.wearable.view.BoxInsetLayout;
 import android.util.Log;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -18,9 +16,6 @@ import com.high_mobility.digitalkey.HMLink.Constants;
 import com.high_mobility.digitalkey.HMLink.LinkException;
 import com.high_mobility.digitalkey.HMLink.Shared.DeviceCertificate;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Random;
 
 public class PeripheralActivity extends WearableActivity implements LocalDeviceCallback, LinkCallback {
@@ -35,11 +30,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
 
     LocalDevice device = LocalDevice.getInstance();
 
-    private static final SimpleDateFormat AMBIENT_DATE_FORMAT =
-            new SimpleDateFormat("HH:mm", Locale.US);
-
-    private BoxInsetLayout mContainerView;
-    private TextView mTextView;
+    private TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,8 +40,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
 
         setContentView(R.layout.activity_main);
 
-        mContainerView = (BoxInsetLayout) findViewById(R.id.container);
-        mTextView = (TextView) findViewById(R.id.text);
+        textView = (TextView) findViewById(R.id.text);
 
         DeviceCertificate cert = new DeviceCertificate(CA_ISSUER, CA_APP_IDENTIFIER, getSerial(), DEVICE_PUBLIC_KEY);
         cert.setSignature(Utils.bytesFromHex("***REMOVED***"));
@@ -60,10 +50,11 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
 
         try {
             device.startBroadcasting();
-            mTextView.setText(device.name);
+            textView.setText(device.name != null ? device.name : "no name");
         } catch (Exception e) {
-            e.printStackTrace();
+            textView.setText("failed to start broadcast");
             Log.e(TAG, "cannot start broadcasting");
+            e.printStackTrace();
         }
     }
 
