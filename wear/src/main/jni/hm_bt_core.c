@@ -457,7 +457,9 @@ uint32_t client_handling_create(uint8_t *mac, uint16_t major, uint16_t minor, ui
 
     memcpy(mBeacons[connection_id].adv_name,name,8);
 
-    service_discover(&mBeacons[connection_id]);
+    if(!isLink){
+      service_discover(&mBeacons[connection_id]);
+    }
 
     return NRF_SUCCESS;
 }
