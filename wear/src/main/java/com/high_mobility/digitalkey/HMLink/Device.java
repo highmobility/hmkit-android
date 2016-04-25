@@ -7,5 +7,9 @@ import com.high_mobility.digitalkey.HMLink.Shared.DeviceCertificate;
  */
 public class Device {
     public DeviceCertificate certificate;
-    public String name;
+
+    public String getName() {
+        return null;
+    }
+
 }

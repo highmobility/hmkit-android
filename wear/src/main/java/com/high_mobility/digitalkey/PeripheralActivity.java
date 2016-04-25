@@ -50,7 +50,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
 
         try {
             device.startBroadcasting();
-            textView.setText(device.name != null ? device.name : "no name");
+            textView.setText(device.getName());
         } catch (Exception e) {
             textView.setText("failed to start broadcast");
             Log.e(TAG, "cannot start broadcasting");
@@ -62,6 +62,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     protected void onDestroy() {
         device.stopBroadcasting();
         device.closeGATTServer();
+        Log.i(TAG, "onDestroy");
 
         super.onDestroy();
     }

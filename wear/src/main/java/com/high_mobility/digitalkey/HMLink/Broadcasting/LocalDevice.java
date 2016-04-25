@@ -194,6 +194,11 @@ public class LocalDevice extends Device {
         }
     }
 
+    @Override
+    public String getName() {
+        return mBluetoothAdapter.getName();
+    }
+
     void didReceiveCustomCommand(HMDevice device, byte[] data, int length, int error) {
         // TODO: implement when cleared
         BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
