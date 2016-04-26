@@ -1,12 +1,36 @@
 package com.high_mobility.btcore;
 
+import java.util.Arrays;
+
 /**
  * Created by ttiganik on 13/04/16.
  */
 public class HMDevice {
-    byte[] mac;
+    byte[] _mac = {0,0,0,0,0,0};
+    byte[] _serial = {0,0,0,0,0,0,0,0,0};
+    int _isAuthenticated = 0;
 
     public byte[] getMac() {
-        return mac;
+        return _mac;
+    }
+
+    public void setMac(byte[] mac) {
+        _mac = Arrays.copyOf(mac,mac.length);
+    }
+
+    public byte[] getSerial() {
+        return _serial;
+    }
+
+    public void setSerial(byte[] serial) {
+        _serial = Arrays.copyOf(serial,serial.length);
+    }
+
+    public int getIsAuthenticated() {
+        return _isAuthenticated;
+    }
+
+    public void setIsAuthenticated(int isAuthenticated) {
+        _isAuthenticated = Arrays.copyOf(isAuthenticated,isAuthenticated.length);
     }
 }
