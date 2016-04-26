@@ -31,7 +31,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreInit(JNIEnv *env, jobject instan
 
     interfaceMethodHMCtwEnteredProximity = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwEnteredProximity","(Lcom/high_mobility/btcore/HMDevice;)V");
     interfaceMethodHMCtwExitedProximity = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwExitedProximity","(Lcom/high_mobility/btcore/HMDevice;)V");
-    interfaceMethodHMCtwCustomCommandReceived = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwCustomCommandReceived","(Lcom/high_mobility/btcore/HMDevice;[BII)V");
+    interfaceMethodHMCtwCustomCommandReceived = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwCustomCommandReceived","(Lcom/high_mobility/btcore/HMDevice;[B[I[I)V");
     interfaceMethodHMCtwGetDeviceCertificateFailed = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwGetDeviceCertificateFailed","(Lcom/high_mobility/btcore/HMDevice;[B)I");
     interfaceMethodHMCtwPairingRequested = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwPairingRequested","(Lcom/high_mobility/btcore/HMDevice;[B)I");
 

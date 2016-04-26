@@ -9,7 +9,7 @@ public class HMDevice {
     byte[] _mac = {0,0,0,0,0,0};
     byte[] _serial = {0,0,0,0,0,0,0,0,0};
     byte[] _appId = {0,0,0,0,0,0,0,0,0,0,0,0};
-    int _isAuthenticated = 0;
+    int _isAuthorised = 0;
 
     public byte[] getMac() {
         return _mac;
@@ -28,11 +28,11 @@ public class HMDevice {
     }
 
     public int getIsAuthenticated() {
-        return _isAuthenticated;
+        return _isAuthorised;
     }
 
-    public void setIsAuthenticated(int isAuthenticated) {
-        _isAuthenticated = isAuthenticated;
+    public void setIsAuthenticated(int isAuthorised) {
+        _isAuthorised = isAuthorised;
     }
 
     public byte[] getAppId() {

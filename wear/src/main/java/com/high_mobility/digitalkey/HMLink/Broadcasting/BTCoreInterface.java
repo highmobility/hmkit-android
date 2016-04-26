@@ -162,8 +162,8 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public void HMCtwCustomCommandReceived(HMDevice device, byte[] data, int length, int error) {
-        this.device.didReceiveCustomCommand(device, data, length, error);
+    public void HMCtwCustomCommandReceived(HMDevice device, byte[] data, int[] length, int[] error) {
+        this.device.didReceiveCustomCommand(device, data, length[0], error[0]);
     }
 
     @Override
