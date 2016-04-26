@@ -153,7 +153,8 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMCtwEnteredProximity(HMDevice device) {
-        this.device.didReceiveLink(device);
+        // TODO: this means device is authenticated
+//        this.device.didReceiveLink(device);
     }
 
     @Override

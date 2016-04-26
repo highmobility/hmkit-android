@@ -60,7 +60,6 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
             BluetoothGatt.GATT_FAILURE,
             0,
             null);
-
     }
 
     @Override
@@ -84,6 +83,7 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
     public void onDescriptorWriteRequest(BluetoothDevice device, int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
         super.onDescriptorWriteRequest(device, requestId, descriptor, preparedWrite, responseNeeded, offset, value);
         if (responseNeeded) {
+            this.device.didReceiveLink(device);
             this.device.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
             this.device.core.HMBTCorelinkConnect(this.device.coreInterface,Utils.bytesFromMacString(device.getAddress()));
         }

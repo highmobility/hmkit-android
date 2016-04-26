@@ -213,14 +213,14 @@ public class LocalDevice extends Device {
         }
     }
 
-    void didReceiveLink(HMDevice device) {
+    void didReceiveLink(BluetoothDevice device) {
         if (LocalDevice.ALLOWS_MULTIPLE_LINKS == false) {
             stopBroadcasting();
         }
 
         // add a new link to the array
-        BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
-        final Link link = new Link(btDevice, this);
+
+        final Link link = new Link(device, this);
         Link[] newLinks = new Link[links.length + 1];
 
         for (int i = 0; i < links.length; i++) {
@@ -348,6 +348,7 @@ public class LocalDevice extends Device {
     }
 
     void writeData(byte[] mac, byte[] value) {
+        Log.i(TAG, "write " + Utils.hexFromBytes(mac) + " " + Utils.hexFromBytes(value));
         Link link = getLinkForMac(mac);
         if (link != null) {
             readCharacteristic.setValue(value);
@@ -361,6 +362,7 @@ public class LocalDevice extends Device {
     private Link getLinkForMac(byte[] mac) {
         for (int i = 0; i < links.length; i++) {
             Link link = links[i];
+
             if (Arrays.equals(link.getAddressBytes(), mac)) {
                 return link;
             }
