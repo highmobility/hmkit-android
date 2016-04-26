@@ -31,6 +31,6 @@ public class HMDevice {
     }
 
     public void setIsAuthenticated(int isAuthenticated) {
-        _isAuthenticated = Arrays.copyOf(isAuthenticated,isAuthenticated.length);
+        _isAuthenticated = isAuthenticated;
     }
 }
