@@ -2,6 +2,7 @@ package com.high_mobility.digitalkey;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
@@ -41,6 +42,10 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
         setContentView(R.layout.activity_main);
 
         textView = (TextView) findViewById(R.id.text);
+
+        Random rnd = new Random();
+        int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+        textView.setBackgroundColor(color);
 
         DeviceCertificate cert = new DeviceCertificate(CA_ISSUER, CA_APP_IDENTIFIER, getSerial(), DEVICE_PUBLIC_KEY);
         cert.setSignature(Utils.bytesFromHex("***REMOVED***"));
