@@ -305,6 +305,7 @@ public class LocalDevice extends Device {
 
         if (linkIndex > -1) {
             Link link = links[linkIndex];
+            // TODO: start a timer
             link.callback.linkDidReceivePairingRequest(link, serialNumber, new Constants.ApprovedCallback() {
                 @Override
                 public void approve() {

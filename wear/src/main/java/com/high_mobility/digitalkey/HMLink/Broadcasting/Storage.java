@@ -18,9 +18,9 @@ import java.util.Set;
 /**
  * Created by ttiganik on 14/04/16.
  *
- * Storage is used to access device's storage, where certificates are securely stored.
+ * Storage is used to access device's storage, where certificates are stored.
  *
- * Uses Android Keystore.
+ * Uses Android SharedPreferences.
  */
 class Storage {
     private static final String ACCESS_CERTIFICATE_STORAGE_KEY = "ACCESS_CERTIFICATE_STORAGE_KEY";
@@ -30,7 +30,7 @@ class Storage {
 
     Storage(Context ctx) {
         settings = ctx.getSharedPreferences("com.hm.wearable.UserPrefs",
-                Context.MODE_PRIVATE );
+                Context.MODE_PRIVATE);
         editor = settings.edit();
     }
 
