@@ -104,7 +104,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public int HMPersistenceHalgetPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int commandSize, byte[] command) {
+    public int HMPersistenceHalgetPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command) {
         AccessCertificate certificate = device.storage.certWithGainingSerial(serial);
         if (certificate == null) {
             return 1;
@@ -114,7 +114,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
         startDate = certificate.getStartDateBytes();
         endDate = certificate.getEndDateBytes();
         command = certificate.getPermissions();
-        commandSize = command.length;
+        commandSize[0] = command.length;
 
         return 0;
     }

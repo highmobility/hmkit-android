@@ -64,10 +64,17 @@ uint32_t hm_bt_persistence_hal_get_public_key(uint8_t *serial, uint8_t *public, 
   jbyteArray endDate_ = (*envRef)->NewByteArray(envRef,5);
   (*envRef)->SetByteArrayRegion(envRef, endDate_, 0, 5, (const jbyte*) endDate );
 
-  jbyteArray command_ = (*envRef)->NewByteArray(envRef,commandSize);
-  (*envRef)->SetByteArrayRegion(envRef, command_, 0, commandSize, (const jbyte*) command );
+  jbyteArray command_ = (*envRef)->NewByteArray(envRef,7);
+  (*envRef)->SetByteArrayRegion(envRef, command_, 0, 7, (const jbyte*) command );
 
-  jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMPersistenceHalgetPublicKey, serial_, public_, startDate_, endDate_, *commandSize, command_);
+  jintArray commandSize_ = (*envRef)->NewIntArray(envRef,1);
+  (*envRef)->SetIntArrayRegion(envRef, commandSize_, 0, 1, (const jint*) commandSize );
+
+  jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMPersistenceHalgetPublicKey, serial_, public_, startDate_, endDate_, commandSize_, command_);
+
+  if(ret != 0){
+    return ret;
+  }
 
   jbyte* serial_array = (*envRef)->GetByteArrayElements(envRef, serial_, NULL);
   memcpy(serial,serial_array,9);
@@ -81,10 +88,11 @@ uint32_t hm_bt_persistence_hal_get_public_key(uint8_t *serial, uint8_t *public, 
   jbyte* endDate_array = (*envRef)->GetByteArrayElements(envRef, endDate_, NULL);
   memcpy(endDate,endDate_array,5);
 
+  jint* size_array = (*envRef)->GetIntArrayElements(envRef, commandSize_, NULL);
+  *commandSize = size_array[0];
+
   jbyte* command_array = (*envRef)->GetByteArrayElements(envRef, command_, NULL);
   memcpy(command,command_array,*commandSize);
-
-  //TODO parse data
 
   return ret;
 }
