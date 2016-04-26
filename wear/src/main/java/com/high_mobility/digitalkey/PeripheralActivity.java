@@ -22,7 +22,7 @@ import java.util.Random;
 public class PeripheralActivity extends WearableActivity implements LocalDeviceCallback, LinkCallback {
     private static final byte[] CA_PUBLIC_KEY = Utils.bytesFromHex("***REMOVED***");
     private static final byte[] CA_APP_IDENTIFIER = Utils.bytesFromHex("***REMOVED***");
-    private static final byte[] CA_ISSUER = Utils.bytesFromHex("47494D4F");
+    private static final byte[] CA_ISSUER = Utils.bytesFromHex("48494D4C");
 
     private static final byte[] DEVICE_PUBLIC_KEY = Utils.bytesFromHex("***REMOVED***");
     private static final byte[] DEVICE_PRIVATE_KEY = Utils.bytesFromHex("***REMOVED***");
