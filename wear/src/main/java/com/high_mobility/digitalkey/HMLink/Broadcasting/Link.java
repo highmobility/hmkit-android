@@ -43,7 +43,7 @@ public class Link {
     }
 
     void sendCustomCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
-        device.core.HMBTCoreSendCustomCommand(bytes, bytes.length, getAddressBytes());
+        device.core.HMBTCoreSendCustomCommand(this.device.coreInterface, bytes, bytes.length, getAddressBytes());
     }
 
     byte[] getAddressBytes() {
