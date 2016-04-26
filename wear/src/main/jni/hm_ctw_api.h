@@ -23,6 +23,7 @@ typedef struct {
 typedef struct {
   uint8_t   mac[6];
   uint8_t   serial_number[9];
+  uint8_t   app_id[12];
   //hm_certificate_t certificate;
   uint8_t   is_authorised;
   uint16_t   major;

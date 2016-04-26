@@ -167,7 +167,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public int HMCtwGetDeviceCertificateFailed(HMDevice device, int nonce) {
+    public int HMCtwGetDeviceCertificateFailed(HMDevice device, byte[] nonce) {
         //ret false on, et ei jätka // TODO:
         return 0;
     }

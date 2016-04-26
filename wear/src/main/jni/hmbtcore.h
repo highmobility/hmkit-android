@@ -30,4 +30,10 @@ jmethodID *interfaceMethodHMPersistenceHaladdStoredCertificate;
 jmethodID *interfaceMethodHMPersistenceHalgetStoredCertificate;
 jmethodID *interfaceMethodHMPersistenceHaleraseStoredCertificate;
 
+jmethodID *interfaceMethodHMCtwEnteredProximity;
+jmethodID *interfaceMethodHMCtwExitedProximity;
+jmethodID *interfaceMethodHMCtwCustomCommandReceived;
+jmethodID *interfaceMethodHMCtwGetDeviceCertificateFailed;
+jmethodID *interfaceMethodHMCtwPairingRequested;
+
 #endif //ANDROID_WEAR_DIGITAL_KEY_HMBTCORE_H

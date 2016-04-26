@@ -29,6 +29,12 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreInit(JNIEnv *env, jobject instan
     interfaceMethodHMPersistenceHalgetStoredCertificate = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetStoredCertificate","([BI)I");
     interfaceMethodHMPersistenceHaleraseStoredCertificate = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHaleraseStoredCertificate","()I");
 
+    interfaceMethodHMCtwEnteredProximity = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwEnteredProximity","(Lcom/high_mobility/btcore/HMDevice;)V");
+    interfaceMethodHMCtwExitedProximity = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwExitedProximity","(Lcom/high_mobility/btcore/HMDevice;)V");
+    interfaceMethodHMCtwCustomCommandReceived = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwCustomCommandReceived","(Lcom/high_mobility/btcore/HMDevice;[BII)V");
+    interfaceMethodHMCtwGetDeviceCertificateFailed = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwGetDeviceCertificateFailed","(Lcom/high_mobility/btcore/HMDevice;[B)I");
+    interfaceMethodHMCtwPairingRequested = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwPairingRequested","(Lcom/high_mobility/btcore/HMDevice;[B)I");
+
     envRef = env;
     coreInterfaceRef = coreInterface;
 

@@ -8,6 +8,7 @@ import java.util.Arrays;
 public class HMDevice {
     byte[] _mac = {0,0,0,0,0,0};
     byte[] _serial = {0,0,0,0,0,0,0,0,0};
+    byte[] _appId = {0,0,0,0,0,0,0,0,0,0,0,0};
     int _isAuthenticated = 0;
 
     public byte[] getMac() {
@@ -32,5 +33,13 @@ public class HMDevice {
 
     public void setIsAuthenticated(int isAuthenticated) {
         _isAuthenticated = isAuthenticated;
+    }
+
+    public byte[] getAppId() {
+        return _appId;
+    }
+
+    public void setAppId(byte[] appId) {
+        _appId = Arrays.copyOf(appId,appId.length);
     }
 }
