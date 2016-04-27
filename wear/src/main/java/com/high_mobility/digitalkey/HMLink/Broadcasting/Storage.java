@@ -50,7 +50,7 @@ class Storage {
             return certificates;
         }
 
-        return null;
+        return new AccessCertificate[0];
     }
 
     void setCertificates(AccessCertificate[] certificates) {
@@ -78,7 +78,7 @@ class Storage {
             return storedCertificates.toArray(new AccessCertificate[storedCertificates.size()]);
         }
 
-        return null;
+        return new AccessCertificate[0];
     }
 
     AccessCertificate[] getStoredCertificates(byte[] serialNumber) {
@@ -95,7 +95,7 @@ class Storage {
             return storedCertificates.toArray(new AccessCertificate[storedCertificates.size()]);
         }
 
-        return null;
+        return new AccessCertificate[0];
     }
 
     void resetStorage() {

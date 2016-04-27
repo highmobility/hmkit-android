@@ -6,6 +6,9 @@ import com.high_mobility.btcore.HMBTCoreInterface;
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.digitalkey.HMLink.LinkException;
 import com.high_mobility.digitalkey.HMLink.Shared.AccessCertificate;
+import com.high_mobility.digitalkey.Utils;
+
+import java.util.Arrays;
 
 /**
  * Created by ttiganik on 20/04/16.
@@ -79,13 +82,13 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetSerial(byte[] serial) {
-        serial = device.certificate.getSerial();
+        copyBytesToJNI(device.certificate.getSerial(), serial);
         return 0;
     }
 
     @Override
     public int HMPersistenceHalgetLocalPublicKey(byte[] publicKey) {
-        publicKey = device.certificate.getPublicKey();
+        copyBytesToJNI(device.certificate.getPublicKey(), publicKey);
         return 0;
     }
 
@@ -109,12 +112,12 @@ public class BTCoreInterface implements HMBTCoreInterface {
         if (certificate == null) {
             return 1;
         }
-
-        publicKey = certificate.getGainerPublicKey();
-        startDate = certificate.getStartDateBytes();
-        endDate = certificate.getEndDateBytes();
-        command = certificate.getPermissions();
-        commandSize[0] = command.length;
+        copyBytesToJNI(certificate.getGainerPublicKey(), publicKey);
+        copyBytesToJNI(certificate.getStartDateBytes(), startDate);
+        copyBytesToJNI(certificate.getEndDateBytes(), endDate);
+        byte[] permissions = certificate.getPermissions();
+        copyBytesToJNI(permissions, command);
+        commandSize[0] = permissions.length;
 
         return 0;
     }
@@ -140,8 +143,8 @@ public class BTCoreInterface implements HMBTCoreInterface {
     @Override
     public int HMPersistenceHalgetStoredCertificate(byte[] cert, int size) {
         AccessCertificate certificate = device.storage.certWithProvidingSerial(device.certificate.getSerial());
-        cert = certificate.getBytes();
-        size = cert.length;
+        copyBytesToJNI(certificate.getBytes(), cert);
+        size = certificate.getBytes().length;
         return 0;
     }
 
@@ -153,17 +156,19 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMCtwEnteredProximity(HMDevice device) {
-        // TODO: this means device is authenticated
+        // TODO: this means core has finished identification of the device (might me authenticated or not) - show device info on screen
 //        this.device.didReceiveLink(device);
     }
 
     @Override
     public void HMCtwExitedProximity(HMDevice device) {
         this.device.didLoseLink(device);
+        // TODO: hide the device
     }
 
     @Override
     public void HMCtwCustomCommandReceived(HMDevice device, byte[] data, int[] length, int[] error) {
+        // TODO: copy bytes with loop -- this is not the command response
         this.device.didReceiveCustomCommand(device, data, length[0], error[0]);
     }
 
@@ -177,5 +182,11 @@ public class BTCoreInterface implements HMBTCoreInterface {
     public int HMCtwPairingRequested(HMDevice device, byte[] serial) {
         this.device.didReceivePairingRequest(device, serial);
         return 0;
+    }
+
+    private void copyBytesToJNI(byte[] from, byte[] to) {
+        for (int i = 0; i < from.length; i++) {
+            to[i] = from[i];
+        }
     }
 }
