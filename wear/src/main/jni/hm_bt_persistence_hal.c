@@ -67,7 +67,7 @@ uint32_t hm_bt_persistence_hal_get_public_key_count(uint8_t *count){
   jintArray count_ = (*envRef)->NewIntArray(envRef,1);
   (*envRef)->SetIntArrayRegion(envRef, count_, 0, 1, (const jint*) count );
 
-  jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMPersistenceHalgetPublicKeyCount, serial_, public_, startDate_, endDate_, commandSize_, command_);
+  jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMPersistenceHalgetPublicKeyCount, count_);
 
   if(ret != 0){
     return ret;
@@ -146,7 +146,7 @@ uint32_t hm_bt_persistence_hal_get_public_key_by_index(uint8_t index, uint8_t *s
   jintArray commandSize_ = (*envRef)->NewIntArray(envRef,1);
   (*envRef)->SetIntArrayRegion(envRef, commandSize_, 0, 1, (const jint*) commandSize );
 
-  jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMPersistenceHalgetPublicKeyByIndex, i, serial_, public_, startDate_, endDate_, commandSize_, command_);
+  jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMPersistenceHalgetPublicKeyByIndex, index, serial_, public_, startDate_, endDate_, commandSize_, command_);
 
   if(ret != 0){
     return ret;
