@@ -46,14 +46,6 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreInit(JNIEnv *env, jobject instan
 
     prepareCallbackFunctions(env,instance,coreInterface);
 
-    uint8_t priv[32];
-    uint8_t pub[64];
-    hm_crypto_openssl_create_keys(priv, pub, true);
-
-    hm_bt_debug_hal_log("KEYS");
-    hm_bt_debug_hal_log_hex(priv,32);
-    hm_bt_debug_hal_log_hex(pub,64);
-
     hm_bt_core_init();
 }
 

@@ -94,6 +94,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetLocalPrivateKey(byte[] privateKey) {
+        copyBytesToJNI(device.privateKey, privateKey);
         return 0;
     }
 
