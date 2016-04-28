@@ -3,6 +3,8 @@
 #include "hm_bt_persistence_hal.h"
 #include "Crypto.h"
 #include <string.h>
+#include <time.h>
+#include <stdlib.h>
 
 uint32_t hm_bt_crypto_hal_aes_ecb_block_encrypt(uint8_t *key, uint8_t *cleartext, uint8_t *cipertext){
   return hm_crypto_openssl_aes_iv(key, cleartext, cipertext);
@@ -53,6 +55,7 @@ uint32_t hm_bt_crypto_hal_ecc_validate_signature(uint8_t *data, uint8_t size, ui
 }
 
 uint32_t hm_bt_crypto_hal_ecc_validate_all_signatures(uint8_t *data, uint8_t size, uint8_t *signature){
+  //TODO
   return 0;
 }
 
@@ -67,5 +70,17 @@ uint32_t hm_bt_crypto_hal_hmac(uint8_t *key, uint8_t *data, uint8_t *hmac){
 }
 
 uint32_t hm_bt_crypto_hal_generate_nonce(uint8_t *nonce){
+
+  srand(time(NULL));
+  nonce[0] = rand();
+  nonce[1] = rand();
+  nonce[2] = rand();
+  nonce[3] = rand();
+  nonce[4] = rand();
+  nonce[5] = rand();
+  nonce[6] = rand();
+  nonce[7] = rand();
+  nonce[8] = rand();
+
   return 0;
 }
