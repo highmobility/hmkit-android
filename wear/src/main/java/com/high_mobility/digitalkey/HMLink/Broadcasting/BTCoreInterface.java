@@ -129,6 +129,16 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
+    public int HMPersistenceHalgetPublicKeyByIndex(int index, byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command) {
+        return 0;
+    }
+
+    @Override
+    public int HMPersistenceHalgetPublicKeyCount(int[] count) {
+        return 0;
+    }
+
+    @Override
     public int HMPersistenceHalremovePublicKey(byte[] serial) {
         device.storage.deleteCertificateWithGainingSerial(serial);
         return 0;

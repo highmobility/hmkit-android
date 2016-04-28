@@ -55,8 +55,28 @@ uint32_t hm_bt_crypto_hal_ecc_validate_signature(uint8_t *data, uint8_t size, ui
 }
 
 uint32_t hm_bt_crypto_hal_ecc_validate_all_signatures(uint8_t *data, uint8_t size, uint8_t *signature){
-  //TODO
-  return 0;
+  uint8_t count = 0;
+  hm_bt_persistence_hal_get_public_key_count(&count);
+
+  uint8_t i = 0;
+  for( i=0 ; i < count ; i++ ){
+    uint8_t usepublic[64];
+    uint8_t start_date[5];
+    uint8_t end_date[5];
+    uint8_t command_size;
+    uint8_t command[16];
+
+    if(hm_bt_persistence_hal_get_public_key_by_index(i, serial, usepublic, start_date, end_date, &command_size, command) == 1){
+      return 1;
+    }
+
+    if(hm_crypto_openssl_verify(data, size, usepublic, signature) == 0 ){
+      return 0;
+    }
+
+  }
+
+  return 1;
 }
 
 uint32_t hm_bt_crypto_hal_ecc_validate_ca_signature(uint8_t *data, uint8_t size, uint8_t *signature){
