@@ -18,6 +18,5 @@ public class LinkGridItem extends View {
         LayoutInflater inflater =
                 (LayoutInflater)context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
         container = (LinearLayout)inflater.inflate( R.layout.link_grid_item, null );
-
     }
 }
