@@ -71,7 +71,7 @@ public class AccessCertificate extends Certificate {
             return bytes;
         }
         else {
-            return null;
+            return new byte[0];
         }
     }
 
