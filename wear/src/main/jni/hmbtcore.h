@@ -23,6 +23,7 @@ jmethodID *interfaceMethodHMBTHalReadData;
 
 jmethodID *interfaceMethodHMPersistenceHalgetSerial;
 jmethodID *interfaceMethodHMPersistenceHalgetLocalPublicKey;
+jmethodID *interfaceMethodHMPersistenceHalgetLocalPrivateKey;
 jmethodID *interfaceMethodHMPersistenceHaladdPublicKey;
 jmethodID *interfaceMethodHMPersistenceHalgetPublicKey;
 jmethodID *interfaceMethodHMPersistenceHalremovePublicKey;

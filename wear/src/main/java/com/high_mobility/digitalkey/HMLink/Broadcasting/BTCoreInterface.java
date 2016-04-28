@@ -93,6 +93,11 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
+    public int HMPersistenceHalgetLocalPrivateKey(byte[] privateKey) {
+        return 0;
+    }
+
+    @Override
     public int HMPersistenceHaladdPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int commandSize, byte[] command) {
         AccessCertificate cert = new AccessCertificate(serial, publicKey, device.certificate.getSerial(), startDate, endDate, command);
 

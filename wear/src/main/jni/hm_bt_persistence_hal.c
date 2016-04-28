@@ -28,6 +28,18 @@ uint32_t hm_bt_persistence_hal_get_local_public_key(uint8_t *public){
   return ret;
 }
 
+uint32_t hm_bt_persistence_hal_get_local_private_key(uint8_t *private){
+
+  jbyteArray private_ = (*envRef)->NewByteArray(envRef,32);
+  (*envRef)->SetByteArrayRegion(envRef, private_, 0, 32, (const jbyte*) private );
+  jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMPersistenceHalgetLocalPrivateKey, private_);
+
+  jbyte* content_array = (*envRef)->GetByteArrayElements(envRef, private_, NULL);
+  memcpy(private,content_array,32);
+
+  return ret;
+}
+
 uint32_t hm_bt_persistence_hal_add_public_key(uint8_t *serial, uint8_t *public, uint8_t *startDate, uint8_t *endDate, uint8_t commandSize, uint8_t *command){
 
   jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
