@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.digitalkey.HMLink.Broadcasting.Link;
 import com.high_mobility.digitalkey.HMLink.Broadcasting.LinkCallback;
 import com.high_mobility.digitalkey.HMLink.Broadcasting.LocalDevice;
@@ -36,6 +37,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     private BoxInsetLayout container;
     private GridViewPager gridViewPager;
     private DotsPageIndicator dotsPageIndicator;
+    private LinkGridViewAdapter gridViewAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +51,9 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
         container = (BoxInsetLayout) findViewById(R.id.container);
         gridViewPager = (GridViewPager) findViewById(R.id.pager);
         dotsPageIndicator = (DotsPageIndicator) findViewById(R.id.page_indicator);
+
+        gridViewAdapter = new LinkGridViewAdapter(this);
+//        gridViewPager.setAdapter(gridViewAdapter);
 
         Random rnd = new Random();
         int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
@@ -68,6 +73,16 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
             Log.e(TAG, "cannot start broadcasting");
             e.printStackTrace();
         }
+
+        testGridView();
+    }
+
+    void testGridView() {
+        HMDevice hmDevice = new HMDevice();
+        hmDevice.setSerial(new byte[] { 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01 });
+        Link link = new Link(null, device);
+        Link[] links = new Link[] {link};
+        gridViewAdapter.setLinks(links);
     }
 
     @Override
