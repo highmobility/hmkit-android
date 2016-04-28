@@ -157,10 +157,10 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public int HMPersistenceHalgetStoredCertificate(byte[] cert, int size) {
+    public int HMPersistenceHalgetStoredCertificate(byte[] cert, int[] size) {
         AccessCertificate certificate = device.storage.certWithProvidingSerial(device.certificate.getSerial());
         copyBytesToJNI(certificate.getBytes(), cert);
-        size = certificate.getBytes().length;
+        size[0] = certificate.getBytes().length;
         return 0;
     }
 
