@@ -133,8 +133,8 @@ extern "C" {
 
 #if !(defined(VMS) || defined(__VMS)) /* VMS uses logical names instead */
 #if defined(HEADER_CRYPTLIB_H) && !defined(OPENSSLDIR)
-#define ENGINESDIR "/usr/local/ssl/android-18/lib/engines"
-#define OPENSSLDIR "/usr/local/ssl/android-18"
+#define ENGINESDIR "/usr/local/ssl/android-14/lib/engines"
+#define OPENSSLDIR "/usr/local/ssl/android-14"
 #endif
 #endif
 
@@ -229,7 +229,7 @@ extern "C" {
 #endif
 
 #if defined(DES_RISC1) && defined(DES_RISC2)
-#error YOU SHOULD NOT HAVE BOTH DES_RISC1 AND DES_RISC2 DEFINED!!!!!
+YOU SHOULD NOT HAVE BOTH DES_RISC1 AND DES_RISC2 DEFINED!!!!!
 #endif
 
 /* Unroll the inner loop, this sometimes helps, sometimes hinders.
@@ -248,7 +248,7 @@ extern "C" {
    optimization options.  Older Sparc's work better with only UNROLL, but
    there's no way to tell at compile time what it is you're running on */
  
-#if defined( __sun ) || defined ( sun )		/* Newer Sparc's */
+#if defined( sun )		/* Newer Sparc's */
 #  define DES_PTR
 #  define DES_RISC1
 #  define DES_UNROLL

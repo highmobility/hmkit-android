@@ -124,6 +124,16 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
+    public int HMPersistenceHalgetPublicKeyByIndex(int index, byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command) {
+        return 0;
+    }
+
+    @Override
+    public int HMPersistenceHalgetPublicKeyCount(int[] count) {
+        return 0;
+    }
+
+    @Override
     public int HMPersistenceHalremovePublicKey(byte[] serial) {
         device.storage.deleteCertificateWithGainingSerial(serial);
         return 0;
@@ -142,10 +152,10 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public int HMPersistenceHalgetStoredCertificate(byte[] cert, int size) {
+    public int HMPersistenceHalgetStoredCertificate(byte[] cert, int[] size) {
         AccessCertificate certificate = device.storage.certWithProvidingSerial(device.certificate.getSerial());
         copyBytesToJNI(certificate.getBytes(), cert);
-        size = certificate.getBytes().length;
+        size[0] = certificate.getBytes().length;
         return 0;
     }
 
