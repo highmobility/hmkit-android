@@ -39,7 +39,6 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
                                             int offset,
                                             BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
-        Log.i(TAG, "onCharacteristicReadRequest " + characteristic.getUuid().toString());
 
         if (Constants.READ_CHAR_UUID.equals(characteristic.getUuid())) {
             // response to read here
@@ -71,7 +70,6 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
                                              int offset,
                                              byte[] value) {
         super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
-        Log.i(TAG, "onCharacteristicWriteRequest : " + device.getAddress() + " v: " + Utils.hexFromBytes(value));
 
         if (responseNeeded) {
             this.device.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);

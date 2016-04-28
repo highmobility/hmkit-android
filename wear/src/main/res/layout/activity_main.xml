@@ -6,16 +6,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.high_mobility.digitalkey.PeripheralActivity"
-    tools:deviceIds="wear">
+    tools:deviceIds="wear"
+    android:background="#d7d7d7">
 
     <TextView
         android:id="@+id/text"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
         android:gravity="center"
+        android:background="#212227"
         android:text="Hello"
-        app:layout_box="all"
-        android:background="#b76f6f" />
+        android:paddingTop="15dp"
+        app:layout_box="left|right|bottom"
+         />
 
+    <android.support.wearable.view.GridViewPager
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <android.support.wearable.view.DotsPageIndicator
+        android:id="@+id/page_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom" />
 
 </android.support.wearable.view.BoxInsetLayout>

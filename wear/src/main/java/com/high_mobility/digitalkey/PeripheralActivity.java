@@ -1,10 +1,11 @@
 package com.high_mobility.digitalkey;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
+import android.support.wearable.view.BoxInsetLayout;
+import android.support.wearable.view.DotsPageIndicator;
+import android.support.wearable.view.GridViewPager;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -32,6 +33,9 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     LocalDevice device = LocalDevice.getInstance();
 
     private TextView textView;
+    private BoxInsetLayout container;
+    private GridViewPager gridViewPager;
+    private DotsPageIndicator dotsPageIndicator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,10 +46,13 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
         setContentView(R.layout.activity_main);
 
         textView = (TextView) findViewById(R.id.text);
+        container = (BoxInsetLayout) findViewById(R.id.container);
+        gridViewPager = (GridViewPager) findViewById(R.id.pager);
+        dotsPageIndicator = (DotsPageIndicator) findViewById(R.id.page_indicator);
 
         Random rnd = new Random();
         int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
-        textView.setBackgroundColor(color);
+        container.setBackgroundColor(color);
 
         DeviceCertificate cert = new DeviceCertificate(CA_ISSUER, CA_APP_IDENTIFIER, getSerial(), DEVICE_PUBLIC_KEY);
         cert.setSignature(Utils.bytesFromHex("***REMOVED***"));
