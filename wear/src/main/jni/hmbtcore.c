@@ -2,8 +2,11 @@
 #include <stddef.h>
 #include "hm_bt_core.h"
 #include "hmbtcore.h"
+#include "Crypto.h"
+#include "hm_bt_debug_hal.h"
 
 void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterface){
+
     interfaceClassRef = (*env)->GetObjectClass(env, coreInterface);
 
     interfaceMethodHMBTHalInit = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalInit","()I");
@@ -41,6 +44,14 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreInit(JNIEnv *env, jobject instan
                                                      jobject coreInterface) {
 
     prepareCallbackFunctions(env,instance,coreInterface);
+
+    uint8_t priv[32];
+    uint8_t pub[64];
+    hm_crypto_openssl_create_keys(priv, pub, true);
+
+    hm_bt_debug_hal_log("KEYS");
+    hm_bt_debug_hal_log_hex(priv,32);
+    hm_bt_debug_hal_log_hex(pub,64);
 
     hm_bt_core_init();
 }
