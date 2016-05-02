@@ -1,9 +1,12 @@
 package com.high_mobility.digitalkey.HMLink.Broadcasting;
 
+import android.util.Log;
+
 import com.high_mobility.btcore.HMBTCoreInterface;
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.digitalkey.HMLink.LinkException;
 import com.high_mobility.digitalkey.HMLink.Shared.AccessCertificate;
+import com.high_mobility.digitalkey.Utils;
 
 /**
  * Created by ttiganik on 20/04/16.
@@ -125,11 +128,25 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetPublicKeyByIndex(int index, byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command) {
-        return 0;
+        AccessCertificate[] certificates = device.storage.getRegisteredCertificates(device.certificate.getSerial());
+        if (certificates.length >= index) {
+            AccessCertificate certificate = certificates[index];
+            copyBytesToJNI(certificate.getGainerPublicKey(), publicKey);
+            copyBytesToJNI(certificate.getStartDateBytes(), startDate);
+            copyBytesToJNI(certificate.getEndDateBytes(), endDate);
+            byte[] permissions = certificate.getPermissions();
+            copyBytesToJNI(permissions, command);
+            commandSize[0] = permissions.length;
+
+            return 0;
+        }
+
+        return 1;
     }
 
     @Override
     public int HMPersistenceHalgetPublicKeyCount(int[] count) {
+        count[0] = device.storage.getRegisteredCertificates(device.certificate.getSerial()).length;
         return 0;
     }
 
@@ -168,11 +185,13 @@ public class BTCoreInterface implements HMBTCoreInterface {
     @Override
     public void HMCtwEnteredProximity(HMDevice device) {
         // TODO: this means core has finished identification of the device (might me authenticated or not) - show device info on screen
-//        this.device.didReceiveLink(device);
+        Log.i(TAG, "HMCtwEnteredProximity");
+        this.device.didResolveDevice(device);
     }
 
     @Override
     public void HMCtwExitedProximity(HMDevice device) {
+        Log.i(TAG, "HMCtwExitedProximity");
         this.device.didLoseLink(device);
         // TODO: hide the device
     }

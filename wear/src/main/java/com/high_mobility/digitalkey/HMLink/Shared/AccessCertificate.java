@@ -1,5 +1,7 @@
 package com.high_mobility.digitalkey.HMLink.Shared;
 
+import android.util.Log;
+
 import com.high_mobility.digitalkey.Utils;
 
 import java.util.Date;
@@ -165,7 +167,7 @@ public class AccessCertificate extends Certificate {
         bytes = Utils.concatBytes(bytes, startDate);
         bytes = Utils.concatBytes(bytes, endDate);
 
-        if (permissions.length > 0) {
+        if (permissions != null && permissions.length > 0) {
             bytes = Utils.concatBytes(bytes, new byte[] {(byte)permissions.length});
             bytes = Utils.concatBytes(bytes, permissions);
         }

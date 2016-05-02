@@ -17,6 +17,7 @@ import com.high_mobility.digitalkey.HMLink.Broadcasting.LocalDevice;
 import com.high_mobility.digitalkey.HMLink.Broadcasting.LocalDeviceCallback;
 import com.high_mobility.digitalkey.HMLink.Constants;
 import com.high_mobility.digitalkey.HMLink.LinkException;
+import com.high_mobility.digitalkey.HMLink.Shared.AccessCertificate;
 import com.high_mobility.digitalkey.HMLink.Shared.DeviceCertificate;
 
 import java.util.Random;
@@ -50,14 +51,12 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
         textView = (TextView) findViewById(R.id.text);
         container = (BoxInsetLayout) findViewById(R.id.container);
         gridViewPager = (GridViewPager) findViewById(R.id.pager);
+
+        gridViewAdapter = new LinkGridViewAdapter(this, getFragmentManager());
+        gridViewPager.setAdapter(gridViewAdapter);
+
         dotsPageIndicator = (DotsPageIndicator) findViewById(R.id.page_indicator);
-
-        gridViewAdapter = new LinkGridViewAdapter(this);
-//        gridViewPager.setAdapter(gridViewAdapter);
-
-        Random rnd = new Random();
-        int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
-        container.setBackgroundColor(color);
+        dotsPageIndicator.setPager(gridViewPager);
 
         DeviceCertificate cert = new DeviceCertificate(CA_ISSUER, CA_APP_IDENTIFIER, getSerial(), DEVICE_PUBLIC_KEY);
         cert.setSignature(Utils.bytesFromHex("***REMOVED***"));
@@ -67,22 +66,10 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
 
         try {
             device.startBroadcasting();
-            textView.setText(device.getName());
         } catch (Exception e) {
-            textView.setText("failed to start broadcast");
             Log.e(TAG, "cannot start broadcasting");
             e.printStackTrace();
         }
-
-        testGridView();
-    }
-
-    void testGridView() {
-        HMDevice hmDevice = new HMDevice();
-        hmDevice.setSerial(new byte[] { 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01 });
-        Link link = new Link(null, device);
-        Link[] links = new Link[] {link};
-        gridViewAdapter.setLinks(links);
     }
 
     @Override
@@ -96,7 +83,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
 
     private byte[] getSerial() {
         return new byte [] {0x01, 0x23, 0x19, 0x10, (byte)0xD6, 0x2C, (byte)0xA5, 0x71, (byte)0xEE};
-        // TODO: use random serial number
+        // TODO: use random serial number when device certificate is dynamic in core
       /*  SharedPreferences settings;
         SharedPreferences.Editor editor;
 
@@ -120,22 +107,36 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
 
     @Override
     public void localDeviceStateChanged(LocalDevice.State state, LocalDevice.State oldState) {
-
+        switch (state) {
+            case BLUETOOTH_UNAVAILABLE:
+                textView.setText(device.getName() + " / x");
+                break;
+            case IDLE:
+                textView.setText(device.getName() + " / -");
+                break;
+            case BROADCASTING:
+                textView.setText(device.getName() + " / +");
+                break;
+        }
     }
 
     @Override
     public void localDeviceDidReceiveLink(Link link) {
+        gridViewAdapter.setLinks(device.getLinks());
+        link.registerCallback(this);
         Log.i(TAG, "localDeviceDidReceiveLink");
     }
 
     @Override
     public void localDeviceDidLoseLink(Link link) {
+        gridViewAdapter.setLinks(device.getLinks());
+        link.registerCallback(null);
         Log.i(TAG, "localDeviceDidLoseLink");
     }
 
     @Override
     public void linkStateDidChange(Link link, Link.State oldState) {
-
+        gridViewAdapter.setLinks(device.getLinks());
     }
 
     @Override
@@ -145,12 +146,13 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
 
     @Override
     public byte[] linkDidReceiveCustomCommand(Link link, byte[] bytes) {
+
         return new byte[0];
     }
 
     @Override
     public void linkDidReceivePairingRequest(Link link, byte[] serialNumber, Constants.ApprovedCallback approvedCallback, float timeout) {
-
+        // TODO: show in UI
     }
 
 }

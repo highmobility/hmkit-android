@@ -52,7 +52,6 @@ public class LocalDevice extends Device {
     BluetoothGattServer GATTServer;
     GATTServerCallback gattServerCallback;
 
-
     BluetoothGattCharacteristic readCharacteristic;
     BluetoothGattCharacteristic writeCharacteristic;
     Handler mainThreadHandler;
@@ -199,6 +198,16 @@ public class LocalDevice extends Device {
         return mBluetoothAdapter.getName();
     }
 
+    void didResolveDevice(HMDevice device) {
+        for (int i = 0; i < links.length; i++) {
+            Link link = links[i];
+            if (Arrays.equals(link.getAddressBytes(), device.getMac())) {
+                link.setHmDevice(device);
+                break;
+            }
+        }
+    }
+
     void didReceiveCustomCommand(HMDevice device, byte[] data, int length, int error) {
         // TODO: implement when cleared
         BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
@@ -232,15 +241,15 @@ public class LocalDevice extends Device {
 
         link.setState(Link.State.CONNECTED);
 
-        final LocalDevice devicePointer = this;
-        devicePointer.mainThreadHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (devicePointer.callback != null) {
+        if (callback != null) {
+            final LocalDevice devicePointer = this;
+            devicePointer.mainThreadHandler.post(new Runnable() {
+                @Override
+                public void run() {
                     devicePointer .callback.localDeviceDidReceiveLink(link);
                 }
-            }
-        });
+            });
+        }
     }
 
     void didLoseLink(HMDevice device) {

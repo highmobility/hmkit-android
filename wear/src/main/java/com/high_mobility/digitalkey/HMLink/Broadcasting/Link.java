@@ -19,37 +19,57 @@ public class Link {
     LinkCallback callback;
 
     BluetoothDevice btDevice;
+
     HMDevice hmDevice;
     LocalDevice device;
 
-    // TODO: make internal
-    public Link(BluetoothDevice btDevice, LocalDevice device) {
+    Link(BluetoothDevice btDevice, LocalDevice device) {
         this.btDevice = btDevice;
         this.device = device;
     }
 
-    void setState(State state) {
-        State oldState = this.state;
-        this.state = state;
-
-        if (callback != null) {
-            callback.linkStateDidChange(this, oldState);
-        }
-    }
-
-    byte[] getSerial() {
-        return hmDevice.getSerial();
+    public byte[] getSerial() {
+        return hmDevice != null ? hmDevice.getSerial() : null;
     }
 
     public State getState() {
         return state;
     }
 
-    void registerCallback(LinkCallback callback) {
+    public void registerCallback(LinkCallback callback) {
         this.callback = callback;
     }
 
-    void sendCustomCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
+    void setHmDevice(final HMDevice hmDevice) {
+        this.hmDevice = hmDevice;
+
+        if (hmDevice.getIsAuthenticated() == 0) {
+            setState(State.CONNECTED);
+        }
+        else {
+            setState(State.AUTHENTICATED);
+        }
+    }
+
+    void setState(State state) {
+        if (this.state != state) {
+            final State oldState = this.state;
+            this.state = state;
+
+            if (callback != null) {
+                final Link linkPointer = this;
+
+                this.device.mainThreadHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        linkPointer.callback.linkStateDidChange(linkPointer, oldState);
+                    }
+                });
+            }
+        }
+    }
+
+    public void sendCustomCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
         device.core.HMBTCoreSendCustomCommand(this.device.coreInterface, bytes, bytes.length, getAddressBytes());
     }
 
