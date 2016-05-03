@@ -34,9 +34,8 @@ import java.util.UUID;
  * Created by ttiganik on 12/04/16.
  */
 public class LocalDevice extends Device {
-    private static final String TAG = LocalDevice.class.getSimpleName();
-
     static final boolean ALLOWS_MULTIPLE_LINKS = false;
+    static final String TAG = "HMLink";
 
     public enum State { BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING }
 
@@ -55,6 +54,7 @@ public class LocalDevice extends Device {
     BluetoothGattCharacteristic readCharacteristic;
     BluetoothGattCharacteristic writeCharacteristic;
     Handler mainThreadHandler;
+    Handler clockHandler;
 
     BTCoreInterface coreInterface;
     HMBTCore core = new HMBTCore();
@@ -87,6 +87,9 @@ public class LocalDevice extends Device {
         mainThreadHandler = new Handler(ctx.getMainLooper());
         coreInterface = new BTCoreInterface(this);
         core.HMBTCoreInit(coreInterface);
+
+        clockHandler = new Handler();
+//        clockRunnable.run();
     }
 
     public AccessCertificate[] getRegisteredCertificates() {
@@ -246,7 +249,7 @@ public class LocalDevice extends Device {
             devicePointer.mainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    devicePointer .callback.localDeviceDidReceiveLink(link);
+                    devicePointer.callback.localDeviceDidReceiveLink(link);
                 }
             });
         }
@@ -314,11 +317,11 @@ public class LocalDevice extends Device {
 
         if (linkIndex > -1) {
             Link link = links[linkIndex];
-            // TODO: start a timer
+
             link.callback.linkDidReceivePairingRequest(link, serialNumber, new Constants.ApprovedCallback() {
                 @Override
                 public void approve() {
-                    pairingResponse = 0;
+                    pairingResponse = 1;
                 }
 
                 @Override
@@ -332,6 +335,7 @@ public class LocalDevice extends Device {
             return 1;
         }
 
+        // TODO: start a timer and return with that as well
         while(pairingResponse < 0) {}
 
         return pairingResponse;
@@ -348,7 +352,6 @@ public class LocalDevice extends Device {
 
         return -1;
     }
-
 
     void setAdapterName() {
         byte[] serialBytes = new byte[4];
@@ -452,11 +455,26 @@ public class LocalDevice extends Device {
         if (this.state != state) {
             State oldState = this.state;
             this.state = state;
-            Log.i(TAG, "set local device state from " + oldState + " to " + state);
+
             if (callback != null) {
                 callback.localDeviceStateChanged(state, oldState);
             }
         }
     }
+
+    private void clock() {
+        core.HMBTCoreClock(coreInterface);
+    }
+
+    private Runnable clockRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                clock();
+            } finally {
+                clockHandler.postDelayed(clockRunnable, 100);
+            }
+        }
+    };
 
 }

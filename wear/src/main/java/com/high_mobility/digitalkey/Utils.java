@@ -22,7 +22,7 @@ public class Utils {
             case BluetoothProfile.STATE_DISCONNECTING:
                 return "Disconnecting";
             default:
-                return "Unknown State "+state;
+                return "Unknown State " + state;
         }
     }
 

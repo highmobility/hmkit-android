@@ -16,8 +16,6 @@ import com.high_mobility.digitalkey.HMLink.Broadcasting.Link;
  * Created by ttiganik on 27/04/16.
  */
 public class LinkGridViewAdapter extends FragmentGridPagerAdapter {
-    private static final String TAG = LinkGridViewAdapter.class.getSimpleName();
-
     Link[] links;
     Context ctx;
 

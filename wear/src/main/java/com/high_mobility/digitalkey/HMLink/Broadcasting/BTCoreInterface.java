@@ -12,7 +12,6 @@ import com.high_mobility.digitalkey.Utils;
  * Created by ttiganik on 20/04/16.
  */
 public class BTCoreInterface implements HMBTCoreInterface {
-    private static final String TAG = "BTCoreInterface";
     LocalDevice device;
 
     BTCoreInterface(LocalDevice device) {
@@ -185,15 +184,15 @@ public class BTCoreInterface implements HMBTCoreInterface {
     @Override
     public void HMCtwEnteredProximity(HMDevice device) {
         // TODO: this means core has finished identification of the device (might me authenticated or not) - show device info on screen
-        Log.i(TAG, "HMCtwEnteredProximity");
+        Log.i(LocalDevice.TAG, "HMCtwEnteredProximity");
         this.device.didResolveDevice(device);
     }
 
     @Override
     public void HMCtwExitedProximity(HMDevice device) {
-        Log.i(TAG, "HMCtwExitedProximity");
-        this.device.didLoseLink(device);
         // TODO: hide the device
+        Log.i(LocalDevice.TAG, "HMCtwExitedProximity");
+        this.device.didLoseLink(device);
     }
 
     @Override

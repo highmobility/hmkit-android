@@ -17,8 +17,6 @@ import java.util.Arrays;
  * Created by ttiganik on 15/04/16.
  */
 public class GATTServerCallback extends BluetoothGattServerCallback {
-    private static final String TAG = "GATTServerCallback";
-
     LocalDevice device;
     public GATTServerCallback(LocalDevice device) {
         this.device = device;
@@ -73,7 +71,7 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
 
         if (responseNeeded) {
             this.device.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
-            this.device.core.HMBTCorelinkIncomingData(this.device.coreInterface,value, value.length, Utils.bytesFromMacString(device.getAddress()));
+            this.device.core.HMBTCorelinkIncomingData(this.device.coreInterface, value, value.length, Utils.bytesFromMacString(device.getAddress()));
         }
     }
 
