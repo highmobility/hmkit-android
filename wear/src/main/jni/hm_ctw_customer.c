@@ -5,6 +5,7 @@
 #include "hm_config.h"
 #include "hmbtcore.h"
 #include "hm_ctw_api.h"
+#include "hm_bt_debug_hal.h"
 
 void hm_ctw_init()
 {
@@ -35,12 +36,21 @@ void hm_ctw_entered_proximity(hm_device_t *device)
     jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
     jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
 
-    (*envRef)->CallVoidMethod(envRef, cls, setMac, device->mac);
-    (*envRef)->CallVoidMethod(envRef, cls, setSerial, device->serial_number);
-    (*envRef)->CallVoidMethod(envRef, cls, setIsAuthenticated, device->is_authorised);
-    (*envRef)->CallVoidMethod(envRef, cls, setAppId, device->app_id);
+    jobject obj = (*envRef)->NewObject(envRef,cls, constructor);
 
-    jobject obj = (*envRef)->NewObject(cls, constructor,NULL);
+    jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
+    (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jint*) device->mac );
+
+    jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
+    (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jint*) device->serial_number );
+
+    jbyteArray appid_ = (*envRef)->NewByteArray(envRef,12);
+    (*envRef)->SetByteArrayRegion(envRef, appid_, 0, 12, (const jint*) device->app_id );
+
+    (*envRef)->CallVoidMethod(envRef, obj, setMac, mac_);
+    (*envRef)->CallVoidMethod(envRef, obj, setSerial, serial_);
+    (*envRef)->CallVoidMethod(envRef, obj, setIsAuthenticated, device->is_authorised);
+    (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
 
 
     return (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMCtwEnteredProximity, obj);
@@ -60,12 +70,21 @@ void hm_ctw_exited_proximity(hm_device_t *device)
     jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
     jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
 
-    jobject obj = (*envRef)->NewObject(cls, constructor,NULL);
+    jobject obj = (*envRef)->NewObject(envRef,cls, constructor);
 
-    (*envRef)->CallVoidMethod(envRef, cls, setMac, device->mac);
-    (*envRef)->CallVoidMethod(envRef, cls, setSerial, device->serial_number);
-    (*envRef)->CallVoidMethod(envRef, cls, setIsAuthenticated, device->is_authorised);
-    (*envRef)->CallVoidMethod(envRef, cls, setAppId, device->app_id);
+    jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
+    (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jint*) device->mac );
+
+    jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
+    (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jint*) device->serial_number );
+
+    jbyteArray appid_ = (*envRef)->NewByteArray(envRef,12);
+    (*envRef)->SetByteArrayRegion(envRef, appid_, 0, 12, (const jint*) device->app_id );
+
+    (*envRef)->CallVoidMethod(envRef, obj, setMac, mac_);
+    (*envRef)->CallVoidMethod(envRef, obj, setSerial, serial_);
+    (*envRef)->CallVoidMethod(envRef, obj, setIsAuthenticated, device->is_authorised);
+    (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
 
     return (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMCtwExitedProximity, obj);
 }
@@ -79,14 +98,23 @@ void hm_ctw_command_received(hm_device_t *device, uint8_t *data, uint8_t *length
     jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
     jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
 
-    jobject obj = (*envRef)->NewObject(cls, constructor,NULL);
+    jobject obj = (*envRef)->NewObject(envRef,cls, constructor);
 
-    (*envRef)->CallVoidMethod(envRef, cls, setMac, device->mac);
-    (*envRef)->CallVoidMethod(envRef, cls, setSerial, device->serial_number);
-    (*envRef)->CallVoidMethod(envRef, cls, setIsAuthenticated, device->is_authorised);
-    (*envRef)->CallVoidMethod(envRef, cls, setAppId, device->app_id);
+    jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
+    (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jint*) device->mac );
 
-    jbyteArray data_ = (*envRef)->NewByteArray(envRef,300);
+    jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
+    (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jint*) device->serial_number );
+
+    jbyteArray appid_ = (*envRef)->NewByteArray(envRef,12);
+    (*envRef)->SetByteArrayRegion(envRef, appid_, 0, 12, (const jint*) device->app_id );
+
+    (*envRef)->CallVoidMethod(envRef, obj, setMac, mac_);
+    (*envRef)->CallVoidMethod(envRef, obj, setSerial, serial_);
+    (*envRef)->CallVoidMethod(envRef, obj, setIsAuthenticated, device->is_authorised);
+    (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
+
+    jbyteArray data_ = (*envRef)->NewByteArray(envRef,255);
     (*envRef)->SetByteArrayRegion(envRef, data_, 0, *length, (const jbyte*) data );
 
     jintArray length_ = (*envRef)->NewIntArray(envRef,1);
@@ -104,7 +132,7 @@ void hm_ctw_command_received(hm_device_t *device, uint8_t *data, uint8_t *length
     *error = error_array[0];
 
     jbyte* data_array = (*envRef)->GetByteArrayElements(envRef, data_, NULL);
-    memcpy(data,data_array,length_array[0]);
+    memcpy(data,data_array,*length);
 }
 
 uint32_t hm_ctw_get_device_certificate_failed(hm_device_t *device, uint8_t *nonce)
@@ -116,12 +144,21 @@ uint32_t hm_ctw_get_device_certificate_failed(hm_device_t *device, uint8_t *nonc
     jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
     jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
 
-    jobject obj = (*envRef)->NewObject(cls, constructor,NULL);
+    jobject obj = (*envRef)->NewObject(envRef,cls, constructor);
 
-    (*envRef)->CallVoidMethod(envRef, cls, setMac, device->mac);
-    (*envRef)->CallVoidMethod(envRef, cls, setSerial, device->serial_number);
-    (*envRef)->CallVoidMethod(envRef, cls, setIsAuthenticated, device->is_authorised);
-    (*envRef)->CallVoidMethod(envRef, cls, setAppId, device->app_id);
+    jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
+    (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jint*) device->mac );
+
+    jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
+    (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jint*) device->serial_number );
+
+    jbyteArray appid_ = (*envRef)->NewByteArray(envRef,12);
+    (*envRef)->SetByteArrayRegion(envRef, appid_, 0, 12, (const jint*) device->app_id );
+
+    (*envRef)->CallVoidMethod(envRef, obj, setMac, mac_);
+    (*envRef)->CallVoidMethod(envRef, obj, setSerial, serial_);
+    (*envRef)->CallVoidMethod(envRef, obj, setIsAuthenticated, device->is_authorised);
+    (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
 
     jbyteArray nonce_ = (*envRef)->NewByteArray(envRef,9);
     (*envRef)->SetByteArrayRegion(envRef, nonce_, 0, 9, (const jbyte*) nonce );

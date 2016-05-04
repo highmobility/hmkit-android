@@ -89,7 +89,8 @@ public class LocalDevice extends Device {
         core.HMBTCoreInit(coreInterface);
 
         clockHandler = new Handler();
-//        clockRunnable.run();
+        //clockRunnable.run();
+        //clockThread.start();
     }
 
     public AccessCertificate[] getRegisteredCertificates() {
@@ -472,8 +473,24 @@ public class LocalDevice extends Device {
             try {
                 clock();
             } finally {
-                clockHandler.postDelayed(clockRunnable, 100);
+                clockHandler.postDelayed(clockRunnable, 500);
             }
+        }
+    };
+
+    private Thread clockThread = new Thread() {
+        @Override
+        public void run() {
+
+            while(true) {
+                try {
+                    sleep(100);
+                    clock();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
     };
 
