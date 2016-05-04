@@ -32,7 +32,7 @@ void hm_ctw_entered_proximity(hm_device_t *device)
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
-    jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthorised", "(I)V");
+    jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
     jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
 
     (*envRef)->CallVoidMethod(envRef, cls, setMac, device->mac);
@@ -57,16 +57,15 @@ void hm_ctw_exited_proximity(hm_device_t *device)
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
-    jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthorised", "(I)V");
+    jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
     jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
+
+    jobject obj = (*envRef)->NewObject(cls, constructor,NULL);
 
     (*envRef)->CallVoidMethod(envRef, cls, setMac, device->mac);
     (*envRef)->CallVoidMethod(envRef, cls, setSerial, device->serial_number);
     (*envRef)->CallVoidMethod(envRef, cls, setIsAuthenticated, device->is_authorised);
     (*envRef)->CallVoidMethod(envRef, cls, setAppId, device->app_id);
-
-    jobject obj = (*envRef)->NewObject(cls, constructor,NULL);
-
 
     return (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMCtwExitedProximity, obj);
 }
@@ -114,15 +113,15 @@ uint32_t hm_ctw_get_device_certificate_failed(hm_device_t *device, uint8_t *nonc
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
-    jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthorised", "(I)V");
+    jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
     jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
+
+    jobject obj = (*envRef)->NewObject(cls, constructor,NULL);
 
     (*envRef)->CallVoidMethod(envRef, cls, setMac, device->mac);
     (*envRef)->CallVoidMethod(envRef, cls, setSerial, device->serial_number);
     (*envRef)->CallVoidMethod(envRef, cls, setIsAuthenticated, device->is_authorised);
     (*envRef)->CallVoidMethod(envRef, cls, setAppId, device->app_id);
-
-    jobject obj = (*envRef)->NewObject(cls, constructor,NULL);
 
     jbyteArray nonce_ = (*envRef)->NewByteArray(envRef,9);
     (*envRef)->SetByteArrayRegion(envRef, nonce_, 0, 9, (const jbyte*) nonce );
