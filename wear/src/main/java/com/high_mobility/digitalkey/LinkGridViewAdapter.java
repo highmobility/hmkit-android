@@ -12,11 +12,11 @@ import com.high_mobility.digitalkey.HMLink.Broadcasting.Link;
  */
 public class LinkGridViewAdapter extends FragmentGridPagerAdapter {
     Link[] links;
-    Context ctx;
+    PeripheralActivity activity;
 
-    public LinkGridViewAdapter(Context ctx, FragmentManager fm) {
+    public LinkGridViewAdapter(PeripheralActivity activity, FragmentManager fm) {
         super(fm);
-        this.ctx = ctx;
+        this.activity = activity;
     }
 
     public void setLinks(Link[] links) {
@@ -26,7 +26,7 @@ public class LinkGridViewAdapter extends FragmentGridPagerAdapter {
 
     @Override
     public Fragment getFragment(int row, int column) {
-        LinkFragment fragment = LinkFragment.newInstance(links[column]);
+        LinkFragment fragment = LinkFragment.newInstance(this, links[column]);
         return fragment;
     }
 
@@ -38,5 +38,9 @@ public class LinkGridViewAdapter extends FragmentGridPagerAdapter {
     @Override
     public int getColumnCount(int i) {
         return links == null ? 0 : links.length;
+    }
+
+    void didClickSendCmdButton(Link link) {
+        activity.didClickSendCmdButton(link);
     }
 }
