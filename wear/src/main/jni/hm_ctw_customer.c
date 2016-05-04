@@ -77,15 +77,15 @@ void hm_ctw_command_received(hm_device_t *device, uint8_t *data, uint8_t *length
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
-    jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthorised", "(I)V");
+    jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
     jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
+
+    jobject obj = (*envRef)->NewObject(cls, constructor,NULL);
 
     (*envRef)->CallVoidMethod(envRef, cls, setMac, device->mac);
     (*envRef)->CallVoidMethod(envRef, cls, setSerial, device->serial_number);
     (*envRef)->CallVoidMethod(envRef, cls, setIsAuthenticated, device->is_authorised);
     (*envRef)->CallVoidMethod(envRef, cls, setAppId, device->app_id);
-
-    jobject obj = (*envRef)->NewObject(cls, constructor,NULL);
 
     jbyteArray data_ = (*envRef)->NewByteArray(envRef,300);
     (*envRef)->SetByteArrayRegion(envRef, data_, 0, *length, (const jbyte*) data );
