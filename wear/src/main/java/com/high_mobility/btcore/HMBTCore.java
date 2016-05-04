@@ -1,7 +1,5 @@
 package com.high_mobility.btcore;
 
-import com.high_mobility.digitalkey.HMLink.Broadcasting.BTCoreInterface;
-
 /**
  * Created by ttiganik on 13/04/16.
  */

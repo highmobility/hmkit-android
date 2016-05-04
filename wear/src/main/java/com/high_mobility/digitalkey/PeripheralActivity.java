@@ -139,6 +139,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
 
     @Override
     public byte[] linkDidReceiveCustomCommand(Link link, byte[] bytes) {
+        Log.i(TAG, "linkDidReceiveCustomCommand " + Utils.hexFromBytes(bytes));
         return new byte[0];
     }
 

@@ -9,9 +9,10 @@
         android:id="@+id/text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
+        android:gravity="top|center"
         android:textColor="@color/black"
         android:text="Hello"
         />
+
 
 </LinearLayout>

@@ -1,7 +1,5 @@
 package com.high_mobility.digitalkey.HMLink.Shared;
 
-import android.util.Log;
-
 import com.high_mobility.digitalkey.Utils;
 
 /**

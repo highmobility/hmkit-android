@@ -2,13 +2,8 @@ package com.high_mobility.digitalkey;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.support.wearable.view.FragmentGridPagerAdapter;
-import android.support.wearable.view.GridPagerAdapter;
-import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.high_mobility.digitalkey.HMLink.Broadcasting.Link;
 

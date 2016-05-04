@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothProfile;
-import android.util.Log;
 
 import com.high_mobility.digitalkey.HMLink.Constants;
 import com.high_mobility.digitalkey.Utils;

@@ -8,29 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattServer;
-import android.bluetooth.BluetoothGattServerCallback;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothProfile;
-import android.bluetooth.le.AdvertiseCallback;
-import android.bluetooth.le.AdvertiseData;
-import android.bluetooth.le.AdvertiseSettings;
-import android.bluetooth.le.BluetoothLeAdvertiser;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Handler;
-import android.os.ParcelUuid;
-import android.util.Log;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
-
-import java.util.ArrayList;
 
 public class MobileActivity extends AppCompatActivity {
 

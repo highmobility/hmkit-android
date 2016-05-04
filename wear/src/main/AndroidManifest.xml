@@ -17,7 +17,7 @@
         <uses-library android:name="com.google.android.wearable" android:required="false" />
 
         <activity
-            android:name=".PeripheralActivity"
+            android:name="com.high_mobility.digitalkey.PeripheralActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
