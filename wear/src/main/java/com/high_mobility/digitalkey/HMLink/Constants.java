@@ -23,7 +23,7 @@ public class Constants {
     }
 
     public interface DataResponseCallback {
-        void response(byte[] bytes, Error error);
+        void response(byte[] bytes, LinkException exception);
     }
 
     public interface ResponseCallback {

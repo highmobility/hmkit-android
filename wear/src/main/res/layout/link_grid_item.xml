@@ -8,11 +8,17 @@
     <TextView
         android:id="@+id/text"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:gravity="top|center"
         android:textColor="@color/black"
         android:text="Hello"
         />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="send cmd"
+        android:id="@+id/sendCmdButton"/>
 
 </LinearLayout>

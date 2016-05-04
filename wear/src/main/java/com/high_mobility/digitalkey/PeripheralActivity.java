@@ -147,4 +147,16 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     public void linkDidReceivePairingRequest(Link link, byte[] serialNumber, Constants.ApprovedCallback approvedCallback, float timeout) {
         // TODO: show in UI
     }
+
+    void didClickSendCmdButton(Link link) {
+        byte[] cmd = new byte[] { (byte) 0x8d };
+        Log.v(TAG, "send cmd " + Utils.hexFromBytes(cmd));
+
+        link.sendCustomCommand(cmd, true, new Constants.DataResponseCallback() {
+            @Override
+            public void response(byte[] bytes, LinkException exception) {
+                Log.v(TAG, "did receive response " + Utils.hexFromBytes(bytes) + " " + exception.code);
+            }
+        });
+    }
 }
