@@ -173,6 +173,8 @@ class Storage {
     }
 
     void storeCertificate(AccessCertificate certificate) throws LinkException {
+        if (certificate == null) throw new LinkException(LinkException.LinkExceptionCode.INTERNAL_ERROR);
+
         AccessCertificate[] certs = getCertificates();
 
         if (certs.length >= 5) throw new LinkException(LinkException.LinkExceptionCode.STORAGE_FULL);
@@ -182,14 +184,22 @@ class Storage {
             if (Arrays.equals(cert.getGainerSerial(), certificate.getGainerSerial())
                 && Arrays.equals(cert.getProviderSerial(), certificate.getProviderSerial())
                 && Arrays.equals(cert.getGainerPublicKey(), certificate.getGainerPublicKey())) {
-                    deleteCertificateWithGainingSerial(certificate.getGainerSerial());
+
+                if (!deleteCertificateWithGainingSerial(certificate.getGainerSerial())) {
+                    Log.e(LocalDevice.TAG, "failed to delete cert");
+                }
             }
         }
 
         certs = getCertificates();
         AccessCertificate[] newCerts = new AccessCertificate[certs.length + 1];
 
+        for (int i = 0; i < certs.length; i++) {
+            newCerts[i] = certs[i];
+        }
+
         newCerts[newCerts.length - 1] = certificate;
+
         setCertificates(newCerts);
     }
 

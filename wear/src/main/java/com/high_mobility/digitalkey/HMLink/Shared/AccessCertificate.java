@@ -131,12 +131,12 @@ public class AccessCertificate extends Certificate {
     public String toString() {
         String description = "";
 
-        description += "gainingSerial: " + Utils.hexFromBytes(getGainerSerial());
-        description += "gainingPublicKey: " + Utils.hexFromBytes(getGainerPublicKey());
-        description += "providingSerial: " + Utils.hexFromBytes(getProviderSerial());
-        description += "valid from: : " + getStartDate() + " to: " + getEndDate();
-        description += "permissions: " + Utils.hexFromBytes(getPermissions());
-        description += "signature: " + Utils.hexFromBytes(getSignature());
+        description += "\ngainingSerial: " + Utils.hexFromBytes(getGainerSerial());
+        description += "\ngainingPublicKey: " + Utils.hexFromBytes(getGainerPublicKey());
+        description += "\nprovidingSerial: " + Utils.hexFromBytes(getProviderSerial());
+        description += "\nvalid from: : " + getStartDate() + " to: " + getEndDate();
+        description += "\npermissions: " + Utils.hexFromBytes(getPermissions());
+        description += "\nsignature: " + Utils.hexFromBytes(getSignature()) + "\n";
 
         return description;
     }
@@ -179,8 +179,6 @@ public class AccessCertificate extends Certificate {
 
         this.bytes = bytes;
     }
-
-
 
     public AccessCertificate(byte[] gainerSerial,
                              byte[] gainingPublicKey,
