@@ -22,8 +22,13 @@ uint32_t hm_bt_hal_scan_stop(){
   return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalScanStop);
 }
 
-uint32_t hm_bt_hal_advertisement_start(){
-  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalAdvertisementStart);
+uint32_t hm_bt_hal_advertisement_start(uint8_t *issuerId, uint8_t *appId){
+  jbyteArray issuer_ = (*envRef)->NewByteArray(envRef,4);
+  (*envRef)->SetByteArrayRegion(envRef, issuer_, 0, 4, (const jbyte*) issuerId );
+
+  jbyteArray appId_ = (*envRef)->NewByteArray(envRef,12);
+  (*envRef)->SetByteArrayRegion(envRef, appId_, 0, 12, (const jbyte*) appId );
+  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalAdvertisementStart,issuer_,appId_);
 }
 
 uint32_t hm_bt_hal_advertisement_stop(){

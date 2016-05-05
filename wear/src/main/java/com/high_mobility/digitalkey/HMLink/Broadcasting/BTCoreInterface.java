@@ -33,7 +33,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public int HMBTHalAdvertisementStart() {
+    public int HMBTHalAdvertisementStart(byte[] issuer, byte[] appID) {
         try {
             device.startBroadcasting();
         } catch (LinkException e) {
