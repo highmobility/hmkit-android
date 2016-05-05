@@ -54,7 +54,6 @@ public class LocalDevice extends Device {
     BluetoothGattCharacteristic readCharacteristic;
     BluetoothGattCharacteristic writeCharacteristic;
     Handler mainThreadHandler;
-    Handler clockHandler;
 
     BTCoreInterface coreInterface;
     HMBTCore core = new HMBTCore();
@@ -87,10 +86,6 @@ public class LocalDevice extends Device {
         mainThreadHandler = new Handler(ctx.getMainLooper());
         coreInterface = new BTCoreInterface(this);
         core.HMBTCoreInit(coreInterface);
-
-        clockHandler = new Handler();
-        //clockRunnable.run();
-        //clockThread.start();
     }
 
     public AccessCertificate[] getRegisteredCertificates() {
@@ -462,36 +457,4 @@ public class LocalDevice extends Device {
             }
         }
     }
-
-    private void clock() {
-        core.HMBTCoreClock(coreInterface);
-    }
-
-    private Runnable clockRunnable = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                clock();
-            } finally {
-                clockHandler.postDelayed(clockRunnable, 500);
-            }
-        }
-    };
-
-    private Thread clockThread = new Thread() {
-        @Override
-        public void run() {
-
-            while(true) {
-                try {
-                    sleep(100);
-                    clock();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-        }
-    };
-
 }
