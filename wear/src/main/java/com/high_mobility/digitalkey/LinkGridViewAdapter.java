@@ -32,7 +32,7 @@ public class LinkGridViewAdapter extends FragmentGridPagerAdapter {
 
     @Override
     public int getRowCount() {
-        return links == null ? 0 : 1;
+        return (links == null || links.length == 0)? 0 : 1;
     }
 
     @Override

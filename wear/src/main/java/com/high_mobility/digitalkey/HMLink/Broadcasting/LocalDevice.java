@@ -278,6 +278,8 @@ public class LocalDevice extends Device {
                 setAdapterName();
             }
 
+            link.setState(Link.State.DISCONNECTED);
+
             // invoke the listener callback
             if (callback != null) {
                 final LocalDevice devicePointer = this;
@@ -288,8 +290,6 @@ public class LocalDevice extends Device {
                     }
                 });
             }
-
-            link.setState(Link.State.DISCONNECTED);
 
             // start broadcasting again
             if (state != LocalDevice.State.BROADCASTING) {

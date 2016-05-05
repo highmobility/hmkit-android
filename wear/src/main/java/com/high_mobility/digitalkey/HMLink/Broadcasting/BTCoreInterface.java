@@ -35,13 +35,6 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMBTHalAdvertisementStart(byte[] issuer, byte[] appID) {
-        try {
-            device.startBroadcasting();
-        } catch (LinkException e) {
-            e.printStackTrace();
-            return 1;
-        }
-
         return 0;
     }
 
@@ -98,7 +91,6 @@ public class BTCoreInterface implements HMBTCoreInterface {
     @Override
     public int HMPersistenceHalgetDeviceCertificate(byte[] cert) {
         copyBytesToJNI(device.certificate.getBytes(), cert);
-        Log.i(LocalDevice.TAG, "get deviceCert " + Utils.hexFromBytes(cert));
         return 0;
     }
 
@@ -190,15 +182,13 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMCtwEnteredProximity(HMDevice device) {
-        // TODO: this means core has finished identification of the device (might me authenticated or not) - show device info on screen
-        Log.i(LocalDevice.TAG, "HMCtwEnteredProximity");
+        // this means core has finished identification of the device (might me authenticated or not) - show device info on screen
+        // always update the device with this, auth state might have changed later with this callback as well
         this.device.didResolveDevice(device);
     }
 
     @Override
     public void HMCtwExitedProximity(HMDevice device) {
-        // TODO: hide the device
-        Log.i(LocalDevice.TAG, "HMCtwExitedProximity");
         this.device.didLoseLink(device);
     }
 
@@ -210,7 +200,9 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMCtwGetDeviceCertificateFailed(HMDevice device, byte[] nonce) {
-        //ret false on, et ei jätka // TODO:
+        // Sensing: should ask for CA sig for the nonce
+        // if ret false getting the sig start failed
+        // if ret true started acquiring signature
         return 0;
     }
 
