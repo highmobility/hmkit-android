@@ -42,6 +42,9 @@ public class LinkFragment extends Fragment {
                 adapter.didClickSendCmdButton(link);
             }
         });
+
+		sendCmdButton.setEnabled(link.getState() == Link.State.AUTHENTICATED);
+
 		return layout;
 	}
 }

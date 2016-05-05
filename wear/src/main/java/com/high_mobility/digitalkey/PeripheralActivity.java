@@ -16,7 +16,6 @@ import com.high_mobility.digitalkey.HMLink.Constants;
 import com.high_mobility.digitalkey.HMLink.LinkException;
 import com.high_mobility.digitalkey.HMLink.Shared.DeviceCertificate;
 
-
 public class PeripheralActivity extends WearableActivity implements LocalDeviceCallback, LinkCallback {
     private static final byte[] CA_PUBLIC_KEY = Utils.bytesFromHex("***REMOVED***");
     private static final byte[] CA_APP_IDENTIFIER = Utils.bytesFromHex("***REMOVED***");
@@ -38,7 +37,6 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        Log.i(TAG, "create");
 
         setContentView(R.layout.activity_main);
 
@@ -69,8 +67,6 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     protected void onDestroy() {
         device.stopBroadcasting();
         device.closeGATTServer();
-        Log.i(TAG, "onDestroy");
-
         super.onDestroy();
     }
 
