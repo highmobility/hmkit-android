@@ -14,7 +14,7 @@ public interface HMBTCoreInterface {
 
     //Start stop peripheral advertisement
     //TT
-    int HMBTHalAdvertisementStart();
+    int HMBTHalAdvertisementStart(byte[] issuer, byte[] appID);
     int HMBTHalAdvertisementStop();
 
     //Connect disconnect to peripheral
