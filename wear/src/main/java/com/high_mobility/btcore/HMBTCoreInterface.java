@@ -41,6 +41,8 @@ public interface HMBTCoreInterface {
     //Get current device publick key
     //TT
     int HMPersistenceHalgetLocalPrivateKey(byte[] privateKey);
+    //TT
+    int HMPersistenceHalgetDeviceCertificate(byte[] cert);
 
     //Add remote device publick key to storagr
     //TT

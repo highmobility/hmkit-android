@@ -24,6 +24,7 @@ jmethodID *interfaceMethodHMBTHalReadData;
 jmethodID *interfaceMethodHMPersistenceHalgetSerial;
 jmethodID *interfaceMethodHMPersistenceHalgetLocalPublicKey;
 jmethodID *interfaceMethodHMPersistenceHalgetLocalPrivateKey;
+jmethodID *interfaceMethodHMPersistenceHalgetDeviceCertificate;
 jmethodID *interfaceMethodHMPersistenceHaladdPublicKey;
 jmethodID *interfaceMethodHMPersistenceHalgetPublicKey;
 jmethodID *interfaceMethodHMPersistenceHalgetPublicKeyByIndex;
