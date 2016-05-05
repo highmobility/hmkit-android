@@ -39,7 +39,7 @@ void hm_ctw_entered_proximity(hm_device_t *device)
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
     jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
-    jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
+    jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setAppId", "([B)V");
 
     jobject obj = (*envRef)->NewObject(envRef,cls, constructor);
 
@@ -78,7 +78,7 @@ void hm_ctw_exited_proximity(hm_device_t *device)
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
     jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
-    jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
+    jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setAppId", "([B)V");
 
     jobject obj = (*envRef)->NewObject(envRef,cls, constructor);
 
@@ -106,7 +106,7 @@ void hm_ctw_command_received(hm_device_t *device, uint8_t *data, uint8_t *length
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
     jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
-    jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
+    jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setAppId", "([B)V");
 
     jobject obj = (*envRef)->NewObject(envRef,cls, constructor);
 
@@ -152,7 +152,7 @@ uint32_t hm_ctw_get_device_certificate_failed(hm_device_t *device, uint8_t *nonc
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
     jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
-    jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
+    jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setAppId", "([B)V");
 
     jobject obj = (*envRef)->NewObject(envRef,cls, constructor);
 
