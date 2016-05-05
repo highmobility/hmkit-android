@@ -29,6 +29,11 @@ void hm_ctw_authorised_device_updated(hm_device_t *device, uint8_t error)
 
 void hm_ctw_entered_proximity(hm_device_t *device)
 {
+    hm_bt_debug_hal_log("ENTERED PROXIMITY");
+    hm_bt_debug_hal_log_hex(device->mac,6);
+    hm_bt_debug_hal_log_hex(device->serial_number,9);
+    hm_bt_debug_hal_log_hex(device->app_id,12);
+
     jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
@@ -63,6 +68,11 @@ void hm_ctw_proximity_measured(hm_device_t *device, uint8_t receiver_count, hm_r
 
 void hm_ctw_exited_proximity(hm_device_t *device)
 {
+    hm_bt_debug_hal_log("EXITED PROXIMITY");
+    hm_bt_debug_hal_log_hex(device->mac,6);
+    hm_bt_debug_hal_log_hex(device->serial_number,9);
+    hm_bt_debug_hal_log_hex(device->app_id,12);
+
     jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
