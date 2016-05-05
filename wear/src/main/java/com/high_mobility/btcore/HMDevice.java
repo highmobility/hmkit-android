@@ -16,7 +16,7 @@ public class HMDevice {
     }
 
     public void setMac(byte[] mac) {
-        _mac = Arrays.copyOf(mac,mac.length);
+        copyBytesToJNI(mac,_mac);
     }
 
     public byte[] getSerial() {
@@ -24,7 +24,7 @@ public class HMDevice {
     }
 
     public void setSerial(byte[] serial) {
-        _serial = Arrays.copyOf(serial,serial.length);
+        copyBytesToJNI(serial,_serial);
     }
 
     public int getIsAuthenticated() {
@@ -40,6 +40,12 @@ public class HMDevice {
     }
 
     public void setAppId(byte[] appId) {
-        _appId = Arrays.copyOf(appId,appId.length);
+        copyBytesToJNI(appId,_appId);
+    }
+
+    private void copyBytesToJNI(byte[] from, byte[] to) {
+        for (int i = 0; i < from.length; i++) {
+            to[i] = from[i];
+        }
     }
 }
