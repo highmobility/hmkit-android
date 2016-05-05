@@ -209,7 +209,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSendCustomCommand(JNIEnv *env, j
     jbyte *data = (*env)->GetByteArrayElements(env, data_, NULL);
     jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
 
-    // TODO
+    sendSecureContainerUsingMac(mac, data, size);
 
     (*env)->ReleaseByteArrayElements(env, data_, data, 0);
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
