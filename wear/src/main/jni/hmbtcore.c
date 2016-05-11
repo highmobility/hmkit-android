@@ -38,7 +38,7 @@ void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterfa
     interfaceMethodHMCtwCustomCommandIncoming = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwCustomCommandIncoming","(Lcom/high_mobility/btcore/HMDevice;[B[I[I)V");
     interfaceMethodHMCtwCustomCommandResponse = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwCustomCommandResponse","(Lcom/high_mobility/btcore/HMDevice;[BI)V");
     interfaceMethodHMCtwGetDeviceCertificateFailed = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwGetDeviceCertificateFailed","(Lcom/high_mobility/btcore/HMDevice;[B)I");
-    interfaceMethodHMCtwPairingRequested = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwPairingRequested","(Lcom/high_mobility/btcore/HMDevice;[B)I");
+    interfaceMethodHMCtwPairingRequested = (*env)->GetMethodID(env,interfaceClassRef, "HMCtwPairingRequested","(Lcom/high_mobility/btcore/HMDevice)I");
 
     envRef = env;
     coreInterfaceRef = coreInterface;
