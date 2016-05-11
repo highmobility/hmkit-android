@@ -80,5 +80,5 @@ public interface HMBTCoreInterface {
     void HMCtwCustomCommandIncoming(HMDevice device, byte[] data, int[] length, int[] error); // received custom command
     void HMCtwCustomCommandResponse(HMDevice device, byte[] data, int length);
     int HMCtwGetDeviceCertificateFailed(HMDevice device, byte[] nonce); //ret false on, et ei jätka
-    int HMCtwPairingRequested(HMDevice device, byte[] serial); //ret false on, et ei jätka
+    int HMCtwPairingRequested(HMDevice device); //ret false on, et ei jätka
 }
