@@ -23,6 +23,8 @@ public class Link {
     HMDevice hmDevice;
     LocalDevice device;
 
+    Constants.DataResponseCallback commandCallback;
+
     Link(BluetoothDevice btDevice, LocalDevice device) {
         this.btDevice = btDevice;
         this.device = device;
@@ -70,8 +72,14 @@ public class Link {
     }
 
     public void sendCustomCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
-        // TODO: store the callback and invoke when command is back
+        commandCallback = responseCallback;
         device.core.HMBTCoreSendCustomCommand(this.device.coreInterface, bytes, bytes.length, getAddressBytes());
+    }
+
+    void didReceiveCustomCommandResponse(byte[] data) {
+        if (commandCallback != null) {
+            commandCallback.response(data, null);
+        }
     }
 
     byte[] getAddressBytes() {
