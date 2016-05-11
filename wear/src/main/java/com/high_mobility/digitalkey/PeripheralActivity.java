@@ -41,45 +41,44 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.round_activity_main);
-        // TODO: use activity_main and set bottom bar inset for moto360
-//        final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
-//        stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
-//            @Override
-//            public void onLayoutInflated(WatchViewStub stub) {
-//                stub.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-//                    @Override
-//                    public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-//                        int chinHeight = insets.getSystemWindowInsetBottom();
-//                        // chinHeight = 30;
-//                        return insets;
-//                    }
-//                });
-//            }
-//        });
-
-
-        textView = (TextView) findViewById(R.id.text);
-        gridViewPager = (GridViewPager) findViewById(R.id.pager);
-
+        setContentView(R.layout.activity_main);
         gridViewAdapter = new LinkGridViewAdapter(this, getFragmentManager());
-        gridViewPager.setAdapter(gridViewAdapter);
-
-        dotsPageIndicator = (DotsPageIndicator) findViewById(R.id.page_indicator);
-        dotsPageIndicator.setPager(gridViewPager);
 
         DeviceCertificate cert = new DeviceCertificate(CA_ISSUER, CA_APP_IDENTIFIER, getSerial(), DEVICE_PUBLIC_KEY);
         cert.setSignature(Utils.bytesFromHex("***REMOVED***"));
         device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
-
         device.registerCallback(this);
 
-        try {
-            device.startBroadcasting();
-        } catch (Exception e) {
-            Log.e(TAG, "cannot start broadcasting");
-            e.printStackTrace();
-        }
+        // TODO: use activity_main and set bottom bar inset for moto360
+        final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
+        stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
+            @Override
+            public void onLayoutInflated(WatchViewStub stub) {
+                stub.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+                    @Override
+                    public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                        int chinHeight = insets.getSystemWindowInsetBottom();
+                        // chinHeight = 30;
+                        return insets;
+                    }
+                });
+
+                textView = (TextView) findViewById(R.id.text);
+                gridViewPager = (GridViewPager) findViewById(R.id.pager);
+
+                gridViewPager.setAdapter(gridViewAdapter);
+
+                dotsPageIndicator = (DotsPageIndicator) findViewById(R.id.page_indicator);
+                dotsPageIndicator.setPager(gridViewPager);
+
+                try {
+                    device.startBroadcasting();
+                } catch (Exception e) {
+                    Log.e(TAG, "cannot start broadcasting");
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override

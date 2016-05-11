@@ -209,7 +209,7 @@ public class LocalDevice extends Device {
 
     void didReceiveCustomCommand(HMDevice device, byte[] data, int length, int error) {
         Log.i(TAG, "LD: didReceiveCustomCommand " + Utils.hexFromBytes(data));
-        // TODO: implement when cleared
+        // TODO: set the response data bytes here
         BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
 
@@ -220,6 +220,10 @@ public class LocalDevice extends Device {
         else {
             Log.e(TAG, "no link for custom command received");
         }
+    }
+
+    void didReceiveCustomCommandResponse(HMDevice device, byte[] data) {
+
     }
 
     void didReceiveLink(BluetoothDevice device) {
@@ -318,12 +322,12 @@ public class LocalDevice extends Device {
             link.callback.linkDidReceivePairingRequest(link, serialNumber, new Constants.ApprovedCallback() {
                 @Override
                 public void approve() {
-                    pairingResponse = 1;
+                    pairingResponse = 0;
                 }
 
                 @Override
                 public void decline() {
-                    pairingResponse = 0;
+                    pairingResponse = 1;
                 }
             }, 10f);
         }

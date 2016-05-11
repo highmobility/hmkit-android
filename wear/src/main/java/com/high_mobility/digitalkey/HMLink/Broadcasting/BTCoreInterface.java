@@ -194,14 +194,14 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMCtwCustomCommandIncoming(HMDevice device, byte[] data, int[] length, int[] error) {
-        // TODO: copy bytes with loop -- this is not the command response
-        Log.i(LocalDevice.TAG, "HMCtwCustomCommandReceived");
+        Log.i(LocalDevice.TAG, "HMCtwCustomCommandIncoming");
         this.device.didReceiveCustomCommand(device, data, length[0], error[0]);
     }
 
     @Override
     public void HMCtwCustomCommandResponse(HMDevice device, byte[] data, int length) {
-
+        Log.i(LocalDevice.TAG, "HMCtwCustomCommandResponse");
+        this.device.didReceiveCustomCommandResponse(device, data);
     }
 
     @Override
