@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/link_grid_item"
     android:background="@android:color/darker_gray">
@@ -11,14 +12,26 @@
         android:layout_height="wrap_content"
         android:gravity="top|center"
         android:textColor="@color/black"
-        android:text="Hello"
         />
 
-    <Button
+    <LinearLayout
+        android:id="@+id/link_grid_item_auth_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="send cmd"
-        android:id="@+id/sendCmdButton"/>
+        android:orientation="vertical"
+        android:layout_centerInParent="true"
+        >
 
-</LinearLayout>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="lock"
+            android:id="@+id/lockButton"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="unlock"
+            android:id="@+id/unlockButton"/>
+    </LinearLayout>
+</RelativeLayout>

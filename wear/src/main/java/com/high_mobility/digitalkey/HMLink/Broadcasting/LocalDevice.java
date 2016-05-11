@@ -208,6 +208,7 @@ public class LocalDevice extends Device {
     }
 
     void didReceiveCustomCommand(HMDevice device, byte[] data, int length, int error) {
+        Log.i(TAG, "LD: didReceiveCustomCommand " + Utils.hexFromBytes(data));
         // TODO: implement when cleared
         BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);

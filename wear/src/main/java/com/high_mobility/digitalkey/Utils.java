@@ -2,6 +2,8 @@ package com.high_mobility.digitalkey;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothProfile;
+import android.view.View;
+import android.view.ViewGroup;
 
 import java.nio.ByteBuffer;
 import java.util.UUID;
@@ -87,5 +89,17 @@ public class Utils {
         }
 
         return macAddressBytes;
+    }
+
+    public static void enableView(View view, boolean enable) {
+        view.setEnabled(enable);
+
+        if ( view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup)view;
+
+            for ( int idx = 0 ; idx < group.getChildCount() ; idx++ ) {
+                enableView(group.getChildAt(idx), enable);
+            }
+        }
     }
 }

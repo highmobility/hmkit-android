@@ -70,6 +70,7 @@ public class Link {
     }
 
     public void sendCustomCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
+        // TODO: store the callback and invoke when command is back
         device.core.HMBTCoreSendCustomCommand(this.device.coreInterface, bytes, bytes.length, getAddressBytes());
     }
 

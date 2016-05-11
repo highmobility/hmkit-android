@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.high_mobility.digitalkey.HMLink.Broadcasting.Link;
@@ -17,9 +18,9 @@ import com.high_mobility.digitalkey.HMLink.Broadcasting.Link;
 public class LinkFragment extends Fragment {
 
 	TextView textView;
-	Button sendCmdButton;
 	Link link;
 	LinkGridViewAdapter adapter;
+	LinearLayout authView;
 
 	public static LinkFragment newInstance(LinkGridViewAdapter adapter, Link link) {
 		LinkFragment fragment = new LinkFragment();
@@ -35,15 +36,25 @@ public class LinkFragment extends Fragment {
 		textView = (TextView)layout.findViewById(R.id.text);
 		textView.setText(Utils.hexFromBytes(link.getSerial()));
 
-		sendCmdButton = (Button) layout.findViewById(R.id.sendCmdButton);
-        sendCmdButton.setOnClickListener(new View.OnClickListener() {
+
+		Button unlockButton = (Button) layout.findViewById(R.id.unlockButton);
+		unlockButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.didClickSendCmdButton(link);
+				adapter.didClickUnlock(link);
             }
         });
 
-		sendCmdButton.setEnabled(link.getState() == Link.State.AUTHENTICATED);
+		Button lockButton = (Button) layout.findViewById(R.id.lockButton);
+		lockButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				adapter.didClickLock(link);
+			}
+		});
+
+		authView = (LinearLayout)layout.findViewById(R.id.link_grid_item_auth_view);
+		Utils.enableView(authView, link.getState() == Link.State.AUTHENTICATED);
 
 		return layout;
 	}

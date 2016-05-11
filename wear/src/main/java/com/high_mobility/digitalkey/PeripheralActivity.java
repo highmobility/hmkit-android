@@ -4,7 +4,10 @@ import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.DotsPageIndicator;
 import android.support.wearable.view.GridViewPager;
+import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
+import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -38,7 +41,23 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.round_activity_main);
+        // TODO: use activity_main and set bottom bar inset for moto360
+//        final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
+//        stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
+//            @Override
+//            public void onLayoutInflated(WatchViewStub stub) {
+//                stub.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+//                    @Override
+//                    public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+//                        int chinHeight = insets.getSystemWindowInsetBottom();
+//                        // chinHeight = 30;
+//                        return insets;
+//                    }
+//                });
+//            }
+//        });
+
 
         textView = (TextView) findViewById(R.id.text);
         gridViewPager = (GridViewPager) findViewById(R.id.pager);
@@ -144,14 +163,29 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
         // TODO: show in UI
     }
 
-    void didClickSendCmdButton(Link link) {
-        byte[] cmd = new byte[] { (byte) 0x8d };
-        Log.v(TAG, "send cmd " + Utils.hexFromBytes(cmd));
+    public void didClickLock(Link link) {
+        byte[] cmd = new byte[] { 0x17, 0x01 };
+        final LinkFragment fragment = gridViewAdapter.getCurrentFragment(gridViewPager);
+        Utils.enableView(fragment.authView, false);
+        link.sendCustomCommand(cmd, true, new Constants.DataResponseCallback() {
+            @Override
+            public void response(byte[] bytes, LinkException exception) {
+                Utils.enableView(fragment.authView, true);
+                Log.v(TAG, "did receive lock response " + Utils.hexFromBytes(bytes) + " " + exception.code);
+            }
+        });
+    }
+
+    public void didClickUnlock(Link link) {
+        byte[] cmd = new byte[] { 0x17, 0x00 };
+        final LinkFragment fragment = gridViewAdapter.getCurrentFragment(gridViewPager);
+        Utils.enableView(fragment.authView, false);
 
         link.sendCustomCommand(cmd, true, new Constants.DataResponseCallback() {
             @Override
             public void response(byte[] bytes, LinkException exception) {
-                Log.v(TAG, "did receive response " + Utils.hexFromBytes(bytes) + " " + exception.code);
+                Utils.enableView(fragment.authView, true);
+                Log.v(TAG, "did receive unlock response " + Utils.hexFromBytes(bytes) + " " + exception.code);
             }
         });
     }
