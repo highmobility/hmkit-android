@@ -36,7 +36,8 @@ jmethodID *interfaceMethodHMPersistenceHaleraseStoredCertificate;
 
 jmethodID *interfaceMethodHMCtwEnteredProximity;
 jmethodID *interfaceMethodHMCtwExitedProximity;
-jmethodID *interfaceMethodHMCtwCustomCommandReceived;
+jmethodID *interfaceMethodHMCtwCustomCommandIncoming;
+jmethodID *interfaceMethodHMCtwCustomCommandResponse;
 jmethodID *interfaceMethodHMCtwGetDeviceCertificateFailed;
 jmethodID *interfaceMethodHMCtwPairingRequested;
 
