@@ -199,6 +199,9 @@ public class BTCoreInterface implements HMBTCoreInterface {
         this.device.didReceiveCustomCommand(device, data, length[0], error[0]);
     }
 
+    // TODO: implement methods HMCtwCustomCommandIncoming and HMCtwCustomCommandResponse
+
+
     @Override
     public int HMCtwGetDeviceCertificateFailed(HMDevice device, byte[] nonce) {
         // Sensing: should ask for CA sig for the nonce
