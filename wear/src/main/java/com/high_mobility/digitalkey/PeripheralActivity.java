@@ -147,11 +147,6 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     }
 
     @Override
-    public void linkDidExecuteCommand(Link link, Constants.Command command, LinkException exception) {
-
-    }
-
-    @Override
     public byte[] linkDidReceiveCustomCommand(Link link, byte[] bytes) {
         Log.i(TAG, "linkDidReceiveCustomCommand " + Utils.hexFromBytes(bytes));
         return bytes;
@@ -170,7 +165,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
             @Override
             public void response(byte[] bytes, LinkException exception) {
                 Utils.enableView(fragment.authView, true);
-                Log.v(TAG, "did receive lock response " + Utils.hexFromBytes(bytes) + " " + exception.code);
+                Log.v(TAG, "did receive lock response " + Utils.hexFromBytes(bytes));
             }
         });
     }
@@ -184,7 +179,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
             @Override
             public void response(byte[] bytes, LinkException exception) {
                 Utils.enableView(fragment.authView, true);
-                Log.v(TAG, "did receive unlock response " + Utils.hexFromBytes(bytes) + " " + exception.code);
+                Log.v(TAG, "did receive unlock response " + Utils.hexFromBytes(bytes));
             }
         });
     }

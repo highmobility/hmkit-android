@@ -8,7 +8,6 @@ import com.high_mobility.digitalkey.HMLink.LinkException;
  */
 public interface LinkCallback {
     void linkStateDidChange(Link link, Link.State oldState);
-    void linkDidExecuteCommand(Link link, Constants.Command command, LinkException exception);
     byte[] linkDidReceiveCustomCommand(Link link, byte[] bytes);
     void linkDidReceivePairingRequest(Link link, byte[] serialNumber, Constants.ApprovedCallback approvedCallback, float timeout);
 }

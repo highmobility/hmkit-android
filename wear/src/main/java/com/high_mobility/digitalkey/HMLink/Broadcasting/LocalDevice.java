@@ -223,7 +223,13 @@ public class LocalDevice extends Device {
     }
 
     void didReceiveCustomCommandResponse(HMDevice device, byte[] data) {
+        BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
+        int linkIndex = linkIndexForBTDevice(btDevice);
 
+        if (linkIndex > -1) {
+            Link link = links[linkIndex];
+            link.didReceiveCustomCommandResponse(data);
+        }
     }
 
     void didReceiveLink(BluetoothDevice device) {

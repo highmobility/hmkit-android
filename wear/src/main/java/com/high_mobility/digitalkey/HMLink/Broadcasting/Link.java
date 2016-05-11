@@ -1,11 +1,14 @@
 package com.high_mobility.digitalkey.HMLink.Broadcasting;
 
 import android.bluetooth.BluetoothDevice;
+import android.util.Log;
 
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.digitalkey.HMLink.Constants;
 import com.high_mobility.digitalkey.HMLink.Shared.AccessCertificate;
 import com.high_mobility.digitalkey.Utils;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Created by ttiganik on 13/04/16.
@@ -23,7 +26,7 @@ public class Link {
     HMDevice hmDevice;
     LocalDevice device;
 
-    Constants.DataResponseCallback commandCallback;
+    WeakReference<Constants.DataResponseCallback> commandCallback;
 
     Link(BluetoothDevice btDevice, LocalDevice device) {
         this.btDevice = btDevice;
@@ -72,13 +75,18 @@ public class Link {
     }
 
     public void sendCustomCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
-        commandCallback = responseCallback;
+        commandCallback = new WeakReference<>(responseCallback);
         device.core.HMBTCoreSendCustomCommand(this.device.coreInterface, bytes, bytes.length, getAddressBytes());
     }
 
-    void didReceiveCustomCommandResponse(byte[] data) {
+    void didReceiveCustomCommandResponse(final byte[] data) {
         if (commandCallback != null) {
-            commandCallback.response(data, null);
+            this.device.mainThreadHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    commandCallback.get().response(data, null);
+                }
+            });
         }
     }
 

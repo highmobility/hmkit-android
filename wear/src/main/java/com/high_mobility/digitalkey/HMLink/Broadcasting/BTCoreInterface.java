@@ -194,13 +194,11 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMCtwCustomCommandIncoming(HMDevice device, byte[] data, int[] length, int[] error) {
-        Log.i(LocalDevice.TAG, "HMCtwCustomCommandIncoming");
         this.device.didReceiveCustomCommand(device, data, length[0], error[0]);
     }
 
     @Override
     public void HMCtwCustomCommandResponse(HMDevice device, byte[] data, int length) {
-        Log.i(LocalDevice.TAG, "HMCtwCustomCommandResponse");
         this.device.didReceiveCustomCommandResponse(device, data);
     }
 
@@ -215,7 +213,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
     @Override
     public int HMCtwPairingRequested(HMDevice device) {
         //TODO serial is inside device
-        this.device.didReceivePairingRequest(device, device.getSerial());
+//        this.device.didReceivePairingRequest(device, device.getSerial());
         return 0;
     }
 
