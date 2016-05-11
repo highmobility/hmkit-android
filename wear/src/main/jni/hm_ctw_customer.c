@@ -217,7 +217,32 @@ void hm_ctw_device_certificate_registered(hm_device_t *device, uint8_t *public_k
 
 }
 
-uint32_t hm_ctw_pairing_requested(){
+uint32_t hm_ctw_pairing_requested(hm_device_t *device){
 
-    return 0;
+    jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
+    jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
+    jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
+    jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
+    jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
+    jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setAppId", "([B)V");
+
+    jobject obj = (*envRef)->NewObject(envRef,cls, constructor);
+
+    jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
+    (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jint*) device->mac );
+
+    jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
+    (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jint*) device->serial_number );
+
+    jbyteArray appid_ = (*envRef)->NewByteArray(envRef,12);
+    (*envRef)->SetByteArrayRegion(envRef, appid_, 0, 12, (const jint*) device->app_id );
+
+    (*envRef)->CallVoidMethod(envRef, obj, setMac, mac_);
+    (*envRef)->CallVoidMethod(envRef, obj, setSerial, serial_);
+    (*envRef)->CallVoidMethod(envRef, obj, setIsAuthenticated, device->is_authorised);
+    (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
+
+    jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMCtwPairingRequested, obj);
+
+    return ret;
 }
