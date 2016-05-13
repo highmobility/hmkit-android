@@ -80,7 +80,7 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
         if (responseNeeded) {
             this.device.didReceiveLink(device);
             this.device.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
-            this.device.core.HMBTCorelinkConnect(this.device.coreInterface,Utils.bytesFromMacString(device.getAddress()));
+            this.device.core.HMBTCorelinkConnect(this.device.coreInterface, Utils.bytesFromMacString(device.getAddress()));
         }
     }
 }

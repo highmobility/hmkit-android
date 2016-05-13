@@ -206,7 +206,7 @@ class Storage {
     private AccessCertificate[] removeAtIndex(int removedIndex, AccessCertificate[] certs) {
         AccessCertificate[] newCerts = new AccessCertificate[certs.length - 1];
 
-        for (int i=0; i<certs.length; i++) {
+        for (int i = 0; i < certs.length; i++) {
             if (i < removedIndex) {
                 newCerts[i] = certs[i];
             }

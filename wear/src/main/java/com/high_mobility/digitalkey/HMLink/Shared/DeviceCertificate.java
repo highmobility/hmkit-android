@@ -71,11 +71,11 @@ public class DeviceCertificate extends Certificate {
     public String toString() {
         String description = "";
 
-        description += "issuer: " + Utils.hexFromBytes(getIssuer());
-        description += "appIdentifer: " + Utils.hexFromBytes(getAppIdentifier());
-        description += "serial: " + Utils.hexFromBytes(getSerial());
-        description += "public key: " + Utils.hexFromBytes(getPublicKey());
-        description += "signature: " + Utils.hexFromBytes(getSignature());
+        description += "\nissuer: " + Utils.hexFromBytes(getIssuer());
+        description += "\nappIdentifer: " + Utils.hexFromBytes(getAppIdentifier());
+        description += "\nserial: " + Utils.hexFromBytes(getSerial());
+        description += "\npublic key: " + Utils.hexFromBytes(getPublicKey());
+        description += "\nsignature: " + Utils.hexFromBytes(getSignature());
 
         return description;
     }
