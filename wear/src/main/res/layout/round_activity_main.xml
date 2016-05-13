@@ -43,6 +43,17 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="20dp" />
+
+        <com.high_mobility.digitalkey.PairingView
+            android:id="@+id/pairing_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@color/dark_red">
+
+        </com.high_mobility.digitalkey.PairingView>
+
     </RelativeLayout>
 
 </android.support.wearable.view.BoxInsetLayout>

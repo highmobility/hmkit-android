@@ -27,6 +27,7 @@ import com.high_mobility.digitalkey.HMLink.Shared.DeviceCertificate;
 import com.high_mobility.digitalkey.Utils;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Random;
 import java.util.UUID;
 
@@ -197,19 +198,21 @@ public class LocalDevice extends Device {
         return mBluetoothAdapter.getName();
     }
 
-    void didResolveDevice(HMDevice device) {
+    int didResolveDevice(HMDevice device) {
         for (int i = 0; i < links.length; i++) {
             Link link = links[i];
             if (Arrays.equals(link.getAddressBytes(), device.getMac())) {
                 link.setHmDevice(device);
-                break;
+                return i;
             }
         }
+
+        return -1;
     }
 
     void didReceiveCustomCommand(HMDevice device, byte[] data, int length, int error) {
         Log.i(TAG, "LD: didReceiveCustomCommand " + Utils.hexFromBytes(data));
-        // TODO: set the response data bytes here
+        // TODO: set the response data bytes here?
         BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
 
@@ -316,36 +319,19 @@ public class LocalDevice extends Device {
         }
     }
 
-    int pairingResponse = -1;
-    int didReceivePairingRequest(HMDevice device, byte[] serialNumber) {
-        pairingResponse = -1;
-        BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
-        int linkIndex = linkIndexForBTDevice(btDevice);
+    int didReceivePairingRequest(HMDevice device) {
+        // TODO: device does not contain serialNumber?
+        Log.i(TAG, "device serial " + Utils.hexFromBytes(device.getSerial()));
+        int linkIndex = didResolveDevice(device);
 
         if (linkIndex > -1) {
-            Link link = links[linkIndex];
-
-            link.callback.linkDidReceivePairingRequest(link, serialNumber, new Constants.ApprovedCallback() {
-                @Override
-                public void approve() {
-                    pairingResponse = 0;
-                }
-
-                @Override
-                public void decline() {
-                    pairingResponse = 1;
-                }
-            }, 10f);
+            final Link link = links[linkIndex];
+            return link.didReceivePairingRequest();
         }
         else {
-            Log.e(TAG, "no link for pairing request");
+            Log.e(TAG, "no link for pairingResponse");
             return 1;
         }
-
-        // TODO: start a timer and return with that as well
-        while(pairingResponse < 0) {}
-
-        return pairingResponse;
     }
 
     private int linkIndexForBTDevice(BluetoothDevice device) {

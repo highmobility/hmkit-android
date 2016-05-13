@@ -16,7 +16,6 @@ import com.high_mobility.digitalkey.HMLink.Broadcasting.Link;
  * Fragment used to show BoxInsetLayout.
  */
 public class LinkFragment extends Fragment {
-
 	TextView textView;
 	Link link;
 	LinkGridViewAdapter adapter;

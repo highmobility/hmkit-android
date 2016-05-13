@@ -68,7 +68,7 @@ class Storage {
         ArrayList<AccessCertificate> storedCertificates = new ArrayList<>();
 
         for (AccessCertificate cert : certificates) {
-            if (Arrays.equals(cert.getGainerSerial(), serialNumber)) {
+            if (Arrays.equals(cert.getProviderSerial(), serialNumber)) {
                 storedCertificates.add(cert);
             }
         }
@@ -85,7 +85,7 @@ class Storage {
         ArrayList<AccessCertificate> storedCertificates = new ArrayList<>();
 
         for (AccessCertificate cert : certificates) {
-            if (!Arrays.equals(cert.getProviderSerial(), serialNumber)) {
+            if (!Arrays.equals(cert.getGainerSerial(), serialNumber)) {
                 storedCertificates.add(cert);
             }
         }

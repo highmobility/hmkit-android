@@ -127,6 +127,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
     @Override
     public int HMPersistenceHalgetPublicKeyByIndex(int index, byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command) {
         AccessCertificate[] certificates = device.storage.getRegisteredCertificates(device.certificate.getSerial());
+
         if (certificates.length >= index) {
             AccessCertificate certificate = certificates[index];
             copyBytesToJNI(certificate.getGainerPublicKey(), publicKey);
@@ -139,6 +140,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
             return 0;
         }
 
+        Log.e(LocalDevice.TAG, "No registered cert for index " + index);
         return 1;
     }
 
@@ -212,9 +214,8 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMCtwPairingRequested(HMDevice device) {
-        //TODO serial is inside device
-//        this.device.didReceivePairingRequest(device, device.getSerial());
-        return 0;
+        int response = this.device.didReceivePairingRequest(device);
+        return response;
     }
 
     private void copyBytesToJNI(byte[] from, byte[] to) {

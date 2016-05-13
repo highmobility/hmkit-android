@@ -9,5 +9,7 @@ import com.high_mobility.digitalkey.HMLink.LinkException;
 public interface LinkCallback {
     void linkStateDidChange(Link link, Link.State oldState);
     byte[] linkDidReceiveCustomCommand(Link link, byte[] bytes);
-    void linkDidReceivePairingRequest(Link link, byte[] serialNumber, Constants.ApprovedCallback approvedCallback, float timeout);
+
+    void linkDidReceivePairingRequest(Link link, Constants.ApprovedCallback approvedCallback);
+    void linkPairingDidTimeout(Link link);
 }

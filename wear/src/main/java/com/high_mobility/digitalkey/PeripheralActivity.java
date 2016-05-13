@@ -1,6 +1,8 @@
 package com.high_mobility.digitalkey;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.DotsPageIndicator;
 import android.support.wearable.view.GridViewPager;
@@ -9,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.high_mobility.digitalkey.HMLink.Broadcasting.Link;
@@ -18,6 +21,8 @@ import com.high_mobility.digitalkey.HMLink.Broadcasting.LocalDeviceCallback;
 import com.high_mobility.digitalkey.HMLink.Constants;
 import com.high_mobility.digitalkey.HMLink.LinkException;
 import com.high_mobility.digitalkey.HMLink.Shared.DeviceCertificate;
+
+import android.os.Handler;
 
 public class PeripheralActivity extends WearableActivity implements LocalDeviceCallback, LinkCallback {
     private static final byte[] CA_PUBLIC_KEY = Utils.bytesFromHex("***REMOVED***");
@@ -35,6 +40,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     private GridViewPager gridViewPager;
     private DotsPageIndicator dotsPageIndicator;
     private LinkGridViewAdapter gridViewAdapter;
+    private PairingView pairingView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +76,9 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
 
                 dotsPageIndicator = (DotsPageIndicator) findViewById(R.id.page_indicator);
                 dotsPageIndicator.setPager(gridViewPager);
+
+                pairingView = (PairingView)findViewById(R.id.pairing_view);
+                pairingView.setVisibility(View.GONE);
 
                 try {
                     device.startBroadcasting();
@@ -153,8 +162,42 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     }
 
     @Override
-    public void linkDidReceivePairingRequest(Link link, byte[] serialNumber, Constants.ApprovedCallback approvedCallback, float timeout) {
-        // TODO: show in UI
+    public void linkDidReceivePairingRequest(Link link,
+                                             final Constants.ApprovedCallback approvedCallback) {
+        Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        long[] vibrationPattern = {0, 300};
+        final int indexInPatternToRepeat = -1;
+        vibrator.vibrate(vibrationPattern, indexInPatternToRepeat);
+
+        pairingView.setVisibility(View.VISIBLE);
+        pairingView.identifierView.setText(Utils.hexFromBytes(link.getSerial()));
+
+        pairingView.confirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pairingView.declineButton.setOnClickListener(null);
+                pairingView.confirmButton.setOnClickListener(null);
+                pairingView.setVisibility(View.GONE);
+                approvedCallback.approve();
+            }
+        });
+
+        pairingView.declineButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pairingView.declineButton.setOnClickListener(null);
+                pairingView.confirmButton.setOnClickListener(null);
+                pairingView.setVisibility(View.GONE);
+                approvedCallback.decline();
+            }
+        });
+    }
+
+    @Override
+    public void linkPairingDidTimeout(Link link) {
+        pairingView.declineButton.setOnClickListener(null);
+        pairingView.confirmButton.setOnClickListener(null);
+        pairingView.setVisibility(View.GONE);
     }
 
     public void didClickLock(Link link) {

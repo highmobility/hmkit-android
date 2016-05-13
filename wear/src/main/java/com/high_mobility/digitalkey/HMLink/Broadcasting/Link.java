@@ -9,6 +9,7 @@ import com.high_mobility.digitalkey.HMLink.Shared.AccessCertificate;
 import com.high_mobility.digitalkey.Utils;
 
 import java.lang.ref.WeakReference;
+import java.util.Calendar;
 
 /**
  * Created by ttiganik on 13/04/16.
@@ -88,6 +89,49 @@ public class Link {
                 }
             });
         }
+    }
+
+    int pairingResponse = -1;
+    int didReceivePairingRequest() {
+        if (callback == null) return 1;
+        final Link reference = this;
+        pairingResponse = -1;
+        device.mainThreadHandler.post(new Runnable() {
+            @Override
+            public void run() {
+            callback.linkDidReceivePairingRequest(reference, new Constants.ApprovedCallback() {
+                @Override
+                public void approve() {
+                    pairingResponse = 0;
+                }
+
+                @Override
+                public void decline() {
+                    pairingResponse = 1;
+                }
+            });
+            }
+        });
+
+        Calendar c = Calendar.getInstance();
+        int startSeconds = c.get(Calendar.SECOND);
+
+        while(pairingResponse < 0) {
+            int passedSeconds = Calendar.getInstance().get(Calendar.SECOND);
+            if (passedSeconds - startSeconds > Constants.registerTimeout) {
+                device.mainThreadHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.linkPairingDidTimeout(reference);
+                    }
+                });
+
+                Log.i(LocalDevice.TAG, "pairing timer exceeded");
+                return 1; // TODO: use correct code
+            }
+        }
+
+        return pairingResponse;
     }
 
     byte[] getAddressBytes() {
