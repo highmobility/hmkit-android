@@ -55,7 +55,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
         device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
         device.registerCallback(this);
 
-        // TODO: use activity_main and set bottom bar inset for moto360
+        // TODO: set bottom bar inset for moto360
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
