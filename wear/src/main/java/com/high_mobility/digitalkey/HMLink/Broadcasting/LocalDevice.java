@@ -210,18 +210,17 @@ public class LocalDevice extends Device {
         return -1;
     }
 
-    void didReceiveCustomCommand(HMDevice device, byte[] data, int length, int error) {
-        Log.i(TAG, "LD: didReceiveCustomCommand " + Utils.hexFromBytes(data));
-        // TODO: set the response data bytes here?
+    byte[] didReceiveCustomCommand(HMDevice device, byte[] data) {
         BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
 
         if (linkIndex > -1) {
             Link link = links[linkIndex];
-            link.callback.linkDidReceiveCustomCommand(link, data);
+            return link.callback.linkDidReceiveCustomCommand(link, data);
         }
         else {
             Log.e(TAG, "no link for custom command received");
+            return null;
         }
     }
 
@@ -320,8 +319,6 @@ public class LocalDevice extends Device {
     }
 
     int didReceivePairingRequest(HMDevice device) {
-        // TODO: device does not contain serialNumber?
-        Log.i(TAG, "device serial " + Utils.hexFromBytes(device.getSerial()));
         int linkIndex = didResolveDevice(device);
 
         if (linkIndex > -1) {

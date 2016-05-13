@@ -158,7 +158,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     @Override
     public byte[] linkDidReceiveCustomCommand(Link link, byte[] bytes) {
         Log.i(TAG, "linkDidReceiveCustomCommand " + Utils.hexFromBytes(bytes));
-        return bytes;
+        return new byte[] { 0x01, bytes[0] };
     }
 
     @Override
@@ -170,7 +170,6 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
         vibrator.vibrate(vibrationPattern, indexInPatternToRepeat);
 
         pairingView.setVisibility(View.VISIBLE);
-        pairingView.identifierView.setText(Utils.hexFromBytes(link.getSerial()));
 
         pairingView.confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
