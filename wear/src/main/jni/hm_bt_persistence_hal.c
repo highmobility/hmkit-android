@@ -205,8 +205,8 @@ uint32_t hm_bt_persistence_hal_add_stored_certificate(uint8_t *cert, uint16_t si
 
 uint32_t hm_bt_persistence_hal_get_stored_certificate(uint8_t *cert, uint16_t *size){
 
-  jbyteArray cert_ = (*envRef)->NewByteArray(envRef,*size);
-  (*envRef)->SetByteArrayRegion(envRef, cert_, 0, *size, (const jbyte*) cert );
+  jbyteArray cert_ = (*envRef)->NewByteArray(envRef,180);
+  (*envRef)->SetByteArrayRegion(envRef, cert_, 0, 180, (const jbyte*) cert );
 
   jintArray size_ = (*envRef)->NewIntArray(envRef,1);
   (*envRef)->SetIntArrayRegion(envRef, size_, 0, 1, (const jint*) size );
