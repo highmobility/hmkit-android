@@ -18,46 +18,41 @@ import java.lang.reflect.Method;
  */
 public class LinkGridViewAdapter extends FragmentGridPagerAdapter {
     Link[] links;
+    LinkFragment[] fragments;
     PeripheralActivity activity;
+    FragmentManager fm;
 
     public LinkGridViewAdapter(PeripheralActivity activity, FragmentManager fm) {
         super(fm);
         this.activity = activity;
+        this.fm = fm;
     }
 
     public void setLinks(Link[] links) {
         this.links = links;
+        fragments = new LinkFragment[links.length];
         notifyDataSetChanged();
     }
 
-    public LinkFragment getCurrentFragment(GridViewPager pager) {
-        try {
-            Method m = this.getClass().getSuperclass().getDeclaredMethod("makeFragmentName", int.class, long.class);
-            Field f = this.getClass().getSuperclass().getDeclaredField("mFragmentManager");
-            f.setAccessible(true);
-            FragmentManager fm = (FragmentManager) f.get(this);
-            m.setAccessible(true);
-            String tag;
-            tag = (String) m.invoke(null, pager.getId(), (long) pager.getCurrentItem().x);
-            return (LinkFragment)fm.findFragmentByTag(tag);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
+    public LinkFragment getFragment(Link link) {
+        int linkIndex = -1;
+        for (int i = 0; i < links.length; i++){
+            if (links[i] == link) {
+                linkIndex = i;
+                break;
+            }
         }
 
-        return null;
+        if (linkIndex >= 0)
+            return fragments[linkIndex];
+        else
+            return null;
     }
 
     @Override
     public Fragment getFragment(int row, int column) {
         LinkFragment fragment = LinkFragment.newInstance(this, links[column]);
+        fragments[column] = fragment;
         return fragment;
     }
 

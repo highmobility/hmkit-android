@@ -204,27 +204,26 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
 
     public void didClickLock(Link link) {
         byte[] cmd = new byte[] { 0x17, 0x01 };
-        final LinkFragment fragment = gridViewAdapter.getCurrentFragment(gridViewPager);
+        final LinkFragment fragment = gridViewAdapter.getFragment(link);
+
         Utils.enableView(fragment.authView, false);
         link.sendCustomCommand(cmd, true, new Constants.DataResponseCallback() {
             @Override
             public void response(byte[] bytes, LinkException exception) {
                 Utils.enableView(fragment.authView, true);
-                Log.v(TAG, "did receive lock response " + Utils.hexFromBytes(bytes));
             }
         });
     }
 
     public void didClickUnlock(Link link) {
         byte[] cmd = new byte[] { 0x17, 0x00 };
-        final LinkFragment fragment = gridViewAdapter.getCurrentFragment(gridViewPager);
-        Utils.enableView(fragment.authView, false);
+        final LinkFragment fragment = gridViewAdapter.getFragment(link);
 
+        Utils.enableView(fragment.authView, false);
         link.sendCustomCommand(cmd, true, new Constants.DataResponseCallback() {
             @Override
             public void response(byte[] bytes, LinkException exception) {
                 Utils.enableView(fragment.authView, true);
-                Log.v(TAG, "did receive unlock response " + Utils.hexFromBytes(bytes));
             }
         });
     }

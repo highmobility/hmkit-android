@@ -46,6 +46,12 @@ public class Link {
         this.callback = callback;
     }
 
+    public void sendCustomCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
+        Log.i(LocalDevice.TAG, "sendCustomCommand " + Utils.hexFromBytes(hmDevice.getMac()));
+        commandCallback = new WeakReference<>(responseCallback);
+        device.core.HMBTCoreSendCustomCommand(this.device.coreInterface, bytes, bytes.length, getAddressBytes());
+    }
+
     void setHmDevice(final HMDevice hmDevice) {
         this.hmDevice = hmDevice;
 
@@ -75,13 +81,9 @@ public class Link {
         }
     }
 
-    public void sendCustomCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
-        commandCallback = new WeakReference<>(responseCallback);
-        device.core.HMBTCoreSendCustomCommand(this.device.coreInterface, bytes, bytes.length, getAddressBytes());
-    }
-
     void didReceiveCustomCommandResponse(final byte[] data) {
-        if (commandCallback != null) {
+        Log.i(LocalDevice.TAG, "didReceiveCustomCommandResponse " + Utils.hexFromBytes(hmDevice.getMac()));
+        if (commandCallback != null && commandCallback.get() != null) {
             this.device.mainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
