@@ -189,20 +189,20 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public void HMCtwEnteredProximity(HMDevice device) {
+    public void HMApiCallbackEnteredProximity(HMDevice device) {
         // this means core has finished identification of the device (might me authenticated or not) - show device info on screen
         // always update the device with this, auth state might have changed later with this callback as well
         this.device.didResolveDevice(device);
     }
 
     @Override
-    public void HMCtwExitedProximity(HMDevice device) {
+    public void HMApiCallbackExitedProximity(HMDevice device) {
         Log.i(LocalDevice.TAG, "HMCtwExitedProximity");
         this.device.didLoseLink(device);
     }
 
     @Override
-    public void HMCtwCustomCommandIncoming(HMDevice device, byte[] data, int[] length, int[] error) {
+    public void HMApiCallbackCustomCommandIncoming(HMDevice device, byte[] data, int[] length, int[] error) {
         byte[] response = this.device.didReceiveCustomCommand(device, data);
         if (response != null) {
             copyBytesToJNI(response, data);
@@ -215,12 +215,12 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public void HMCtwCustomCommandResponse(HMDevice device, byte[] data, int length) {
+    public void HMApiCallbackCustomCommandResponse(HMDevice device, byte[] data, int length) {
         this.device.didReceiveCustomCommandResponse(device, data);
     }
 
     @Override
-    public int HMCtwGetDeviceCertificateFailed(HMDevice device, byte[] nonce) {
+    public int HMApiCallbackGetDeviceCertificateFailed(HMDevice device, byte[] nonce) {
         // Sensing: should ask for CA sig for the nonce
         // if ret false getting the sig start failed
         // if ret true started acquiring signature
@@ -228,7 +228,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public int HMCtwPairingRequested(HMDevice device) {
+    public int HMApiCallbackPairingRequested(HMDevice device) {
         int response = this.device.didReceivePairingRequest(device);
         return response;
     }
