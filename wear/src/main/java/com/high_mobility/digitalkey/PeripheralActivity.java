@@ -54,7 +54,6 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
 //        cert.setSignature(Utils.bytesFromHex("***REMOVED***")); // 48494D4C sig
         cert.setSignature(Utils.bytesFromHex("***REMOVED***")); // original
 
-
         device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
         device.registerCallback(this);
 
@@ -82,6 +81,8 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
 
                 pairingView = (PairingView)findViewById(R.id.pairing_view);
                 pairingView.setVisibility(View.GONE);
+
+                localDeviceStateChanged(device.state, device.state);
 
                 try {
                     device.startBroadcasting();

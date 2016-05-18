@@ -436,18 +436,28 @@ public class LocalDevice extends Device {
 
         @Override
         public void onStartFailure(int errorCode) {
-            Log.w(TAG, "Start Advertise Failed: " + errorCode);
-            setState(State.IDLE);
+            if (errorCode != 3) {
+                Log.w(TAG, "Start Advertise Failed: " + errorCode);
+                setState(State.IDLE);
+            }
+            else if (state != State.BROADCASTING) {
+                setState(State.BROADCASTING);
+            }
         }
     };
 
-    private void setState(State state) {
+    private void setState(final State state) {
         if (this.state != state) {
-            State oldState = this.state;
+            final State oldState = this.state;
             this.state = state;
 
             if (callback != null) {
-                callback.localDeviceStateChanged(state, oldState);
+                mainThreadHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.localDeviceStateChanged(state, oldState);
+                    }
+                });
             }
         }
     }
