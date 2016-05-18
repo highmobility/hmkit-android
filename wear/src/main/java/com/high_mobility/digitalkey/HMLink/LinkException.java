@@ -4,7 +4,7 @@ package com.high_mobility.digitalkey.HMLink;
  * Created by ttiganik on 13/04/16.
  */
 public class LinkException extends Exception {
-    /// The values representing an error encountered in the *MajesticLink*
+    /// The values representing an error encountered in the *HMLink*
     public enum LinkExceptionCode {
         /// Bluetooth is turned off
         BLUETOOTH_OFF,
@@ -25,7 +25,7 @@ public class LinkException extends Exception {
         /// The app is not authorised with the connected link to perform the action
         UNAUTHORISED,
         /// Bluetooth Low Energy is unavailable for this device
-        UNSUPPORTED;
+        UNSUPPORTED
     }
 
     public LinkExceptionCode code;
