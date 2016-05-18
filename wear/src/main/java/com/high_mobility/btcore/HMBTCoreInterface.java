@@ -71,14 +71,14 @@ public interface HMBTCoreInterface {
 
     //Proximity
     //TT
-    void HMCtwEnteredProximity(HMDevice device);
+    void HMApiCallbackEnteredProximity(HMDevice device);
     //TT
-    void HMCtwExitedProximity(HMDevice device);
+    void HMApiCallbackExitedProximity(HMDevice device);
 
     //Callback
     //TT
-    void HMCtwCustomCommandIncoming(HMDevice device, byte[] data, int[] length, int[] error); // received custom command
-    void HMCtwCustomCommandResponse(HMDevice device, byte[] data, int length);
-    int HMCtwGetDeviceCertificateFailed(HMDevice device, byte[] nonce); //ret false on, et ei jätka
-    int HMCtwPairingRequested(HMDevice device); //ret false on, et ei jätka
+    void HMApiCallbackCustomCommandIncoming(HMDevice device, byte[] data, int[] length, int[] error); // received custom command
+    void HMApiCallbackCustomCommandResponse(HMDevice device, byte[] data, int length);
+    int HMApiCallbackGetDeviceCertificateFailed(HMDevice device, byte[] nonce); //ret false on, et ei jätka
+    int HMApiCallbackPairingRequested(HMDevice device); //ret false on, et ei jätka
 }

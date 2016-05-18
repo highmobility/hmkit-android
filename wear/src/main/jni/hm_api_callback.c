@@ -1,33 +1,33 @@
 
-#include "hm_ctw_customer.h"
+#include "hm_api_callback.h"
 #include "hm_cert.h"
 #include <string.h>
 #include "hm_config.h"
 #include "hmbtcore.h"
-#include "hm_ctw_api.h"
+#include "hm_api.h"
 #include "hm_bt_debug_hal.h"
 
-void hm_ctw_init()
+void hm_api_callback_init()
 {
 
 }
 
-void hm_ctw_ping()
+void hm_api_callback_ping()
 {
 
 }
 
-void hm_ctw_authorised_device_added(hm_device_t *device, uint8_t error)
+void hm_api_callback_authorised_device_added(hm_device_t *device, uint8_t error)
 {
 
 }
 
-void hm_ctw_authorised_device_updated(hm_device_t *device, uint8_t error)
+void hm_api_callback_authorised_device_updated(hm_device_t *device, uint8_t error)
 {
 
 }
 
-void hm_ctw_entered_proximity(hm_device_t *device)
+void hm_api_callback_entered_proximity(hm_device_t *device)
 {
     hm_bt_debug_hal_log("ENTERED PROXIMITY");
     hm_bt_debug_hal_log_hex(device->mac,6);
@@ -58,15 +58,15 @@ void hm_ctw_entered_proximity(hm_device_t *device)
     (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
 
 
-    return (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMCtwEnteredProximity, obj);
+    return (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackEnteredProximity, obj);
 }
 
-void hm_ctw_proximity_measured(hm_device_t *device, uint8_t receiver_count, hm_receiver_t *receivers)
+void hm_api_callback_proximity_measured(hm_device_t *device, uint8_t receiver_count, hm_receiver_t *receivers)
 {
 
 }
 
-void hm_ctw_exited_proximity(hm_device_t *device)
+void hm_api_callback_exited_proximity(hm_device_t *device)
 {
     hm_bt_debug_hal_log("EXITED PROXIMITY");
     hm_bt_debug_hal_log_hex(device->mac,6);
@@ -96,10 +96,10 @@ void hm_ctw_exited_proximity(hm_device_t *device)
     (*envRef)->CallVoidMethod(envRef, obj, setIsAuthenticated, device->is_authorised);
     (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
 
-    return (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMCtwExitedProximity, obj);
+    return (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackExitedProximity, obj);
 }
 
-void hm_ctw_command_incoming(hm_device_t *device, uint8_t *data, uint8_t *length, uint8_t *error)
+void hm_api_callback_command_incoming(hm_device_t *device, uint8_t *data, uint16_t *length, uint8_t *error)
 {
     jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
@@ -133,7 +133,7 @@ void hm_ctw_command_incoming(hm_device_t *device, uint8_t *data, uint8_t *length
     jintArray error_ = (*envRef)->NewIntArray(envRef,1);
     (*envRef)->SetIntArrayRegion(envRef, error_, 0, 1, (const jint*) error );
 
-    (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMCtwCustomCommandIncoming, obj,data_,length_,error_);
+    (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackCustomCommandIncoming, obj,data_,length_,error_);
 
     jint* length_array = (*envRef)->GetIntArrayElements(envRef, length_, NULL);
     *length = length_array[0];
@@ -145,7 +145,7 @@ void hm_ctw_command_incoming(hm_device_t *device, uint8_t *data, uint8_t *length
     memcpy(data,data_array,*length);
 }
 
-void hm_ctw_command_response(hm_device_t *device, uint8_t *data, uint8_t length)
+void hm_api_callback_command_response(hm_device_t *device, uint8_t *data, uint16_t length)
 {
     jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
@@ -173,10 +173,10 @@ void hm_ctw_command_response(hm_device_t *device, uint8_t *data, uint8_t length)
     jbyteArray data_ = (*envRef)->NewByteArray(envRef,255);
     (*envRef)->SetByteArrayRegion(envRef, data_, 0, length, (const jbyte*) data );
 
-    (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMCtwCustomCommandResponse, obj,data_,length);
+    (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackCustomCommandResponse, obj,data_,length);
 }
 
-uint32_t hm_ctw_get_device_certificate_failed(hm_device_t *device, uint8_t *nonce)
+uint32_t hm_api_callback_get_device_certificate_failed(hm_device_t *device, uint8_t *nonce)
 {
     jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
@@ -204,7 +204,7 @@ uint32_t hm_ctw_get_device_certificate_failed(hm_device_t *device, uint8_t *nonc
     jbyteArray nonce_ = (*envRef)->NewByteArray(envRef,9);
     (*envRef)->SetByteArrayRegion(envRef, nonce_, 0, 9, (const jbyte*) nonce );
 
-    jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMCtwGetDeviceCertificateFailed, obj,nonce_);
+    jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackGetDeviceCertificateFailed, obj,nonce_);
 
     jbyte* nonce_array = (*envRef)->GetByteArrayElements(envRef, nonce_, NULL);
     memcpy(nonce,nonce_array,9);
@@ -212,12 +212,12 @@ uint32_t hm_ctw_get_device_certificate_failed(hm_device_t *device, uint8_t *nonc
     return ret;
 }
 
-void hm_ctw_device_certificate_registered(hm_device_t *device, uint8_t *public_key, uint8_t error)
+void hm_api_callback_access_certificate_registered(hm_device_t *device, uint8_t *public_key, uint8_t error)
 {
 
 }
 
-uint32_t hm_ctw_pairing_requested(hm_device_t *device){
+uint32_t hm_api_callback_pairing_requested(hm_device_t *device){
 
     jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
@@ -242,7 +242,7 @@ uint32_t hm_ctw_pairing_requested(hm_device_t *device){
     (*envRef)->CallVoidMethod(envRef, obj, setIsAuthenticated, device->is_authorised);
     (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
 
-    jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMCtwPairingRequested, obj);
+    jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackPairingRequested, obj);
 
     return ret;
 }

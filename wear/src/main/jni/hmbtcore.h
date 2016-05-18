@@ -34,11 +34,11 @@ jmethodID *interfaceMethodHMPersistenceHaladdStoredCertificate;
 jmethodID *interfaceMethodHMPersistenceHalgetStoredCertificate;
 jmethodID *interfaceMethodHMPersistenceHaleraseStoredCertificate;
 
-jmethodID *interfaceMethodHMCtwEnteredProximity;
-jmethodID *interfaceMethodHMCtwExitedProximity;
-jmethodID *interfaceMethodHMCtwCustomCommandIncoming;
-jmethodID *interfaceMethodHMCtwCustomCommandResponse;
-jmethodID *interfaceMethodHMCtwGetDeviceCertificateFailed;
-jmethodID *interfaceMethodHMCtwPairingRequested;
+jmethodID *interfaceMethodHMApiCallbackEnteredProximity;
+jmethodID *interfaceMethodHMApiCallbackExitedProximity;
+jmethodID *interfaceMethodHMApiCallbackCustomCommandIncoming;
+jmethodID *interfaceMethodHMApiCallbackCustomCommandResponse;
+jmethodID *interfaceMethodHMApiCallbackGetDeviceCertificateFailed;
+jmethodID *interfaceMethodHMApiCallbackPairingRequested;
 
 #endif //ANDROID_WEAR_DIGITAL_KEY_HMBTCORE_H
