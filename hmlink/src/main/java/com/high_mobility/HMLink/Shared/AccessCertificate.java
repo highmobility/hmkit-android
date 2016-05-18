@@ -1,6 +1,6 @@
 package com.high_mobility.HMLink.Shared;
 
-import com.high_mobility.digitalkey.Utils;
+import com.high_mobility.HMLink.Utils;
 
 import java.util.Date;
 

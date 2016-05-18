@@ -19,6 +19,7 @@ import com.high_mobility.HMLink.Broadcasting.LocalDeviceCallback;
 import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.DeviceCertificate;
+import com.high_mobility.HMLink.Utils;
 
 public class PeripheralActivity extends WearableActivity implements LocalDeviceCallback, LinkCallback {
     private static final byte[] CA_PUBLIC_KEY = Utils.bytesFromHex("***REMOVED***");

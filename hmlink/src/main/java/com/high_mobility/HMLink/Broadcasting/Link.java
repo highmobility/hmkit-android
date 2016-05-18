@@ -3,10 +3,10 @@ package com.high_mobility.HMLink.Broadcasting;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
+import com.high_mobility.HMLink.Utils;
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.Shared.AccessCertificate;
-import com.high_mobility.digitalkey.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.Calendar;

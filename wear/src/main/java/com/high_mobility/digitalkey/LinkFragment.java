@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.high_mobility.HMLink.Broadcasting.Link;
+import com.high_mobility.HMLink.Utils;
 
 /**
  * Fragment used to show BoxInsetLayout.

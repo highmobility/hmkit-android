@@ -8,7 +8,7 @@ import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothProfile;
 
 import com.high_mobility.HMLink.Constants;
-import com.high_mobility.digitalkey.Utils;
+import com.high_mobility.HMLink.Utils;
 
 import java.util.Arrays;
 
@@ -26,7 +26,7 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
         super.onConnectionStateChange(device, status, newState);
 
         if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            this.device.core.HMBTCorelinkDisconnect(this.device.coreInterface,Utils.bytesFromMacString(device.getAddress()));
+            this.device.core.HMBTCorelinkDisconnect(this.device.coreInterface, Utils.bytesFromMacString(device.getAddress()));
         }
     }
 

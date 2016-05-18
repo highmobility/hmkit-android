@@ -7,7 +7,7 @@ import android.util.Log;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.AccessCertificate;
 import com.high_mobility.HMLink.Shared.Certificate;
-import com.high_mobility.digitalkey.Utils;
+import com.high_mobility.HMLink.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

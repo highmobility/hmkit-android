@@ -1,6 +1,7 @@
 package com.high_mobility.HMLink.Shared;
 
-import com.high_mobility.digitalkey.Utils;
+
+import com.high_mobility.HMLink.Utils;
 
 /**
  * Created by ttiganik on 13/04/16.

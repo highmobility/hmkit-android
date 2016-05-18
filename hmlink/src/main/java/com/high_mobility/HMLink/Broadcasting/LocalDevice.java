@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+import com.high_mobility.HMLink.Utils;
 import com.high_mobility.btcore.HMBTCore;
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.Constants;
@@ -24,7 +25,6 @@ import com.high_mobility.HMLink.Device;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.AccessCertificate;
 import com.high_mobility.HMLink.Shared.DeviceCertificate;
-import com.high_mobility.digitalkey.Utils;
 
 import java.util.Arrays;
 import java.util.Random;
