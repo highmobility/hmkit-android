@@ -1,7 +1,5 @@
 package com.high_mobility.btcore;
 
-import java.util.Arrays;
-
 /**
  * Created by ttiganik on 13/04/16.
  */
