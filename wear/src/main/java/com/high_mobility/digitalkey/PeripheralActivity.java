@@ -1,6 +1,5 @@
 package com.high_mobility.digitalkey;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.wearable.activity.WearableActivity;
@@ -11,18 +10,15 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.high_mobility.digitalkey.HMLink.Broadcasting.Link;
-import com.high_mobility.digitalkey.HMLink.Broadcasting.LinkCallback;
-import com.high_mobility.digitalkey.HMLink.Broadcasting.LocalDevice;
-import com.high_mobility.digitalkey.HMLink.Broadcasting.LocalDeviceCallback;
-import com.high_mobility.digitalkey.HMLink.Constants;
-import com.high_mobility.digitalkey.HMLink.LinkException;
-import com.high_mobility.digitalkey.HMLink.Shared.DeviceCertificate;
-
-import android.os.Handler;
+import com.high_mobility.HMLink.Broadcasting.Link;
+import com.high_mobility.HMLink.Broadcasting.LinkCallback;
+import com.high_mobility.HMLink.Broadcasting.LocalDevice;
+import com.high_mobility.HMLink.Broadcasting.LocalDeviceCallback;
+import com.high_mobility.HMLink.Constants;
+import com.high_mobility.HMLink.LinkException;
+import com.high_mobility.HMLink.Shared.DeviceCertificate;
 
 public class PeripheralActivity extends WearableActivity implements LocalDeviceCallback, LinkCallback {
     private static final byte[] CA_PUBLIC_KEY = Utils.bytesFromHex("***REMOVED***");

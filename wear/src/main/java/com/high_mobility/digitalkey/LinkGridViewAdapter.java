@@ -2,16 +2,9 @@ package com.high_mobility.digitalkey;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Context;
-import android.support.v4.view.ViewPager;
 import android.support.wearable.view.FragmentGridPagerAdapter;
-import android.support.wearable.view.GridViewPager;
 
-import com.high_mobility.digitalkey.HMLink.Broadcasting.Link;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import com.high_mobility.HMLink.Broadcasting.Link;
 
 /**
  * Created by ttiganik on 27/04/16.

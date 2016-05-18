@@ -1,7 +1,6 @@
-package com.high_mobility.digitalkey.HMLink.Broadcasting;
+package com.high_mobility.HMLink.Broadcasting;
 
-import com.high_mobility.digitalkey.HMLink.Constants;
-import com.high_mobility.digitalkey.HMLink.LinkException;
+import com.high_mobility.HMLink.Constants;
 
 /**
  * Created by ttiganik on 13/04/16.

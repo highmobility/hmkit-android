@@ -1,4 +1,4 @@
-package com.high_mobility.digitalkey.HMLink;
+package com.high_mobility.HMLink;
 
 /**
  * Created by ttiganik on 13/04/16.

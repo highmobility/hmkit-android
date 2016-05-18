@@ -1,12 +1,11 @@
-package com.high_mobility.digitalkey.HMLink.Broadcasting;
+package com.high_mobility.HMLink.Broadcasting;
 
 import android.util.Log;
 
 import com.high_mobility.btcore.HMBTCoreInterface;
 import com.high_mobility.btcore.HMDevice;
-import com.high_mobility.digitalkey.HMLink.LinkException;
-import com.high_mobility.digitalkey.HMLink.Shared.AccessCertificate;
-import com.high_mobility.digitalkey.Utils;
+import com.high_mobility.HMLink.LinkException;
+import com.high_mobility.HMLink.Shared.AccessCertificate;
 
 /**
  * Created by ttiganik on 20/04/16.

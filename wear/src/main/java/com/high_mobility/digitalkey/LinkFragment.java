@@ -10,7 +10,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.high_mobility.digitalkey.HMLink.Broadcasting.Link;
+import com.high_mobility.HMLink.Broadcasting.Link;
 
 /**
  * Fragment used to show BoxInsetLayout.

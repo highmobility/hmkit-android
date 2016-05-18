@@ -1,4 +1,4 @@
-package com.high_mobility.digitalkey.HMLink;
+package com.high_mobility.HMLink;
 
 import java.util.UUID;
 

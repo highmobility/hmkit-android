@@ -1,12 +1,12 @@
-package com.high_mobility.digitalkey.HMLink.Broadcasting;
+package com.high_mobility.HMLink.Broadcasting;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.high_mobility.digitalkey.HMLink.LinkException;
-import com.high_mobility.digitalkey.HMLink.Shared.AccessCertificate;
-import com.high_mobility.digitalkey.HMLink.Shared.Certificate;
+import com.high_mobility.HMLink.LinkException;
+import com.high_mobility.HMLink.Shared.AccessCertificate;
+import com.high_mobility.HMLink.Shared.Certificate;
 import com.high_mobility.digitalkey.Utils;
 
 import java.util.ArrayList;

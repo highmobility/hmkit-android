@@ -1,4 +1,4 @@
-package com.high_mobility.digitalkey.HMLink.Broadcasting;
+package com.high_mobility.HMLink.Broadcasting;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -7,7 +7,7 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothProfile;
 
-import com.high_mobility.digitalkey.HMLink.Constants;
+import com.high_mobility.HMLink.Constants;
 import com.high_mobility.digitalkey.Utils;
 
 import java.util.Arrays;

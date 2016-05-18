@@ -1,4 +1,4 @@
-package com.high_mobility.digitalkey.HMLink.Broadcasting;
+package com.high_mobility.HMLink.Broadcasting;
 
 /**
  * Created by ttiganik on 13/04/16.

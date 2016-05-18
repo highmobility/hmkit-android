@@ -1,6 +1,6 @@
-package com.high_mobility.digitalkey.HMLink.Shared.Commands;
+package com.high_mobility.HMLink.Shared.Commands;
 
-import com.high_mobility.digitalkey.HMLink.LinkException;
+import com.high_mobility.HMLink.LinkException;
 
 /**
  * Created by ttiganik on 18/04/16.

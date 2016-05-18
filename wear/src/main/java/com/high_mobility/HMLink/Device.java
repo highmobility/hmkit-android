@@ -1,6 +1,6 @@
-package com.high_mobility.digitalkey.HMLink;
+package com.high_mobility.HMLink;
 
-import com.high_mobility.digitalkey.HMLink.Shared.DeviceCertificate;
+import com.high_mobility.HMLink.Shared.DeviceCertificate;
 
 /**
  * Created by ttiganik on 13/04/16.

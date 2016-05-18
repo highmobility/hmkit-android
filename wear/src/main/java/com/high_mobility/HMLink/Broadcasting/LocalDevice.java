@@ -1,4 +1,4 @@
-package com.high_mobility.digitalkey.HMLink.Broadcasting;
+package com.high_mobility.HMLink.Broadcasting;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -19,15 +19,14 @@ import android.util.Log;
 
 import com.high_mobility.btcore.HMBTCore;
 import com.high_mobility.btcore.HMDevice;
-import com.high_mobility.digitalkey.HMLink.Constants;
-import com.high_mobility.digitalkey.HMLink.Device;
-import com.high_mobility.digitalkey.HMLink.LinkException;
-import com.high_mobility.digitalkey.HMLink.Shared.AccessCertificate;
-import com.high_mobility.digitalkey.HMLink.Shared.DeviceCertificate;
+import com.high_mobility.HMLink.Constants;
+import com.high_mobility.HMLink.Device;
+import com.high_mobility.HMLink.LinkException;
+import com.high_mobility.HMLink.Shared.AccessCertificate;
+import com.high_mobility.HMLink.Shared.DeviceCertificate;
 import com.high_mobility.digitalkey.Utils;
 
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Random;
 import java.util.UUID;
 
