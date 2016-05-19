@@ -272,6 +272,11 @@ public class LocalDevice extends Device {
         if (linkIndex > -1) {
             // remove the link from the array
             final Link link = links[linkIndex];
+
+            if (link.state != Link.State.DISCONNECTED) {
+                GATTServer.cancelConnection(link.btDevice);
+            }
+
             Link[] newLinks = new Link[links.length - 1];
 
             for (int i = 0; i < links.length; i++) {
