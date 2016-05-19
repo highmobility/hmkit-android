@@ -6,5 +6,5 @@
 .DS_Store
 /build
 /captures
-wear/src/main/libs/*
-wear/src/main/obj/*
+hmlink/src/main/libs/*
+hmlink/src/main/obj/*
