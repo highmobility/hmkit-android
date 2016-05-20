@@ -2,6 +2,7 @@ package com.high_mobility.HMLink.Broadcasting;
 
 import android.util.Log;
 
+import com.high_mobility.HMLink.Constants;
 import com.high_mobility.btcore.HMBTCoreInterface;
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.LinkException;
@@ -39,7 +40,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMBTHalAdvertisementStop() {
-        device.stopBroadcasting();
+//        device.stopBroadcasting(); // stop broadcasting disconnects all the current connections and is not usable atm
         return 0;
     }
 
@@ -196,7 +197,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMApiCallbackExitedProximity(HMDevice device) {
-        Log.i(LocalDevice.TAG, "HMCtwExitedProximity");
+        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(LocalDevice.TAG, "HMCtwExitedProximity");
         this.device.didLoseLink(device);
     }
 

@@ -34,6 +34,7 @@ import java.util.UUID;
  * Created by ttiganik on 12/04/16.
  */
 public class LocalDevice extends Device {
+
     static final boolean ALLOWS_MULTIPLE_LINKS = false;
     static final String TAG = "HMLink";
 
@@ -132,27 +133,19 @@ public class LocalDevice extends Device {
     }
 
     public void stopBroadcasting() {
-        // if (mBluetoothLeAdvertiser == null) return;
-        // mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
+        // stopAdvertising clears the GATT server as well.
+        // This causes all connection to fail with the link because there is no GATT server.
 
-        // TODO:
-        // this clears the GATT server as well and GATTServer.sendResponse fails with nullPointer.
-        // or device disconnects automatically if on main thread
-        // Figure out how to stop advertise with a continually working server
-    }
-
-    public void closeGATTServer() {
-        if (GATTServer != null) {
-            GATTServer.clearServices();
-            GATTServer.close();
-            GATTServer = null;
+        for (int i = getLinks().length - 1; i >= 0; i--) {
+            GATTServer.cancelConnection(getLinks()[i].btDevice);
         }
 
-        // TODO: delete when stop broadcasting is fixed (will be stopped at some other time)
         if (mBluetoothLeAdvertiser != null) {
             mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
         }
-        //
+
+        setState(State.IDLE);
+
     }
 
     public void registerCertificate(AccessCertificate certificate) throws LinkException {
@@ -183,12 +176,12 @@ public class LocalDevice extends Device {
 
     public void reset() {
         storage.resetStorage();
-        closeGATTServer();
+        stopBroadcasting();
 
-        try {
-            startBroadcasting();
-        } catch (LinkException e) {
-            e.printStackTrace();
+        if (GATTServer != null) {
+            GATTServer.clearServices();
+            GATTServer.close();
+            GATTServer = null;
         }
     }
 
@@ -234,10 +227,6 @@ public class LocalDevice extends Device {
     }
 
     void didReceiveLink(BluetoothDevice device) {
-        if (LocalDevice.ALLOWS_MULTIPLE_LINKS == false) {
-            stopBroadcasting();
-        }
-
         // add a new link to the array
 
         final Link link = new Link(device, this);
@@ -264,7 +253,7 @@ public class LocalDevice extends Device {
     }
 
     void didLoseLink(HMDevice device) {
-        Log.i(TAG, "lose link " + Utils.hexFromBytes(device.getMac()));
+        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(TAG, "lose link " + Utils.hexFromBytes(device.getMac()));
 
         BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
@@ -307,15 +296,6 @@ public class LocalDevice extends Device {
                     }
                 });
             }
-
-            // start broadcasting again
-            if (state != State.BROADCASTING) {
-                try {
-                    startBroadcasting();
-                } catch (LinkException e) {
-                    e.printStackTrace();
-                }
-            }
         }
         else {
             Log.e(TAG, "no link for lose device");
@@ -354,7 +334,7 @@ public class LocalDevice extends Device {
     }
 
     void writeData(byte[] mac, byte[] value) {
-        Log.i(TAG, "write " + Utils.hexFromBytes(mac) + " " + Utils.hexFromBytes(value));
+        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Debug.getValue()) Log.i(TAG, "write " + Utils.hexFromBytes(mac) + " " + Utils.hexFromBytes(value));
         Link link = getLinkForMac(mac);
         if (link != null) {
             readCharacteristic.setValue(value);
@@ -382,7 +362,7 @@ public class LocalDevice extends Device {
             gattServerCallback = new GATTServerCallback(LocalDevice.getInstance());
             GATTServer = mBluetoothManager.openGattServer(ctx, gattServerCallback);
 
-            Log.i(TAG, "createGATTServer");
+            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(TAG, "createGATTServer");
             // create the service
             BluetoothGattService service = new BluetoothGattService(Constants.SERVICE_UUID,
                     BluetoothGattService.SERVICE_TYPE_PRIMARY);
@@ -406,7 +386,7 @@ public class LocalDevice extends Device {
             GATTServer.addService(service);
         }
         else {
-            Log.i(TAG, "createGATTServer: already exists");
+            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(TAG, "createGATTServer: already exists");
         }
     }
 
@@ -415,7 +395,7 @@ public class LocalDevice extends Device {
             mBluetoothManager = (BluetoothManager) ctx.getSystemService(Context.BLUETOOTH_SERVICE);
             mBluetoothAdapter = mBluetoothManager.getAdapter();
             setAdapterName();
-            Log.i(TAG, "Create adapter " + mBluetoothAdapter.getName());
+            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(TAG, "Create adapter " + mBluetoothAdapter.getName());
         }
     }
 
@@ -434,7 +414,7 @@ public class LocalDevice extends Device {
     private final AdvertiseCallback advertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            Log.i(TAG, "Start advertise " + mBluetoothAdapter.getName());
+            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(TAG, "Start advertise " + mBluetoothAdapter.getName());
             setState(State.BROADCASTING);
         }
 

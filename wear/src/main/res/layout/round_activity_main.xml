@@ -25,9 +25,11 @@
                 android:gravity="center"
                 android:background="#212227"
                 android:text="Hello"
-                android:paddingTop="15dp"
+                android:paddingTop="20dp"
                 app:layout_box="left|right|bottom"
-                 />
+                android:onClick="didTapTitle"
+                android:clickable="true"
+                />
 
             <android.support.wearable.view.GridViewPager
                 android:id="@+id/pager"

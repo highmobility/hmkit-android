@@ -42,6 +42,19 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     private PairingView pairingView;
     private BoxInsetLayout container;
 
+    public void didTapTitle(View view) {
+        if (device.state == LocalDevice.State.IDLE) {
+            try {
+                device.startBroadcasting();
+            } catch (LinkException e) {
+                e.printStackTrace();
+            }
+        }
+        else if (device.state == LocalDevice.State.BROADCASTING) {
+            device.stopBroadcasting();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,7 +70,6 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
         device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
         device.registerCallback(this);
 
-        // TODO: set bottom bar inset for moto360
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
@@ -99,7 +111,6 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     @Override
     protected void onDestroy() {
         device.stopBroadcasting();
-        device.closeGATTServer();
         super.onDestroy();
     }
 

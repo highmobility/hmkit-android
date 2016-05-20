@@ -47,7 +47,7 @@ public class Link {
     }
 
     public void sendCustomCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
-        Log.i(LocalDevice.TAG, "sendCustomCommand " + Utils.hexFromBytes(hmDevice.getMac()));
+        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Debug.getValue()) Log.i(LocalDevice.TAG, "sendCustomCommand " + Utils.hexFromBytes(hmDevice.getMac()));
         commandCallback = new WeakReference<>(responseCallback);
         device.core.HMBTCoreSendCustomCommand(this.device.coreInterface, bytes, bytes.length, getAddressBytes());
     }
@@ -82,7 +82,7 @@ public class Link {
     }
 
     void didReceiveCustomCommandResponse(final byte[] data) {
-        Log.i(LocalDevice.TAG, "didReceiveCustomCommandResponse " + Utils.hexFromBytes(hmDevice.getMac()));
+        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Debug.getValue()) Log.i(LocalDevice.TAG, "didReceiveCustomCommandResponse " + Utils.hexFromBytes(hmDevice.getMac()));
         if (commandCallback != null && commandCallback.get() != null) {
             this.device.mainThreadHandler.post(new Runnable() {
                 @Override
@@ -128,7 +128,7 @@ public class Link {
                     }
                 });
 
-                Log.i(LocalDevice.TAG, "pairing timer exceeded");
+                if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(LocalDevice.TAG, "pairing timer exceeded");
                 return 1; // TODO: use correct code
             }
         }
