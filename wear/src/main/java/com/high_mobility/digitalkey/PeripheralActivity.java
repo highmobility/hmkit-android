@@ -3,6 +3,7 @@ package com.high_mobility.digitalkey;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.wearable.activity.WearableActivity;
+import android.support.wearable.view.BoxInsetLayout;
 import android.support.wearable.view.DotsPageIndicator;
 import android.support.wearable.view.GridViewPager;
 import android.support.wearable.view.WatchViewStub;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.high_mobility.HMLink.Broadcasting.Link;
@@ -38,6 +40,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     private DotsPageIndicator dotsPageIndicator;
     private LinkGridViewAdapter gridViewAdapter;
     private PairingView pairingView;
+    private BoxInsetLayout container;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,15 +62,6 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
-                stub.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-                    @Override
-                    public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-                        int chinHeight = insets.getSystemWindowInsetBottom();
-                        // chinHeight = 30;
-                        return insets;
-                    }
-                });
-
                 textView = (TextView) findViewById(R.id.text);
                 gridViewPager = (GridViewPager) findViewById(R.id.pager);
 
@@ -78,6 +72,17 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
 
                 pairingView = (PairingView)findViewById(R.id.pairing_view);
                 pairingView.setVisibility(View.GONE);
+
+                container = (BoxInsetLayout) findViewById(R.id.container);
+
+                stub.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+                    @Override
+                    public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                        int chinHeight = insets.getSystemWindowInsetBottom();
+                        container.setPadding(0, 0, 0, chinHeight);
+                        return insets;
+                    }
+                });
 
                 localDeviceStateChanged(device.state, device.state);
 
