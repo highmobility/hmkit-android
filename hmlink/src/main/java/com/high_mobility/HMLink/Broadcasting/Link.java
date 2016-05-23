@@ -18,7 +18,6 @@ public class Link {
     public enum State { CONNECTED, AUTHENTICATED, DISCONNECTED }
 
     State state;
-    public AccessCertificate certificate;
 
     LinkListener listener;
 
