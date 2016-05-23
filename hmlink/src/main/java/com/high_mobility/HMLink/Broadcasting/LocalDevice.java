@@ -60,7 +60,7 @@ public class LocalDevice extends Device {
     HMBTCore core = new HMBTCore();
 
     static LocalDevice instance = null;
-    State state = State.IDLE;
+    public State state = State.IDLE;
     Link[] links = new Link[0];
 
     public static LocalDevice getInstance() {

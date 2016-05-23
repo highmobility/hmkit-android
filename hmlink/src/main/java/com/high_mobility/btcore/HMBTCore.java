@@ -45,5 +45,10 @@ public class HMBTCore {
     //TT
     public native void HMBTCorelinkIncomingData(HMBTCoreInterface coreInterface, byte[] data, int size, byte[] mac);
 
-    public native  void HMBTCoreSendCustomCommand(HMBTCoreInterface coreInterface, byte[] data, int size, byte[] mac);
+    public native void HMBTCoreSendCustomCommand(HMBTCoreInterface coreInterface, byte[] data, int size, byte[] mac);
+
+    //Crypto
+    public native void HMBTCoreCryptoCreateKeys(byte[] privateKey, byte[] publicKey);
+
+    public native void HMBTCoreCryptoAddSignature(byte[] privateKey, byte[] publicKey);
 }

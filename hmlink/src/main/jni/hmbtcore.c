@@ -216,3 +216,32 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSendCustomCommand(JNIEnv *env, j
     (*env)->ReleaseByteArrayElements(env, data_, data, 0);
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
 }
+
+JNIEXPORT void JNICALL
+Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreCryptoCreateKeys(JNIEnv *env, jobject instance,
+                                                                  jbyteArray privateKey_,
+                                                                  jbyteArray publicKey_) {
+    jbyte *private = (*env)->GetByteArrayElements(env, privateKey_, NULL);
+    jbyte *public = (*env)->GetByteArrayElements(env, publicKey_, NULL);
+
+    hm_crypto_openssl_create_keys(private, public, true);
+
+    (*env)->ReleaseByteArrayElements(env, privateKey_, private, 0);
+    (*env)->ReleaseByteArrayElements(env, publicKey_, public, 0);
+}
+
+JNIEXPORT void JNICALL
+Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreCryptoAddSignature(JNIEnv *env, jobject instance,
+                                                                 jbyteArray data_, jint size,
+                                                                 jbyteArray privateKey_, jbyteArray signature_) {
+
+    jbyte *data = (*env)->GetByteArrayElements(env, data_, NULL);
+    jbyte *private = (*env)->GetByteArrayElements(env, privateKey_, NULL);
+    jbyte *signature = (*env)->GetByteArrayElements(env, signature_, NULL);
+
+    hm_crypto_openssl_signature(data, size, private, signature);
+
+    (*env)->ReleaseByteArrayElements(env, data_, data, 0);
+    (*env)->ReleaseByteArrayElements(env, privateKey_, private, 0);
+    (*env)->ReleaseByteArrayElements(env, signature_, signature, 0);
+}
