@@ -60,7 +60,7 @@ public class LocalDevice extends Device {
     HMBTCore core = new HMBTCore();
 
     static LocalDevice instance = null;
-    public State state = State.IDLE;
+    State state = State.IDLE;
     Link[] links = new Link[0];
 
     public static LocalDevice getInstance() {
@@ -69,6 +69,10 @@ public class LocalDevice extends Device {
         }
 
         return instance;
+    }
+
+    public State getState() {
+        return state;
     }
 
     public void setListener(LocalDeviceListener listener) {
