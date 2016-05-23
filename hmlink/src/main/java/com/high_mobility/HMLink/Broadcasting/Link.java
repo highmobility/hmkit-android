@@ -20,7 +20,7 @@ public class Link {
     State state;
     public AccessCertificate certificate;
 
-    LinkCallback callback;
+    LinkListener listener;
 
     BluetoothDevice btDevice;
 
@@ -42,8 +42,8 @@ public class Link {
         return state;
     }
 
-    public void registerCallback(LinkCallback callback) {
-        this.callback = callback;
+    public void setListener(LinkListener listener) {
+        this.listener = listener;
     }
 
     public void sendCustomCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
@@ -68,13 +68,13 @@ public class Link {
             final State oldState = this.state;
             this.state = state;
 
-            if (callback != null) {
+            if (listener != null) {
                 final Link linkPointer = this;
 
                 this.device.mainThreadHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        linkPointer.callback.linkStateDidChange(linkPointer, oldState);
+                        linkPointer.listener.onStateChanged(linkPointer, oldState);
                     }
                 });
             }
@@ -95,13 +95,13 @@ public class Link {
 
     int pairingResponse = -1;
     int didReceivePairingRequest() {
-        if (callback == null) return 1;
+        if (listener == null) return 1;
         final Link reference = this;
         pairingResponse = -1;
         device.mainThreadHandler.post(new Runnable() {
             @Override
             public void run() {
-            callback.linkDidReceivePairingRequest(reference, new Constants.ApprovedCallback() {
+            listener.onPairingRequested(reference, new Constants.ApprovedCallback() {
                 @Override
                 public void approve() {
                     pairingResponse = 0;
@@ -124,7 +124,7 @@ public class Link {
                 device.mainThreadHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        callback.linkPairingDidTimeout(reference);
+                        listener.onPairingRequestTimeout(reference);
                     }
                 });
 

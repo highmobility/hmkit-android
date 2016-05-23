@@ -44,7 +44,7 @@ public class LocalDevice extends Device {
     Storage storage;
     byte[] privateKey;
     byte[] CAPublicKey;
-    LocalDeviceCallback callback;
+    LocalDeviceListener listener;
 
     BluetoothManager mBluetoothManager;
     BluetoothAdapter mBluetoothAdapter;
@@ -71,8 +71,8 @@ public class LocalDevice extends Device {
         return instance;
     }
 
-    public void registerCallback(LocalDeviceCallback callback) {
-        this.callback = callback;
+    public void setListener(LocalDeviceListener listener) {
+        this.listener = listener;
     }
 
     public void setDeviceCertificate(DeviceCertificate certificate, byte[] privateKey, byte[] CAPublicKey, Context ctx) {
@@ -208,7 +208,7 @@ public class LocalDevice extends Device {
 
         if (linkIndex > -1) {
             Link link = links[linkIndex];
-            return link.callback.linkDidReceiveCustomCommand(link, data);
+            return link.listener.onCommandReceived(link, data);
         }
         else {
             Log.e(TAG, "no link for custom command received");
@@ -241,12 +241,12 @@ public class LocalDevice extends Device {
 
         link.setState(Link.State.CONNECTED);
 
-        if (callback != null) {
+        if (listener != null) {
             final LocalDevice devicePointer = this;
             devicePointer.mainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    devicePointer.callback.localDeviceDidReceiveLink(link);
+                    devicePointer.listener.onLinkReceived(link);
                 }
             });
         }
@@ -286,13 +286,13 @@ public class LocalDevice extends Device {
 
             link.setState(Link.State.DISCONNECTED);
 
-            // invoke the listener callback
-            if (callback != null) {
+            // invoke the listener listener
+            if (listener != null) {
                 final LocalDevice devicePointer = this;
                 devicePointer.mainThreadHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        devicePointer.callback.localDeviceDidLoseLink(link);
+                        devicePointer.listener.onLinkLost(link);
                     }
                 });
             }
@@ -435,11 +435,11 @@ public class LocalDevice extends Device {
             final State oldState = this.state;
             this.state = state;
 
-            if (callback != null) {
+            if (listener != null) {
                 mainThreadHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        callback.localDeviceStateChanged(state, oldState);
+                        listener.onStateChanged(state, oldState);
                     }
                 });
             }

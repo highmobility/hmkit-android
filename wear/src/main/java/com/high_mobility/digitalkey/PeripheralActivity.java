@@ -11,19 +11,18 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.high_mobility.HMLink.Broadcasting.Link;
-import com.high_mobility.HMLink.Broadcasting.LinkCallback;
+import com.high_mobility.HMLink.Broadcasting.LinkListener;
 import com.high_mobility.HMLink.Broadcasting.LocalDevice;
-import com.high_mobility.HMLink.Broadcasting.LocalDeviceCallback;
+import com.high_mobility.HMLink.Broadcasting.LocalDeviceListener;
 import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.DeviceCertificate;
 import com.high_mobility.HMLink.Utils;
 
-public class PeripheralActivity extends WearableActivity implements LocalDeviceCallback, LinkCallback {
+public class PeripheralActivity extends WearableActivity implements LocalDeviceListener, LinkListener {
     private static final byte[] CA_PUBLIC_KEY = Utils.bytesFromHex("***REMOVED***");
     private static final byte[] CA_APP_IDENTIFIER = Utils.bytesFromHex("***REMOVED***");
 //    private static final byte[] CA_ISSUER = Utils.bytesFromHex("48494D4C");
@@ -68,7 +67,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
         cert.setSignature(Utils.bytesFromHex("***REMOVED***")); // original
 
         device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
-        device.registerCallback(this);
+        device.setListener(this);
 
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
@@ -96,7 +95,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
                     }
                 });
 
-                localDeviceStateChanged(device.state, device.state);
+                onStateChanged(device.state, device.state);
 
                 try {
                     device.startBroadcasting();
@@ -139,7 +138,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     }
 
     @Override
-    public void localDeviceStateChanged(LocalDevice.State state, LocalDevice.State oldState) {
+    public void onStateChanged(LocalDevice.State state, LocalDevice.State oldState) {
         switch (state) {
             case BLUETOOTH_UNAVAILABLE:
                 textView.setText(device.getName() + " / x");
@@ -154,33 +153,33 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     }
 
     @Override
-    public void localDeviceDidReceiveLink(Link link) {
+    public void onLinkReceived(Link link) {
         gridViewAdapter.setLinks(device.getLinks());
-        link.registerCallback(this);
-        Log.i(TAG, "localDeviceDidReceiveLink");
+        link.setListener(this);
+        Log.i(TAG, "onLinkReceived");
     }
 
     @Override
-    public void localDeviceDidLoseLink(Link link) {
+    public void onLinkLost(Link link) {
         gridViewAdapter.setLinks(device.getLinks());
-        link.registerCallback(null);
-        Log.i(TAG, "localDeviceDidLoseLink");
+        link.setListener(null);
+        Log.i(TAG, "onLinkLost");
     }
 
     @Override
-    public void linkStateDidChange(Link link, Link.State oldState) {
+    public void onStateChanged(Link link, Link.State oldState) {
         gridViewAdapter.setLinks(device.getLinks());
     }
 
     @Override
-    public byte[] linkDidReceiveCustomCommand(Link link, byte[] bytes) {
-        Log.i(TAG, "linkDidReceiveCustomCommand " + Utils.hexFromBytes(bytes));
+    public byte[] onCommandReceived(Link link, byte[] bytes) {
+        Log.i(TAG, "onCommandReceived " + Utils.hexFromBytes(bytes));
         return new byte[] { 0x01, bytes[0] };
     }
 
     @Override
-    public void linkDidReceivePairingRequest(Link link,
-                                             final Constants.ApprovedCallback approvedCallback) {
+    public void onPairingRequested(Link link,
+                                   final Constants.ApprovedCallback approvedCallback) {
         Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         long[] vibrationPattern = {0, 300};
         final int indexInPatternToRepeat = -1;
@@ -210,7 +209,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceC
     }
 
     @Override
-    public void linkPairingDidTimeout(Link link) {
+    public void onPairingRequestTimeout(Link link) {
         pairingView.declineButton.setOnClickListener(null);
         pairingView.confirmButton.setOnClickListener(null);
         pairingView.setVisibility(View.GONE);
