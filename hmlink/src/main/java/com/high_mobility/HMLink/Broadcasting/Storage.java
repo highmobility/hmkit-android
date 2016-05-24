@@ -7,7 +7,6 @@ import android.util.Log;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.AccessCertificate;
 import com.high_mobility.HMLink.Shared.Certificate;
-import com.high_mobility.HMLink.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +40,7 @@ class Storage {
 
             int counter = 0;
             for (String bytesString : bytesStringSet) {
-                AccessCertificate cert = new AccessCertificate(Utils.bytesFromHex(bytesString));
+                AccessCertificate cert = new AccessCertificate(ByteUtils.bytesFromHex(bytesString));
                 certificates[counter] = cert;
                 counter++;
             }
@@ -56,7 +55,7 @@ class Storage {
         HashSet<String> stringSet = new HashSet<>();
 
         for (Certificate cert : certificates) {
-            stringSet.add(Utils.hexFromBytes(cert.getBytes()));
+            stringSet.add(ByteUtils.hexFromBytes(cert.getBytes()));
         }
 
         editor.putStringSet(ACCESS_CERTIFICATE_STORAGE_KEY, stringSet);
@@ -221,8 +220,8 @@ class Storage {
     private void _test_Storage() {
         editor.clear();
         editor.commit();
-        AccessCertificate cert1 = new AccessCertificate(Utils.bytesFromHex("***REMOVED***"));
-        AccessCertificate cert2 = new AccessCertificate(Utils.bytesFromHex("***REMOVED***"));
+        AccessCertificate cert1 = new AccessCertificate(ByteUtils.bytesFromHex("***REMOVED***"));
+        AccessCertificate cert2 = new AccessCertificate(ByteUtils.bytesFromHex("***REMOVED***"));
 
         AccessCertificate[] certs = new AccessCertificate[] {cert1, cert2};
         setCertificates(certs);

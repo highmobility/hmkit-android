@@ -17,7 +17,6 @@ import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
 
-import com.high_mobility.HMLink.Utils;
 import com.high_mobility.btcore.HMBTCore;
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.Constants;
@@ -126,7 +125,7 @@ public class LocalDevice extends Device {
                 .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
                 .build();
 
-        final UUID advertiseUUID = Utils.UUIDFromByteArray(Utils.concatBytes(certificate.getIssuer(), certificate.getAppIdentifier()));
+        final UUID advertiseUUID = ByteUtils.UUIDFromByteArray(ByteUtils.concatBytes(certificate.getIssuer(), certificate.getAppIdentifier()));
 
         final AdvertiseData data = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
@@ -257,7 +256,7 @@ public class LocalDevice extends Device {
     }
 
     void didLoseLink(HMDevice device) {
-        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(TAG, "lose link " + Utils.hexFromBytes(device.getMac()));
+        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
         BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
@@ -334,11 +333,11 @@ public class LocalDevice extends Device {
     void setAdapterName() {
         byte[] serialBytes = new byte[4];
         new Random().nextBytes(serialBytes);
-        mBluetoothAdapter.setName(Utils.hexFromBytes(serialBytes));
+        mBluetoothAdapter.setName(ByteUtils.hexFromBytes(serialBytes));
     }
 
     void writeData(byte[] mac, byte[] value) {
-        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Debug.getValue()) Log.i(TAG, "write " + Utils.hexFromBytes(mac) + " " + Utils.hexFromBytes(value));
+        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Debug.getValue()) Log.i(TAG, "write " + ByteUtils.hexFromBytes(mac) + " " + ByteUtils.hexFromBytes(value));
         Link link = getLinkForMac(mac);
         if (link != null) {
             readCharacteristic.setValue(value);

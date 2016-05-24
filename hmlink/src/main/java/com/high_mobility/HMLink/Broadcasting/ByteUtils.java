@@ -1,4 +1,4 @@
-package com.high_mobility.HMLink;
+package com.high_mobility.HMLink.Broadcasting;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothProfile;
@@ -11,40 +11,7 @@ import java.util.UUID;
 /**
  * Created by ttiganik on 08/04/16.
  */
-public class Utils {
-    public static String getStateDescription(int state) {
-
-        switch (state) {
-            case BluetoothProfile.STATE_CONNECTED:
-                return "Connected";
-            case BluetoothProfile.STATE_CONNECTING:
-                return "Connecting";
-            case BluetoothProfile.STATE_DISCONNECTED:
-                return "Disconnected";
-            case BluetoothProfile.STATE_DISCONNECTING:
-                return "Disconnecting";
-            default:
-                return "Unknown State " + state;
-        }
-    }
-
-    public static String getStatusDescription(int status) {
-        switch (status) {
-            case BluetoothGatt.GATT_SUCCESS:
-                return "SUCCESS";
-            default:
-                return "Unknown Status "+status;
-        }
-    }
-
-    public static UUID UUIDFromByteArray(byte[] bytes) {
-        ByteBuffer bb = ByteBuffer.wrap(bytes);
-        long high = bb.getLong();
-        long low = bb.getLong();
-        UUID uuid = new UUID(high, low);
-        return uuid;
-    }
-
+public class ByteUtils {
     final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
     public static String hexFromBytes(byte[] bytes) {
         if (bytes == null) return "(null)";
@@ -78,7 +45,15 @@ public class Utils {
         return c;
     }
 
-    public static byte[] bytesFromMacString(String mac) {
+    static UUID UUIDFromByteArray(byte[] bytes) {
+        ByteBuffer bb = ByteBuffer.wrap(bytes);
+        long high = bb.getLong();
+        long low = bb.getLong();
+        UUID uuid = new UUID(high, low);
+        return uuid;
+    }
+
+    static byte[] bytesFromMacString(String mac) {
         String[] macAddressParts = mac.split(":");
 
         // convert hex string to byte values
@@ -89,17 +64,5 @@ public class Utils {
         }
 
         return macAddressBytes;
-    }
-
-    public static void enableView(View view, boolean enable) {
-        view.setEnabled(enable);
-
-        if ( view instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup)view;
-
-            for ( int idx = 0 ; idx < group.getChildCount() ; idx++ ) {
-                enableView(group.getChildAt(idx), enable);
-            }
-        }
     }
 }

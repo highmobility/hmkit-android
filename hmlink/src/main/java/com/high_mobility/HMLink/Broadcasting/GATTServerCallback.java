@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothProfile;
 
 import com.high_mobility.HMLink.Constants;
-import com.high_mobility.HMLink.Utils;
 
 import java.util.Arrays;
 
@@ -26,7 +25,7 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
         super.onConnectionStateChange(device, status, newState);
 
         if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            this.device.core.HMBTCorelinkDisconnect(this.device.coreInterface, Utils.bytesFromMacString(device.getAddress()));
+            this.device.core.HMBTCorelinkDisconnect(this.device.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
         }
     }
 
@@ -70,7 +69,7 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
 
         if (responseNeeded) {
             this.device.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
-            this.device.core.HMBTCorelinkIncomingData(this.device.coreInterface, value, value.length, Utils.bytesFromMacString(device.getAddress()));
+            this.device.core.HMBTCorelinkIncomingData(this.device.coreInterface, value, value.length, ByteUtils.bytesFromMacString(device.getAddress()));
         }
     }
 
@@ -80,7 +79,7 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
         if (responseNeeded) {
             this.device.didReceiveLink(device);
             this.device.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
-            this.device.core.HMBTCorelinkConnect(this.device.coreInterface, Utils.bytesFromMacString(device.getAddress()));
+            this.device.core.HMBTCorelinkConnect(this.device.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
         }
     }
 }

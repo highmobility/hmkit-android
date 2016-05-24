@@ -10,8 +10,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.high_mobility.HMLink.Broadcasting.ByteUtils;
 import com.high_mobility.HMLink.Broadcasting.Link;
-import com.high_mobility.HMLink.Utils;
 
 /**
  * Fragment used to show BoxInsetLayout.
@@ -34,7 +34,7 @@ public class LinkFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		ViewGroup layout = (ViewGroup) inflater.inflate(R.layout.link_grid_item, container, false);
 		textView = (TextView)layout.findViewById(R.id.text);
-		textView.setText(Utils.hexFromBytes(link.getSerial()));
+		textView.setText(ByteUtils.hexFromBytes(link.getSerial()));
 
 
 		Button unlockButton = (Button) layout.findViewById(R.id.unlockButton);
@@ -54,7 +54,7 @@ public class LinkFragment extends Fragment {
 		});
 
 		authView = (LinearLayout)layout.findViewById(R.id.link_grid_item_auth_view);
-		Utils.enableView(authView, link.getState() == Link.State.AUTHENTICATED);
+		ViewUtils.enableView(authView, link.getState() == Link.State.AUTHENTICATED);
 
 		return layout;
 	}

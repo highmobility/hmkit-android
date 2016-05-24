@@ -3,10 +3,8 @@ package com.high_mobility.HMLink.Broadcasting;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
-import com.high_mobility.HMLink.Utils;
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.Constants;
-import com.high_mobility.HMLink.Shared.AccessCertificate;
 
 import java.lang.ref.WeakReference;
 import java.util.Calendar;
@@ -46,7 +44,7 @@ public class Link {
     }
 
     public void sendCustomCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
-        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Debug.getValue()) Log.i(LocalDevice.TAG, "sendCustomCommand " + Utils.hexFromBytes(hmDevice.getMac()));
+        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Debug.getValue()) Log.i(LocalDevice.TAG, "sendCustomCommand " + ByteUtils.hexFromBytes(hmDevice.getMac()));
         commandCallback = new WeakReference<>(responseCallback);
         device.core.HMBTCoreSendCustomCommand(this.device.coreInterface, bytes, bytes.length, getAddressBytes());
     }
@@ -81,7 +79,7 @@ public class Link {
     }
 
     void didReceiveCustomCommandResponse(final byte[] data) {
-        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Debug.getValue()) Log.i(LocalDevice.TAG, "didReceiveCustomCommandResponse " + Utils.hexFromBytes(hmDevice.getMac()));
+        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Debug.getValue()) Log.i(LocalDevice.TAG, "didReceiveCustomCommandResponse " + ByteUtils.hexFromBytes(hmDevice.getMac()));
         if (commandCallback != null && commandCallback.get() != null) {
             this.device.mainThreadHandler.post(new Runnable() {
                 @Override
@@ -136,6 +134,6 @@ public class Link {
     }
 
     byte[] getAddressBytes() {
-        return Utils.bytesFromMacString(btDevice.getAddress());
+        return ByteUtils.bytesFromMacString(btDevice.getAddress());
     }
 }

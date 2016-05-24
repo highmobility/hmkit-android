@@ -9,10 +9,12 @@ import android.support.wearable.view.GridViewPager;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.high_mobility.HMLink.Broadcasting.ByteUtils;
 import com.high_mobility.HMLink.Broadcasting.Link;
 import com.high_mobility.HMLink.Broadcasting.LinkListener;
 import com.high_mobility.HMLink.Broadcasting.LocalDevice;
@@ -20,15 +22,14 @@ import com.high_mobility.HMLink.Broadcasting.LocalDeviceListener;
 import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.DeviceCertificate;
-import com.high_mobility.HMLink.Utils;
 
 public class PeripheralActivity extends WearableActivity implements LocalDeviceListener, LinkListener {
-    private static final byte[] CA_PUBLIC_KEY = Utils.bytesFromHex("***REMOVED***");
-    private static final byte[] CA_APP_IDENTIFIER = Utils.bytesFromHex("***REMOVED***");
-//    private static final byte[] CA_ISSUER = Utils.bytesFromHex("48494D4C");
-    private static final byte[] CA_ISSUER = Utils.bytesFromHex("48494D4F");
-    private static final byte[] DEVICE_PUBLIC_KEY = Utils.bytesFromHex("***REMOVED***");
-    private static final byte[] DEVICE_PRIVATE_KEY = Utils.bytesFromHex("***REMOVED***");
+    private static final byte[] CA_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
+    private static final byte[] CA_APP_IDENTIFIER = ByteUtils.bytesFromHex("***REMOVED***");
+//    private static final byte[] CA_ISSUER = ByteUtils.bytesFromHex("48494D4C");
+    private static final byte[] CA_ISSUER = ByteUtils.bytesFromHex("48494D4F");
+    private static final byte[] DEVICE_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
+    private static final byte[] DEVICE_PRIVATE_KEY = ByteUtils.bytesFromHex("***REMOVED***");
 
     static final String TAG = "DigitalKey";
 
@@ -63,8 +64,8 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         gridViewAdapter = new LinkGridViewAdapter(this, getFragmentManager());
 
         DeviceCertificate cert = new DeviceCertificate(CA_ISSUER, CA_APP_IDENTIFIER, getSerial(), DEVICE_PUBLIC_KEY);
-//        cert.setSignature(Utils.bytesFromHex("***REMOVED***")); // 48494D4C sig
-        cert.setSignature(Utils.bytesFromHex("***REMOVED***")); // original
+//        cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***")); // 48494D4C sig
+        cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***")); // original
 
         device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
         device.setListener(this);
@@ -127,12 +128,12 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         String serialKey = "serialUserDefaultsKey";
 
         if (settings.contains(serialKey)) {
-            return Utils.bytesFromHex(settings.getString(serialKey, ""));
+            return ByteUtils.bytesFromHex(settings.getString(serialKey, ""));
         }
         else {
             byte[] serialBytes = new byte[9];
             new Random().nextBytes(serialBytes);
-            editor.putString(serialKey, Utils.hexFromBytes(serialBytes));
+            editor.putString(serialKey, ByteUtils.hexFromBytes(serialBytes));
             return serialBytes;
         }*/
     }
@@ -173,7 +174,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
 
     @Override
     public byte[] onCommandReceived(Link link, byte[] bytes) {
-        Log.i(TAG, "onCommandReceived " + Utils.hexFromBytes(bytes));
+        Log.i(TAG, "onCommandReceived " + ByteUtils.hexFromBytes(bytes));
         return new byte[] { 0x01, bytes[0] };
     }
 
@@ -219,11 +220,11 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         byte[] cmd = new byte[] { 0x17, 0x01 };
         final LinkFragment fragment = gridViewAdapter.getFragment(link);
 
-        Utils.enableView(fragment.authView, false);
+        ViewUtils.enableView(fragment.authView, false);
         link.sendCustomCommand(cmd, true, new Constants.DataResponseCallback() {
             @Override
             public void response(byte[] bytes, LinkException exception) {
-                Utils.enableView(fragment.authView, true);
+                ViewUtils.enableView(fragment.authView, true);
             }
         });
     }
@@ -232,11 +233,11 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         byte[] cmd = new byte[] { 0x17, 0x00 };
         final LinkFragment fragment = gridViewAdapter.getFragment(link);
 
-        Utils.enableView(fragment.authView, false);
+        ViewUtils.enableView(fragment.authView, false);
         link.sendCustomCommand(cmd, true, new Constants.DataResponseCallback() {
             @Override
             public void response(byte[] bytes, LinkException exception) {
-                Utils.enableView(fragment.authView, true);
+                ViewUtils.enableView(fragment.authView, true);
             }
         });
     }
