@@ -33,8 +33,6 @@ import java.util.UUID;
  * Created by ttiganik on 12/04/16.
  */
 public class LocalDevice extends Device {
-
-    static final boolean ALLOWS_MULTIPLE_LINKS = false;
     static final String TAG = "HMLink";
 
     public enum State { BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING }
@@ -105,9 +103,7 @@ public class LocalDevice extends Device {
     }
 
     public void startBroadcasting() throws LinkException {
-        if (ALLOWS_MULTIPLE_LINKS == false && links.length != 0) {
-            return;
-        }
+        if (state == State.BROADCASTING) return; // already broadcasting
 
         checkIfBluetoothIsEnabled();
 
@@ -256,7 +252,7 @@ public class LocalDevice extends Device {
     }
 
     void didLoseLink(HMDevice device) {
-        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
+        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.All.getValue()) Log.i(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
         BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
@@ -283,7 +279,7 @@ public class LocalDevice extends Device {
             links = newLinks;
 
             // set new adapter name
-            if (LocalDevice.ALLOWS_MULTIPLE_LINKS == false && getLinks() == null) {
+            if (links.length == 0) {
                 setAdapterName();
             }
 
@@ -318,18 +314,6 @@ public class LocalDevice extends Device {
         }
     }
 
-    private int linkIndexForBTDevice(BluetoothDevice device) {
-        for (int i = 0; i < links.length; i++) {
-            Link link = links[i];
-
-            if (link.btDevice.getAddress().equals(device.getAddress())) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
     void setAdapterName() {
         byte[] serialBytes = new byte[4];
         new Random().nextBytes(serialBytes);
@@ -348,6 +332,10 @@ public class LocalDevice extends Device {
         }
     }
 
+    protected boolean isReadCharacteristic(UUID characteristicUUID) {
+        return READ_CHAR_UUID.equals(characteristicUUID);
+    }
+
     private Link getLinkForMac(byte[] mac) {
         for (int i = 0; i < links.length; i++) {
             Link link = links[i];
@@ -360,18 +348,30 @@ public class LocalDevice extends Device {
         return null;
     }
 
+    private int linkIndexForBTDevice(BluetoothDevice device) {
+        for (int i = 0; i < links.length; i++) {
+            Link link = links[i];
+
+            if (link.btDevice.getAddress().equals(device.getAddress())) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     private void createGATTServer() {
         if (GATTServer == null) {
             gattServerCallback = new GATTServerCallback(LocalDevice.getInstance());
             GATTServer = mBluetoothManager.openGattServer(ctx, gattServerCallback);
 
-            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(TAG, "createGATTServer");
+            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.All.getValue()) Log.i(TAG, "createGATTServer");
             // create the service
-            BluetoothGattService service = new BluetoothGattService(Constants.SERVICE_UUID,
+            BluetoothGattService service = new BluetoothGattService(SERVICE_UUID,
                     BluetoothGattService.SERVICE_TYPE_PRIMARY);
 
             readCharacteristic =
-                    new BluetoothGattCharacteristic(Constants.READ_CHAR_UUID,
+                    new BluetoothGattCharacteristic(READ_CHAR_UUID,
                             BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                             BluetoothGattCharacteristic.PERMISSION_READ);
 
@@ -379,7 +379,7 @@ public class LocalDevice extends Device {
             readCharacteristic.addDescriptor(new BluetoothGattDescriptor(confUUUID, BluetoothGattDescriptor.PERMISSION_READ | BluetoothGattDescriptor.PERMISSION_WRITE));
 
             writeCharacteristic =
-                    new BluetoothGattCharacteristic(Constants.WRITE_CHAR_UUID,
+                    new BluetoothGattCharacteristic(WRITE_CHAR_UUID,
                             BluetoothGattCharacteristic.PROPERTY_WRITE,
                             BluetoothGattCharacteristic.PERMISSION_WRITE);
 
@@ -389,7 +389,7 @@ public class LocalDevice extends Device {
             GATTServer.addService(service);
         }
         else {
-            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(TAG, "createGATTServer: already exists");
+            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.All.getValue()) Log.i(TAG, "createGATTServer: already exists");
         }
     }
 
@@ -398,7 +398,7 @@ public class LocalDevice extends Device {
             mBluetoothManager = (BluetoothManager) ctx.getSystemService(Context.BLUETOOTH_SERVICE);
             mBluetoothAdapter = mBluetoothManager.getAdapter();
             setAdapterName();
-            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(TAG, "Create adapter " + mBluetoothAdapter.getName());
+            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.All.getValue()) Log.i(TAG, "Create adapter " + mBluetoothAdapter.getName());
         }
     }
 
@@ -417,7 +417,7 @@ public class LocalDevice extends Device {
     private final AdvertiseCallback advertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(TAG, "Start advertise " + mBluetoothAdapter.getName());
+            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.All.getValue()) Log.i(TAG, "Start advertise " + mBluetoothAdapter.getName());
             setState(State.BROADCASTING);
         }
 

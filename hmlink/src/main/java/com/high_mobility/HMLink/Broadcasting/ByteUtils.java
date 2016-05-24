@@ -1,10 +1,5 @@
 package com.high_mobility.HMLink.Broadcasting;
 
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothProfile;
-import android.view.View;
-import android.view.ViewGroup;
-
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
@@ -12,7 +7,7 @@ import java.util.UUID;
  * Created by ttiganik on 08/04/16.
  */
 public class ByteUtils {
-    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+    final static char[] hexArray = "0123456789ABCDEF".toCharArray();
     public static String hexFromBytes(byte[] bytes) {
         if (bytes == null) return "(null)";
         char[] hexChars = new char[bytes.length * 2];

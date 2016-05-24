@@ -3,10 +3,9 @@ package com.high_mobility.HMLink;
 import java.util.UUID;
 
 public class Constants {
-
-    public final static LoggingLevel loggingLevel = LoggingLevel.All;
+    public final static LoggingLevel loggingLevel = LoggingLevel.Debug;
     public enum LoggingLevel {
-        Debug(0), Info(1), All(2);
+        None(0), Debug(1), All(2);
 
         private Integer level;
 
@@ -19,14 +18,6 @@ public class Constants {
         }
     }
 
-    public static UUID SERVICE_UUID = UUID.fromString("713D0100-503E-4C75-BA94-3148F18D941E");
-
-    public static UUID READ_CHAR_UUID = UUID.fromString("713D0102-503E-4C75-BA94-3148F18D941E");
-
-    public static UUID WRITE_CHAR_UUID = UUID.fromString("713D0103-503E-4C75-BA94-3148F18D941E");
-
-    public static UUID PING_CHAR_UUID = UUID.fromString("713D0104-503E-4C75-BA94-3148F18D941E");
-
     public static final float registerTimeout      = 6.0f;
 
     public interface ApprovedCallback {
@@ -36,9 +27,5 @@ public class Constants {
 
     public interface DataResponseCallback {
         void response(byte[] bytes, LinkException exception);
-    }
-
-    public interface ResponseCallback {
-        void response(Error error);
     }
 }

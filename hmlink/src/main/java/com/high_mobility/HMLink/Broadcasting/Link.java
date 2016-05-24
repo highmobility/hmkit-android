@@ -125,7 +125,7 @@ public class Link {
                     }
                 });
 
-                if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Info.getValue()) Log.i(LocalDevice.TAG, "pairing timer exceeded");
+                if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.All.getValue()) Log.i(LocalDevice.TAG, "pairing timer exceeded");
                 return 1; // TODO: use correct code
             }
         }
