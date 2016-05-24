@@ -42,14 +42,14 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
     private BoxInsetLayout container;
 
     public void didTapTitle(View view) {
-        if (device.state == LocalDevice.State.IDLE) {
+        if (device.getState() == LocalDevice.State.IDLE) {
             try {
                 device.startBroadcasting();
             } catch (LinkException e) {
                 e.printStackTrace();
             }
         }
-        else if (device.state == LocalDevice.State.BROADCASTING) {
+        else if (device.getState() == LocalDevice.State.BROADCASTING) {
             device.stopBroadcasting();
         }
     }
@@ -95,7 +95,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
                     }
                 });
 
-                onStateChanged(device.state, device.state);
+                onStateChanged(device.getState(), device.getState());
 
                 try {
                     device.startBroadcasting();
