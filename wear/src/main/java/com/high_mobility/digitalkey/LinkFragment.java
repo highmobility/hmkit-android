@@ -36,7 +36,6 @@ public class LinkFragment extends Fragment {
 		textView = (TextView)layout.findViewById(R.id.text);
 		textView.setText(ByteUtils.hexFromBytes(link.getSerial()));
 
-
 		Button unlockButton = (Button) layout.findViewById(R.id.unlockButton);
 		unlockButton.setOnClickListener(new View.OnClickListener() {
             @Override

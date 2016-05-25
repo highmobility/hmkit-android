@@ -92,7 +92,11 @@ public class Link {
 
     int pairingResponse = -1;
     int didReceivePairingRequest() {
-        if (listener == null) return 1;
+        if (listener == null) {
+            Log.e(LocalDevice.TAG, "link listener not set");
+            return 1;
+        }
+
         final Link reference = this;
         pairingResponse = -1;
         device.mainThreadHandler.post(new Runnable() {
