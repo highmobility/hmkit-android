@@ -1,4 +1,4 @@
-package com.high_mobility.HMLink.Shared;
+package com.high_mobility.HMLink;
 
 import java.util.Calendar;
 import java.util.Date;

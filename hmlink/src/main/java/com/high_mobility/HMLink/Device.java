@@ -1,7 +1,5 @@
 package com.high_mobility.HMLink;
 
-import com.high_mobility.HMLink.Shared.DeviceCertificate;
-
 import java.util.UUID;
 
 /**

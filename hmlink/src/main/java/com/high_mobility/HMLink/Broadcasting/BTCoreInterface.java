@@ -2,12 +2,11 @@ package com.high_mobility.HMLink.Broadcasting;
 
 import android.util.Log;
 
-import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.Device;
 import com.high_mobility.btcore.HMBTCoreInterface;
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.LinkException;
-import com.high_mobility.HMLink.Shared.AccessCertificate;
+import com.high_mobility.HMLink.AccessCertificate;
 
 /**
  * Created by ttiganik on 20/04/16.

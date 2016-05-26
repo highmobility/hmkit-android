@@ -5,8 +5,8 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.high_mobility.HMLink.LinkException;
-import com.high_mobility.HMLink.Shared.AccessCertificate;
-import com.high_mobility.HMLink.Shared.Certificate;
+import com.high_mobility.HMLink.AccessCertificate;
+import com.high_mobility.HMLink.Certificate;
 
 import java.util.ArrayList;
 import java.util.Arrays;

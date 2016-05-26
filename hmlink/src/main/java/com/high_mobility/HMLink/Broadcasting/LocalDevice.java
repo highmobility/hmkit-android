@@ -19,11 +19,10 @@ import android.util.Log;
 
 import com.high_mobility.btcore.HMBTCore;
 import com.high_mobility.btcore.HMDevice;
-import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.Device;
 import com.high_mobility.HMLink.LinkException;
-import com.high_mobility.HMLink.Shared.AccessCertificate;
-import com.high_mobility.HMLink.Shared.DeviceCertificate;
+import com.high_mobility.HMLink.AccessCertificate;
+import com.high_mobility.HMLink.DeviceCertificate;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -56,9 +55,9 @@ public class LocalDevice extends Device {
     BTCoreInterface coreInterface;
     HMBTCore core = new HMBTCore();
 
-    static LocalDevice instance = null;
     State state = State.IDLE;
     Link[] links = new Link[0];
+    static LocalDevice instance = null;
 
     public static LocalDevice getInstance() {
         if (instance == null) {

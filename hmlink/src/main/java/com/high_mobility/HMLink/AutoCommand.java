@@ -1,4 +1,4 @@
-package com.high_mobility.HMLink.Shared;
+package com.high_mobility.HMLink;
 
 /**
  * Created by ttiganik on 25/05/16.

@@ -1,4 +1,4 @@
-package com.high_mobility.HMLink.Shared;
+package com.high_mobility.HMLink;
 
 
 import com.high_mobility.HMLink.Broadcasting.ByteUtils;

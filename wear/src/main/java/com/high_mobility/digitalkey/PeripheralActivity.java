@@ -20,7 +20,7 @@ import com.high_mobility.HMLink.Broadcasting.LocalDevice;
 import com.high_mobility.HMLink.Broadcasting.LocalDeviceListener;
 import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.LinkException;
-import com.high_mobility.HMLink.Shared.DeviceCertificate;
+import com.high_mobility.HMLink.DeviceCertificate;
 
 public class PeripheralActivity extends WearableActivity implements LocalDeviceListener, LinkListener {
     private static final byte[] CA_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
