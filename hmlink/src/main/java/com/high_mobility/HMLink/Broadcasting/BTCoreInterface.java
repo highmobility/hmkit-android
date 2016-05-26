@@ -3,6 +3,7 @@ package com.high_mobility.HMLink.Broadcasting;
 import android.util.Log;
 
 import com.high_mobility.HMLink.Constants;
+import com.high_mobility.HMLink.Device;
 import com.high_mobility.btcore.HMBTCoreInterface;
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.LinkException;
@@ -197,7 +198,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMApiCallbackExitedProximity(HMDevice device) {
-        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.All.getValue()) Log.i(LocalDevice.TAG, "HMCtwExitedProximity");
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(LocalDevice.TAG, "HMCtwExitedProximity");
         this.device.didLoseLink(device);
     }
 

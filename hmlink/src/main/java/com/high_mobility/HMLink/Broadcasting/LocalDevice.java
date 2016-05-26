@@ -252,7 +252,7 @@ public class LocalDevice extends Device {
     }
 
     void didLoseLink(HMDevice device) {
-        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.All.getValue()) Log.i(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
         BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
@@ -321,7 +321,7 @@ public class LocalDevice extends Device {
     }
 
     void writeData(byte[] mac, byte[] value) {
-        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Debug.getValue()) Log.i(TAG, "write " + ByteUtils.hexFromBytes(mac) + " " + ByteUtils.hexFromBytes(value));
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue()) Log.i(TAG, "write " + ByteUtils.hexFromBytes(mac) + " " + ByteUtils.hexFromBytes(value));
         Link link = getLinkForMac(mac);
         if (link != null) {
             readCharacteristic.setValue(value);
@@ -365,7 +365,7 @@ public class LocalDevice extends Device {
             gattServerCallback = new GATTServerCallback(LocalDevice.getInstance());
             GATTServer = mBluetoothManager.openGattServer(ctx, gattServerCallback);
 
-            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.All.getValue()) Log.i(TAG, "createGATTServer");
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "createGATTServer");
             // create the service
             BluetoothGattService service = new BluetoothGattService(SERVICE_UUID,
                     BluetoothGattService.SERVICE_TYPE_PRIMARY);
@@ -389,7 +389,7 @@ public class LocalDevice extends Device {
             GATTServer.addService(service);
         }
         else {
-            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.All.getValue()) Log.i(TAG, "createGATTServer: already exists");
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "createGATTServer: already exists");
         }
     }
 
@@ -398,7 +398,7 @@ public class LocalDevice extends Device {
             mBluetoothManager = (BluetoothManager) ctx.getSystemService(Context.BLUETOOTH_SERVICE);
             mBluetoothAdapter = mBluetoothManager.getAdapter();
             setAdapterName();
-            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.All.getValue()) Log.i(TAG, "Create adapter " + mBluetoothAdapter.getName());
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "Create adapter " + mBluetoothAdapter.getName());
         }
     }
 
@@ -417,7 +417,7 @@ public class LocalDevice extends Device {
     private final AdvertiseCallback advertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.All.getValue()) Log.i(TAG, "Start advertise " + mBluetoothAdapter.getName());
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "Start advertise " + mBluetoothAdapter.getName());
             setState(State.BROADCASTING);
         }
 
