@@ -78,8 +78,13 @@ public class Link {
         }
     }
 
-    void didReceiveCustomCommandResponse(final byte[] data) {
-        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Debug.getValue()) Log.i(LocalDevice.TAG, "didReceiveCustomCommandResponse " + ByteUtils.hexFromBytes(hmDevice.getMac()));
+    byte[] onCommandReceived(byte[] bytes) {
+        if (listener == null) return null;
+        return listener.onCommandReceived(this, bytes);
+    }
+
+    void onCommandResponseReceived(final byte[] data) {
+        if (Constants.loggingLevel.getValue() >= Constants.LoggingLevel.Debug.getValue()) Log.i(LocalDevice.TAG, "onCommandResponseReceived " + ByteUtils.hexFromBytes(hmDevice.getMac()));
         if (commandCallback != null && commandCallback.get() != null) {
             this.device.mainThreadHandler.post(new Runnable() {
                 @Override

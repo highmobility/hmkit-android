@@ -203,20 +203,21 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMApiCallbackCustomCommandIncoming(HMDevice device, byte[] data, int[] length, int[] error) {
-        byte[] response = this.device.didReceiveCustomCommand(device, data);
+        byte[] response = this.device.onCommandReceived(device, data);
         if (response != null) {
             copyBytesToJNI(response, data);
             length[0] = response.length;
             error[0] = 0;
         }
         else {
-            error[0] = 1;
+            length[0] = 0;
+            error[0] = 0;
         }
     }
 
     @Override
     public void HMApiCallbackCustomCommandResponse(HMDevice device, byte[] data, int length) {
-        this.device.didReceiveCustomCommandResponse(device, data);
+        this.device.onCommandResponseReceived(device, data);
     }
 
     @Override

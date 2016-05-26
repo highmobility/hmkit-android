@@ -201,13 +201,13 @@ public class LocalDevice extends Device {
         return -1;
     }
 
-    byte[] didReceiveCustomCommand(HMDevice device, byte[] data) {
+    byte[] onCommandReceived(HMDevice device, byte[] data) {
         BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
 
         if (linkIndex > -1) {
             Link link = links[linkIndex];
-            return link.listener.onCommandReceived(link, data);
+            return link.onCommandReceived(data);
         }
         else {
             Log.e(TAG, "no link for custom command received");
@@ -215,13 +215,13 @@ public class LocalDevice extends Device {
         }
     }
 
-    void didReceiveCustomCommandResponse(HMDevice device, byte[] data) {
+    void onCommandResponseReceived(HMDevice device, byte[] data) {
         BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
 
         if (linkIndex > -1) {
             Link link = links[linkIndex];
-            link.didReceiveCustomCommandResponse(data);
+            link.onCommandResponseReceived(data);
         }
     }
 
