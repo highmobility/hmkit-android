@@ -9,35 +9,41 @@ import java.util.Date;
 public class Certificate {
     byte[] bytes;
 
-    public Certificate(byte[] bytes) {
+    Certificate(byte[] bytes) {
         this.bytes = bytes;
     }
 
-    public Certificate(){}
+    Certificate(){}
 
-    /// The certificate's data in binary format, without the signature
+    /**
+     * @return The certificate data in binary form, excluding the signature.
+     */
     public byte [] getCertificateData() {
         return null;
     }
 
-    /// The certificate's signature
+    /**
+     * @return The Certificate Authority's signature for the certificate, 64 bytes.
+     */
     public byte[] getSignature() {
         return null;
     }
 
-    /// The full certificate data in binary format.
+    /**
+     * @return The full certificate bytes, with the signature if it exists.
+     */
     public byte[] getBytes() {
         return bytes;
     }
 
-    protected static Date dateFromBytes(byte[] bytes) {
+    static Date dateFromBytes(byte[] bytes) {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(0);
         cal.set(2000 + bytes[0], bytes[1], bytes[2], bytes[3], bytes[4]);
         return cal.getTime(); // get back a Date object
     }
 
-    protected static byte[] bytesFromDate(Date date) {
+    static byte[] bytesFromDate(Date date) {
         byte [] bytes = new byte[5];
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);

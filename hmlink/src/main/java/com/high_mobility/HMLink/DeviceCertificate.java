@@ -7,7 +7,8 @@ import com.high_mobility.HMLink.Broadcasting.ByteUtils;
  * Created by ttiganik on 13/04/16.
  *
  * Device Certificate is used to recognize a valid device.
- * Certificate binary format
+ *
+ *  Certificate binary format
  * Bytes[0 to 4]: Issuer (4 bytes)
  * Bytes[4 to 16]: App ID (12 bytes)
  * Bytes[16 to 25]: Device serial (9 bytes)
@@ -16,24 +17,36 @@ import com.high_mobility.HMLink.Broadcasting.ByteUtils;
  *
  */
 public class DeviceCertificate extends Certificate {
+    /**
+     * @return The certificate issuer's identifier.
+     */
     public byte[] getIssuer() {
         byte[] bytes = new byte[4];
         System.arraycopy(this.bytes, 0, bytes, 0, 4);
         return bytes;
     }
 
+    /**
+     * @return The certificate's app identifier.
+     */
     public byte[] getAppIdentifier() {
         byte[] bytes = new byte[12];
         System.arraycopy(this.bytes, 4, bytes, 0, 12);
         return bytes;
     }
 
+    /**
+     * @return The serial number of the device.
+     */
     public byte[] getSerial() {
         byte[] bytes = new byte[9];
         System.arraycopy(this.bytes, 16, bytes, 0, 9);
         return bytes;
     }
 
+    /**
+     * @return The public key of the device.
+     */
     public byte[] getPublicKey() {
         byte[] bytes = new byte[64];
         System.arraycopy(this.bytes, 25, bytes, 0, 64);
@@ -51,6 +64,9 @@ public class DeviceCertificate extends Certificate {
         return bytes;
     }
 
+    /**
+     * @return The Certificate Authority's signature for the certificate, 64 bytes.
+     */
     @Override
     public byte[] getSignature() {
         if (bytes.length == 153) {
@@ -62,6 +78,9 @@ public class DeviceCertificate extends Certificate {
         return null;
     }
 
+    /**
+     * @param bytes The Certificate Authority's signature for the certificate, 64 bytes.
+     */
     public void setSignature(byte[] bytes) {
         if (bytes.length == 64) {
             this.bytes = ByteUtils.concatBytes(getCertificateData(), bytes);
@@ -81,6 +100,11 @@ public class DeviceCertificate extends Certificate {
         return description;
     }
 
+    /**
+     * Initialise Initialise the device certificate with raw bytes.
+     * @param bytes The bytes making up the certificate (89 bytes are expected).
+     * @throws IllegalArgumentException When bytes length is not correct.
+     */
     public DeviceCertificate(byte[] bytes) throws IllegalArgumentException {
         super(bytes);
 
@@ -89,6 +113,17 @@ public class DeviceCertificate extends Certificate {
         }
     }
 
+    /**
+     * Initialise the device certificate with all its attributes except Certificate Authority
+     * signature.
+     *
+     * @param issuer        The issuer's identifying 4 bytes.
+     * @param appIdentifier The specific app's identifying 12 bytes (one issuer might have many
+     *                      apps / uses).
+     * @param serial        The serial of the device with the certificate that's 9 bytes.
+     * @param publicKey     The public key of the device with the certificate that's 64 bytes.
+     * @throws IllegalArgumentException When the parameters sizes are wrong.
+     */
     public DeviceCertificate(byte[] issuer,
                              byte[] appIdentifier,
                              byte[] serial,
