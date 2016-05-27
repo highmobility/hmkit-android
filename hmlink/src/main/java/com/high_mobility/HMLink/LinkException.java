@@ -8,8 +8,6 @@ public class LinkException extends Exception {
     public enum LinkExceptionCode {
         /// Bluetooth is turned off
         BLUETOOTH_OFF,
-        /// Bluetooth is not authorised for this framework (app)
-        BLUETOOTH_UNAUTHORISED,
         /// A custom command has not yet received a response
         CUSTOM_COMMAND_IN_PROGRESS,
         /// Framework encountered an internal error (commonly releated to invalid data received)
