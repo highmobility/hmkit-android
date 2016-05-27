@@ -220,7 +220,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         final LinkFragment fragment = gridViewAdapter.getFragment(link);
 
         ViewUtils.enableView(fragment.authView, false);
-        link.sendCustomCommand(cmd, true, new Constants.DataResponseCallback() {
+        link.sendCommand(cmd, true, new Constants.DataResponseCallback() {
             @Override
             public void response(byte[] bytes, LinkException exception) {
                 ViewUtils.enableView(fragment.authView, true);
@@ -233,7 +233,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         final LinkFragment fragment = gridViewAdapter.getFragment(link);
 
         ViewUtils.enableView(fragment.authView, false);
-        link.sendCustomCommand(cmd, true, new Constants.DataResponseCallback() {
+        link.sendCommand(cmd, true, new Constants.DataResponseCallback() {
             @Override
             public void response(byte[] bytes, LinkException exception) {
                 ViewUtils.enableView(fragment.authView, true);
