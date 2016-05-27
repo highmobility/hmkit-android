@@ -63,11 +63,14 @@ public class LocalDevice extends Device {
     static LocalDevice instance = null;
 
     /**
+     * @param applicationContext The application context.
      * @return The shared LocalDevice object.
      */
-    public static LocalDevice getInstance() {
+    public static LocalDevice getInstance(Context applicationContext) {
         if (instance == null) {
             instance = new LocalDevice();
+            instance.ctx = applicationContext;
+            instance.storage = new Storage(applicationContext);
         }
 
         return instance;
@@ -95,15 +98,13 @@ public class LocalDevice extends Device {
     /**
      * Set the device certificate and private key before using any other functionality.
      *
+     * setContext() has to be called before this to initialize the database.
+     *
      * @param certificate The device certificate.
      * @param privateKey 32 byte private key with elliptic curve Prime 256v1.
      * @param CAPublicKey 64 byte public key of the Certificate Authority.
-     * @param ctx The application context.
      */
-    public void setDeviceCertificate(DeviceCertificate certificate, byte[] privateKey, byte[] CAPublicKey, Context ctx) {
-        this.ctx = ctx;
-        storage = new Storage(ctx);
-
+    public void setDeviceCertificate(DeviceCertificate certificate, byte[] privateKey, byte[] CAPublicKey) {
         this.certificate = certificate;
         this.privateKey = privateKey;
         this.CAPublicKey = CAPublicKey;
@@ -428,7 +429,7 @@ public class LocalDevice extends Device {
 
     private void createGATTServer() {
         if (GATTServer == null) {
-            gattServerCallback = new GATTServerCallback(LocalDevice.getInstance());
+            gattServerCallback = new GATTServerCallback(this);
             GATTServer = mBluetoothManager.openGattServer(ctx, gattServerCallback);
 
             if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "createGATTServer");

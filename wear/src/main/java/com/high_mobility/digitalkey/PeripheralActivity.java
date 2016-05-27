@@ -32,7 +32,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
 
     static final String TAG = "DigitalKey";
 
-    LocalDevice device = LocalDevice.getInstance();
+    LocalDevice device = LocalDevice.getInstance(getApplicationContext());
 
     private TextView textView;
     private GridViewPager gridViewPager;
@@ -66,7 +66,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
 //        cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***")); // 48494D4C sig
         cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***")); // original
 
-        device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
+        device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY);
         device.setListener(this);
 
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
