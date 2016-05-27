@@ -1,6 +1,5 @@
 package com.high_mobility.HMLink;
 
-import com.high_mobility.HMLink.Broadcasting.LocalDevice;
 import com.high_mobility.btcore.HMBTCore;
 
 import java.util.Random;
@@ -22,5 +21,12 @@ public class Crypto {
         byte[] serialBytes = new byte[9];
         new Random().nextBytes(serialBytes);
         return serialBytes;
+    }
+
+    public static byte[] sign(byte[] bytes, byte[] privateKey) {
+        HMBTCore core = new HMBTCore();
+        byte[] signature = new byte[64];
+        core.HMBTCoreCryptoAddSignature(bytes, bytes.length, privateKey, signature);
+        return signature;
     }
 }
