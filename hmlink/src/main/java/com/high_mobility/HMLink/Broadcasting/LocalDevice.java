@@ -30,6 +30,9 @@ import java.util.UUID;
 
 /**
  * Created by ttiganik on 12/04/16.
+ *
+ * LocalDevice acts as a gateway to the application's capability to broadcast itself and handle Link connectivity.
+ *
  */
 public class LocalDevice extends Device {
     static final String TAG = "HMLink";
@@ -59,6 +62,9 @@ public class LocalDevice extends Device {
     Link[] links = new Link[0];
     static LocalDevice instance = null;
 
+    /**
+     * @return The shared LocalDevice object.
+     */
     public static LocalDevice getInstance() {
         if (instance == null) {
             instance = new LocalDevice();
@@ -67,14 +73,33 @@ public class LocalDevice extends Device {
         return instance;
     }
 
+    /**
+     * The possible states of the local device are represented by the enum LocalDevice.State.
+     *
+     * @return The current state of the LocalDevice.
+     * @see LocalDevice.State
+     */
     public State getState() {
         return state;
     }
 
+    /**
+     * In order to receive LocalDevice events, a listener must be set.
+     *
+     * @param listener The listener instance to receive LocalDevice events.
+     */
     public void setListener(LocalDeviceListener listener) {
         this.listener = listener;
     }
 
+    /**
+     * Set the device certificate and private key before using any other functionality.
+     *
+     * @param certificate The device certificate.
+     * @param privateKey 32 byte private key with elliptic curve Prime 256v1.
+     * @param CAPublicKey 64 byte public key of the Certificate Authority.
+     * @param ctx The application context.
+     */
     public void setDeviceCertificate(DeviceCertificate certificate, byte[] privateKey, byte[] CAPublicKey, Context ctx) {
         this.ctx = ctx;
         storage = new Storage(ctx);
@@ -89,18 +114,32 @@ public class LocalDevice extends Device {
         core.HMBTCoreInit(coreInterface);
     }
 
+    /**
+     * @return The certificates that are registered on the LocalDevice.
+     */
     public AccessCertificate[] getRegisteredCertificates() {
         return storage.getRegisteredCertificates(certificate.getSerial());
     }
 
+    /**
+     * @return The certificates that are stored in the device's database for other devices.
+     */
     public AccessCertificate[] getStoredCertificates() {
         return storage.getStoredCertificates(certificate.getSerial());
     }
 
+    /**
+     * @return The Links currently connected to the LocalDevice.
+     */
     public Link[] getLinks() {
         return links;
     }
 
+    /**
+     * Start broadcasting the LocalDevice via BLE advertising.
+     *
+     * @throws LinkException	    An exception with either UNSUPPORTED or BLUETOOTH_OFF code.
+     */
     public void startBroadcasting() throws LinkException {
         if (state == State.BROADCASTING) return; // already broadcasting
 
@@ -130,6 +169,9 @@ public class LocalDevice extends Device {
         mBluetoothLeAdvertiser.startAdvertising(settings, data, advertiseCallback);
     }
 
+    /**
+     * Stops the advertisements and disconnects all the links.
+     */
     public void stopBroadcasting() {
         // stopAdvertising clears the GATT server as well.
         // This causes all connection to fail with the link because there is no GATT server.
@@ -146,6 +188,15 @@ public class LocalDevice extends Device {
 
     }
 
+    /**
+     * Registers the AccessCertificate for the device, enabling authenticated
+     * connection to another device.
+     *
+     * @param certificate The certificate that can be used by the Device to authorised Links
+     * @throws LinkException When this device's certificate hasn't been set, the given certificates
+     *                       providing serial doesn't match with this device's serial or
+     *                       the storage is full.
+     */
     public void registerCertificate(AccessCertificate certificate) throws LinkException {
         if (this.certificate == null) {
             throw new LinkException(LinkException.LinkExceptionCode.INTERNAL_ERROR);
@@ -158,10 +209,23 @@ public class LocalDevice extends Device {
         storage.storeCertificate(certificate);
     }
 
+    /**
+     * Stores a Certificate to Device's storage. This certificate is usually read by other Devices.
+     *
+     * @param certificate The certificate that will be saved to the database
+     * @throws LinkException When the storage is full or certificate has not been set
+     */
     public void storeCertificate(AccessCertificate certificate) throws LinkException {
         storage.storeCertificate(certificate);
     }
 
+    /**
+     * Revokes a stored certificate from Device's storage. The stored certificate and its
+     * accompanying registered certificate are deleted from the storage.
+     *
+     * @param serial The 9-byte serial number of the access providing device
+     * @throws LinkException When there are no matching certificate pairs for this serial.
+     */
     public void revokeCertificate(byte[] serial) throws LinkException {
         if (storage.certWithGainingSerial(serial) == null
                 || storage.certWithProvidingSerial(serial) == null) {
@@ -172,6 +236,9 @@ public class LocalDevice extends Device {
         storage.deleteCertificateWithProvidingSerial(serial);
     }
 
+    /**
+     * Deletes the saved certificates, resets the Bluetooth connection and stops broadcasting.
+     */
     public void reset() {
         storage.resetStorage();
         stopBroadcasting();
