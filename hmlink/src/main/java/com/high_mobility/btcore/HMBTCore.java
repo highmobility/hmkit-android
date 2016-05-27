@@ -50,5 +50,5 @@ public class HMBTCore {
     //Crypto
     public native void HMBTCoreCryptoCreateKeys(byte[] privateKey, byte[] publicKey);
 
-    public native void HMBTCoreCryptoAddSignature(byte[] privateKey, byte[] publicKey);
+    public native void HMBTCoreCryptoAddSignature(byte[] data, int size, byte[] privateKey, byte[] signature);
 }
