@@ -62,7 +62,24 @@ class Storage {
         editor.commit();
     }
 
-    AccessCertificate[] getRegisteredCertificates(byte[] serialNumber) {
+    AccessCertificate[] getCertificatesWithGainingSerial(byte[] serialNumber) {
+        AccessCertificate[] certificates = getCertificates();
+        ArrayList<AccessCertificate> storedCertificates = new ArrayList<>();
+
+        for (AccessCertificate cert : certificates) {
+            if (Arrays.equals(cert.getGainerSerial(), serialNumber)) {
+                storedCertificates.add(cert);
+            }
+        }
+
+        if (storedCertificates.size() > 0) {
+            return storedCertificates.toArray(new AccessCertificate[storedCertificates.size()]);
+        }
+
+        return new AccessCertificate[0];
+    }
+
+    AccessCertificate[] getCertificatesWithProvidingSerial(byte[] serialNumber) {
         AccessCertificate[] certificates = getCertificates();
         ArrayList<AccessCertificate> storedCertificates = new ArrayList<>();
 
@@ -79,12 +96,12 @@ class Storage {
         return new AccessCertificate[0];
     }
 
-    AccessCertificate[] getStoredCertificates(byte[] serialNumber) {
+    AccessCertificate[] getCertificatesWithoutProvidingSerial(byte[] serialNumber) {
         AccessCertificate[] certificates = getCertificates();
         ArrayList<AccessCertificate> storedCertificates = new ArrayList<>();
 
         for (AccessCertificate cert : certificates) {
-            if (!Arrays.equals(cert.getGainerSerial(), serialNumber)) {
+            if (!Arrays.equals(cert.getProviderSerial(), serialNumber)) {
                 storedCertificates.add(cert);
             }
         }
@@ -94,11 +111,36 @@ class Storage {
         }
 
         return new AccessCertificate[0];
+
     }
 
     void resetStorage() {
         editor.remove(ACCESS_CERTIFICATE_STORAGE_KEY);
         editor.commit();
+    }
+
+    boolean deleteCertificate(AccessCertificate certificateToDelete) {
+        AccessCertificate[] certs = getCertificates();
+
+        int removedIndex = -1;
+        for (int i=0; i<certs.length; i++) {
+            AccessCertificate cert = certs[i];
+            if (Arrays.equals(cert.getGainerSerial(), certificateToDelete.getGainerSerial()) &&
+                Arrays.equals(cert.getGainerPublicKey(), certificateToDelete.getGainerPublicKey()) &&
+                Arrays.equals(cert.getProviderSerial(), certificateToDelete.getProviderSerial())) {
+                removedIndex = i;
+                break;
+            }
+        }
+
+        if (removedIndex != -1) {
+            AccessCertificate[] newCerts = removeAtIndex(removedIndex, certs);
+            setCertificates(newCerts);
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     boolean deleteCertificateWithGainingSerial(byte[] serial) {
@@ -150,6 +192,7 @@ class Storage {
 
         for (int i=0; i<certs.length; i++) {
             AccessCertificate cert = certs[i];
+
             if (Arrays.equals(cert.getProviderSerial(), serial)) {
                 return cert;
             }

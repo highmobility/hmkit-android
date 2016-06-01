@@ -126,7 +126,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetPublicKeyByIndex(int index, byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command) {
-        AccessCertificate[] certificates = device.storage.getRegisteredCertificates(device.getCertificate().getSerial());
+        AccessCertificate[] certificates = device.storage.getCertificatesWithProvidingSerial(device.getCertificate().getSerial());
 
         if (certificates.length >= index) {
             AccessCertificate certificate = certificates[index];
@@ -140,13 +140,13 @@ public class BTCoreInterface implements HMBTCoreInterface {
             return 0;
         }
 
-        Log.e(LocalDevice.TAG, "No registered cert for index " + index);
         return 1;
     }
 
     @Override
     public int HMPersistenceHalgetPublicKeyCount(int[] count) {
-        count[0] = device.storage.getRegisteredCertificates(device.getCertificate().getSerial()).length;
+        count[0] = device.storage.getCertificatesWithProvidingSerial(device.getCertificate().getSerial()).length;
+
         return 0;
     }
 
@@ -170,9 +170,11 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetStoredCertificate(byte[] cert, int[] size) {
-        AccessCertificate certificate = device.storage.certWithProvidingSerial(device.getCertificate().getSerial());
+        AccessCertificate[] storedCerts = device.storage.getCertificatesWithoutProvidingSerial(device.getCertificate().getSerial());
 
-        if (certificate != null) {
+        if (storedCerts.length > 0) {
+            AccessCertificate certificate = storedCerts[0];
+            Log.i(LocalDevice.TAG, "return stored cert to core " + certificate.toString());
             copyBytesToJNI(certificate.getBytes(), cert);
             size[0] = certificate.getBytes().length;
             return 0;
@@ -184,8 +186,13 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHaleraseStoredCertificate() {
-        if (device.storage.deleteCertificateWithProvidingSerial(device.getCertificate().getSerial())) return 0;
-        else return 1;
+        AccessCertificate[] storedCerts = device.storage.getCertificatesWithoutProvidingSerial(device.getCertificate().getSerial());
+
+        for (AccessCertificate cert : storedCerts) {
+            if (device.storage.deleteCertificate(cert)) return 0; // this does not work for an array of stored certs
+        }
+
+        return 1;
     }
 
     @Override

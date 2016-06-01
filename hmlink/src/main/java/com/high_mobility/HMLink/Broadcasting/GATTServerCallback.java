@@ -7,8 +7,6 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothProfile;
 
-import com.high_mobility.HMLink.Constants;
-
 import java.util.Arrays;
 
 /**
@@ -35,7 +33,6 @@ public class GATTServerCallback extends BluetoothGattServerCallback {
                                             int offset,
                                             BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
-
 
         if (this.device.isReadCharacteristic(characteristic.getUuid())) {
             // response to read here
