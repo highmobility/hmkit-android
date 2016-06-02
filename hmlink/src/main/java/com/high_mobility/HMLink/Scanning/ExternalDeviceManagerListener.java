@@ -6,5 +6,5 @@ package com.high_mobility.HMLink.Scanning;
 public interface ExternalDeviceManagerListener {
     void onStateChanged(ExternalDeviceManager.State oldState);
     void onDeviceEnteredProximity(ExternalDevice device);
-    void onDeviceExitedroximity(ExternalDevice device);
+    void onDeviceExitedProximity(ExternalDevice device);
 }

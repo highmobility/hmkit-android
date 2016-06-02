@@ -22,7 +22,7 @@ public class ExternalDeviceManager {
 
     ExternalDevice[] devices = new ExternalDevice[0];
     ExternalDeviceManagerListener listener;
-    State state;
+    State state = State.IDLE;
     static ExternalDeviceManager instance;
     Context ctx;
     SharedBle ble;
@@ -67,39 +67,38 @@ public class ExternalDeviceManager {
             throw new LinkException(LinkException.LinkExceptionCode.BLUETOOTH_OFF);
         }
 
-        if (bleScanner == null) bleScanner = ble.getAdapter().getBluetoothLeScanner(); // TODO: use filter
+        if (bleScanner == null) bleScanner = ble.getAdapter().getBluetoothLeScanner(); // TODO: use filter if useful to our scan filter
 
         bleScanner.startScan(scanCallback);
+        setState(State.SCANNING);
     }
 
     private ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            // TODO:
+            // TODO: create/sync devices
             Log.i(TAG, "onScanResult " + result);
             super.onScanResult(callbackType, result);
         }
 
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
-            // TODO:
+            // TODO: create/sync devices
             Log.i(TAG, "onBatchScanResults " + results);
             super.onBatchScanResults(results);
         }
 
         @Override
         public void onScanFailed(int errorCode) {
-            // TODO:
-            Log.i(TAG, "onScanFailed " + errorCode);
+            setState(State.IDLE);
+            Log.e(TAG, "onScanFailed " + errorCode);
             super.onScanFailed(errorCode);
         }
     };
 
     public void stopScanning() {
-        if (getState() == State.IDLE) return;
-        // TODO:
-
-
+        if (getState() != State.SCANNING) return;
+        bleScanner.stopScan(scanCallback);
     }
 
     private void setState(final State state) {
