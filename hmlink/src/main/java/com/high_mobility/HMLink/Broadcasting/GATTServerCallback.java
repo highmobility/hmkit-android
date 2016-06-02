@@ -14,7 +14,7 @@ import java.util.Arrays;
 /**
  * Created by ttiganik on 15/04/16.
  */
-public class GATTServerCallback extends BluetoothGattServerCallback {
+class GATTServerCallback extends BluetoothGattServerCallback {
     LocalDevice device;
     public GATTServerCallback(LocalDevice device) {
         this.device = device;

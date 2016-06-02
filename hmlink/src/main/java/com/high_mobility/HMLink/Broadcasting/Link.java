@@ -92,7 +92,7 @@ public class Link {
             if (listener != null) {
                 final Link linkPointer = this;
 
-                this.device.mainThreadHandler.post(new Runnable() {
+                this.device.ble.mainThreadHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         linkPointer.listener.onStateChanged(linkPointer, oldState);
@@ -110,7 +110,7 @@ public class Link {
     void onCommandResponseReceived(final byte[] data) {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue()) Log.i(LocalDevice.TAG, "onCommandResponseReceived " + ByteUtils.hexFromBytes(hmDevice.getMac()));
         if (commandCallback != null && commandCallback.get() != null) {
-            this.device.mainThreadHandler.post(new Runnable() {
+            this.device.ble.mainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     commandCallback.get().response(data, null);
@@ -128,7 +128,7 @@ public class Link {
 
         final Link reference = this;
         pairingResponse = -1;
-        device.mainThreadHandler.post(new Runnable() {
+        device.ble.mainThreadHandler.post(new Runnable() {
             @Override
             public void run() {
             listener.onPairingRequested(reference, new Constants.ApprovedCallback() {
@@ -151,7 +151,7 @@ public class Link {
         while(pairingResponse < 0) {
             int passedSeconds = Calendar.getInstance().get(Calendar.SECOND);
             if (passedSeconds - startSeconds > Constants.registerTimeout) {
-                device.mainThreadHandler.post(new Runnable() {
+                device.ble.mainThreadHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         listener.onPairingRequestTimeout(reference);

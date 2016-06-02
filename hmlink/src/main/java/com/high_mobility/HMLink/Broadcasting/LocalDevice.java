@@ -1,12 +1,10 @@
 package com.high_mobility.HMLink.Broadcasting;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
@@ -17,6 +15,7 @@ import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+import com.high_mobility.HMLink.SharedBle;
 import com.high_mobility.btcore.HMBTCore;
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.Device;
@@ -45,15 +44,13 @@ public class LocalDevice extends Device {
     byte[] CAPublicKey;
     LocalDeviceListener listener;
 
-    BluetoothManager mBluetoothManager;
-    BluetoothAdapter mBluetoothAdapter;
+    SharedBle ble;
     BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     BluetoothGattServer GATTServer;
     GATTServerCallback gattServerCallback;
 
     BluetoothGattCharacteristic readCharacteristic;
     BluetoothGattCharacteristic writeCharacteristic;
-    Handler mainThreadHandler;
 
     BTCoreInterface coreInterface;
     HMBTCore core = new HMBTCore();
@@ -71,6 +68,7 @@ public class LocalDevice extends Device {
             instance = new LocalDevice();
             instance.ctx = applicationContext;
             instance.storage = new Storage(applicationContext);
+            instance.ble = SharedBle.getInstance(applicationContext);
         }
 
         return instance;
@@ -108,9 +106,6 @@ public class LocalDevice extends Device {
         this.certificate = certificate;
         this.privateKey = privateKey;
         this.CAPublicKey = CAPublicKey;
-        storage = new Storage(ctx);
-        createAdapter();
-        mainThreadHandler = new Handler(ctx.getMainLooper());
         coreInterface = new BTCoreInterface(this);
         core.HMBTCoreInit(coreInterface);
     }
@@ -144,13 +139,21 @@ public class LocalDevice extends Device {
     public void startBroadcasting() throws LinkException {
         if (state == State.BROADCASTING) return; // already broadcasting
 
-        checkIfBluetoothIsEnabled();
+        if (!ble.isBluetoothSupported()) {
+            setState(State.BLUETOOTH_UNAVAILABLE);
+            throw new LinkException(LinkException.LinkExceptionCode.UNSUPPORTED);
+        }
+
+        if (!ble.isBluetoothOn()) {
+            setState(State.BLUETOOTH_UNAVAILABLE);
+            throw new LinkException(LinkException.LinkExceptionCode.BLUETOOTH_OFF);
+        }
 
         createGATTServer();
 
         // start advertising
         if (mBluetoothLeAdvertiser == null) {
-            mBluetoothLeAdvertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
+            mBluetoothLeAdvertiser = ble.getAdapter().getBluetoothLeAdvertiser();
         }
 
         final AdvertiseSettings settings = new AdvertiseSettings.Builder()
@@ -253,7 +256,7 @@ public class LocalDevice extends Device {
 
     @Override
     public String getName() {
-        return mBluetoothAdapter.getName();
+        return ble.getAdapter().getName();
     }
 
     int didResolveDevice(HMDevice device) {
@@ -269,7 +272,7 @@ public class LocalDevice extends Device {
     }
 
     byte[] onCommandReceived(HMDevice device, byte[] data) {
-        BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
+        BluetoothDevice btDevice = ble.getAdapter().getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
 
         if (linkIndex > -1) {
@@ -283,7 +286,7 @@ public class LocalDevice extends Device {
     }
 
     void onCommandResponseReceived(HMDevice device, byte[] data) {
-        BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
+        BluetoothDevice btDevice = ble.getAdapter().getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
 
         if (linkIndex > -1) {
@@ -309,7 +312,7 @@ public class LocalDevice extends Device {
 
         if (listener != null) {
             final LocalDevice devicePointer = this;
-            devicePointer.mainThreadHandler.post(new Runnable() {
+            devicePointer.ble.mainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     devicePointer.listener.onLinkReceived(link);
@@ -321,7 +324,7 @@ public class LocalDevice extends Device {
     void didLoseLink(HMDevice device) {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
-        BluetoothDevice btDevice = mBluetoothAdapter.getRemoteDevice(device.getMac());
+        BluetoothDevice btDevice = ble.getAdapter().getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
 
         if (linkIndex > -1) {
@@ -355,7 +358,7 @@ public class LocalDevice extends Device {
             // invoke the listener listener
             if (listener != null) {
                 final LocalDevice devicePointer = this;
-                devicePointer.mainThreadHandler.post(new Runnable() {
+                devicePointer.ble.mainThreadHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         devicePointer.listener.onLinkLost(link);
@@ -384,7 +387,7 @@ public class LocalDevice extends Device {
     void setAdapterName() {
         byte[] serialBytes = new byte[4];
         new Random().nextBytes(serialBytes);
-        mBluetoothAdapter.setName(ByteUtils.hexFromBytes(serialBytes));
+        ble.getAdapter().setName(ByteUtils.hexFromBytes(serialBytes));
     }
 
     void writeData(byte[] mac, byte[] value) {
@@ -430,7 +433,7 @@ public class LocalDevice extends Device {
     private void createGATTServer() {
         if (GATTServer == null) {
             gattServerCallback = new GATTServerCallback(this);
-            GATTServer = mBluetoothManager.openGattServer(ctx, gattServerCallback);
+            GATTServer = ble.getManager().openGattServer(ctx, gattServerCallback);
 
             if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "createGATTServer");
             // create the service
@@ -460,31 +463,10 @@ public class LocalDevice extends Device {
         }
     }
 
-    private void createAdapter() {
-        if (mBluetoothManager == null) {
-            mBluetoothManager = (BluetoothManager) ctx.getSystemService(Context.BLUETOOTH_SERVICE);
-            mBluetoothAdapter = mBluetoothManager.getAdapter();
-            setAdapterName();
-            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "Create adapter " + mBluetoothAdapter.getName());
-        }
-    }
-
-    private void checkIfBluetoothIsEnabled() throws LinkException {
-        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-            setState(State.BLUETOOTH_UNAVAILABLE);
-            throw new LinkException(LinkException.LinkExceptionCode.BLUETOOTH_OFF);
-        }
-
-        if (!ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            setState(State.BLUETOOTH_UNAVAILABLE);
-            throw new LinkException(LinkException.LinkExceptionCode.UNSUPPORTED);
-        }
-    }
-
     private final AdvertiseCallback advertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "Start advertise " + mBluetoothAdapter.getName());
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "Start advertise " + ble.getAdapter().getName());
             setState(State.BROADCASTING);
         }
 
@@ -506,7 +488,7 @@ public class LocalDevice extends Device {
             this.state = state;
 
             if (listener != null) {
-                mainThreadHandler.post(new Runnable() {
+                ble.mainThreadHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         listener.onStateChanged(state, oldState);
