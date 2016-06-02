@@ -114,14 +114,14 @@ public class LocalDevice extends Device {
      * @return The certificates that are registered on the LocalDevice.
      */
     public AccessCertificate[] getRegisteredCertificates() {
-        return storage.getRegisteredCertificates(certificate.getSerial());
+        return storage.getCertificatesWithProvidingSerial(certificate.getSerial());
     }
 
     /**
      * @return The certificates that are stored in the device's database for other devices.
      */
     public AccessCertificate[] getStoredCertificates() {
-        return storage.getStoredCertificates(certificate.getSerial());
+        return storage.getCertificatesWithoutProvidingSerial(certificate.getSerial());
     }
 
     /**
