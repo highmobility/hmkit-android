@@ -189,7 +189,6 @@ public class LocalDevice extends Device {
         }
 
         setState(State.IDLE);
-
     }
 
     /**

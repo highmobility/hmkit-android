@@ -9,16 +9,24 @@ import android.util.Log;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.SharedBle;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ttiganik on 01/06/16.
  */
 public class ExternalDeviceManager {
     public static final String TAG = "ExternalDeviceManager";
+
     public enum State {
         BLUETOOTH_UNAVAILABLE, IDLE, SCANNING
     }
+
+    byte[] serialNumber;
+    byte[] publicKey;
+    byte[] privateKey;
+    Map<byte[], byte[]> CaPublicKeyMap = new HashMap<>();
 
     ExternalDevice[] devices = new ExternalDevice[0];
     ExternalDeviceManagerListener listener;
@@ -50,7 +58,13 @@ public class ExternalDeviceManager {
     }
 
     public void addTrustedCertificateAuthority(byte[] issuer, byte[] publicKey) {
-        // TODO:
+        CaPublicKeyMap.put(issuer, publicKey);
+    }
+
+    public void setProperties(byte[] serialNumber, byte[] publicKey, byte[] privateKey) {
+        this.serialNumber = serialNumber;
+        this.publicKey = publicKey;
+        this.privateKey = privateKey;
     }
 
     public void startScanning(byte[][] appIdentifiers) throws LinkException {
