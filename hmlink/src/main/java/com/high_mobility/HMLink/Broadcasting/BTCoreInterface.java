@@ -3,6 +3,7 @@ package com.high_mobility.HMLink.Broadcasting;
 import android.util.Log;
 
 import com.high_mobility.HMLink.Device;
+import com.high_mobility.HMLink.Scanning.ExternalDeviceManager;
 import com.high_mobility.btcore.HMBTCoreInterface;
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.LinkException;

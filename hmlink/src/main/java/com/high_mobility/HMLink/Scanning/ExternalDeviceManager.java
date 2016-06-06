@@ -6,8 +6,10 @@ import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.util.Log;
 
+import com.high_mobility.HMLink.Broadcasting.*;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.SharedBle;
+import com.high_mobility.btcore.HMBTCore;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,10 +28,15 @@ public class ExternalDeviceManager {
     byte[] serialNumber;
     byte[] publicKey;
     byte[] privateKey;
+
     Map<byte[], byte[]> CaPublicKeyMap = new HashMap<>();
 
     ExternalDevice[] devices = new ExternalDevice[0];
     ExternalDeviceManagerListener listener;
+
+    HMBTCore core = new HMBTCore();
+    BTCoreInterface coreInterface;
+
     State state = State.IDLE;
     static ExternalDeviceManager instance;
     Context ctx;
@@ -38,11 +45,29 @@ public class ExternalDeviceManager {
 
     public static ExternalDeviceManager getInstance(Context applicationContext) {
         if (instance == null) {
-            instance = new ExternalDeviceManager();
-            instance.ctx = applicationContext;
-            instance.ble = SharedBle.getInstance(applicationContext);
+            instance = new ExternalDeviceManager(applicationContext);
+
         }
         return  instance;
+    }
+
+    ExternalDeviceManager(Context applicationContext) {
+        ctx = applicationContext;
+        ble = SharedBle.getInstance(applicationContext);
+        coreInterface = new BTCoreInterface(this);
+        core.HMBTCoreInit(coreInterface);
+    }
+
+    public byte[] getSerialNumber() {
+        return serialNumber;
+    }
+
+    public byte[] getPublicKey() {
+        return publicKey;
+    }
+
+    public byte[] getPrivateKey() {
+        return privateKey;
     }
 
     public ExternalDevice[] getDevices() {
@@ -92,6 +117,7 @@ public class ExternalDeviceManager {
         public void onScanResult(int callbackType, ScanResult result) {
             // TODO: create/sync devices
             Log.i(TAG, "onScanResult " + result);
+            onScanResult(result);
             super.onScanResult(callbackType, result);
         }
 
@@ -99,6 +125,9 @@ public class ExternalDeviceManager {
         public void onBatchScanResults(List<ScanResult> results) {
             // TODO: create/sync devices
             Log.i(TAG, "onBatchScanResults " + results);
+            for (ScanResult result : results) {
+                onScanResult(result);
+            }
             super.onBatchScanResults(results);
         }
 
@@ -107,6 +136,10 @@ public class ExternalDeviceManager {
             setState(State.IDLE);
             Log.e(TAG, "onScanFailed " + errorCode);
             super.onScanFailed(errorCode);
+        }
+
+        void onScanResult(ScanResult result) {
+//            core.HMBTCoreSensingProcessAdvertisement(coreInterface, );
         }
     };
 

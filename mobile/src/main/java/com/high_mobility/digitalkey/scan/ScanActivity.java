@@ -42,10 +42,7 @@ public class ScanActivity extends AppCompatActivity implements ExternalDeviceMan
         setContentView(R.layout.scan_view);
 
         ButterKnife.bind(this);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            getBlePermission();
-        }
+        getBlePermission();
     }
 
     @Override
