@@ -154,6 +154,10 @@ public class LocalDevice extends Device {
         // start advertising
         if (mBluetoothLeAdvertiser == null) {
             mBluetoothLeAdvertiser = ble.getAdapter().getBluetoothLeAdvertiser();
+            if (mBluetoothLeAdvertiser == null) {
+                setState(State.BLUETOOTH_UNAVAILABLE);
+                throw new LinkException(LinkException.LinkExceptionCode.UNSUPPORTED);
+            }
         }
 
         final AdvertiseSettings settings = new AdvertiseSettings.Builder()
