@@ -10,8 +10,6 @@ import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
 
@@ -24,7 +22,6 @@ import com.high_mobility.HMLink.AccessCertificate;
 import com.high_mobility.HMLink.DeviceCertificate;
 
 import java.util.Arrays;
-import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -155,6 +152,7 @@ public class LocalDevice extends Device {
         if (mBluetoothLeAdvertiser == null) {
             mBluetoothLeAdvertiser = ble.getAdapter().getBluetoothLeAdvertiser();
             if (mBluetoothLeAdvertiser == null) {
+                // for unsupported devices the system does not return an advertiser
                 setState(State.BLUETOOTH_UNAVAILABLE);
                 throw new LinkException(LinkException.LinkExceptionCode.UNSUPPORTED);
             }
@@ -358,7 +356,7 @@ public class LocalDevice extends Device {
 
             // set new adapter name
             if (links.length == 0) {
-                setAdapterName();
+                ble.setRandomAdapterName();
             }
 
             link.setState(Link.State.DISCONNECTED);
@@ -390,12 +388,6 @@ public class LocalDevice extends Device {
             Log.e(TAG, "no link for pairingResponse");
             return 1;
         }
-    }
-
-    void setAdapterName() {
-        byte[] serialBytes = new byte[4];
-        new Random().nextBytes(serialBytes);
-        ble.getAdapter().setName(ByteUtils.hexFromBytes(serialBytes));
     }
 
     void writeData(byte[] mac, byte[] value) {
