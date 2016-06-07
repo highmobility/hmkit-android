@@ -179,16 +179,21 @@ public class LocalDevice extends Device {
     public void stopBroadcasting() {
         // stopAdvertising clears the GATT server as well.
         // This causes all connection to fail with the link because there is no GATT server.
+        try {
+            for (int i = getLinks().length - 1; i >= 0; i--) {
+                GATTServer.cancelConnection(getLinks()[i].btDevice);
+            }
 
-        for (int i = getLinks().length - 1; i >= 0; i--) {
-            GATTServer.cancelConnection(getLinks()[i].btDevice);
+            if (mBluetoothLeAdvertiser != null) {
+                mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
+            }
+
+            setState(State.IDLE);
         }
-
-        if (mBluetoothLeAdvertiser != null) {
-            mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
+        catch (Exception e) {
+            // TODO: fix the crash on app close
+            e.printStackTrace();
         }
-
-        setState(State.IDLE);
     }
 
     /**

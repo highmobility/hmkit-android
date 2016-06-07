@@ -96,6 +96,14 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        if (device != null) {
+            device.stopBroadcasting();
+        }
+        super.onDestroy();
+    }
+
     private void initializeDevice() {
         device = LocalDevice.getInstance(getApplicationContext());
         device.reset();
@@ -137,12 +145,6 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         } catch (LinkException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        device.stopBroadcasting();
-        super.onDestroy();
     }
 
     private byte[] getSerial() {
