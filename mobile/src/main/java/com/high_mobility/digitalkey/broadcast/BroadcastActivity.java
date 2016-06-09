@@ -1,9 +1,9 @@
 package com.high_mobility.digitalkey.broadcast;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -12,25 +12,27 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.high_mobility.HMLink.AccessCertificate;
-import com.high_mobility.HMLink.AutoCommand;
+import com.high_mobility.HMLink.Commands.AccessResponse;
+import com.high_mobility.HMLink.Commands.AutoCommand;
 import com.high_mobility.HMLink.Broadcasting.ByteUtils;
 import com.high_mobility.HMLink.Broadcasting.Link;
 import com.high_mobility.HMLink.Broadcasting.LinkListener;
 import com.high_mobility.HMLink.Broadcasting.LocalDevice;
 import com.high_mobility.HMLink.Broadcasting.LocalDeviceListener;
+import com.high_mobility.HMLink.Commands.AutoCommandNotification;
+import com.high_mobility.HMLink.Commands.LockStatusChangedNotification;
+import com.high_mobility.HMLink.Commands.GetVehicleStatusResponse;
+import com.high_mobility.HMLink.Commands.CommandParseException;
 import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.DeviceCertificate;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.digitalkey.R;
-import com.high_mobility.digitalkey.broadcast.CertUtils;
-import com.high_mobility.digitalkey.broadcast.LinkFragment;
-import com.high_mobility.digitalkey.broadcast.LinkPagerAdapter;
-import com.high_mobility.digitalkey.broadcast.ViewUtils;
 
 /**
  * Created by ttiganik on 02/06/16.
  */
 public class BroadcastActivity extends AppCompatActivity implements LocalDeviceListener, LinkListener {
+    static final String TAG = "BroadcastActivity";
     static final byte[] CA_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
 
     TextView serialTextView;
@@ -129,6 +131,19 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
 
     @Override
     public byte[] onCommandReceived(Link link, byte[] bytes) {
+        try {
+            AutoCommandNotification notification = AutoCommandNotification.create(bytes);
+
+            if (notification.getType() == AutoCommand.Type.LOCK_STATUS_CHANGED) {
+                LockStatusChangedNotification changedNotification = (LockStatusChangedNotification)notification;
+                Log.i(TAG, "LockStatusChanged " + changedNotification.getLockStatus());
+            }
+        }
+        catch (Exception e) {
+            Log.e(TAG, e.getLocalizedMessage());
+        }
+
+
         return null;
     }
 
@@ -221,6 +236,19 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
             @Override
             public void response(byte[] bytes, LinkException exception) {
                 ViewUtils.enableView(fragment.authView, true);
+                try {
+                    AccessResponse response = new AccessResponse(bytes);
+
+                    if (response.getErrorCode() == 0) {
+                        Log.i(TAG, "successfully locked the vehicle");
+                    }
+                    else {
+                        Log.i(TAG, "failed to lock the vehicle");
+                    }
+                } catch (CommandParseException e) {
+                    Log.e(TAG, "CommandParseException ", e);
+                }
+
             }
         });
     }
@@ -233,6 +261,18 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
             @Override
             public void response(byte[] bytes, LinkException exception) {
                 ViewUtils.enableView(fragment.authView, true);
+                try {
+                    AccessResponse response = new AccessResponse(bytes);
+
+                    if (response.getErrorCode() == 0) {
+                        Log.i(TAG, "successfully unlocked the vehicle");
+                    }
+                    else {
+                        Log.i(TAG, "failed to unlock the vehicle");
+                    }
+                } catch (CommandParseException e) {
+                    Log.e(TAG, "CommandParseException ", e);
+                }
             }
         });
     }}
