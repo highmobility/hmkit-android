@@ -17,6 +17,11 @@ void hm_api_callback_ping()
 
 }
 
+void hm_api_callback_clock()
+{
+
+}
+
 void hm_api_callback_authorised_device_added(hm_device_t *device, uint8_t error)
 {
 
@@ -127,11 +132,15 @@ void hm_api_callback_command_incoming(hm_device_t *device, uint8_t *data, uint16
     jbyteArray data_ = (*envRef)->NewByteArray(envRef,255);
     (*envRef)->SetByteArrayRegion(envRef, data_, 0, *length, (const jbyte*) data );
 
+    uint32_t lenArr[1];
+    lenArr[0] = (uint32_t)*length;
     jintArray length_ = (*envRef)->NewIntArray(envRef,1);
-    (*envRef)->SetIntArrayRegion(envRef, length_, 0, 1, (const jint*) length );
+    (*envRef)->SetIntArrayRegion(envRef, length_, 0, 1, (const jint*) lenArr );
 
+    uint32_t errArr[1];
+    errArr[0] = (uint32_t)*error;
     jintArray error_ = (*envRef)->NewIntArray(envRef,1);
-    (*envRef)->SetIntArrayRegion(envRef, error_, 0, 1, (const jint*) error );
+    (*envRef)->SetIntArrayRegion(envRef, error_, 0, 1, (const jint*) errArr );
 
     (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackCustomCommandIncoming, obj,data_,length_,error_);
 
