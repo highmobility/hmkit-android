@@ -257,6 +257,9 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         link.sendCommand(cmd, true, new Constants.DataResponseCallback() {
             @Override
             public void response(byte[] bytes, LinkException exception) {
+                if (exception != null) {
+                    Log.e(PeripheralActivity.TAG, "lock exception", exception);
+                }
                 ViewUtils.enableView(fragment.authView, true);
             }
         });
@@ -270,6 +273,10 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         link.sendCommand(cmd, true, new Constants.DataResponseCallback() {
             @Override
             public void response(byte[] bytes, LinkException exception) {
+                if (exception != null) {
+                    Log.e(PeripheralActivity.TAG, "lock exception", exception);
+                }
+
                 ViewUtils.enableView(fragment.authView, true);
             }
         });

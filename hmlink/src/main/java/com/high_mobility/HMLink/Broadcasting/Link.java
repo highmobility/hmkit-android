@@ -1,6 +1,7 @@
 package com.high_mobility.HMLink.Broadcasting;
 
 import android.bluetooth.BluetoothDevice;
+import android.os.CountDownTimer;
 import android.util.Log;
 
 import com.high_mobility.HMLink.Device;
@@ -121,14 +122,8 @@ public class Link {
 
     void onCommandResponseReceived(final byte[] data) {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue()) Log.i(LocalDevice.TAG, "onCommandResponseReceived " + ByteUtils.hexFromBytes(hmDevice.getMac()));
-        if (sentCommand != null && sentCommand.commandCallback != null && sentCommand.commandCallback.get() != null) {
-            this.device.ble.mainThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                sentCommand.finished = true;
-                sentCommand.commandCallback.get().response(data, null);
-                }
-            });
+        if (sentCommand != null) {
+            sentCommand.dispatchResult(data, null);
         }
     }
 
@@ -186,9 +181,36 @@ public class Link {
     private class SentCommand {
         boolean finished;
         WeakReference<Constants.DataResponseCallback> commandCallback;
+        CountDownTimer timeoutTimer;
+
 
         SentCommand(Constants.DataResponseCallback callback) {
-            this.commandCallback = new WeakReference<>(callback);;
+            this.commandCallback = new WeakReference<>(callback);
+            startTimeoutTimer();
+        }
+
+        void dispatchResult(final byte[] response, final LinkException exception) {
+            if (timeoutTimer != null) timeoutTimer.cancel();
+            finished = true;
+            if (commandCallback == null || commandCallback.get() == null) return;
+
+            device.ble.mainThreadHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    sentCommand.commandCallback.get().response(response, exception);
+                }
+            });
+        }
+
+        void startTimeoutTimer() {
+            timeoutTimer = new CountDownTimer((long)(Constants.commandTimeout * 1000), 15000) {
+                public void onTick(long millisUntilFinished) {
+                }
+
+                public void onFinish() {
+                    dispatchResult(null, new LinkException(LinkException.LinkExceptionCode.TIME_OUT));
+                }
+            }.start();
         }
     }
 }
