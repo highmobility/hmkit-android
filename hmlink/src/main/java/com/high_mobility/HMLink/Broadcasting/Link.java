@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
 import com.high_mobility.HMLink.Device;
+import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.Constants;
 
@@ -30,7 +31,7 @@ public class Link {
     HMDevice hmDevice;
     LocalDevice device;
 
-    WeakReference<Constants.DataResponseCallback> commandCallback;
+    SentCommand sentCommand;
 
     Link(BluetoothDevice btDevice, LocalDevice device) {
         this.btDevice = btDevice;
@@ -68,8 +69,19 @@ public class Link {
      *                          or a LinkException if unsuccessful
      */
     public void sendCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
+        if (state != State.AUTHENTICATED) {
+            responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.UNAUTHORISED));
+            return;
+        }
+
+        if (sentCommand != null && sentCommand.finished == false) {
+            responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.CUSTOM_COMMAND_IN_PROGRESS));
+            return;
+        }
+
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue()) Log.i(LocalDevice.TAG, "sendCommand " + ByteUtils.hexFromBytes(hmDevice.getMac()));
-        commandCallback = new WeakReference<>(responseCallback);
+
+        sentCommand = new SentCommand(responseCallback);
         device.core.HMBTCoreSendCustomCommand(this.device.coreInterface, bytes, bytes.length, getAddressBytes());
     }
 
@@ -109,11 +121,12 @@ public class Link {
 
     void onCommandResponseReceived(final byte[] data) {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue()) Log.i(LocalDevice.TAG, "onCommandResponseReceived " + ByteUtils.hexFromBytes(hmDevice.getMac()));
-        if (commandCallback != null && commandCallback.get() != null) {
+        if (sentCommand != null && sentCommand.commandCallback != null && sentCommand.commandCallback.get() != null) {
             this.device.ble.mainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    commandCallback.get().response(data, null);
+                sentCommand.finished = true;
+                sentCommand.commandCallback.get().response(data, null);
                 }
             });
         }
@@ -168,5 +181,14 @@ public class Link {
 
     byte[] getAddressBytes() {
         return ByteUtils.bytesFromMacString(btDevice.getAddress());
+    }
+
+    private class SentCommand {
+        boolean finished;
+        WeakReference<Constants.DataResponseCallback> commandCallback;
+
+        SentCommand(Constants.DataResponseCallback callback) {
+            this.commandCallback = new WeakReference<>(callback);;
+        }
     }
 }
