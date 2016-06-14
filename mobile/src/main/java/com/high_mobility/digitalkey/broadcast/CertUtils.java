@@ -1,5 +1,7 @@
 package com.high_mobility.digitalkey.broadcast;
 
+import android.util.Log;
+
 import com.high_mobility.HMLink.AccessCertificate;
 import com.high_mobility.HMLink.Broadcasting.ByteUtils;
 import com.high_mobility.HMLink.Crypto;
@@ -13,8 +15,12 @@ import java.util.Date;
 public class CertUtils {
     static final byte[] CA_PRIVATE_KEY = ByteUtils.bytesFromHex("***REMOVED***");
 
-    static final byte[] CAR_SERIAL = ByteUtils.bytesFromHex("01231910D62CA571EE");
+//    static final byte[] CAR_SERIAL = ByteUtils.bytesFromHex("01231910D62CA571EE");
+//    static final byte[] CAR_PUBLIC = ByteUtils.bytesFromHex("***REMOVED***");
+
+    static final byte[] CAR_SERIAL = ByteUtils.bytesFromHex("01234268D62CA571EE");
     static final byte[] CAR_PUBLIC = ByteUtils.bytesFromHex("***REMOVED***");
+
 
     public static AccessCertificate demoRegisteredCertificate(byte[] device_serial) {
         Date startDate = new Date();

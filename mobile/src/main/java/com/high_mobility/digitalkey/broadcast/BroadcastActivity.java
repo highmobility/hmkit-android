@@ -12,7 +12,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.high_mobility.HMLink.AccessCertificate;
-import com.high_mobility.HMLink.Commands.AccessResponse;
 import com.high_mobility.HMLink.Commands.AutoCommand;
 import com.high_mobility.HMLink.Broadcasting.ByteUtils;
 import com.high_mobility.HMLink.Broadcasting.Link;
@@ -20,8 +19,8 @@ import com.high_mobility.HMLink.Broadcasting.LinkListener;
 import com.high_mobility.HMLink.Broadcasting.LocalDevice;
 import com.high_mobility.HMLink.Broadcasting.LocalDeviceListener;
 import com.high_mobility.HMLink.Commands.AutoCommandNotification;
+import com.high_mobility.HMLink.Commands.AutoCommandResponse;
 import com.high_mobility.HMLink.Commands.LockStatusChangedNotification;
-import com.high_mobility.HMLink.Commands.GetVehicleStatusResponse;
 import com.high_mobility.HMLink.Commands.CommandParseException;
 import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.DeviceCertificate;
@@ -139,10 +138,9 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
                 Log.i(TAG, "LockStatusChanged " + changedNotification.getLockStatus());
             }
         }
-        catch (Exception e) {
-            Log.e(TAG, e.getLocalizedMessage());
+        catch (CommandParseException e) {
+            Log.e(TAG, "Notification parse exception ", e);
         }
-
 
         return null;
     }
@@ -230,14 +228,20 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
 
     void onLockClicked(Link link) {
         final LinkFragment fragment = adapter.getFragment(link);
-
         ViewUtils.enableView(fragment.authView, false);
+
         link.sendCommand(AutoCommand.lockDoorsBytes(), true, new Constants.DataResponseCallback() {
             @Override
             public void response(byte[] bytes, LinkException exception) {
                 ViewUtils.enableView(fragment.authView, true);
+                if (exception != null) {
+                    Log.e(TAG, "command exception", exception);
+                    return;
+                }
+
                 try {
-                    AccessResponse response = new AccessResponse(bytes);
+                    // generic ack/error response does not have a separate response class
+                    AutoCommandResponse response = new AutoCommandResponse(bytes);
 
                     if (response.getErrorCode() == 0) {
                         Log.i(TAG, "successfully locked the vehicle");
@@ -262,7 +266,8 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
             public void response(byte[] bytes, LinkException exception) {
                 ViewUtils.enableView(fragment.authView, true);
                 try {
-                    AccessResponse response = new AccessResponse(bytes);
+                    // generic ack/error response does not have a separate response class
+                    AutoCommandResponse response = new AutoCommandResponse(bytes);
 
                     if (response.getErrorCode() == 0) {
                         Log.i(TAG, "successfully unlocked the vehicle");

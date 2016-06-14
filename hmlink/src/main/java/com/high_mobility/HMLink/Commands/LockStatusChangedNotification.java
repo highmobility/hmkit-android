@@ -18,7 +18,7 @@ public class LockStatusChangedNotification extends AutoCommandNotification {
             throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
         }
 
-        this.type = Type.GET_VEHICLE_STATUS;
+        this.type = Type.LOCK_STATUS_CHANGED;
         if (bytes[1] == 0x00) {
             lockStatus = Types.LockStatus.UNLOCKED;
         }

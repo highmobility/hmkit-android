@@ -6,33 +6,23 @@ package com.high_mobility.HMLink.Commands;
 public class AutoCommandResponse extends AutoCommand {
     byte errorCode = 0;
 
-    public static AutoCommandResponse create(byte[] bytes) throws CommandParseException {
-        if (bytes.length > 1) {
-            if (bytes[1] == Type.GET_VEHICLE_STATUS.getValue()) {
-                return new GetVehicleStatusResponse(bytes);
-            }
-            else if (bytes[1] == Type.ACCESS.getValue()) {
-                return new AccessResponse(bytes);
-            }
-            else {
-                throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
-            }
-        }
-        else {
-            throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
-        }
-    }
-
     public AutoCommandResponse(byte[] bytes) throws CommandParseException {
         super(bytes);
-
-        if (bytes[0] == 0x01) {
-            return;
+        if (bytes.length < 2) {
+            throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
         }
-        else if (bytes[0] == 0x02) {
+
+        if (bytes[1] == Type.GET_VEHICLE_STATUS.getValue()) {
+            type = Type.GET_VEHICLE_STATUS;
+        }
+        else if (bytes[1] == Type.ACCESS.getValue()) {
+            type = Type.ACCESS;
+        }
+
+        if (bytes[0] == 0x02) {
             errorCode = bytes[1];
         }
-        else {
+        else if (bytes[0] != 0x01) {
             throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
         }
     }

@@ -13,8 +13,12 @@ import java.util.Date;
 public class CertUtils {
     static final byte[] CA_PRIVATE_KEY = ByteUtils.bytesFromHex("***REMOVED***");
 
-    static final byte[] CAR_SERIAL = ByteUtils.bytesFromHex("01231910D62CA571EE");
-    static final byte[] CAR_PUBLIC = ByteUtils.bytesFromHex("***REMOVED***");
+//    static final byte[] CAR_SERIAL = ByteUtils.bytesFromHex("01231910D62CA571EE");
+//    static final byte[] CAR_PUBLIC = ByteUtils.bytesFromHex("***REMOVED***");
+
+    static final byte[] CAR_SERIAL = ByteUtils.bytesFromHex("01234268D62CA571EE");
+    static final byte[] CAR_PUBLIC = ByteUtils.bytesFromHex("7FBE0002FFBF0002FFFF0820FFFF00415200FF7B00407FF700107D3F0000DFFFDFFF0250FFF60412FFFB0003EFFF88010009DFEE50660200143D002058660200");
+
 
     public static AccessCertificate demoRegisteredCertificate(byte[] device_serial) {
         Date startDate = new Date();
