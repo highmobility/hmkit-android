@@ -175,7 +175,6 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
         if (storedCerts.length > 0) {
             AccessCertificate certificate = storedCerts[0];
-            Log.i(LocalDevice.TAG, "return stored cert to core " + certificate.toString());
             copyBytesToJNI(certificate.getBytes(), cert);
             size[0] = certificate.getBytes().length;
             return 0;

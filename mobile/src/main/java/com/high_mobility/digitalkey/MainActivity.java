@@ -3,6 +3,7 @@ package com.high_mobility.digitalkey;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 
 import com.high_mobility.HMLink.Broadcasting.ByteUtils;

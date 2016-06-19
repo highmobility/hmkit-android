@@ -391,7 +391,9 @@ public class LocalDevice extends Device {
     }
 
     void writeData(byte[] mac, byte[] value) {
-        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue()) Log.i(TAG, "write " + ByteUtils.hexFromBytes(mac) + " " + ByteUtils.hexFromBytes(value));
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
+            Log.i(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(mac));
+
         Link link = getLinkForMac(mac);
         if (link != null) {
             readCharacteristic.setValue(value);
