@@ -192,24 +192,26 @@ public class Link {
 
     private class SentCommand {
         boolean finished;
-        WeakReference<Constants.DataResponseCallback> commandCallback;
+        Constants.DataResponseCallback commandCallback;
         CountDownTimer timeoutTimer;
 
 
         SentCommand(Constants.DataResponseCallback callback) {
-            this.commandCallback = new WeakReference<>(callback);
+            this.commandCallback = callback;
             startTimeoutTimer();
         }
 
         void dispatchResult(final byte[] response, final LinkException exception) {
             if (timeoutTimer != null) timeoutTimer.cancel();
             finished = true;
-            if (commandCallback == null || commandCallback.get() == null) return;
+            if (commandCallback == null) {
+                return;
+            }
 
             device.ble.mainThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    sentCommand.commandCallback.get().response(response, exception);
+                    commandCallback.response(response, exception);
                 }
             });
         }
