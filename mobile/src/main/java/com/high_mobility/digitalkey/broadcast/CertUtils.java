@@ -15,10 +15,7 @@ import java.util.Date;
 public class CertUtils {
     static final byte[] CA_PRIVATE_KEY = ByteUtils.bytesFromHex("***REMOVED***");
 
-//    static final byte[] CAR_SERIAL = ByteUtils.bytesFromHex("01231910D62CA571EE");
-//    static final byte[] CAR_PUBLIC = ByteUtils.bytesFromHex("***REMOVED***");
-
-    static final byte[] CAR_SERIAL = ByteUtils.bytesFromHex("01234268D62CA571EE");
+    static final byte[] CAR_SERIAL = ByteUtils.bytesFromHex("01231910D62CA571EE");
     static final byte[] CAR_PUBLIC = ByteUtils.bytesFromHex("***REMOVED***");
 
 

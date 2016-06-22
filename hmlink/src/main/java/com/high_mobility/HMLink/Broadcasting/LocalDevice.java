@@ -14,6 +14,7 @@ import android.os.ParcelUuid;
 import android.util.Log;
 
 import com.high_mobility.HMLink.SharedBle;
+import com.high_mobility.HMLink.SharedBleListener;
 import com.high_mobility.btcore.HMBTCore;
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.Device;
@@ -30,7 +31,7 @@ import java.util.UUID;
  * LocalDevice acts as a gateway to the application's capability to broadcast itself and handle Link connectivity.
  *
  */
-public class LocalDevice extends Device {
+public class LocalDevice extends Device implements SharedBleListener {
     static final String TAG = "HMLink";
 
     public enum State { BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING }
@@ -66,6 +67,7 @@ public class LocalDevice extends Device {
             instance.ctx = applicationContext;
             instance.storage = new Storage(applicationContext);
             instance.ble = SharedBle.getInstance(applicationContext);
+            instance.ble.addListener(instance);
         }
 
         return instance;
@@ -105,6 +107,7 @@ public class LocalDevice extends Device {
         this.CAPublicKey = CAPublicKey;
         coreInterface = new BTCoreInterface(this);
         core.HMBTCoreInit(coreInterface);
+        Log.i(LocalDevice.TAG, "Initialized High-Mobility device with certificate" + certificate.toString());
     }
 
     /**
@@ -134,7 +137,12 @@ public class LocalDevice extends Device {
      * @throws LinkException	    An exception with either UNSUPPORTED or BLUETOOTH_OFF code.
      */
     public void startBroadcasting() throws LinkException {
-        if (state == State.BROADCASTING) return; // already broadcasting
+        if (state == State.BROADCASTING) {
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+                Log.d(TAG, "will not start broadcasting: already broadcasting");
+
+            return;
+        }
 
         if (!ble.isBluetoothSupported()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
@@ -179,6 +187,10 @@ public class LocalDevice extends Device {
      * Stops the advertisements and disconnects all the links.
      */
     public void stopBroadcasting() {
+        if (getState() != State.BROADCASTING) {
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+                Log.d(TAG, "already not broadcasting");
+        }
         // stopAdvertising clears the GATT server as well.
         // This causes all connection to fail with the link because there is no GATT server.
         try {
@@ -265,6 +277,19 @@ public class LocalDevice extends Device {
         return ble.getAdapter().getName();
     }
 
+    @Override
+    public void bluetoothChangedToAvailable(boolean available) {
+        if (available) {
+            if (getState() == State.BLUETOOTH_UNAVAILABLE) setState(State.IDLE);
+            else if (getState() == State.BROADCASTING) {
+                stopBroadcasting();
+            }
+        }
+        else {
+            setState(State.BLUETOOTH_UNAVAILABLE);
+        }
+    }
+
     int didResolveDevice(HMDevice device) {
         for (int i = 0; i < links.length; i++) {
             Link link = links[i];
@@ -328,7 +353,7 @@ public class LocalDevice extends Device {
     }
 
     void didLoseLink(HMDevice device) {
-        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
         BluetoothDevice btDevice = ble.getAdapter().getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
@@ -392,7 +417,7 @@ public class LocalDevice extends Device {
 
     void writeData(byte[] mac, byte[] value) {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
-            Log.i(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(mac));
+            Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(mac));
 
         Link link = getLinkForMac(mac);
         if (link != null) {
@@ -437,7 +462,7 @@ public class LocalDevice extends Device {
             gattServerCallback = new GATTServerCallback(this);
             GATTServer = ble.getManager().openGattServer(ctx, gattServerCallback);
 
-            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "createGATTServer");
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(TAG, "createGATTServer");
             // create the service
             BluetoothGattService service = new BluetoothGattService(SERVICE_UUID,
                     BluetoothGattService.SERVICE_TYPE_PRIMARY);
@@ -461,25 +486,45 @@ public class LocalDevice extends Device {
             GATTServer.addService(service);
         }
         else {
-            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "createGATTServer: already exists");
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(TAG, "createGATTServer: already exists");
         }
     }
 
     private final AdvertiseCallback advertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(TAG, "Start advertise " + ble.getAdapter().getName());
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(TAG, "Start advertise " + ble.getAdapter().getName());
             setState(State.BROADCASTING);
         }
 
         @Override
         public void onStartFailure(int errorCode) {
-            if (errorCode != 3) {
-                Log.w(TAG, "Start Advertise Failed: " + errorCode);
-                setState(State.IDLE);
+            switch (errorCode) {
+                case AdvertiseCallback.ADVERTISE_FAILED_ALREADY_STARTED:
+                    setState(State.BROADCASTING);
+                    break;
+                case AdvertiseCallback.ADVERTISE_FAILED_DATA_TOO_LARGE:
+                    Log.e(TAG, "Advertise failed: data too large");
+                    setState(State.IDLE);
+                    break;
+                case AdvertiseCallback.ADVERTISE_FAILED_FEATURE_UNSUPPORTED:
+                    Log.e(TAG, "Advertise failed: feature unsupported");
+                    setState(State.IDLE);
+                    break;
+                case AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR:
+                    Log.e(TAG, "Advertise failed: internal error");
+                    setState(State.IDLE);
+                    break;
+                case AdvertiseCallback.ADVERTISE_FAILED_TOO_MANY_ADVERTISERS:
+                    Log.e(TAG, "Advertise failed: too many advertisers");
+                    setState(State.IDLE);
+                    break;
             }
-            else if (state != State.BROADCASTING) {
+
+            if (errorCode == AdvertiseCallback.ADVERTISE_FAILED_ALREADY_STARTED) {
                 setState(State.BROADCASTING);
+            } else {
+                setState(State.IDLE);
             }
         }
     };

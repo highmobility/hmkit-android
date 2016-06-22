@@ -2,12 +2,17 @@ package com.high_mobility.HMLink;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.util.Log;
 
 import com.high_mobility.HMLink.Broadcasting.ByteUtils;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -20,6 +25,7 @@ public class SharedBle {
     BluetoothAdapter mBluetoothAdapter;
 
     public Handler mainThreadHandler;
+    private ArrayList<SharedBleListener> listeners = new ArrayList<>();
 
     static SharedBle instance;
     public static SharedBle getInstance(Context context) {
@@ -28,10 +34,38 @@ public class SharedBle {
             instance.ctx = context;
             instance.mainThreadHandler = new Handler(context.getMainLooper());
             instance.createAdapter();
+            context.registerReceiver(instance.receiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
         }
 
         return instance;
     }
+
+    public void addListener(SharedBleListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(SharedBleListener listener) {
+        listeners.remove(listener);
+    }
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+                if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_OFF) {
+                    for (SharedBleListener listener : listeners) {
+                        listener.bluetoothChangedToAvailable(false);
+                    }
+                } else {
+                    for (SharedBleListener listener : listeners) {
+                        listener.bluetoothChangedToAvailable(true);
+                    }
+
+                }
+            }
+        }
+    };
 
     public BluetoothManager getManager() {
         return mBluetoothManager;
