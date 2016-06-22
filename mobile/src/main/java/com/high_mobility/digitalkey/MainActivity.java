@@ -19,8 +19,6 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, BroadcastActivity.class);
         startActivity(intent);
-
-
     }
 
     void onBroadcastClicked(View v) {

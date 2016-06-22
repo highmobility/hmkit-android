@@ -288,6 +288,6 @@ class Storage {
             success = false;
         }
 
-        Log.i("", "TEST: store certs " + success);
+        Log.d("", "TEST: store certs " + success);
     }
 }

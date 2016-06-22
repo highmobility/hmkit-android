@@ -1,5 +1,10 @@
 package com.high_mobility.digitalkey.broadcast;
 
+import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -23,9 +28,11 @@ import com.high_mobility.HMLink.Commands.AutoCommandResponse;
 import com.high_mobility.HMLink.Commands.LockStatusChangedNotification;
 import com.high_mobility.HMLink.Commands.CommandParseException;
 import com.high_mobility.HMLink.Constants;
+import com.high_mobility.HMLink.Device;
 import com.high_mobility.HMLink.DeviceCertificate;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.digitalkey.R;
+import android.os.Handler;
 
 /**
  * Created by ttiganik on 02/06/16.
@@ -51,6 +58,10 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
 
     void onBroadcastCheckedChanged() {
         if (broadcastSwitch.isChecked()) {
+            if (device.getState() == LocalDevice.State.BROADCASTING) return;
+            resetDevice();
+            updateDeviceInfoViews();
+
             try {
                 device.startBroadcasting();
             } catch (LinkException e) {
@@ -72,15 +83,39 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.broadcast_view);
+        device = LocalDevice.getInstance(getApplicationContext());
+        device.loggingLevel = Device.LoggingLevel.All;
 
         createViews();
-        initializeDevice();
-        onStateChanged(device.getState(), device.getState()); // set the initial broadcasting status text
-        publicKeyTextView.setText(ByteUtils.hexFromBytes(device.getCertificate().getPublicKey()));
-        serialTextView.setText(ByteUtils.hexFromBytes(device.getCertificate().getSerial()));
 
         broadcastSwitch.setChecked(true);
+        //registerReceiver(mReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }
+
+    /*private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+                if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_OFF) {
+                    Log.i(TAG, "bluetooth off");
+                    broadcastSwitch.setChecked(false);
+                } else {
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            broadcastSwitch.setChecked(true);
+                        }
+                    }, 3000);
+
+                    Log.i(TAG, "bluetooth on");
+
+                }
+            }
+        }
+    };
+*/
 
     @Override
     protected void onDestroy() {
@@ -93,10 +128,16 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
     @Override
     public void onStateChanged(LocalDevice.State state, LocalDevice.State state1) {
         broadcastSwitch.setEnabled(state != LocalDevice.State.BLUETOOTH_UNAVAILABLE);
-        setTitle(device.getName());
 
         switch (state) {
             case IDLE:
+                if (state1 == LocalDevice.State.BLUETOOTH_UNAVAILABLE && broadcastSwitch.isChecked()) {
+                    try {
+                        device.startBroadcasting();
+                    } catch (LinkException e) {
+                        e.printStackTrace();
+                    }
+                }
                 statusTextView.setText("idle");
                 break;
             case BLUETOOTH_UNAVAILABLE:
@@ -105,6 +146,7 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
 
             case BROADCASTING:
                 statusTextView.setText("broadcasting");
+                setTitle(device.getName());
                 break;
         }
     }
@@ -156,8 +198,7 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
         pairingView.setVisibility(View.GONE);
     }
 
-    void initializeDevice() {
-        device = LocalDevice.getInstance(getApplicationContext());
+    void resetDevice() {
         // Delete the previous certificates from the device.
         // This is not needed in real scenario where certificates are not faked.
         device.reset();
@@ -224,6 +265,11 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
         pager = (ViewPager) findViewById(R.id.pager);
         adapter = new LinkPagerAdapter(this, getSupportFragmentManager());
         pager.setAdapter(adapter);
+    }
+
+    void updateDeviceInfoViews() {
+        publicKeyTextView.setText(ByteUtils.hexFromBytes(device.getCertificate().getPublicKey()));
+        serialTextView.setText(ByteUtils.hexFromBytes(device.getCertificate().getSerial()));
     }
 
     void onLockClicked(Link link) {

@@ -204,7 +204,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMApiCallbackExitedProximity(HMDevice device) {
-        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(LocalDevice.TAG, "HMCtwExitedProximity");
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(LocalDevice.TAG, "HMCtwExitedProximity");
         this.device.didLoseLink(device);
     }
 

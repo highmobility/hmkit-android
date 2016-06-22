@@ -72,20 +72,20 @@ public class Link {
     public void sendCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
         if (state != State.AUTHENTICATED) {
             if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
-                Log.i(LocalDevice.TAG, "cant send command, not authenticated");
+                Log.d(LocalDevice.TAG, "cant send command, not authenticated");
             responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.UNAUTHORISED));
             return;
         }
 
         if (sentCommand != null && sentCommand.finished == false) {
             if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
-                Log.i(LocalDevice.TAG, "cant send command, custom command in progress");
+                Log.d(LocalDevice.TAG, "cant send command, custom command in progress");
             responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.CUSTOM_COMMAND_IN_PROGRESS));
             return;
         }
 
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
-            Log.i(LocalDevice.TAG, "send command " + ByteUtils.hexFromBytes(bytes)
+            Log.d(LocalDevice.TAG, "send command " + ByteUtils.hexFromBytes(bytes)
                     + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
         sentCommand = new SentCommand(responseCallback);
@@ -123,20 +123,27 @@ public class Link {
 
     byte[] onCommandReceived(byte[] bytes) {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
-            Log.i(LocalDevice.TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
+            Log.d(LocalDevice.TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
                     + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()));
-        if (listener == null) return null;
+        if (listener == null) {
+            Log.d(LocalDevice.TAG, "can't dispatch notification: no listener set");
+            return null;
+        }
         return listener.onCommandReceived(this, bytes);
     }
 
     void onCommandResponseReceived(final byte[] data) {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
-            Log.i(LocalDevice.TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
+            Log.d(LocalDevice.TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
                     + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
-        if (sentCommand != null) {
-            sentCommand.dispatchResult(data, null);
+        if (sentCommand == null) {
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
+                Log.d(LocalDevice.TAG, "can't dispatch command response: sentCommand = null");
+            return;
         }
+
+        sentCommand.dispatchResult(data, null);
     }
 
     int pairingResponse = -1;
@@ -178,7 +185,7 @@ public class Link {
                     }
                 });
 
-                if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.i(LocalDevice.TAG, "pairing timer exceeded");
+                if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(LocalDevice.TAG, "pairing timer exceeded");
                 return 1; // TODO: use correct code
             }
         }
@@ -205,6 +212,7 @@ public class Link {
             if (timeoutTimer != null) timeoutTimer.cancel();
             finished = true;
             if (commandCallback == null) {
+                Log.d(LocalDevice.TAG, "cannot dispatch the result: no callback reference");
                 return;
             }
 

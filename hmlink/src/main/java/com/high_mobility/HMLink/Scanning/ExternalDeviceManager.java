@@ -116,7 +116,7 @@ public class ExternalDeviceManager {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             // TODO: create/sync devices
-            Log.i(TAG, "onScanResult " + result);
+            Log.d(TAG, "onScanResult " + result);
             onScanResult(result);
             super.onScanResult(callbackType, result);
         }
@@ -124,7 +124,7 @@ public class ExternalDeviceManager {
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
             // TODO: create/sync devices
-            Log.i(TAG, "onBatchScanResults " + results);
+            Log.d(TAG, "onBatchScanResults " + results);
             for (ScanResult result : results) {
                 onScanResult(result);
             }
