@@ -8,7 +8,7 @@ public class AutoCommandResponse extends AutoCommand {
 
     public AutoCommandResponse(byte[] bytes) throws CommandParseException {
         super(bytes);
-        if (bytes.length < 2) {
+        if (bytes == null || bytes.length < 2) {
             throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
         }
 

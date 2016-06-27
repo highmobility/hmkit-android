@@ -50,20 +50,19 @@ public class SharedBle {
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
+        String action = intent.getAction();
 
-            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
-                if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_OFF) {
-                    for (SharedBleListener listener : listeners) {
-                        listener.bluetoothChangedToAvailable(false);
-                    }
-                } else {
-                    for (SharedBleListener listener : listeners) {
-                        listener.bluetoothChangedToAvailable(true);
-                    }
-
+        if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+            if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_OFF) {
+                for (SharedBleListener listener : listeners) {
+                    listener.bluetoothChangedToAvailable(false);
+                }
+            } else if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_ON) {
+                for (SharedBleListener listener : listeners) {
+                    listener.bluetoothChangedToAvailable(true);
                 }
             }
+        }
         }
     };
 

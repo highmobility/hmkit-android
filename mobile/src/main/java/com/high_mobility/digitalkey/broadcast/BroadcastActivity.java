@@ -89,33 +89,7 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
         createViews();
 
         broadcastSwitch.setChecked(true);
-        //registerReceiver(mReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }
-
-    /*private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
-                if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_OFF) {
-                    Log.i(TAG, "bluetooth off");
-                    broadcastSwitch.setChecked(false);
-                } else {
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            broadcastSwitch.setChecked(true);
-                        }
-                    }, 3000);
-
-                    Log.i(TAG, "bluetooth on");
-
-                }
-            }
-        }
-    };
-*/
 
     @Override
     protected void onDestroy() {

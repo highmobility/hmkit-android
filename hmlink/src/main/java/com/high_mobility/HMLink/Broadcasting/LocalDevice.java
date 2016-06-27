@@ -279,13 +279,20 @@ public class LocalDevice extends Device implements SharedBleListener {
 
     @Override
     public void bluetoothChangedToAvailable(boolean available) {
-        if (available) {
-            if (getState() == State.BLUETOOTH_UNAVAILABLE) setState(State.IDLE);
-            else if (getState() == State.BROADCASTING) {
-                stopBroadcasting();
-            }
+        if (available && getState() == State.BLUETOOTH_UNAVAILABLE) {
+            setState(State.IDLE);
         }
-        else {
+        else if (!available && getState() != State.BLUETOOTH_UNAVAILABLE) {
+            if (mBluetoothLeAdvertiser != null) {
+                mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
+            }
+
+            if (GATTServer != null) {
+                GATTServer.clearServices();
+                GATTServer.close();
+                GATTServer = null;
+            }
+
             setState(State.BLUETOOTH_UNAVAILABLE);
         }
     }
