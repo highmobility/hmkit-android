@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.Auth;
 import com.high_mobility.HMLink.AccessCertificate;
 import com.high_mobility.HMLink.Commands.AutoCommand;
 import com.high_mobility.HMLink.Broadcasting.ByteUtils;
@@ -56,6 +57,8 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
     LocalDevice device;
     Constants.ApprovedCallback pairApproveCallback;
 
+    CertUtils certUtils;
+
     void onBroadcastCheckedChanged() {
         if (broadcastSwitch.isChecked()) {
             if (device.getState() == LocalDevice.State.BROADCASTING) return;
@@ -84,6 +87,8 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.broadcast_view);
         device = LocalDevice.getInstance(getApplicationContext());
+        // set the device listener
+        device.setListener(this);
         device.loggingLevel = Device.LoggingLevel.All;
 
         createViews();
@@ -141,6 +146,10 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
 
     @Override
     public void onStateChanged(Link link, Link.State state) {
+        if (link.getState() == Link.State.AUTHENTICATED) {
+            certUtils.onCertificateReadForSerial(link.getSerial());
+        }
+
         adapter.setLinks(device.getLinks());
     }
 
@@ -181,36 +190,73 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
         // Reference: http://dc-9141.high-mobility.com/android-tutorial/#creating-key-pair
         final byte[] DEVICE_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
         final byte[] DEVICE_PRIVATE_KEY = ByteUtils.bytesFromHex("***REMOVED***");
-
-        // Create a demo certificate. In real life situation the certificate should be queried from the server
-        // Reference: http://dc-9141.high-mobility.com/android-tutorial/#setting-device-certificate
-        // Reference: http://dc-9141.high-mobility.com/android-reference-device-certificate/#convenience-init
-        final byte[] APP_IDENTIFIER = ByteUtils.bytesFromHex("***REMOVED***");
-        final byte[] ISSUER = ByteUtils.bytesFromHex("48494D4F");
         final byte[] DEVICE_SERIAL = ByteUtils.bytesFromHex("01231910D62CA571EF");
 
-        DeviceCertificate cert = new DeviceCertificate(ISSUER, APP_IDENTIFIER, DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
-        cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***")); // original
+        if (device.getCertificate() == null) {
+            // Create a demo certificate. In real life situation the certificate should be queried from the server
+            // Reference: http://dc-9141.high-mobility.com/android-tutorial/#setting-device-certificate
+            // Reference: http://dc-9141.high-mobility.com/android-reference-device-certificate/#convenience-init
+            final byte[] APP_IDENTIFIER = ByteUtils.bytesFromHex("***REMOVED***");
+            final byte[] ISSUER = ByteUtils.bytesFromHex("48494D4F");
 
-        // set the device certificate.
-        device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY);
-        // set the device listener
-        device.setListener(this);
+            DeviceCertificate cert = new DeviceCertificate(ISSUER, APP_IDENTIFIER, DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
+            cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***"));
+            // set the device certificate.
+            device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY);
+        }
+
+        if (certUtils == null) {
+            certUtils = new CertUtils(this, DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
+        }
 
         // create the AccessCertificates for the car to read(stored certificate)
         // and register ourselves with the car already(registeredCertificate)
-        AccessCertificate registeredCertificate = CertUtils.demoRegisteredCertificate(DEVICE_SERIAL);
+        AccessCertificate redBoxRegisteredCertificate = certUtils.registerCertificateForBoxType(CertUtils.BoxType.Red);
         try {
-            device.registerCertificate(registeredCertificate);
+            device.registerCertificate(redBoxRegisteredCertificate);
         } catch (LinkException e) {
             e.printStackTrace();
         }
 
-        AccessCertificate storedCertificate = CertUtils.demoStoredCertificate(DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
+        if (!certUtils.isCertificateReadForType(CertUtils.BoxType.Red)) {
+            AccessCertificate storedCertificate = certUtils.storedCertificateForBoxType(CertUtils.BoxType.Red);
+            try {
+                device.storeCertificate(storedCertificate);
+            } catch (LinkException e) {
+                e.printStackTrace();
+            }
+        }
+
+        AccessCertificate noBoxRegisteredCertificate = certUtils.registerCertificateForBoxType(CertUtils.BoxType.NoBox);
         try {
-            device.storeCertificate(storedCertificate);
+            device.registerCertificate(noBoxRegisteredCertificate);
         } catch (LinkException e) {
             e.printStackTrace();
+        }
+
+        if (!certUtils.isCertificateReadForType(CertUtils.BoxType.NoBox)) {
+            AccessCertificate storedCertificate = certUtils.storedCertificateForBoxType(CertUtils.BoxType.NoBox);
+            try {
+                device.storeCertificate(storedCertificate);
+            } catch (LinkException e) {
+                e.printStackTrace();
+            }
+        }
+
+        AccessCertificate yellowRegisteredCertificate = certUtils.registerCertificateForBoxType(CertUtils.BoxType.Yellow);
+        try {
+            device.registerCertificate(yellowRegisteredCertificate);
+        } catch (LinkException e) {
+            e.printStackTrace();
+        }
+
+        if (!certUtils.isCertificateReadForType(CertUtils.BoxType.Yellow)) {
+            AccessCertificate storedCertificate = certUtils.storedCertificateForBoxType(CertUtils.BoxType.Yellow);
+            try {
+                device.storeCertificate(storedCertificate);
+            } catch (LinkException e) {
+                e.printStackTrace();
+            }
         }
     }
 

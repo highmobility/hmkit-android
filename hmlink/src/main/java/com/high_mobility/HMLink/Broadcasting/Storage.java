@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.AccessCertificate;
 import com.high_mobility.HMLink.Certificate;
@@ -219,7 +220,7 @@ class Storage {
 
         AccessCertificate[] certs = getCertificates();
 
-        if (certs.length >= 5) throw new LinkException(LinkException.LinkExceptionCode.STORAGE_FULL);
+        if (certs.length >= Constants.certificateStorageCount) throw new LinkException(LinkException.LinkExceptionCode.STORAGE_FULL);
 
         for (int i = 0; i < certs.length; i++) {
             AccessCertificate cert = certs[i];

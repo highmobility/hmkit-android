@@ -9,6 +9,8 @@ import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.AccessCertificate;
 
+import java.util.Arrays;
+
 /**
  * Created by ttiganik on 20/04/16.
  */
@@ -185,11 +187,20 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public int HMPersistenceHaleraseStoredCertificate() {
+    public int HMPersistenceHaleraseStoredCertificate(byte[] serial) {
         AccessCertificate[] storedCerts = device.storage.getCertificatesWithoutProvidingSerial(device.getCertificate().getSerial());
 
         for (AccessCertificate cert : storedCerts) {
-            if (device.storage.deleteCertificate(cert)) return 0; // this does not work for an array of stored certs
+            if (Arrays.equals(cert.getProviderSerial(), serial)) {
+                if (device.storage.deleteCertificate(cert)) {
+                    Log.i(LocalDevice.TAG, "delete cert with serial " + ByteUtils.hexFromBytes(serial));
+                    return 0;
+                }
+                else {
+                    Log.i(LocalDevice.TAG, "could not delete cert with serial " + ByteUtils.hexFromBytes(serial));
+                    return 1;
+                }
+            }
         }
 
         return 1;
