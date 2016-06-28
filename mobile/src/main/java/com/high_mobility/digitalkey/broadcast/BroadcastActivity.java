@@ -1,10 +1,5 @@
 package com.high_mobility.digitalkey.broadcast;
 
-import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -16,24 +11,21 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.google.android.gms.auth.api.Auth;
-import com.high_mobility.HMLink.AccessCertificate;
-import com.high_mobility.HMLink.Commands.AutoCommand;
 import com.high_mobility.HMLink.Broadcasting.ByteUtils;
 import com.high_mobility.HMLink.Broadcasting.Link;
 import com.high_mobility.HMLink.Broadcasting.LinkListener;
 import com.high_mobility.HMLink.Broadcasting.LocalDevice;
 import com.high_mobility.HMLink.Broadcasting.LocalDeviceListener;
+import com.high_mobility.HMLink.Commands.AutoCommand;
 import com.high_mobility.HMLink.Commands.AutoCommandNotification;
 import com.high_mobility.HMLink.Commands.AutoCommandResponse;
-import com.high_mobility.HMLink.Commands.LockStatusChangedNotification;
 import com.high_mobility.HMLink.Commands.CommandParseException;
+import com.high_mobility.HMLink.Commands.LockStatusChangedNotification;
 import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.Device;
 import com.high_mobility.HMLink.DeviceCertificate;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.digitalkey.R;
-import android.os.Handler;
 
 /**
  * Created by ttiganik on 02/06/16.
@@ -209,55 +201,7 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
             certUtils = new CertUtils(this, DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
         }
 
-        // create the AccessCertificates for the car to read(stored certificate)
-        // and register ourselves with the car already(registeredCertificate)
-        AccessCertificate redBoxRegisteredCertificate = certUtils.registerCertificateForBoxType(CertUtils.BoxType.Red);
-        try {
-            device.registerCertificate(redBoxRegisteredCertificate);
-        } catch (LinkException e) {
-            e.printStackTrace();
-        }
-
-        if (!certUtils.isCertificateReadForType(CertUtils.BoxType.Red)) {
-            AccessCertificate storedCertificate = certUtils.storedCertificateForBoxType(CertUtils.BoxType.Red);
-            try {
-                device.storeCertificate(storedCertificate);
-            } catch (LinkException e) {
-                e.printStackTrace();
-            }
-        }
-
-        AccessCertificate noBoxRegisteredCertificate = certUtils.registerCertificateForBoxType(CertUtils.BoxType.NoBox);
-        try {
-            device.registerCertificate(noBoxRegisteredCertificate);
-        } catch (LinkException e) {
-            e.printStackTrace();
-        }
-
-        if (!certUtils.isCertificateReadForType(CertUtils.BoxType.NoBox)) {
-            AccessCertificate storedCertificate = certUtils.storedCertificateForBoxType(CertUtils.BoxType.NoBox);
-            try {
-                device.storeCertificate(storedCertificate);
-            } catch (LinkException e) {
-                e.printStackTrace();
-            }
-        }
-
-        AccessCertificate yellowRegisteredCertificate = certUtils.registerCertificateForBoxType(CertUtils.BoxType.Yellow);
-        try {
-            device.registerCertificate(yellowRegisteredCertificate);
-        } catch (LinkException e) {
-            e.printStackTrace();
-        }
-
-        if (!certUtils.isCertificateReadForType(CertUtils.BoxType.Yellow)) {
-            AccessCertificate storedCertificate = certUtils.storedCertificateForBoxType(CertUtils.BoxType.Yellow);
-            try {
-                device.storeCertificate(storedCertificate);
-            } catch (LinkException e) {
-                e.printStackTrace();
-            }
-        }
+        certUtils.registerAndStoreAllCertificates(device);
     }
 
     void createViews() {

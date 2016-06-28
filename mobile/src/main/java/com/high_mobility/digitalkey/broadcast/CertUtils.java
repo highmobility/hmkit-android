@@ -9,6 +9,7 @@ import com.high_mobility.HMLink.Broadcasting.ByteUtils;
 import com.high_mobility.HMLink.Broadcasting.LocalDevice;
 import com.high_mobility.HMLink.Certificate;
 import com.high_mobility.HMLink.Crypto;
+import com.high_mobility.HMLink.LinkException;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -86,14 +87,17 @@ public class CertUtils {
                 return;
             }
         }
-        Log.i(BroadcastActivity.TAG, "add bool for serial " + ByteUtils.hexFromBytes(serial));
+
+        Log.d(BroadcastActivity.TAG, "Remember that cert is stored for serial" + ByteUtils.hexFromBytes(serial));
         certificatesReadStringSet.add(serialString);
+
         editor.putStringSet(CERT_UTILS_STORAGE_KEY, certificatesReadStringSet);
         editor.commit();
     }
 
     public void reset() {
         editor.remove(CERT_UTILS_STORAGE_KEY);
+        editor.commit();
     }
 
     public AccessCertificate registerCertificateForBoxType(BoxType type) {
@@ -148,5 +152,58 @@ public class CertUtils {
         byte[] signature = Crypto.sign(storedCertificate.getBytes(), CA_PRIVATE_KEY);
         storedCertificate.setSignature(signature);
         return storedCertificate;
+    }
+
+    public void registerAndStoreAllCertificates(LocalDevice device) {
+        // create the AccessCertificates for the car to read(stored certificate)
+        // and register ourselves with the car already(registeredCertificate)
+        AccessCertificate redBoxRegisteredCertificate = registerCertificateForBoxType(CertUtils.BoxType.Red);
+        try {
+            device.registerCertificate(redBoxRegisteredCertificate);
+        } catch (LinkException e) {
+            Log.e(BroadcastActivity.TAG, "Cannot register cert " + redBoxRegisteredCertificate.getGainerSerial(), e);
+        }
+
+        if (!isCertificateReadForType(CertUtils.BoxType.Red)) {
+            AccessCertificate storedCertificate = storedCertificateForBoxType(CertUtils.BoxType.Red);
+            try {
+                device.storeCertificate(storedCertificate);
+            } catch (LinkException e) {
+                Log.e(BroadcastActivity.TAG, "Cannot store cert " + storedCertificate.getProviderSerial(), e);
+            }
+        }
+
+        AccessCertificate noBoxRegisteredCertificate = registerCertificateForBoxType(CertUtils.BoxType.NoBox);
+        try {
+            device.registerCertificate(noBoxRegisteredCertificate);
+        } catch (LinkException e) {
+            Log.e(BroadcastActivity.TAG, "Cannot register cert " + noBoxRegisteredCertificate.getGainerSerial(), e);
+        }
+
+        if (!isCertificateReadForType(CertUtils.BoxType.NoBox)) {
+            AccessCertificate storedCertificate = storedCertificateForBoxType(CertUtils.BoxType.NoBox);
+            try {
+                device.storeCertificate(storedCertificate);
+            } catch (LinkException e) {
+                Log.e(BroadcastActivity.TAG, "Cannot store cert " + storedCertificate.getProviderSerial(), e);
+            }
+        }
+
+        AccessCertificate yellowRegisteredCertificate = registerCertificateForBoxType(CertUtils.BoxType.Yellow);
+        try {
+            device.registerCertificate(yellowRegisteredCertificate);
+        } catch (LinkException e) {
+            Log.e(BroadcastActivity.TAG, "Cannot register cert " + yellowRegisteredCertificate.getGainerSerial(), e);
+        }
+
+        if (!isCertificateReadForType(CertUtils.BoxType.Yellow)) {
+            AccessCertificate storedCertificate = storedCertificateForBoxType(CertUtils.BoxType.Yellow);
+            try {
+                device.storeCertificate(storedCertificate);
+                Log.i(BroadcastActivity.TAG, "stored cert");
+            } catch (LinkException e) {
+                Log.e(BroadcastActivity.TAG, "Cannot store cert " + storedCertificate.getProviderSerial(), e);
+            }
+        }
     }
 }

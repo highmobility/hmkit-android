@@ -173,38 +173,45 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetStoredCertificate(byte[] serial, byte[] cert, int[] size) {
-        Log.i(LocalDevice.TAG, "HMPersistenceHalgetStoredCertificate");
         AccessCertificate[] storedCerts = device.storage.getCertificatesWithoutProvidingSerial(device.getCertificate().getSerial());
 
         for (AccessCertificate storedCert : storedCerts) {
             if (Arrays.equals(storedCert.getProviderSerial(), serial)) {
-                Log.i(LocalDevice.TAG, "found the stored cert");
                 copyBytesToJNI(storedCert.getBytes(), cert);
                 size[0] = storedCert.getBytes().length;
+                if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+                    Log.d(LocalDevice.TAG, "Returned stored cert for serial " + ByteUtils.hexFromBytes(serial));
                 return 0;
             }
         }
+
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+            Log.d(LocalDevice.TAG, "No stored cert for serial" + ByteUtils.hexFromBytes(serial));
 
         return 1;
     }
 
     @Override
     public int HMPersistenceHaleraseStoredCertificate(byte[] serial) {
-        Log.i(LocalDevice.TAG, "HMPersistenceHaleraseStoredCertificate");
         AccessCertificate[] storedCerts = device.storage.getCertificatesWithoutProvidingSerial(device.getCertificate().getSerial());
 
         for (AccessCertificate cert : storedCerts) {
             if (Arrays.equals(cert.getProviderSerial(), serial)) {
                 if (device.storage.deleteCertificate(cert)) {
-                    Log.i(LocalDevice.TAG, "delete cert with serial " + ByteUtils.hexFromBytes(serial));
+                    if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+                        Log.d(LocalDevice.TAG, "Erased stored cert for serial " + ByteUtils.hexFromBytes(serial));
+
                     return 0;
                 }
                 else {
-                    Log.i(LocalDevice.TAG, "could not delete cert with serial " + ByteUtils.hexFromBytes(serial));
+                    if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+                        Log.d(LocalDevice.TAG, "Could not erase cert for serial " + ByteUtils.hexFromBytes(serial));
                     return 1;
                 }
             }
         }
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+            Log.d(LocalDevice.TAG, "No cert to erase for serial " + ByteUtils.hexFromBytes(serial));
 
         return 1;
     }

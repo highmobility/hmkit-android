@@ -205,7 +205,6 @@ public class LocalDevice extends Device implements SharedBleListener {
             setState(State.IDLE);
         }
         catch (Exception e) {
-            // TODO: fix the crash on app close
             e.printStackTrace();
         }
     }
