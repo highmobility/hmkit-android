@@ -172,22 +172,25 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public int HMPersistenceHalgetStoredCertificate(byte[] cert, int[] size) {
+    public int HMPersistenceHalgetStoredCertificate(byte[] serial, byte[] cert, int[] size) {
+        Log.i(LocalDevice.TAG, "HMPersistenceHalgetStoredCertificate");
         AccessCertificate[] storedCerts = device.storage.getCertificatesWithoutProvidingSerial(device.getCertificate().getSerial());
 
-        if (storedCerts.length > 0) {
-            AccessCertificate certificate = storedCerts[0];
-            copyBytesToJNI(certificate.getBytes(), cert);
-            size[0] = certificate.getBytes().length;
-            return 0;
+        for (AccessCertificate storedCert : storedCerts) {
+            if (Arrays.equals(storedCert.getProviderSerial(), serial)) {
+                Log.i(LocalDevice.TAG, "found the stored cert");
+                copyBytesToJNI(storedCert.getBytes(), cert);
+                size[0] = storedCert.getBytes().length;
+                return 0;
+            }
         }
-        else {
-            return 1;
-        }
+
+        return 1;
     }
 
     @Override
     public int HMPersistenceHaleraseStoredCertificate(byte[] serial) {
+        Log.i(LocalDevice.TAG, "HMPersistenceHaleraseStoredCertificate");
         AccessCertificate[] storedCerts = device.storage.getCertificatesWithoutProvidingSerial(device.getCertificate().getSerial());
 
         for (AccessCertificate cert : storedCerts) {

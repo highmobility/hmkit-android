@@ -149,7 +149,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public int HMPersistenceHaleraseStoredCertificate() {
+    public int HMPersistenceHaleraseStoredCertificate(byte[] serial) {
         Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName());
         return 1;
     }

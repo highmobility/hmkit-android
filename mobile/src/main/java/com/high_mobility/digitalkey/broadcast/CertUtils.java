@@ -30,10 +30,10 @@ public class CertUtils {
     static final byte[] CAR_PUBLIC_RED = ByteUtils.bytesFromHex("***REMOVED***");
 
     static final byte[] CAR_SERIAL_NO_BOX = ByteUtils.bytesFromHex("01231910D62CA571EE");
-    static final byte[] CAR_PUBLIC_NO_BOX = ByteUtils.bytesFromHex("***REMOVED******REMOVED***");
+    static final byte[] CAR_PUBLIC_NO_BOX = ByteUtils.bytesFromHex("***REMOVED***");
 
     static final byte[] CAR_SERIAL_YELLOW = ByteUtils.bytesFromHex("01234268D62CA571EE");
-    static final byte[] CAR_PUBLIC_YELLOW = ByteUtils.bytesFromHex("***REMOVED******REMOVED***");
+    static final byte[] CAR_PUBLIC_YELLOW = ByteUtils.bytesFromHex("***REMOVED***");
 
     byte[] deviceSerial;
     byte[] devicePublic;
@@ -50,6 +50,7 @@ public class CertUtils {
 
     public boolean isCertificateReadForType(BoxType type) {
         Set<String> certificatesReadStringSet = settings.getStringSet(CERT_UTILS_STORAGE_KEY, null);
+        if (certificatesReadStringSet == null) return false;
         byte[] serial;
 
         if (type == BoxType.Red) {
@@ -76,6 +77,7 @@ public class CertUtils {
     public void onCertificateReadForSerial(byte[] serial) {
         Log.i(BroadcastActivity.TAG, "onCertificateReadForSerial " + ByteUtils.hexFromBytes(serial));
         Set<String> certificatesReadStringSet = settings.getStringSet(CERT_UTILS_STORAGE_KEY, null);
+        if (certificatesReadStringSet == null) certificatesReadStringSet = new HashSet<>();
         String serialString = ByteUtils.hexFromBytes(serial);
 
         // verify that this serial is not stored yet
@@ -84,7 +86,7 @@ public class CertUtils {
                 return;
             }
         }
-
+        Log.i(BroadcastActivity.TAG, "add bool for serial " + ByteUtils.hexFromBytes(serial));
         certificatesReadStringSet.add(serialString);
         editor.putStringSet(CERT_UTILS_STORAGE_KEY, certificatesReadStringSet);
         editor.commit();
