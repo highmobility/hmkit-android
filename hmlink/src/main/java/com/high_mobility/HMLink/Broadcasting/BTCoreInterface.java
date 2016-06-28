@@ -185,7 +185,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public int HMPersistenceHaleraseStoredCertificate() {
+    public int HMPersistenceHaleraseStoredCertificate(byte[] serial) {
         AccessCertificate[] storedCerts = device.storage.getCertificatesWithoutProvidingSerial(device.getCertificate().getSerial());
 
         for (AccessCertificate cert : storedCerts) {
@@ -204,7 +204,8 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMApiCallbackExitedProximity(HMDevice device) {
-        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(LocalDevice.TAG, "HMCtwExitedProximity");
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+            Log.d(LocalDevice.TAG, "HMCtwExitedProximity");
         this.device.didLoseLink(device);
     }
 

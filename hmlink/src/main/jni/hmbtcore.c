@@ -31,7 +31,7 @@ void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterfa
     interfaceMethodHMPersistenceHalremovePublicKey = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalremovePublicKey","([B)I");
     interfaceMethodHMPersistenceHaladdStoredCertificate = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHaladdStoredCertificate","([BI)I");
     interfaceMethodHMPersistenceHalgetStoredCertificate = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetStoredCertificate","([B[I)I");
-    interfaceMethodHMPersistenceHaleraseStoredCertificate = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHaleraseStoredCertificate","()I");
+    interfaceMethodHMPersistenceHaleraseStoredCertificate = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHaleraseStoredCertificate","([B)I");
 
     interfaceMethodHMApiCallbackEnteredProximity = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackEnteredProximity","(Lcom/high_mobility/btcore/HMDevice;)V");
     interfaceMethodHMApiCallbackExitedProximity = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackExitedProximity","(Lcom/high_mobility/btcore/HMDevice;)V");
