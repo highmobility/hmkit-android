@@ -222,9 +222,11 @@ uint32_t hm_bt_persistence_hal_get_stored_certificate(uint8_t *cert, uint16_t *s
   return ret;
 }
 
-uint32_t hm_bt_persistence_hal_erase_stored_certificate(){
+uint32_t hm_bt_persistence_hal_erase_stored_certificate(uint8_t *serial){
 
-  jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMPersistenceHaleraseStoredCertificate);
+  jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
+  (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jbyte*) serial );
+  jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMPersistenceHaleraseStoredCertificate, serial_);
 
   return ret;
 }
