@@ -59,4 +59,10 @@ public class LinkFragment extends Fragment {
 
         return layout;
     }
+
+    @Override
+    public void onDestroy() {
+        link = null;
+        super.onDestroy();
+    }
 }
