@@ -36,6 +36,9 @@ public class LocalDevice extends Device implements SharedBleListener {
 
     public enum State { BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING }
 
+    static int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_LOW_POWER;
+    static int txPowerLevel = AdvertiseSettings.ADVERTISE_TX_POWER_ULTRA_LOW;
+
     Context ctx;
     Storage storage;
     byte[] privateKey;
@@ -71,6 +74,28 @@ public class LocalDevice extends Device implements SharedBleListener {
         }
 
         return instance;
+    }
+
+    /**
+     * Sets the advertise mode for the AdvertiseSettings
+     *
+     * @param advertiseMode the advertise mode
+     * @see AdvertiseSettings
+     */
+    public static void setAdvertiseMode(int advertiseMode) {
+        if (advertiseMode > AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY) return;
+        LocalDevice.advertiseMode = advertiseMode;
+    }
+
+    /**
+     * Sets the TX power level for the AdvertiseSettings
+     *
+     * @param txPowerLevel the advertise mode
+     * @see AdvertiseSettings
+     */
+    public static void setTxPowerLevel(int txPowerLevel) {
+        if (txPowerLevel > AdvertiseSettings.ADVERTISE_TX_POWER_HIGH) return;
+        LocalDevice.txPowerLevel = txPowerLevel;
     }
 
     /**
@@ -167,10 +192,10 @@ public class LocalDevice extends Device implements SharedBleListener {
         }
 
         final AdvertiseSettings settings = new AdvertiseSettings.Builder()
-                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER)
+                .setAdvertiseMode(advertiseMode)
                 .setConnectable(true)
                 .setTimeout(0)
-                .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_ULTRA_LOW)
+                .setTxPowerLevel(txPowerLevel)
                 .build();
 
         final UUID advertiseUUID = ByteUtils.UUIDFromByteArray(ByteUtils.concatBytes(certificate.getIssuer(), certificate.getAppIdentifier()));
