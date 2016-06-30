@@ -307,10 +307,6 @@ public class LocalDevice extends Device implements SharedBleListener {
             setState(State.IDLE);
         }
         else if (!available && getState() != State.BLUETOOTH_UNAVAILABLE) {
-            if (mBluetoothLeAdvertiser != null) {
-                mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
-            }
-
             if (GATTServer != null) {
                 GATTServer.clearServices();
                 GATTServer.close();
