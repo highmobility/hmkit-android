@@ -186,7 +186,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
         }
 
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
-            Log.d(LocalDevice.TAG, "No stored cert for serial" + ByteUtils.hexFromBytes(serial));
+            Log.d(LocalDevice.TAG, "No stored cert for serial " + ByteUtils.hexFromBytes(serial));
 
         return 1;
     }

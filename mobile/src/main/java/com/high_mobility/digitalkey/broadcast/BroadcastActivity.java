@@ -1,5 +1,6 @@
 package com.high_mobility.digitalkey.broadcast;
 
+import android.bluetooth.le.AdvertiseSettings;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -78,7 +79,10 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.broadcast_view);
+        LocalDevice.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY);
+        LocalDevice.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH);
         device = LocalDevice.getInstance(getApplicationContext());
+
         // set the device listener
         device.setListener(this);
         device.loggingLevel = Device.LoggingLevel.All;

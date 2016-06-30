@@ -34,7 +34,11 @@ public class Link {
 
     SentCommand sentCommand;
 
+    long connectionTime;
+
     Link(BluetoothDevice btDevice, LocalDevice device) {
+        connectionTime = Calendar.getInstance().getTimeInMillis();
+
         this.btDevice = btDevice;
         this.device = device;
     }
@@ -106,6 +110,10 @@ public class Link {
     void setState(State state) {
         if (this.state != state) {
             final State oldState = this.state;
+            if (state == State.AUTHENTICATED && Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue()) {
+                Log.d(LocalDevice.TAG, "authenticated in " + (Calendar.getInstance().getTimeInMillis() - connectionTime) + "ms");
+            }
+
             this.state = state;
 
             if (listener != null) {
@@ -135,7 +143,8 @@ public class Link {
     void onCommandResponseReceived(final byte[] data) {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
             Log.d(LocalDevice.TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
-                    + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()));
+                    + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()) + " in " +
+                    (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime) + "ms");
 
         if (sentCommand == null) {
             if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
@@ -201,11 +210,12 @@ public class Link {
         boolean finished;
         Constants.DataResponseCallback commandCallback;
         CountDownTimer timeoutTimer;
-
+        Long commandStartTime;
 
         SentCommand(Constants.DataResponseCallback callback) {
             this.commandCallback = callback;
             startTimeoutTimer();
+            commandStartTime = Calendar.getInstance().getTimeInMillis();
         }
 
         void dispatchResult(final byte[] response, final LinkException exception) {

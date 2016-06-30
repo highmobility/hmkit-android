@@ -80,7 +80,6 @@ public class CertUtils {
     }
 
     public void onCertificateReadForSerial(byte[] serial) {
-        Log.i(BroadcastActivity.TAG, "onCertificateReadForSerial " + ByteUtils.hexFromBytes(serial));
         Set<String> certificatesReadStringSet = settings.getStringSet(CERT_UTILS_STORAGE_KEY, null);
         if (certificatesReadStringSet == null) certificatesReadStringSet = new HashSet<>();
         String serialString = ByteUtils.hexFromBytes(serial);
@@ -92,7 +91,6 @@ public class CertUtils {
             }
         }
 
-        Log.d(BroadcastActivity.TAG, "Remember that cert is stored for serial" + ByteUtils.hexFromBytes(serial));
         certificatesReadStringSet.add(serialString);
 
         editor.putStringSet(CERT_UTILS_STORAGE_KEY, certificatesReadStringSet);
