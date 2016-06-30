@@ -7,11 +7,9 @@ import android.util.Log;
 import com.high_mobility.HMLink.AccessCertificate;
 import com.high_mobility.HMLink.Broadcasting.ByteUtils;
 import com.high_mobility.HMLink.Broadcasting.LocalDevice;
-import com.high_mobility.HMLink.Certificate;
 import com.high_mobility.HMLink.Crypto;
 import com.high_mobility.HMLink.LinkException;
 
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -22,7 +20,7 @@ import java.util.Set;
  */
 public class CertUtils {
     enum BoxType {
-        Red, NoBox, Yellow
+        Red, NoBox, Yellow, Raspberry
     }
     static final String CERT_UTILS_STORAGE_KEY = "CERT_UTILS_STORAGE_KEY";
     static final byte[] CA_PRIVATE_KEY = ByteUtils.bytesFromHex("***REMOVED***");
@@ -35,6 +33,9 @@ public class CertUtils {
 
     static final byte[] CAR_SERIAL_YELLOW = ByteUtils.bytesFromHex("01234268D62CA571EE");
     static final byte[] CAR_PUBLIC_YELLOW = ByteUtils.bytesFromHex("***REMOVED***");
+
+    static final byte[] CAR_SERIAL_RASPBERRY = ByteUtils.bytesFromHex("010203030303030202");
+    static final byte[] CAR_PUBLIC_RASPBERRY = ByteUtils.bytesFromHex("***REMOVED***");
 
     byte[] deviceSerial;
     byte[] devicePublic;
@@ -62,6 +63,9 @@ public class CertUtils {
         }
         else if (type == BoxType.Yellow) {
             serial = CAR_SERIAL_YELLOW;
+        }
+        else if (type == BoxType.Raspberry) {
+            serial = CAR_SERIAL_RASPBERRY;
         }
         else {
             return false;
@@ -118,6 +122,9 @@ public class CertUtils {
         else if (type == BoxType.Yellow) {
             registeredCertificate = new AccessCertificate(CAR_SERIAL_YELLOW, CAR_PUBLIC_YELLOW, deviceSerial, startDate, endDate, null);
         }
+        else if (type == BoxType.Raspberry) {
+            registeredCertificate = new AccessCertificate(CAR_SERIAL_RASPBERRY, CAR_PUBLIC_RASPBERRY, deviceSerial, startDate, endDate, null);
+        }
         else {
             return null;
         }
@@ -145,6 +152,9 @@ public class CertUtils {
         else if (type == BoxType.Yellow) {
             storedCertificate = new AccessCertificate(deviceSerial, devicePublic, CAR_SERIAL_YELLOW, startDate, endDate, null);
         }
+        else if (type == BoxType.Raspberry) {
+            storedCertificate = new AccessCertificate(deviceSerial, devicePublic, CAR_SERIAL_RASPBERRY, startDate, endDate, null);
+        }
         else {
             return null;
         }
@@ -157,11 +167,12 @@ public class CertUtils {
     public void registerAndStoreAllCertificates(LocalDevice device) {
         // create the AccessCertificates for the car to read(stored certificate)
         // and register ourselves with the car already(registeredCertificate)
-        AccessCertificate redBoxRegisteredCertificate = registerCertificateForBoxType(CertUtils.BoxType.Red);
+
+        AccessCertificate redRegisteredCertificate = registerCertificateForBoxType(CertUtils.BoxType.Red);
         try {
-            device.registerCertificate(redBoxRegisteredCertificate);
+            device.registerCertificate(redRegisteredCertificate);
         } catch (LinkException e) {
-            Log.e(BroadcastActivity.TAG, "Cannot register cert " + redBoxRegisteredCertificate.getGainerSerial(), e);
+            Log.e(BroadcastActivity.TAG, "Cannot register cert " + redRegisteredCertificate.getGainerSerial(), e);
         }
 
         if (!isCertificateReadForType(CertUtils.BoxType.Red)) {
@@ -175,9 +186,9 @@ public class CertUtils {
 
         AccessCertificate noBoxRegisteredCertificate = registerCertificateForBoxType(CertUtils.BoxType.NoBox);
         try {
-            device.registerCertificate(noBoxRegisteredCertificate);
+            device.registerCertificate(noBoxRegisteredCertificate );
         } catch (LinkException e) {
-            Log.e(BroadcastActivity.TAG, "Cannot register cert " + noBoxRegisteredCertificate.getGainerSerial(), e);
+            Log.e(BroadcastActivity.TAG, "Cannot register cert " + noBoxRegisteredCertificate .getGainerSerial(), e);
         }
 
         if (!isCertificateReadForType(CertUtils.BoxType.NoBox)) {
@@ -191,13 +202,30 @@ public class CertUtils {
 
         AccessCertificate yellowRegisteredCertificate = registerCertificateForBoxType(CertUtils.BoxType.Yellow);
         try {
-            device.registerCertificate(yellowRegisteredCertificate);
+            device.registerCertificate(yellowRegisteredCertificate );
         } catch (LinkException e) {
-            Log.e(BroadcastActivity.TAG, "Cannot register cert " + yellowRegisteredCertificate.getGainerSerial(), e);
+            Log.e(BroadcastActivity.TAG, "Cannot register cert " + yellowRegisteredCertificate .getGainerSerial(), e);
         }
 
         if (!isCertificateReadForType(CertUtils.BoxType.Yellow)) {
             AccessCertificate storedCertificate = storedCertificateForBoxType(CertUtils.BoxType.Yellow);
+            try {
+                device.storeCertificate(storedCertificate);
+                Log.i(BroadcastActivity.TAG, "stored cert");
+            } catch (LinkException e) {
+                Log.e(BroadcastActivity.TAG, "Cannot store cert " + storedCertificate.getProviderSerial(), e);
+            }
+        }
+
+        AccessCertificate raspberryRegisteredCertificate = registerCertificateForBoxType(BoxType.Raspberry);
+        try {
+            device.registerCertificate(raspberryRegisteredCertificate );
+        } catch (LinkException e) {
+            Log.e(BroadcastActivity.TAG, "Cannot register cert " + raspberryRegisteredCertificate .getGainerSerial(), e);
+        }
+
+        if (!isCertificateReadForType(BoxType.Raspberry)) {
+            AccessCertificate storedCertificate = storedCertificateForBoxType(BoxType.Raspberry);
             try {
                 device.storeCertificate(storedCertificate);
                 Log.i(BroadcastActivity.TAG, "stored cert");
