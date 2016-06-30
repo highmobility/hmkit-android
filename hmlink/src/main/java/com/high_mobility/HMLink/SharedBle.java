@@ -79,7 +79,7 @@ public class SharedBle {
     }
 
     public boolean isBluetoothOn() {
-        return (getAdapter() != null && getAdapter().isEnabled());
+        return (getAdapter() != null && getAdapter().isEnabled() && getAdapter().getState() == BluetoothAdapter.STATE_ON);
     }
 
     public void setRandomAdapterName() {
