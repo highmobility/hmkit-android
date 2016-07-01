@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.highmobility.hmlink"
-    android:versionCode="1"
+    android:versionCode="2"
     android:versionName="0.1">
     
     <uses-permission android:name="android.permission.BLUETOOTH" />
