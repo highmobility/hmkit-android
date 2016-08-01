@@ -1,6 +1,6 @@
 ### What is this repository for? ###
 
-* This is the HM Android SDK with Mobile and Wear reference apps.
+* This is the Android SDK with Mobile and Wear reference apps.
 
 ### How do I get set up? ###
 
