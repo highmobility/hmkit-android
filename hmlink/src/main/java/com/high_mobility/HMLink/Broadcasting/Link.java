@@ -133,10 +133,12 @@ public class Link {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
             Log.d(LocalDevice.TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
                     + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()));
+
         if (listener == null) {
             Log.d(LocalDevice.TAG, "can't dispatch notification: no listener set");
             return null;
         }
+
         return listener.onCommandReceived(this, bytes);
     }
 

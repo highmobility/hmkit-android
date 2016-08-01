@@ -24,7 +24,7 @@ public interface LinkListener {
      *
      * @param link The link that received the command.
      * @param bytes The commands bytes that can correspond to the Auto API.
-     * @return
+     * @return response to the command. can be null.
      */
     byte[] onCommandReceived(Link link, byte[] bytes);
 
