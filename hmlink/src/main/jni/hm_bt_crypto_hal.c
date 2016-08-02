@@ -18,7 +18,7 @@ uint32_t hm_bt_crypto_hal_ecc_get_ecdh(uint8_t *serial, uint8_t *ecdh){
   uint8_t command_size;
   uint8_t command[16];
 
-  if(hm_bt_persistence_hal_get_public_key(serial, usepublic, start_date, end_date, &command_size, command) == 1){
+  if(hm_bt_persistence_hal_get_access_certificate(serial, usepublic, start_date, end_date, &command_size, command) == 1){
     return 1;
   }
 
@@ -47,7 +47,7 @@ uint32_t hm_bt_crypto_hal_ecc_validate_signature(uint8_t *data, uint8_t size, ui
   uint8_t command_size;
   uint8_t command[16];
 
-  if(hm_bt_persistence_hal_get_public_key(serial, usepublic, start_date, end_date, &command_size, command) == 1){
+  if(hm_bt_persistence_hal_get_access_certificate(serial, usepublic, start_date, end_date, &command_size, command) == 1){
     return 1;
   }
 
@@ -56,7 +56,7 @@ uint32_t hm_bt_crypto_hal_ecc_validate_signature(uint8_t *data, uint8_t size, ui
 
 uint32_t hm_bt_crypto_hal_ecc_validate_all_signatures(uint8_t *data, uint8_t size, uint8_t *signature){
   uint8_t count = 0;
-  hm_bt_persistence_hal_get_public_key_count(&count);
+  hm_bt_persistence_hal_get_access_certificate_count(&count);
 
   uint8_t serial[9];
   uint8_t usepublic[64];
@@ -68,7 +68,7 @@ uint32_t hm_bt_crypto_hal_ecc_validate_all_signatures(uint8_t *data, uint8_t siz
   uint8_t i = 0;
   for( i=0 ; i < count ; i++ ){
 
-    if(hm_bt_persistence_hal_get_public_key_by_index(i, serial, usepublic, start_date, end_date, &command_size, command) == 1){
+    if(hm_bt_persistence_hal_get_access_certificate_by_index(i, serial, usepublic, start_date, end_date, &command_size, command) == 1){
       return 1;
     }
 
