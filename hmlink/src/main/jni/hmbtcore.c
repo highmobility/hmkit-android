@@ -120,7 +120,7 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSensingProcessAdvertisement(JNIE
     jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
     jbyte *data = (*env)->GetByteArrayElements(env, data_, NULL);
 
-    hm_bt_core_sensing_process_advertisement(mac,data,size);
+    hm_bt_core_sensing_process_advertisement(mac,0, data,size);
 
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
     (*env)->ReleaseByteArrayElements(env, data_, data, 0);

@@ -63,7 +63,7 @@ uint32_t hm_bt_hal_init(){
   return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalInit);
 }
 
-uint32_t hm_bt_hal_connect(const uint8_t *mac){
+uint32_t hm_bt_hal_connect(const uint8_t *mac, uint8_t macType){
   jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
   (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jbyte*) mac );
   return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalConnect, mac_);
