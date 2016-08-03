@@ -5,7 +5,6 @@
 #include "hm_config.h"
 #include "hmbtcore.h"
 #include "hm_api.h"
-#include "hm_bt_debug_hal.h"
 
 void hm_api_callback_init()
 {
@@ -34,11 +33,6 @@ void hm_api_callback_authorised_device_updated(hm_device_t *device, uint8_t erro
 
 void hm_api_callback_entered_proximity(hm_device_t *device)
 {
-    hm_bt_debug_hal_log("ENTERED PROXIMITY");
-    hm_bt_debug_hal_log_hex(device->mac,6);
-    hm_bt_debug_hal_log_hex(device->serial_number,9);
-    hm_bt_debug_hal_log_hex(device->app_id,12);
-
     jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
@@ -73,11 +67,6 @@ void hm_api_callback_proximity_measured(hm_device_t *device, uint8_t receiver_co
 
 void hm_api_callback_exited_proximity(hm_device_t *device)
 {
-    hm_bt_debug_hal_log("EXITED PROXIMITY");
-    hm_bt_debug_hal_log_hex(device->mac,6);
-    hm_bt_debug_hal_log_hex(device->serial_number,9);
-    hm_bt_debug_hal_log_hex(device->app_id,12);
-
     jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
