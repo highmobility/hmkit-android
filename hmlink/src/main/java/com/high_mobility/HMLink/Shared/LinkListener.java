@@ -1,4 +1,4 @@
-package com.high_mobility.HMLink.Broadcasting;
+package com.high_mobility.HMLink.Shared;
 
 import com.high_mobility.HMLink.Constants;
 

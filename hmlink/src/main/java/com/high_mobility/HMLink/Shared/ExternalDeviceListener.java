@@ -1,4 +1,4 @@
-package com.high_mobility.HMLink.Scanning;
+package com.high_mobility.HMLink.Shared;
 
 /**
  * Created by ttiganik on 01/06/16.

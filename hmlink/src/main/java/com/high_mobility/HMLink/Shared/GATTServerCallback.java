@@ -1,4 +1,4 @@
-package com.high_mobility.HMLink.Broadcasting;
+package com.high_mobility.HMLink.Shared;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -26,7 +26,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         super.onConnectionStateChange(device, status, newState);
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(LocalDevice.TAG, "onConnectionStateChange " + newState);
         if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            this.device.core.HMBTCorelinkDisconnect(this.device.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
+            this.device.shared.core.HMBTCorelinkDisconnect(this.device.shared.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
         }
     }
 
@@ -75,7 +75,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
 
         if (responseNeeded) {
             this.device.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
-            this.device.core.HMBTCorelinkIncomingData(this.device.coreInterface, value, value.length, ByteUtils.bytesFromMacString(device.getAddress()));
+            this.device.shared.core.HMBTCorelinkIncomingData(this.device.shared.coreInterface, value, value.length, ByteUtils.bytesFromMacString(device.getAddress()));
         }
     }
 
@@ -85,7 +85,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         if (responseNeeded) {
             this.device.didReceiveLink(device);
             this.device.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
-            this.device.core.HMBTCorelinkConnect(this.device.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
+            this.device.shared.core.HMBTCorelinkConnect(this.device.shared.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
         }
     }
 }

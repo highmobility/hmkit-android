@@ -1,18 +1,17 @@
-package com.high_mobility.HMLink.Scanning;
+package com.high_mobility.HMLink.Shared;
 
 import android.bluetooth.BluetoothDevice;
 
-import com.high_mobility.HMLink.AccessCertificate;
 import com.high_mobility.HMLink.Device;
-import com.high_mobility.HMLink.DeviceCertificate;
 
 /**
  * Created by ttiganik on 01/06/16.
  */
 public class ExternalDevice extends Device {
     public enum State {
-        Disconnected, Disconnecting, Connecting, Connected, Authenticated
+        Disconnected, Connected, Authenticated
     }
+
     State state;
     ExternalDeviceListener listener;
     int RSSI;
@@ -41,23 +40,7 @@ public class ExternalDevice extends Device {
         // TODO:
     }
 
-    public void getNonce() {
-        // TODO:
-    }
-
-    public void getDeviceCertificate() {
-        // TODO:
-    }
-
-    public void getDeviceCertificateWithNonce() {
-        // TODO:
-    }
-
     public void registerCertificate() {
-        // TODO:
-    }
-
-    public void authenticate() {
         // TODO:
     }
 
@@ -74,7 +57,7 @@ public class ExternalDevice extends Device {
     }
 
     public void sendCommand() {
-        // TODO:
+        // TODO: HMBTCoreSendCustomCommand
     }
 
     public void reset() {

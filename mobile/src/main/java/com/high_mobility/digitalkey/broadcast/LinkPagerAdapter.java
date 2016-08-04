@@ -4,7 +4,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
-import com.high_mobility.HMLink.Broadcasting.Link;
+import com.high_mobility.HMLink.Shared.Link;
 
 /**
  * Created by ttiganik on 25/05/16.

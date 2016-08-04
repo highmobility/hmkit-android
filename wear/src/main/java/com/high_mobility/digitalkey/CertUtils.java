@@ -1,7 +1,7 @@
 package com.high_mobility.digitalkey;
 
 import com.high_mobility.HMLink.AccessCertificate;
-import com.high_mobility.HMLink.Broadcasting.ByteUtils;
+import com.high_mobility.HMLink.Shared.ByteUtils;
 import com.high_mobility.HMLink.Crypto;
 
 import java.util.Calendar;

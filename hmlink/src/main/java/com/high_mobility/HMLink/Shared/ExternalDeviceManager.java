@@ -1,4 +1,4 @@
-package com.high_mobility.HMLink.Scanning;
+package com.high_mobility.HMLink.Shared;
 
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -6,10 +6,7 @@ import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.util.Log;
 
-import com.high_mobility.HMLink.Broadcasting.*;
 import com.high_mobility.HMLink.LinkException;
-import com.high_mobility.HMLink.SharedBle;
-import com.high_mobility.btcore.HMBTCore;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,15 +30,14 @@ public class ExternalDeviceManager {
 
     ExternalDevice[] devices = new ExternalDevice[0];
     ExternalDeviceManagerListener listener;
-
-    HMBTCore core = new HMBTCore();
     BTCoreInterface coreInterface;
 
     State state = State.IDLE;
     static ExternalDeviceManager instance;
     Context ctx;
-    SharedBle ble;
+    Shared shared;
     BluetoothLeScanner bleScanner;
+    byte[][] scannedIdentifiers;
 
     public static ExternalDeviceManager getInstance(Context applicationContext) {
         if (instance == null) {
@@ -53,9 +49,8 @@ public class ExternalDeviceManager {
 
     ExternalDeviceManager(Context applicationContext) {
         ctx = applicationContext;
-        ble = SharedBle.getInstance(applicationContext);
-        coreInterface = new BTCoreInterface(this);
-        core.HMBTCoreInit(coreInterface);
+        shared = Shared.getInstance(applicationContext);
+        shared.externalDeviceManager = this;
     }
 
     public byte[] getSerialNumber() {
@@ -96,26 +91,28 @@ public class ExternalDeviceManager {
         // = new byte[][] { array1, array2, array3, array4, array5 };
         if (getState() == State.SCANNING) return;
 
-        if (!ble.isBluetoothSupported()) {
+        if (!shared.ble.isBluetoothSupported()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
             throw new LinkException(LinkException.LinkExceptionCode.UNSUPPORTED);
         }
 
-        if (!ble.isBluetoothOn()) {
+        if (!shared.ble.isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
             throw new LinkException(LinkException.LinkExceptionCode.BLUETOOTH_OFF);
         }
 
-        if (bleScanner == null) bleScanner = ble.getAdapter().getBluetoothLeScanner(); // TODO: use filter if useful to our scan filter
+        if (bleScanner == null) bleScanner = shared.ble.getAdapter().getBluetoothLeScanner();
 
-        bleScanner.startScan(scanCallback);
+        scannedIdentifiers = appIdentifiers;
+        bleScanner.startScan(scanCallback); // TODO: could use filter if useful to our scan preferences
         setState(State.SCANNING);
+        shared.startClock();
+        shared.core.HMBTCoreSensingScanStart(coreInterface);
     }
 
     private ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            // TODO: create/sync devices
             Log.d(TAG, "onScanResult " + result);
             onScanResult(result);
             super.onScanResult(callbackType, result);
@@ -123,7 +120,6 @@ public class ExternalDeviceManager {
 
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
-            // TODO: create/sync devices
             Log.d(TAG, "onBatchScanResults " + results);
             for (ScanResult result : results) {
                 onScanResult(result);
@@ -139,7 +135,13 @@ public class ExternalDeviceManager {
         }
 
         void onScanResult(ScanResult result) {
-//            core.HMBTCoreSensingProcessAdvertisement(coreInterface, );
+            // TODO: create/sync devices
+            /*
+            public native void HMBTCoreSensingProcessAdvertisement(HMBTCoreInterface forwardInterface, byte[] mac, byte[] data, int size);
+
+
+             */
+//            core.HMBTCoreSensingProcessAdvertisement(forwardInterface, );
         }
     };
 
@@ -148,13 +150,17 @@ public class ExternalDeviceManager {
         bleScanner.stopScan(scanCallback);
     }
 
+    void startServiceDiscovery(byte[] mac) {
+        // TODO: HMBTCoreSensingDiscoveryEvent(HMBTCoreInterface forwardInterface, byte[] mac); // call when services have been discovered
+    }
+
     private void setState(final State state) {
         if (this.state != state) {
             final State oldState = this.state;
             this.state = state;
 
             if (listener != null) {
-                ble.mainThreadHandler.post(new Runnable() {
+                shared.ble.mainThreadHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         listener.onStateChanged(oldState);

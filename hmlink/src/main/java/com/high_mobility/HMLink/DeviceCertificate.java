@@ -1,7 +1,7 @@
 package com.high_mobility.HMLink;
 
 
-import com.high_mobility.HMLink.Broadcasting.ByteUtils;
+import com.high_mobility.HMLink.Shared.ByteUtils;
 
 /**
  * Created by ttiganik on 13/04/16.

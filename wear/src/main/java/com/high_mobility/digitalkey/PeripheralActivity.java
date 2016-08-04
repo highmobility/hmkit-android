@@ -14,11 +14,11 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.high_mobility.HMLink.AccessCertificate;
-import com.high_mobility.HMLink.Broadcasting.ByteUtils;
-import com.high_mobility.HMLink.Broadcasting.Link;
-import com.high_mobility.HMLink.Broadcasting.LinkListener;
-import com.high_mobility.HMLink.Broadcasting.LocalDevice;
-import com.high_mobility.HMLink.Broadcasting.LocalDeviceListener;
+import com.high_mobility.HMLink.Shared.ByteUtils;
+import com.high_mobility.HMLink.Shared.Link;
+import com.high_mobility.HMLink.Shared.LinkListener;
+import com.high_mobility.HMLink.Shared.LocalDevice;
+import com.high_mobility.HMLink.Shared.LocalDeviceListener;
 import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.DeviceCertificate;

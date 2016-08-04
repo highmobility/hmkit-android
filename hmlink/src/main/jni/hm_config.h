@@ -4,6 +4,7 @@
 
 //Turns on debug functionality
 #define DEBUG
+#define HM_BT_LOG_LEVEL 3
 
 ////H-M BT
 #define HM_BT_DEVICE_NAME                   "HM"	                    /**< Name of device. Will be included in the advertising data. */

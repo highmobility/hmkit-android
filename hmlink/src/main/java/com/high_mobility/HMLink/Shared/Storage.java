@@ -1,4 +1,4 @@
-package com.high_mobility.HMLink.Broadcasting;
+package com.high_mobility.HMLink.Shared;
 
 import android.content.Context;
 import android.content.SharedPreferences;

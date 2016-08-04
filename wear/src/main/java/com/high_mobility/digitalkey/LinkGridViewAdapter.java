@@ -4,7 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.support.wearable.view.FragmentGridPagerAdapter;
 
-import com.high_mobility.HMLink.Broadcasting.Link;
+import com.high_mobility.HMLink.Shared.Link;
 
 /**
  * Created by ttiganik on 27/04/16.

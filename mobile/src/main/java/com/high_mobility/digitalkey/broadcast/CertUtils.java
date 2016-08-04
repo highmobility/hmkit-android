@@ -5,8 +5,8 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.high_mobility.HMLink.AccessCertificate;
-import com.high_mobility.HMLink.Broadcasting.ByteUtils;
-import com.high_mobility.HMLink.Broadcasting.LocalDevice;
+import com.high_mobility.HMLink.Shared.ByteUtils;
+import com.high_mobility.HMLink.Shared.LocalDevice;
 import com.high_mobility.HMLink.Crypto;
 import com.high_mobility.HMLink.LinkException;
 

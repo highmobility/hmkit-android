@@ -1,24 +1,22 @@
-package com.high_mobility.HMLink.Broadcasting;
+package com.high_mobility.HMLink.Shared;
 
 import android.util.Log;
 
+import com.high_mobility.HMLink.AccessCertificate;
 import com.high_mobility.HMLink.Device;
-import com.high_mobility.HMLink.Scanning.ExternalDeviceManager;
+import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.btcore.HMBTCoreInterface;
 import com.high_mobility.btcore.HMDevice;
-import com.high_mobility.HMLink.LinkException;
-import com.high_mobility.HMLink.AccessCertificate;
 
 import java.util.Arrays;
 
 /**
- * Created by ttiganik on 20/04/16.
+ * Created by ttiganik on 03/08/16.
  */
 public class BTCoreInterface implements HMBTCoreInterface {
-    LocalDevice device;
-
-    BTCoreInterface(LocalDevice device) {
-        this.device = device;
+    Shared shared;
+    BTCoreInterface(Shared shared) {
+        this.shared = shared;
     }
 
     @Override
@@ -64,7 +62,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMBTHalWriteData(byte[] mac, int length, byte[] data) {
-        device.writeData(mac, data);
+        shared.localDevice.writeData(mac, data);
         return 0;
     }
 
@@ -75,34 +73,35 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetSerial(byte[] serial) {
-        copyBytesToJNI(device.getCertificate().getSerial(), serial);
+        copyBytesToJNI(shared.localDevice.getCertificate().getSerial(), serial);
         return 0;
     }
 
     @Override
     public int HMPersistenceHalgetLocalPublicKey(byte[] publicKey) {
-        copyBytesToJNI(device.getCertificate().getPublicKey(), publicKey);
+        copyBytesToJNI(shared.localDevice.getCertificate().getPublicKey(), publicKey);
         return 0;
     }
 
     @Override
     public int HMPersistenceHalgetLocalPrivateKey(byte[] privateKey) {
-        copyBytesToJNI(device.privateKey, privateKey);
+        copyBytesToJNI(shared.localDevice.privateKey, privateKey);
         return 0;
     }
 
     @Override
     public int HMPersistenceHalgetDeviceCertificate(byte[] cert) {
-        copyBytesToJNI(device.getCertificate().getBytes(), cert);
+        if (shared.localDevice != null)
+            copyBytesToJNI(shared.localDevice.getCertificate().getBytes(), cert);
         return 0;
     }
 
     @Override
     public int HMPersistenceHaladdPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int commandSize, byte[] command) {
-        AccessCertificate cert = new AccessCertificate(serial, publicKey, device.getCertificate().getSerial(), startDate, endDate, command);
+        AccessCertificate cert = new AccessCertificate(serial, publicKey, shared.localDevice.getCertificate().getSerial(), startDate, endDate, command);
 
         try {
-            device.storage.storeCertificate(cert);
+            shared.localDevice.storage.storeCertificate(cert);
         } catch (LinkException e) {
             e.printStackTrace();
             return 1;
@@ -113,7 +112,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command) {
-        AccessCertificate certificate = device.storage.certWithGainingSerial(serial);
+        AccessCertificate certificate = shared.localDevice.storage.certWithGainingSerial(serial);
         if (certificate == null) {
             return 1;
         }
@@ -129,7 +128,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetPublicKeyByIndex(int index, byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command) {
-        AccessCertificate[] certificates = device.storage.getCertificatesWithProvidingSerial(device.getCertificate().getSerial());
+        AccessCertificate[] certificates = shared.localDevice.storage.getCertificatesWithProvidingSerial(shared.localDevice.getCertificate().getSerial());
 
         if (certificates.length >= index) {
             AccessCertificate certificate = certificates[index];
@@ -148,14 +147,14 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetPublicKeyCount(int[] count) {
-        count[0] = device.storage.getCertificatesWithProvidingSerial(device.getCertificate().getSerial()).length;
+        count[0] = shared.localDevice.storage.getCertificatesWithProvidingSerial(shared.localDevice.getCertificate().getSerial()).length;
 
         return 0;
     }
 
     @Override
     public int HMPersistenceHalremovePublicKey(byte[] serial) {
-        if (device.storage.deleteCertificateWithGainingSerial(serial)) return 0;
+        if (shared.localDevice.storage.deleteCertificateWithGainingSerial(serial)) return 0;
         else return 1;
     }
 
@@ -163,7 +162,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
     public int HMPersistenceHaladdStoredCertificate(byte[] cert, int size) {
         AccessCertificate certificate = new AccessCertificate(cert);
         try {
-            device.storage.storeCertificate(certificate);
+            shared.localDevice.storage.storeCertificate(certificate);
         } catch (LinkException e) {
             e.printStackTrace();
             return 1;
@@ -173,7 +172,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetStoredCertificate(byte[] serial, byte[] cert, int[] size) {
-        AccessCertificate[] storedCerts = device.storage.getCertificatesWithoutProvidingSerial(device.getCertificate().getSerial());
+        AccessCertificate[] storedCerts = shared.localDevice.storage.getCertificatesWithoutProvidingSerial(shared.localDevice.getCertificate().getSerial());
 
         for (AccessCertificate storedCert : storedCerts) {
             if (Arrays.equals(storedCert.getProviderSerial(), serial)) {
@@ -193,11 +192,11 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHaleraseStoredCertificate(byte[] serial) {
-        AccessCertificate[] storedCerts = device.storage.getCertificatesWithoutProvidingSerial(device.getCertificate().getSerial());
+        AccessCertificate[] storedCerts = shared.localDevice.storage.getCertificatesWithoutProvidingSerial(shared.localDevice.getCertificate().getSerial());
 
         for (AccessCertificate cert : storedCerts) {
             if (Arrays.equals(cert.getProviderSerial(), serial)) {
-                if (device.storage.deleteCertificate(cert)) {
+                if (shared.localDevice.storage.deleteCertificate(cert)) {
                     if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
                         Log.d(LocalDevice.TAG, "Erased stored cert for serial " + ByteUtils.hexFromBytes(serial));
 
@@ -220,14 +219,14 @@ public class BTCoreInterface implements HMBTCoreInterface {
     public void HMApiCallbackEnteredProximity(HMDevice device) {
         // this means core has finished identification of the device (might me authenticated or not) - show device info on screen
         // always update the device with this, auth state might have changed later with this callback as well
-        this.device.didResolveDevice(device);
+        shared.localDevice.didResolveDevice(device);
     }
 
     @Override
     public void HMApiCallbackExitedProximity(HMDevice device) {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
             Log.d(LocalDevice.TAG, "HMCtwExitedProximity");
-        this.device.didLoseLink(device);
+        shared.localDevice.didLoseLink(device);
     }
 
     @Override
@@ -238,7 +237,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
             cutBytes[i] = data[i];
         }
 
-        byte[] response = this.device.onCommandReceived(device, cutBytes);
+        byte[] response = shared.localDevice.onCommandReceived(device, cutBytes);
         if (response != null) {
             copyBytesToJNI(response, data);
             length[0] = response.length;
@@ -257,7 +256,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
             cutBytes[i] = data[i];
         }
 
-        this.device.onCommandResponseReceived(device, cutBytes);
+        shared.localDevice.onCommandResponseReceived(device, cutBytes);
     }
 
     @Override
@@ -270,7 +269,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMApiCallbackPairingRequested(HMDevice device) {
-        int response = this.device.didReceivePairingRequest(device);
+        int response = shared.localDevice.didReceivePairingRequest(device);
         return response;
     }
 

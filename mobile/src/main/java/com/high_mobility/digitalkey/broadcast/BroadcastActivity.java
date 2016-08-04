@@ -12,11 +12,11 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.high_mobility.HMLink.Broadcasting.ByteUtils;
-import com.high_mobility.HMLink.Broadcasting.Link;
-import com.high_mobility.HMLink.Broadcasting.LinkListener;
-import com.high_mobility.HMLink.Broadcasting.LocalDevice;
-import com.high_mobility.HMLink.Broadcasting.LocalDeviceListener;
+import com.high_mobility.HMLink.Shared.ByteUtils;
+import com.high_mobility.HMLink.Shared.Link;
+import com.high_mobility.HMLink.Shared.LinkListener;
+import com.high_mobility.HMLink.Shared.LocalDevice;
+import com.high_mobility.HMLink.Shared.LocalDeviceListener;
 import com.high_mobility.HMLink.Commands.AutoCommand;
 import com.high_mobility.HMLink.Commands.AutoCommandNotification;
 import com.high_mobility.HMLink.Commands.AutoCommandResponse;
@@ -94,6 +94,10 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
 
     @Override
     protected void onDestroy() {
+        for (Link link : device.getLinks()) {
+            link.setListener(null);
+        }
+        device.setListener(null);
         device.stopBroadcasting();
         super.onDestroy();
     }
@@ -143,7 +147,7 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
     @Override
     public void onStateChanged(Link link, Link.State state) {
         if (link.getState() == Link.State.AUTHENTICATED) {
-            certUtils.onCertificateReadForSerial(link.getSerial());
+//            certUtils.onCertificateReadForSerial(link.getSerial());
         }
 
         adapter.setLinks(device.getLinks());

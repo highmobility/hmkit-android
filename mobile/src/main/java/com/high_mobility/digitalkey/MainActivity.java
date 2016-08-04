@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-import com.high_mobility.HMLink.Broadcasting.ByteUtils;
+import com.high_mobility.HMLink.Shared.ByteUtils;
 import com.high_mobility.digitalkey.broadcast.BroadcastActivity;
 import com.high_mobility.digitalkey.scan.ScanActivity;
 
@@ -17,16 +17,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+//        Intent intent = new Intent(this, BroadcastActivity.class);
+//        startActivity(intent);
+    }
+
+    public void onBroadcastClicked(View v) {
         Intent intent = new Intent(this, BroadcastActivity.class);
         startActivity(intent);
     }
 
-    void onBroadcastClicked(View v) {
-        Intent intent = new Intent(this, BroadcastActivity.class);
-        startActivity(intent);
-    }
-
-    void onScanClicked(View v) {
+    public void onScanClicked(View v) {
         Intent intent = new Intent(this, ScanActivity.class);
         startActivity(intent);
     }

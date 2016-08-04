@@ -10,8 +10,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.high_mobility.HMLink.Broadcasting.ByteUtils;
-import com.high_mobility.HMLink.Broadcasting.Link;
+import com.high_mobility.HMLink.Shared.ByteUtils;
+import com.high_mobility.HMLink.Shared.Link;
 import com.high_mobility.digitalkey.R;
 
 /**

@@ -1,4 +1,4 @@
-package com.high_mobility.HMLink;
+package com.high_mobility.HMLink.Shared;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
@@ -8,9 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.util.Log;
-
-import com.high_mobility.HMLink.Broadcasting.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -27,17 +24,11 @@ public class SharedBle {
     public Handler mainThreadHandler;
     private ArrayList<SharedBleListener> listeners = new ArrayList<>();
 
-    static SharedBle instance;
-    public static SharedBle getInstance(Context context) {
-        if (instance == null) {
-            instance = new SharedBle();
-            instance.ctx = context;
-            instance.mainThreadHandler = new Handler(context.getMainLooper());
-            instance.createAdapter();
-            context.registerReceiver(instance.receiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
-        }
-
-        return instance;
+    SharedBle(Context context) {
+        this.ctx = context;
+        mainThreadHandler = new Handler(context.getMainLooper());
+        createAdapter();
+        context.registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }
 
     public void addListener(SharedBleListener listener) {

@@ -1,23 +1,17 @@
 package com.high_mobility.digitalkey.scan;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.ListActivity;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.high_mobility.HMLink.LinkException;
-import com.high_mobility.HMLink.Scanning.ExternalDevice;
-import com.high_mobility.HMLink.Scanning.ExternalDeviceManager;
-import com.high_mobility.HMLink.Scanning.ExternalDeviceManagerListener;
+import com.high_mobility.HMLink.Shared.ExternalDevice;
+import com.high_mobility.HMLink.Shared.ExternalDeviceManager;
+import com.high_mobility.HMLink.Shared.ExternalDeviceManagerListener;
 import com.high_mobility.digitalkey.MainActivity;
 import com.high_mobility.digitalkey.R;
 
