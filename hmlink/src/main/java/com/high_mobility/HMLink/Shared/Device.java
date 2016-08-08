@@ -1,4 +1,6 @@
-package com.high_mobility.HMLink;
+package com.high_mobility.HMLink.Shared;
+
+import com.high_mobility.HMLink.DeviceCertificate;
 
 import java.util.UUID;
 
@@ -27,7 +29,7 @@ public class Device {
     protected static UUID WRITE_CHAR_UUID = UUID.fromString("713D0103-503E-4C75-BA94-3148F18D941E");
     protected static UUID PING_CHAR_UUID = UUID.fromString("713D0104-503E-4C75-BA94-3148F18D941E");
 
-    protected DeviceCertificate certificate;
+    DeviceCertificate certificate;
 
     public String getName() {
         return null;

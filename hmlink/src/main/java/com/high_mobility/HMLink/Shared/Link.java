@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothDevice;
 import android.os.CountDownTimer;
 import android.util.Log;
 
-import com.high_mobility.HMLink.Device;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.Constants;

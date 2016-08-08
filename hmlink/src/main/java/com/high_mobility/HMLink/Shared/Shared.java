@@ -1,7 +1,9 @@
 package com.high_mobility.HMLink.Shared;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.high_mobility.HMLink.DeviceCertificate;
 import com.high_mobility.btcore.HMBTCore;
 
 import java.util.Timer;
@@ -16,20 +18,56 @@ public class Shared {
     static Shared instance;
     public BTCoreInterface coreInterface;
 
-    public ExternalDeviceManager externalDeviceManager;
-    public LocalDevice localDevice;
+    private ExternalDeviceManager externalDeviceManager;
+    private LocalDevice localDevice;
+    Context ctx;
     Timer t;
 
-    public static Shared getInstance(Context context) {
+    byte[] CAPublicKey;
+
+    public static Shared getInstance() {
         if (instance == null) {
             instance = new Shared();
-            instance.ble = new SharedBle(context);
         }
 
         return instance;
     }
 
-    public void startClock() {
+    /**
+     * Set the device certificate and private key before using any other functionality.
+     *
+     * setContext() has to be called before this to initialize the database.
+     *
+     * @param certificate The device certificate.
+     * @param privateKey 32 byte private key with elliptic curve Prime 256v1.
+     * @param CAPublicKey 64 byte public key of the Certificate Authority.
+     * @param applicationContext The application context
+     */
+    public void initialize(DeviceCertificate certificate, byte[] privateKey, byte[] CAPublicKey, Context applicationContext) {
+        Log.i(LocalDevice.TAG, "Initialized High-Mobility SDK with certificate" + certificate.toString());
+        ctx = applicationContext;
+        ble = new SharedBle(ctx);
+        this.CAPublicKey = CAPublicKey;
+        coreInterface = new BTCoreInterface(this);
+
+        getLocalDevice().certificate = certificate;
+        getLocalDevice().privateKey = privateKey;
+
+        core.HMBTCoreInit(coreInterface);
+//        startClock(); // TODO: start clock?
+    }
+
+    public LocalDevice getLocalDevice() {
+        if (localDevice == null) localDevice = new LocalDevice(this);
+        return localDevice;
+    }
+
+    public ExternalDeviceManager getExternalDeviceManager() {
+        if (externalDeviceManager == null) externalDeviceManager = new ExternalDeviceManager(this);
+        return externalDeviceManager;
+    }
+
+    void startClock() {
         if (t != null) return;
 
         t = new Timer();
@@ -39,10 +77,5 @@ public class Shared {
                 core.HMBTCoreClock(coreInterface);
             }
         }, 0, 1000);
-    }
-
-    Shared() {
-        coreInterface = new BTCoreInterface(this);
-        core.HMBTCoreInit(coreInterface);
     }
 }

@@ -12,6 +12,7 @@ import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.ExternalDevice;
 import com.high_mobility.HMLink.Shared.ExternalDeviceManager;
 import com.high_mobility.HMLink.Shared.ExternalDeviceManagerListener;
+import com.high_mobility.HMLink.Shared.Shared;
 import com.high_mobility.digitalkey.MainActivity;
 import com.high_mobility.digitalkey.R;
 
@@ -56,8 +57,7 @@ public class ScanActivity extends AppCompatActivity implements ExternalDeviceMan
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case 1: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -69,7 +69,7 @@ public class ScanActivity extends AppCompatActivity implements ExternalDeviceMan
     }
 
     private void didReceiveBlePermission() {
-        deviceManager = ExternalDeviceManager.getInstance(getApplicationContext());
+        deviceManager = Shared.getInstance().getExternalDeviceManager();
         deviceManager.setListener(this);
         onStateChanged(deviceManager.getState());
 

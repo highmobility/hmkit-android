@@ -14,10 +14,8 @@ import android.os.ParcelUuid;
 import android.util.Log;
 
 import com.high_mobility.btcore.HMDevice;
-import com.high_mobility.HMLink.Device;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.AccessCertificate;
-import com.high_mobility.HMLink.DeviceCertificate;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -36,13 +34,11 @@ public class LocalDevice extends Device implements SharedBleListener {
     static int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_LOW_POWER;
     static int txPowerLevel = AdvertiseSettings.ADVERTISE_TX_POWER_ULTRA_LOW;
 
-    Context ctx;
     Storage storage;
-    byte[] privateKey;
-    byte[] CAPublicKey;
     LocalDeviceListener listener;
 
     Shared shared;
+    byte[] privateKey;
     BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     BluetoothGattServer GATTServer;
     GATTServerCallback gattServerCallback;
@@ -53,18 +49,6 @@ public class LocalDevice extends Device implements SharedBleListener {
     State state = State.IDLE;
     Link[] links = new Link[0];
     static LocalDevice instance = null;
-
-    /**
-     * @param applicationContext The application context.
-     * @return The shared LocalDevice object.
-     */
-    public static LocalDevice getInstance(Context applicationContext) {
-        if (instance == null) {
-            instance = new LocalDevice(applicationContext);
-        }
-
-        return instance;
-    }
 
     /**
      * Sets the advertise mode for the AdvertiseSettings
@@ -107,21 +91,7 @@ public class LocalDevice extends Device implements SharedBleListener {
         this.listener = listener;
     }
 
-    /**
-     * Set the device certificate and private key before using any other functionality.
-     *
-     * setContext() has to be called before this to initialize the database.
-     *
-     * @param certificate The device certificate.
-     * @param privateKey 32 byte private key with elliptic curve Prime 256v1.
-     * @param CAPublicKey 64 byte public key of the Certificate Authority.
-     */
-    public void setDeviceCertificate(DeviceCertificate certificate, byte[] privateKey, byte[] CAPublicKey) {
-        this.certificate = certificate;
-        this.privateKey = privateKey;
-        this.CAPublicKey = CAPublicKey;
-        Log.i(LocalDevice.TAG, "Initialized High-Mobility device with certificate" + certificate.toString());
-    }
+
 
     /**
      * @return The certificates that are registered on the LocalDevice.
@@ -284,12 +254,10 @@ public class LocalDevice extends Device implements SharedBleListener {
         }
     }
 
-    LocalDevice(Context context) {
-        ctx = context;
-        storage = new Storage(context);
-        shared = Shared.getInstance(context);
+    LocalDevice(Shared shared) {
+        this.shared = shared;
         shared.ble.addListener(instance);
-        shared.localDevice = this;
+        storage = new Storage(shared.ctx);
     }
 
     @Override
@@ -438,25 +406,19 @@ public class LocalDevice extends Device implements SharedBleListener {
         }
     }
 
-    void writeData(byte[] mac, byte[] value) {
+    void writeData(Link link, byte[] value) {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
-            Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(mac));
+            Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(link.getAddressBytes()));
 
-        Link link = getLinkForMac(mac);
-        if (link != null) {
-            readCharacteristic.setValue(value);
-            GATTServer.notifyCharacteristicChanged(link.btDevice, readCharacteristic, false);
-        }
-        else {
-            Log.e(TAG, "link does not exist for write");
-        }
+        readCharacteristic.setValue(value);
+        GATTServer.notifyCharacteristicChanged(link.btDevice, readCharacteristic, false);
     }
 
-    protected boolean isReadCharacteristic(UUID characteristicUUID) {
+    boolean isReadCharacteristic(UUID characteristicUUID) {
         return READ_CHAR_UUID.equals(characteristicUUID);
     }
 
-    private Link getLinkForMac(byte[] mac) {
+    Link getLinkForMac(byte[] mac) {
         for (int i = 0; i < links.length; i++) {
             Link link = links[i];
 
@@ -483,7 +445,7 @@ public class LocalDevice extends Device implements SharedBleListener {
     private void createGATTServer() {
         if (GATTServer == null) {
             gattServerCallback = new GATTServerCallback(this);
-            GATTServer = shared.ble.getManager().openGattServer(ctx, gattServerCallback);
+            GATTServer = shared.ble.getManager().openGattServer(shared.ctx, gattServerCallback);
 
             if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(TAG, "createGATTServer");
             // create the service

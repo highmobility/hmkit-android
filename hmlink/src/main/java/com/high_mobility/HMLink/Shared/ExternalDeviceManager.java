@@ -1,13 +1,16 @@
 package com.high_mobility.HMLink.Shared;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
-import android.content.Context;
 import android.util.Log;
 
 import com.high_mobility.HMLink.LinkException;
+import com.high_mobility.btcore.HMDevice;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,39 +33,17 @@ public class ExternalDeviceManager {
 
     ExternalDevice[] devices = new ExternalDevice[0];
     ExternalDeviceManagerListener listener;
-    BTCoreInterface coreInterface;
 
     State state = State.IDLE;
-    static ExternalDeviceManager instance;
-    Context ctx;
+
     Shared shared;
     BluetoothLeScanner bleScanner;
     byte[][] scannedIdentifiers;
+    ArrayList<byte[]> authenticatingMacs = new ArrayList<>();
 
-    public static ExternalDeviceManager getInstance(Context applicationContext) {
-        if (instance == null) {
-            instance = new ExternalDeviceManager(applicationContext);
 
-        }
-        return  instance;
-    }
-
-    ExternalDeviceManager(Context applicationContext) {
-        ctx = applicationContext;
-        shared = Shared.getInstance(applicationContext);
-        shared.externalDeviceManager = this;
-    }
-
-    public byte[] getSerialNumber() {
-        return serialNumber;
-    }
-
-    public byte[] getPublicKey() {
-        return publicKey;
-    }
-
-    public byte[] getPrivateKey() {
-        return privateKey;
+    ExternalDeviceManager(Shared shared) {
+        this.shared = shared;
     }
 
     public ExternalDevice[] getDevices() {
@@ -104,23 +85,20 @@ public class ExternalDeviceManager {
         if (bleScanner == null) bleScanner = shared.ble.getAdapter().getBluetoothLeScanner();
 
         scannedIdentifiers = appIdentifiers;
-        bleScanner.startScan(scanCallback); // TODO: could use filter if useful to our scan preferences
+        bleScanner.startScan(scanCallback);
         setState(State.SCANNING);
-        shared.startClock();
-        shared.core.HMBTCoreSensingScanStart(coreInterface);
+        shared.core.HMBTCoreSensingScanStart(shared.coreInterface);
     }
 
     private ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            Log.d(TAG, "onScanResult " + result);
             onScanResult(result);
             super.onScanResult(callbackType, result);
         }
 
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
-            Log.d(TAG, "onBatchScanResults " + results);
             for (ScanResult result : results) {
                 onScanResult(result);
             }
@@ -130,18 +108,15 @@ public class ExternalDeviceManager {
         @Override
         public void onScanFailed(int errorCode) {
             setState(State.IDLE);
-            Log.e(TAG, "onScanFailed " + errorCode);
             super.onScanFailed(errorCode);
         }
 
         void onScanResult(ScanResult result) {
-            // TODO: create/sync devices
-            /*
-            public native void HMBTCoreSensingProcessAdvertisement(HMBTCoreInterface forwardInterface, byte[] mac, byte[] data, int size);
-
-
-             */
-//            core.HMBTCoreSensingProcessAdvertisement(forwardInterface, );
+            BluetoothDevice device = result.getDevice();
+            byte[] advBytes = result.getScanRecord().getBytes();
+            shared.core.HMBTCoreSensingProcessAdvertisement(shared.coreInterface,
+                    ByteUtils.bytesFromMacString(device.getAddress()),
+                    advBytes, advBytes.length);
         }
     };
 
@@ -150,8 +125,76 @@ public class ExternalDeviceManager {
         bleScanner.stopScan(scanCallback);
     }
 
+    void connect(byte[] mac) {
+        for (byte[] authenticatingMac : authenticatingMacs) {
+            if (Arrays.equals(authenticatingMac, mac)) return; // already connecting
+        }
+
+        addAuthenticatingMac(mac);
+        BluetoothDevice bluetoothDevice = shared.ble.getAdapter().getRemoteDevice(mac);
+
+        for (ExternalDevice existingDevice : devices) {
+            if (existingDevice.btDevice.getAddress().equals(bluetoothDevice.getAddress())) {
+                existingDevice.connect();
+                return;
+            }
+        }
+
+        ExternalDevice device = new ExternalDevice(this, bluetoothDevice);
+        addDevice(device);
+        device.connect();
+    }
+
+    void disconnect(byte[] mac) {
+        ExternalDevice device = getDeviceForMac(mac);
+        if (device == null) return;
+
+        device.disconnect();
+        removeAuthenticatingMac(mac);
+        removeDevice(device);
+    }
+
+    void deviceExitedProximity(ExternalDevice device) {
+        if (listener != null) {
+            device.onDeviceExitedProximity();
+            listener.onDeviceExitedProximity(device);
+        }
+        removeAuthenticatingMac(device.getAddressBytes());
+        removeDevice(device);
+    }
+
     void startServiceDiscovery(byte[] mac) {
-        // TODO: HMBTCoreSensingDiscoveryEvent(HMBTCoreInterface forwardInterface, byte[] mac); // call when services have been discovered
+        ExternalDevice device = getDeviceForMac(mac);
+        device.discoverServices();
+    }
+
+    ExternalDevice getDeviceForMac(byte[] mac) {
+        for (ExternalDevice existingDevice : devices) {
+            if (Arrays.equals(ByteUtils.bytesFromMacString(existingDevice.btDevice.getAddress()), mac)) {
+                return existingDevice;
+            }
+        }
+
+        return null;
+    }
+
+    void didAuthenticateDevice(HMDevice device) {
+        Log.d(TAG, "didAuthenticateDevice " + ByteUtils.hexFromBytes(device.getMac()));
+        ExternalDevice externalDevice = getDeviceForMac(device.getMac());
+        if (externalDevice != null) {
+            externalDevice.hmDevice = device;
+            externalDevice.didAuthenticate();
+        }
+    }
+
+    boolean waitingForAuthenticatedDevice(byte[] mac) {
+        for (int i = 0; i < authenticatingMacs.size(); i++) {
+            byte[] existingMac = authenticatingMacs.get(i);
+            if (Arrays.equals(existingMac, mac)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void setState(final State state) {
@@ -167,6 +210,59 @@ public class ExternalDeviceManager {
                     }
                 });
             }
+        }
+    }
+
+    private void removeAuthenticatingMac(byte[] mac) {
+        for (int i = 0; i < authenticatingMacs.size(); i++) {
+            byte[] existingMac = authenticatingMacs.get(i);
+            if (Arrays.equals(existingMac, mac)) {
+                authenticatingMacs.remove(i);
+                return;
+            }
+        }
+    }
+
+    private boolean addAuthenticatingMac(byte[] mac) {
+        for (byte[] existingAuthMac : authenticatingMacs) {
+            if (Arrays.equals(existingAuthMac, mac)) {
+                return false;
+            }
+        }
+        authenticatingMacs.add(mac);
+        return true;
+    }
+
+    private void addDevice(ExternalDevice device) {
+        ExternalDevice[] newDevices = new ExternalDevice[devices.length + 1];
+        for (int i = 0; i < devices.length; i++) {
+            newDevices[i] = devices[i];
+        }
+
+        newDevices[devices.length] = device;
+        devices = newDevices;
+    }
+
+    private void removeDevice(ExternalDevice device) {
+        if (device == null) return;
+        int removedIndex = -1;
+        for (int i = 0; i < devices.length; i++) {
+            if (device == devices[i]) {
+                removedIndex = i;
+                break;
+            }
+        }
+
+        if (removedIndex >= 0) {
+            ExternalDevice[] newDevices = new ExternalDevice[devices.length - 1];
+            for (int i = 0; i < devices.length - 1; i++) {
+                if (i >= removedIndex) {
+                    newDevices[i] = devices[i + 1]; // if you crash here the initial size is not big enough
+                } else {
+                    newDevices[i] = devices[i];
+                }
+            }
+            devices = newDevices;
         }
     }
 }
