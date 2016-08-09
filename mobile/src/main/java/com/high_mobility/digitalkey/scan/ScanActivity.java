@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.ListView;
 
 import com.high_mobility.HMLink.LinkException;
@@ -100,7 +101,7 @@ public class ScanActivity extends AppCompatActivity implements ExternalDeviceMan
 
     @Override
     public void onDeviceEnteredProximity(ExternalDevice device) {
-
+        adapter.notifyDataSetChanged();
     }
 
     @Override

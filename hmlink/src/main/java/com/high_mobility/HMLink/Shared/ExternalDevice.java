@@ -4,25 +4,32 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
+import android.content.Context;
+import android.provider.ContactsContract;
+import android.provider.Telephony;
 import android.util.Log;
 
+import com.high_mobility.HMLink.Constants;
+import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.btcore.HMDevice;
 
+import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by ttiganik on 01/06/16.
  */
 public class ExternalDevice extends Device {
     public enum State {
-        Disconnected, Connected, Authenticated
+        DISCONNECTED, CONNECTED, AUTHENTICATED
     }
 
     State state;
     ExternalDeviceListener listener;
-    int RSSI;
 
     ExternalDeviceManager manager;
 
@@ -33,12 +40,16 @@ public class ExternalDevice extends Device {
     BluetoothGattCharacteristic readCharacteristic;
     BluetoothGattCharacteristic writeCharacteristic;
 
+    SentCommand sentCommand;
+    Constants.RSSICallback rssiCallback;
+
     public State getState() {
         return state;
     }
 
-    public int getRSSI() {
-        return RSSI;
+    public void readRSSI(Constants.RSSICallback rssiCallback) {
+        this.rssiCallback = rssiCallback;
+        gatt.readRemoteRssi();
     }
 
     public void setListener(ExternalDeviceListener listener) {
@@ -61,8 +72,27 @@ public class ExternalDevice extends Device {
         // TODO:
     }
 
-    public void sendCommand() {
-        // TODO: HMBTCoreSendCustomCommand
+    public void sendCommand(byte[] bytes, Constants.DataResponseCallback responseCallback) {
+        if (state != State.AUTHENTICATED) {
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+                Log.d(LocalDevice.TAG, "cant send command, not authenticated");
+            responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.UNAUTHORISED));
+            return;
+        }
+
+        if (sentCommand != null && sentCommand.finished == false) {
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+                Log.d(LocalDevice.TAG, "cant send command, custom command in progress");
+            responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.CUSTOM_COMMAND_IN_PROGRESS));
+            return;
+        }
+
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
+            Log.d(LocalDevice.TAG, "send command " + ByteUtils.hexFromBytes(bytes)
+                    + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
+
+        sentCommand = new SentCommand(responseCallback, manager.shared.mainThread);
+        manager.shared.core.HMBTCoreSendCustomCommand(manager.shared.coreInterface, bytes, bytes.length, getAddressBytes());
     }
 
     public void reset() {
@@ -84,21 +114,23 @@ public class ExternalDevice extends Device {
         if (listener != null) listener.onStateChanged(oldState);
     }
 
-    void writeData(byte[] value) {
-        Log.d(ExternalDeviceManager.TAG, "TODO: write data");
-        if (writeCharacteristic != null) writeCharacteristic.setValue(value);
+    void writeValue(byte[] value) {
+        if (writeCharacteristic != null){
+            writeCharacteristic.setValue(value);
+            gatt.writeCharacteristic(writeCharacteristic);
+        }
     }
 
-    void readData() {
+    void readValue() { // TODO: delete offset if not used
         gatt.readCharacteristic(readCharacteristic);
     }
 
     void didAuthenticate() {
-        setState(State.Authenticated);
+        setState(State.AUTHENTICATED);
     }
 
     void onDeviceExitedProximity() {
-        setState(State.Disconnected);
+        setState(State.DISCONNECTED);
     }
 
     void connect() {
@@ -119,24 +151,51 @@ public class ExternalDevice extends Device {
         return ByteUtils.bytesFromMacString(btDevice.getAddress());
     }
 
-    // TODO: wait for notification, if there is data in read notif, then can call readResponse instantly
-    // otherwise send to core that notification with data appeared, core decices if needs to call readData again
+
+    byte[] onCommandReceived(byte[] bytes) {
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
+            Log.d(LocalDevice.TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
+                    + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()));
+
+        if (listener == null) {
+            Log.d(LocalDevice.TAG, "can't dispatch notification: no listener set");
+            return null;
+        }
+
+        return listener.onCommandReceived(bytes);
+    }
+
+    public void onCommandResponseReceived(byte[] data) {
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
+            Log.d(LocalDevice.TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
+                    + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()) + " in " +
+                    (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime) + "ms");
+
+        if (sentCommand == null) {
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
+                Log.d(LocalDevice.TAG, "can't dispatch command response: sentCommand = null");
+            return;
+        }
+
+        sentCommand.dispatchResult(data, null);
+    }
 
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            Log.i(ExternalDeviceManager.TAG, "onConnectionStateChange status: " + status);
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
-                    Log.i(ExternalDeviceManager.TAG, "STATE_CONNECTED " + this);
+                    if (Device.loggingLevel.getValue() >= LoggingLevel.Debug.getValue())
+                        Log.d(ExternalDeviceManager.TAG, "STATE_CONNECTED " + this);
                     manager.shared.core.HMBTCoreSensingConnect(manager.shared.coreInterface, getAddressBytes());
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
-                    Log.i(ExternalDeviceManager.TAG, "STATE_DISCONNECTED " + this);
+                    if (Device.loggingLevel.getValue() >= LoggingLevel.Debug.getValue())
+                        Log.d(ExternalDeviceManager.TAG, "STATE_DISCONNECTED " + this);
                     manager.shared.core.HMBTCoreSensingDisconnect(manager.shared.coreInterface, getAddressBytes());
                     break;
                 default:
-                    Log.e(ExternalDeviceManager.TAG, "STATE_OTHER " + this);
+                    Log.e(ExternalDeviceManager.TAG, "INVALID CONNECTION STATE " + this);
             }
         }
 
@@ -160,27 +219,46 @@ public class ExternalDevice extends Device {
             Log.i(ExternalDeviceManager.TAG, "onServicesDiscovered " + (readCharacteristic != null && writeCharacteristic != null));
 
             if (readCharacteristic != null && writeCharacteristic != null) {
-                manager.shared.core.HMBTCoreSensingDiscoveryEvent(manager.shared.coreInterface, getAddressBytes());
+                gatt.setCharacteristicNotification(readCharacteristic, true);
+                UUID uuid = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+                BluetoothGattDescriptor descriptor = readCharacteristic.getDescriptor(uuid);
+                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                gatt.writeDescriptor(descriptor);
             }
             else {
-                // TODO: ask how failed service discovery should be handled
+                // TODO: how failed service discovery/connection should be handled
+                // also remove authenticatingMac from manager
 //                disconnect();
             }
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt,
-                                         BluetoothGattCharacteristic
-                                                 characteristic, int status) {
-            Log.i("onCharacteristicRead", characteristic.toString());
-//            manager.shared.core.HMBTCoreSensingReadResponse();
+                                         BluetoothGattCharacteristic characteristic, int status) {
+            Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName() + " " + ByteUtils.hexFromBytes(characteristic.getValue()));
+            manager.shared.core.HMBTCoreSensingReadResponse(manager.shared.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes());
+        }
+
+        @Override
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName() + " " + ByteUtils.hexFromBytes(characteristic.getValue()));
+            manager.shared.core.HMBTCoreSensingWriteResponse(manager.shared.coreInterface, getAddressBytes());
         }
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName());
-            super.onCharacteristicChanged(gatt, characteristic);
+            Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName() + " " + ByteUtils.hexFromBytes(characteristic.getValue()));
+            manager.shared.core.HMBTCoreSensingReadResponse(manager.shared.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes());
+        }
+
+        @Override
+        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+            manager.shared.core.HMBTCoreSensingDiscoveryEvent(manager.shared.coreInterface, getAddressBytes());
+        }
+
+        @Override
+        public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
+            if (rssiCallback != null) rssiCallback.onRSSIRead(rssi);
         }
     };
-
 }

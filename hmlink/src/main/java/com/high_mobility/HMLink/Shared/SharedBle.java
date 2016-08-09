@@ -21,12 +21,10 @@ public class SharedBle {
     BluetoothManager mBluetoothManager;
     BluetoothAdapter mBluetoothAdapter;
 
-    public Handler mainThreadHandler;
     private ArrayList<SharedBleListener> listeners = new ArrayList<>();
 
     SharedBle(Context context) {
         this.ctx = context;
-        mainThreadHandler = new Handler(context.getMainLooper());
         createAdapter();
         context.registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }

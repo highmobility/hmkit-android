@@ -307,14 +307,15 @@ public class LocalDevice extends Device implements SharedBleListener {
         }
     }
 
-    void onCommandResponseReceived(HMDevice device, byte[] data) {
+    boolean onCommandResponseReceived(HMDevice device, byte[] data) {
         BluetoothDevice btDevice = shared.ble.getAdapter().getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
 
-        if (linkIndex > -1) {
-            Link link = links[linkIndex];
-            link.onCommandResponseReceived(data);
-        }
+        if (linkIndex < 0) return false;
+
+        Link link = links[linkIndex];
+        link.onCommandResponseReceived(data);
+        return true;
     }
 
     void didReceiveLink(BluetoothDevice device) {
@@ -334,7 +335,7 @@ public class LocalDevice extends Device implements SharedBleListener {
 
         if (listener != null) {
             final LocalDevice devicePointer = this;
-            devicePointer.shared.ble.mainThreadHandler.post(new Runnable() {
+            devicePointer.shared.mainThread.post(new Runnable() {
                 @Override
                 public void run() {
                     devicePointer.listener.onLinkReceived(link);
@@ -343,54 +344,53 @@ public class LocalDevice extends Device implements SharedBleListener {
         }
     }
 
-    void didLoseLink(HMDevice device) {
+    boolean didLoseLink(HMDevice device) {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
         BluetoothDevice btDevice = shared.ble.getAdapter().getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
 
-        if (linkIndex > -1) {
-            // remove the link from the array
-            final Link link = links[linkIndex];
+        if (linkIndex < 0) return false;
 
-            if (link.state != Link.State.DISCONNECTED) {
-                GATTServer.cancelConnection(link.btDevice);
+        // remove the link from the array
+        final Link link = links[linkIndex];
+
+        if (link.state != Link.State.DISCONNECTED) {
+            GATTServer.cancelConnection(link.btDevice);
+        }
+
+        Link[] newLinks = new Link[links.length - 1];
+
+        for (int i = 0; i < links.length; i++) {
+            if (i < linkIndex) {
+                newLinks[i] = links[i];
             }
-
-            Link[] newLinks = new Link[links.length - 1];
-
-            for (int i = 0; i < links.length; i++) {
-                if (i < linkIndex) {
-                    newLinks[i] = links[i];
-                }
-                else if (i > linkIndex) {
-                    newLinks[i - 1] = links[i];
-                }
-            }
-
-            links = newLinks;
-
-            // set new adapter name
-            if (links.length == 0) {
-                shared.ble.setRandomAdapterName();
-            }
-
-            link.setState(Link.State.DISCONNECTED);
-
-            // invoke the listener listener
-            if (listener != null) {
-                final LocalDevice devicePointer = this;
-                devicePointer.shared.ble.mainThreadHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        devicePointer.listener.onLinkLost(link);
-                    }
-                });
+            else if (i > linkIndex) {
+                newLinks[i - 1] = links[i];
             }
         }
-        else {
-            Log.e(TAG, "no link for device");
+
+        links = newLinks;
+
+        // set new adapter name
+        if (links.length == 0) {
+            shared.ble.setRandomAdapterName();
         }
+
+        link.setState(Link.State.DISCONNECTED);
+
+        // invoke the listener listener
+        if (listener != null) {
+            final LocalDevice devicePointer = this;
+            devicePointer.shared.mainThread.post(new Runnable() {
+                @Override
+                public void run() {
+                    devicePointer.listener.onLinkLost(link);
+                }
+            });
+        }
+
+        return true;
     }
 
     int didReceivePairingRequest(HMDevice device) {
@@ -520,7 +520,7 @@ public class LocalDevice extends Device implements SharedBleListener {
             this.state = state;
 
             if (listener != null) {
-                shared.ble.mainThreadHandler.post(new Runnable() {
+                shared.mainThread.post(new Runnable() {
                     @Override
                     public void run() {
                         listener.onStateChanged(state, oldState);

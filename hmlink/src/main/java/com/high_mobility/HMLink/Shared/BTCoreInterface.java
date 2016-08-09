@@ -20,34 +20,29 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMBTHalInit() {
-//        Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName());
         return 0;
     }
 
     @Override
     public int HMBTHalScanStart() {
-//        Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName());
         // ignored, controlled by the user
         return 0;
     }
 
     @Override
     public int HMBTHalScanStop() {
-//        Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName());
         // ignored, controlled by the user
         return 0;
     }
 
     @Override
     public int HMBTHalAdvertisementStart(byte[] issuer, byte[] appID) {
-//        Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName());
         // ignored, controlled by the user
         return 0;
     }
 
     @Override
     public int HMBTHalAdvertisementStop() {
-//        Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName());
         // ignored, controlled by the user
         return 0;
     }
@@ -67,15 +62,12 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMBTHalServiceDiscovery(byte[] mac) {
-        Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName());
         shared.getExternalDeviceManager().startServiceDiscovery(mac);
         return 0;
     }
 
     @Override
     public int HMBTHalWriteData(byte[] mac, int length, byte[] data) {
-        Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName());
-
         Link link = shared.getLocalDevice().getLinkForMac(mac);
         if (link != null) {
             shared.getLocalDevice().writeData(link, data);
@@ -83,7 +75,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
         else {
             ExternalDevice device = shared.getExternalDeviceManager().getDeviceForMac(mac);
             if (device == null) return 1;
-            device.writeData(data);
+            device.writeValue(data);
         }
 
         return 0;
@@ -91,11 +83,9 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMBTHalReadData(byte[] mac, int offset) {
-        Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName());
-
         ExternalDevice device = shared.getExternalDeviceManager().getDeviceForMac(mac);
         if (device == null) return 1;
-        
+        device.readValue(offset);
         return 0;
     }
 
@@ -175,7 +165,6 @@ public class BTCoreInterface implements HMBTCoreInterface {
     @Override
     public int HMPersistenceHalgetPublicKeyCount(int[] count) {
         count[0] = shared.getLocalDevice().storage.getCertificatesWithProvidingSerial(shared.getLocalDevice().getCertificate().getSerial()).length;
-
         return 0;
     }
 
@@ -188,12 +177,14 @@ public class BTCoreInterface implements HMBTCoreInterface {
     @Override
     public int HMPersistenceHaladdStoredCertificate(byte[] cert, int size) {
         AccessCertificate certificate = new AccessCertificate(cert);
+
         try {
             shared.getLocalDevice().storage.storeCertificate(certificate);
         } catch (LinkException e) {
             e.printStackTrace();
             return 1;
         }
+
         return 0;
     }
 
@@ -246,27 +237,13 @@ public class BTCoreInterface implements HMBTCoreInterface {
     public void HMApiCallbackEnteredProximity(HMDevice device) {
         // this means core has finished identification of the device (might me authenticated or not) - show device info on screen
         // always update the device with this, auth state might have changed later with this callback as well
-        boolean scanningWaitingForDevice = shared.getExternalDeviceManager().waitingForAuthenticatedDevice(device.getMac());
-        if (scanningWaitingForDevice) {
+        boolean scanningDevice = shared.getExternalDeviceManager().isAuthenticating(device.getMac());
+        if (scanningDevice) {
             shared.getExternalDeviceManager().didAuthenticateDevice(device);
         }
         else {
             shared.getLocalDevice().didResolveDevice(device);
         }
-
-        /*
-        ExternalDevice externalDevice = shared.getExternalDeviceManager().getDeviceForMac(device.getMac())
-        Link link = shared.getLocalDevice().getLinkForMac(mac);
-        if (link != null) {
-            shared.getLocalDevice().writeData(link, data);
-        }
-        else {
-
-            if (device == null) return 1;
-            device.writeData(data);
-        }
-
-         */
     }
 
     @Override
@@ -274,22 +251,17 @@ public class BTCoreInterface implements HMBTCoreInterface {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
             Log.d(LocalDevice.TAG, "HMCtwExitedProximity");
 
-        Link link = shared.getLocalDevice().getLinkForMac(device.getMac());
-        if (link != null) {
-            shared.getLocalDevice().didLoseLink(device);
-        }
-        else {
-            ExternalDevice externalDevice = shared.getExternalDeviceManager().getDeviceForMac(device.getMac());
-
-            if (externalDevice != null) {
-                shared.getExternalDeviceManager().deviceExitedProximity(externalDevice);
-            }
+        if (shared.getLocalDevice().didLoseLink(device) == false) {
+            shared.getExternalDeviceManager().deviceExitedProximity(device.getMac());
         }
     }
 
     @Override
     public void HMApiCallbackCustomCommandIncoming(HMDevice device, byte[] data, int[] length, int[] error) {
         byte[] response = shared.getLocalDevice().onCommandReceived(device, trimmedBytes(data, length[0]));
+
+        if (response == null)
+            response = shared.getExternalDeviceManager().onCommandReceived(device, trimmedBytes(data, length[0]));
 
         if (response != null) {
             copyBytesToJNI(response, data);
@@ -321,19 +293,19 @@ public class BTCoreInterface implements HMBTCoreInterface {
         return response;
     }
 
-    private void copyBytesToJNI(byte[] from, byte[] to) {
+    void copyBytesToJNI(byte[] from, byte[] to) {
         for (int i = 0; i < from.length; i++) {
             to[i] = from[i];
         }
     }
 
-    private byte[] trimmedBytes(byte[] bytes, int length) {
-        byte[] cutBytes = new byte[length];
+    byte[] trimmedBytes(byte[] bytes, int length) {
+        byte[] trimmedBytes = new byte[length];
 
         for (int i = 0; i < length; i++) {
-            cutBytes[i] = bytes[i];
+            trimmedBytes[i] = bytes[i];
         }
 
-        return cutBytes;
+        return trimmedBytes;
     }
 }

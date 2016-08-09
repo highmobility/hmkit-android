@@ -25,13 +25,9 @@ public class ExternalDeviceManager {
         BLUETOOTH_UNAVAILABLE, IDLE, SCANNING
     }
 
-    byte[] serialNumber;
-    byte[] publicKey;
-    byte[] privateKey;
-
     Map<byte[], byte[]> CaPublicKeyMap = new HashMap<>();
 
-    ExternalDevice[] devices = new ExternalDevice[0];
+    ExternalDevice[] devices = new ExternalDevice[0];  // TODO: test if devices pointer is ok for adapter dataSetChanged
     ExternalDeviceManagerListener listener;
 
     State state = State.IDLE;
@@ -40,7 +36,6 @@ public class ExternalDeviceManager {
     BluetoothLeScanner bleScanner;
     byte[][] scannedIdentifiers;
     ArrayList<byte[]> authenticatingMacs = new ArrayList<>();
-
 
     ExternalDeviceManager(Shared shared) {
         this.shared = shared;
@@ -60,12 +55,6 @@ public class ExternalDeviceManager {
 
     public void addTrustedCertificateAuthority(byte[] issuer, byte[] publicKey) {
         CaPublicKeyMap.put(issuer, publicKey);
-    }
-
-    public void setProperties(byte[] serialNumber, byte[] publicKey, byte[] privateKey) {
-        this.serialNumber = serialNumber;
-        this.publicKey = publicKey;
-        this.privateKey = privateKey;
     }
 
     public void startScanning(byte[][] appIdentifiers) throws LinkException {
@@ -154,13 +143,18 @@ public class ExternalDeviceManager {
         removeDevice(device);
     }
 
-    void deviceExitedProximity(ExternalDevice device) {
+    boolean deviceExitedProximity(byte[] mac) {
+        ExternalDevice device = getDeviceForMac(mac);
+        if (device == null) return false;
+
         if (listener != null) {
             device.onDeviceExitedProximity();
             listener.onDeviceExitedProximity(device);
         }
+
         removeAuthenticatingMac(device.getAddressBytes());
         removeDevice(device);
+        return true;
     }
 
     void startServiceDiscovery(byte[] mac) {
@@ -180,14 +174,19 @@ public class ExternalDeviceManager {
 
     void didAuthenticateDevice(HMDevice device) {
         Log.d(TAG, "didAuthenticateDevice " + ByteUtils.hexFromBytes(device.getMac()));
+        removeAuthenticatingMac(device.getMac());
         ExternalDevice externalDevice = getDeviceForMac(device.getMac());
         if (externalDevice != null) {
             externalDevice.hmDevice = device;
             externalDevice.didAuthenticate();
+            if (listener != null) listener.onDeviceEnteredProximity(externalDevice);
+        }
+        else {
+            Log.e(TAG, "Invalid authenticated device");
         }
     }
 
-    boolean waitingForAuthenticatedDevice(byte[] mac) {
+    boolean isAuthenticating(byte[] mac) {
         for (int i = 0; i < authenticatingMacs.size(); i++) {
             byte[] existingMac = authenticatingMacs.get(i);
             if (Arrays.equals(existingMac, mac)) {
@@ -196,6 +195,20 @@ public class ExternalDeviceManager {
         }
         return false;
     }
+
+    byte[] onCommandReceived(HMDevice device, byte[] data) {
+        ExternalDevice externalDevice = getDeviceForMac(device.getMac());
+        if (externalDevice == null) return null;
+        return externalDevice.onCommandReceived(data);
+    }
+
+    boolean onCommandResponseReceived(HMDevice device, byte[] data) {
+        ExternalDevice externalDevice = getDeviceForMac(device.getMac());
+        if (externalDevice == null) return false;
+        externalDevice.onCommandResponseReceived(data);
+        return true;
+    }
+
 
     private void setState(final State state) {
         if (this.state != state) {

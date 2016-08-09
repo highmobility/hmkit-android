@@ -1,6 +1,7 @@
 package com.high_mobility.HMLink.Shared;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 
 import com.high_mobility.HMLink.DeviceCertificate;
@@ -13,10 +14,13 @@ import java.util.TimerTask;
  * Created by ttiganik on 03/08/16.
  */
 public class Shared {
-    public HMBTCore core = new HMBTCore();
-    public SharedBle ble;
+    HMBTCore core = new HMBTCore();
+    SharedBle ble;
+
     static Shared instance;
-    public BTCoreInterface coreInterface;
+    Handler mainThread;
+
+    BTCoreInterface coreInterface;
 
     private ExternalDeviceManager externalDeviceManager;
     private LocalDevice localDevice;
@@ -46,6 +50,8 @@ public class Shared {
     public void initialize(DeviceCertificate certificate, byte[] privateKey, byte[] CAPublicKey, Context applicationContext) {
         Log.i(LocalDevice.TAG, "Initialized High-Mobility SDK with certificate" + certificate.toString());
         ctx = applicationContext;
+        mainThread = new Handler(ctx.getMainLooper());
+
         ble = new SharedBle(ctx);
         this.CAPublicKey = CAPublicKey;
         coreInterface = new BTCoreInterface(this);
@@ -54,7 +60,7 @@ public class Shared {
         getLocalDevice().privateKey = privateKey;
 
         core.HMBTCoreInit(coreInterface);
-//        startClock(); // TODO: start clock?
+        startClock(); // TODO: start clock?
     }
 
     public LocalDevice getLocalDevice() {

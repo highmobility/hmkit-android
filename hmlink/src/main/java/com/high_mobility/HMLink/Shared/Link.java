@@ -13,13 +13,13 @@ import java.util.Calendar;
 /**
  * The Link is a representation of the connection between the LocalDevice and a Device
  * that has connected to it. The Link is created by the other Device via discovering
- * and connecting to the LocalDevice. The Link's interface provides the user the ability
+ * and connecting to the LocalDevice. The Link's interface provides the ability
  * to send commands and handle incoming requests from the Link.
  *
  * Created by ttiganik on 13/04/16.
  */
 public class Link {
-    public enum State { CONNECTED, AUTHENTICATED, DISCONNECTED }
+    public enum State { DISCONNECTED, CONNECTED, AUTHENTICATED }
 
     State state;
 
@@ -36,7 +36,6 @@ public class Link {
 
     Link(BluetoothDevice btDevice, LocalDevice device) {
         connectionTime = Calendar.getInstance().getTimeInMillis();
-
         this.btDevice = btDevice;
         this.device = device;
     }
@@ -90,8 +89,8 @@ public class Link {
             Log.d(LocalDevice.TAG, "send command " + ByteUtils.hexFromBytes(bytes)
                     + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
-        sentCommand = new SentCommand(responseCallback);
-        device.shared.core.HMBTCoreSendCustomCommand(this.device.shared.coreInterface, bytes, bytes.length, getAddressBytes());
+        sentCommand = new SentCommand(responseCallback, device.shared.mainThread);
+        device.shared.core.HMBTCoreSendCustomCommand(device.shared.coreInterface, bytes, bytes.length, getAddressBytes());
     }
 
     void setHmDevice(final HMDevice hmDevice) {
@@ -117,7 +116,7 @@ public class Link {
             if (listener != null) {
                 final Link linkPointer = this;
 
-                this.device.shared.ble.mainThreadHandler.post(new Runnable() {
+                device.shared.mainThread.post(new Runnable() {
                     @Override
                     public void run() {
                         linkPointer.listener.onStateChanged(linkPointer, oldState);
@@ -164,7 +163,7 @@ public class Link {
 
         final Link reference = this;
         pairingResponse = -1;
-        device.shared.ble.mainThreadHandler.post(new Runnable() {
+        device.shared.mainThread.post(new Runnable() {
             @Override
             public void run() {
             listener.onPairingRequested(reference, new Constants.ApprovedCallback() {
@@ -187,7 +186,7 @@ public class Link {
         while(pairingResponse < 0) {
             int passedSeconds = Calendar.getInstance().get(Calendar.SECOND);
             if (passedSeconds - startSeconds > Constants.registerTimeout) {
-                device.shared.ble.mainThreadHandler.post(new Runnable() {
+                device.shared.mainThread.post(new Runnable() {
                     @Override
                     public void run() {
                         listener.onPairingRequestTimeout(reference);
@@ -204,45 +203,5 @@ public class Link {
 
     byte[] getAddressBytes() {
         return ByteUtils.bytesFromMacString(btDevice.getAddress());
-    }
-
-    private class SentCommand {
-        boolean finished;
-        Constants.DataResponseCallback commandCallback;
-        CountDownTimer timeoutTimer;
-        Long commandStartTime;
-
-        SentCommand(Constants.DataResponseCallback callback) {
-            this.commandCallback = callback;
-            startTimeoutTimer();
-            commandStartTime = Calendar.getInstance().getTimeInMillis();
-        }
-
-        void dispatchResult(final byte[] response, final LinkException exception) {
-            if (timeoutTimer != null) timeoutTimer.cancel();
-            finished = true;
-            if (commandCallback == null) {
-                Log.d(LocalDevice.TAG, "cannot dispatch the result: no callback reference");
-                return;
-            }
-
-            device.shared.ble.mainThreadHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    commandCallback.response(response, exception);
-                }
-            });
-        }
-
-        void startTimeoutTimer() {
-            timeoutTimer = new CountDownTimer((long)(Constants.commandTimeout * 1000), 15000) {
-                public void onTick(long millisUntilFinished) {
-                }
-
-                public void onFinish() {
-                    dispatchResult(null, new LinkException(LinkException.LinkExceptionCode.TIME_OUT));
-                }
-            }.start();
-        }
     }
 }
