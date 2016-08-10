@@ -5,6 +5,5 @@ package com.high_mobility.HMLink.Shared;
  */
 public interface ExternalDeviceListener {
     void onStateChanged(ExternalDevice.State oldState);
-    void onRSSIChanged(int RSSI);
     byte[] onCommandReceived(byte[] command);
 }

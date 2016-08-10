@@ -71,7 +71,7 @@ public class SharedBle {
         return (getAdapter() != null && getAdapter().isEnabled() && getAdapter().getState() == BluetoothAdapter.STATE_ON);
     }
 
-    public void setRandomAdapterName() {
+    void setRandomAdapterName() {
         byte[] serialBytes = new byte[4];
         new Random().nextBytes(serialBytes);
         getAdapter().setName(ByteUtils.hexFromBytes(serialBytes));

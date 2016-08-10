@@ -220,8 +220,7 @@ public class ExternalDevice extends Device {
 
             if (readCharacteristic != null && writeCharacteristic != null) {
                 gatt.setCharacteristicNotification(readCharacteristic, true);
-                UUID uuid = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
-                BluetoothGattDescriptor descriptor = readCharacteristic.getDescriptor(uuid);
+                BluetoothGattDescriptor descriptor = readCharacteristic.getDescriptor(NOTIFY_DESC_UUID);
                 descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                 gatt.writeDescriptor(descriptor);
             }

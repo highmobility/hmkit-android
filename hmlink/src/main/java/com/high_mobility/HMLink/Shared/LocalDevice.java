@@ -449,11 +449,12 @@ public class LocalDevice extends Device implements SharedBleListener {
 
             if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(TAG, "createGATTServer");
 
-            // bluez hack service
+            /// bluez hack service
             UUID BLUEZ_HACK_SERVICE_UUID = UUID.fromString("48494D4F-BB81-49AB-BE90-6F25D716E8DE");
             BluetoothGattService bluezHackService = new BluetoothGattService(BLUEZ_HACK_SERVICE_UUID,
-                    BluetoothGattService.SERVICE_TYPE_SECONDARY);
+                    BluetoothGattService.SERVICE_TYPE_PRIMARY);
             GATTServer.addService(bluezHackService);
+            ///
 
             // create the service
             BluetoothGattService service = new BluetoothGattService(SERVICE_UUID,
@@ -464,8 +465,8 @@ public class LocalDevice extends Device implements SharedBleListener {
                             BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                             BluetoothGattCharacteristic.PERMISSION_READ);
 
-            UUID confUUUID = UUID.fromString("00002902-0000-1000-8000-00805F9B34FB");
-            readCharacteristic.addDescriptor(new BluetoothGattDescriptor(confUUUID, BluetoothGattDescriptor.PERMISSION_READ | BluetoothGattDescriptor.PERMISSION_WRITE));
+            readCharacteristic.addDescriptor(new BluetoothGattDescriptor(NOTIFY_DESC_UUID,
+                    BluetoothGattDescriptor.PERMISSION_READ | BluetoothGattDescriptor.PERMISSION_WRITE));
 
             writeCharacteristic =
                     new BluetoothGattCharacteristic(WRITE_CHAR_UUID,

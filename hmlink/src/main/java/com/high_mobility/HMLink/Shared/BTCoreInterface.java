@@ -12,7 +12,7 @@ import java.util.Arrays;
 /**
  * Created by ttiganik on 03/08/16.
  */
-public class BTCoreInterface implements HMBTCoreInterface {
+class BTCoreInterface implements HMBTCoreInterface {
     Shared shared;
     BTCoreInterface(Shared shared) {
         this.shared = shared;
@@ -289,8 +289,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMApiCallbackPairingRequested(HMDevice device) {
-        int response = shared.getLocalDevice().didReceivePairingRequest(device);
-        return response;
+        return shared.getLocalDevice().didReceivePairingRequest(device);
     }
 
     void copyBytesToJNI(byte[] from, byte[] to) {

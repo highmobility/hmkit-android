@@ -13,7 +13,7 @@ import java.util.Calendar;
 /**
  * Created by ttiganik on 09/08/16.
  */
-public class SentCommand {
+class SentCommand {
     boolean finished;
     Constants.DataResponseCallback commandCallback;
     CountDownTimer timeoutTimer;

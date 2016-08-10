@@ -146,7 +146,8 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
     private byte[] getSerial() {
         return new byte [] {0x01, 0x23, 0x19, 0x10, (byte)0xD6, 0x2C, (byte)0xA5, 0x71, (byte)0xEE};
         // TODO: use random serial number when you can get CA sig from web
-      /*  SharedPreferences settings;
+        /*
+        SharedPreferences settings;
         SharedPreferences.Editor editor;
 
         settings = getApplicationContext().getSharedPreferences("com.hm.wearable.UserPrefs",
@@ -164,7 +165,8 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
             new Random().nextBytes(serialBytes);
             editor.putString(serialKey, ByteUtils.hexFromBytes(serialBytes));
             return serialBytes;
-        }*/
+        }
+        */
     }
 
     @Override
