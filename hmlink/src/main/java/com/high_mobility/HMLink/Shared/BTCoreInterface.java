@@ -85,7 +85,7 @@ public class BTCoreInterface implements HMBTCoreInterface {
     public int HMBTHalReadData(byte[] mac, int offset) {
         ExternalDevice device = shared.getExternalDeviceManager().getDeviceForMac(mac);
         if (device == null) return 1;
-        device.readValue(offset);
+        device.readValue();
         return 0;
     }
 

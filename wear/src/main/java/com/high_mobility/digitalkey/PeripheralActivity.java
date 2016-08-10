@@ -22,6 +22,7 @@ import com.high_mobility.HMLink.Shared.LocalDeviceListener;
 import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.DeviceCertificate;
+import com.high_mobility.HMLink.Shared.Shared;
 
 public class PeripheralActivity extends WearableActivity implements LocalDeviceListener, LinkListener {
     private static final byte[] CA_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
@@ -105,11 +106,6 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
     }
 
     private void initializeDevice() {
-        device = LocalDevice.getInstance(getApplicationContext());
-        device.reset();
-        onStateChanged(device.getState(), device.getState());
-        device.setListener(this);
-
         final byte[] DEVICE_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
         final byte[] DEVICE_PRIVATE_KEY = ByteUtils.bytesFromHex("***REMOVED***");
         final byte[] DEVICE_SERIAL = ByteUtils.bytesFromHex("01231910D62CA571F0");
@@ -123,8 +119,12 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         DeviceCertificate cert = new DeviceCertificate(ISSUER, APP_IDENTIFIER, DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
         cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***")); // original
 
-        // set the device certificate.
-        device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY);
+
+        Shared.getInstance().initialize(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
+        device = Shared.getInstance().getLocalDevice();
+        device.reset();
+        onStateChanged(device.getState(), device.getState());
+        device.setListener(this);
 
         // create the AccessCertificates for the car to read(stored certificate)
         // and register ourselves with the car already(registeredCertificate)

@@ -216,7 +216,7 @@ public class ExternalDeviceManager {
             this.state = state;
 
             if (listener != null) {
-                shared.ble.mainThreadHandler.post(new Runnable() {
+                shared.mainThread.post(new Runnable() {
                     @Override
                     public void run() {
                         listener.onStateChanged(oldState);

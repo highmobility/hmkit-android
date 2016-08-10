@@ -60,7 +60,7 @@ public class Shared {
         getLocalDevice().privateKey = privateKey;
 
         core.HMBTCoreInit(coreInterface);
-        startClock(); // TODO: start clock?
+//        startClock(); // TODO: start clock?
     }
 
     public LocalDevice getLocalDevice() {

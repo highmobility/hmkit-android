@@ -31,8 +31,8 @@ public class LocalDevice extends Device implements SharedBleListener {
 
     public enum State { BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING }
 
-    static int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_LOW_POWER;
-    static int txPowerLevel = AdvertiseSettings.ADVERTISE_TX_POWER_ULTRA_LOW;
+    static int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY;
+    static int txPowerLevel = AdvertiseSettings.ADVERTISE_TX_POWER_HIGH;
 
     Storage storage;
     LocalDeviceListener listener;
@@ -448,6 +448,13 @@ public class LocalDevice extends Device implements SharedBleListener {
             GATTServer = shared.ble.getManager().openGattServer(shared.ctx, gattServerCallback);
 
             if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(TAG, "createGATTServer");
+
+            // bluez hack service
+            UUID BLUEZ_HACK_SERVICE_UUID = UUID.fromString("48494D4F-BB81-49AB-BE90-6F25D716E8DE");
+            BluetoothGattService bluezHackService = new BluetoothGattService(BLUEZ_HACK_SERVICE_UUID,
+                    BluetoothGattService.SERVICE_TYPE_SECONDARY);
+            GATTServer.addService(bluezHackService);
+
             // create the service
             BluetoothGattService service = new BluetoothGattService(SERVICE_UUID,
                     BluetoothGattService.SERVICE_TYPE_PRIMARY);
