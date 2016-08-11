@@ -4,6 +4,7 @@
 #include "hmbtcore.h"
 #include "Crypto.h"
 #include "hm_bt_debug_hal.h"
+#include "hm_cert.h"
 
 void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterface){
 
@@ -231,6 +232,19 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSendReadDeviceCertificate(JNIEnv
     (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
     (*env)->ReleaseByteArrayElements(env, nonce_, nonce, 0);
     (*env)->ReleaseByteArrayElements(env, caSignature_, caSignature, 0);
+}
+
+JNIEXPORT void JNICALL
+Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSendRegisterAccessCertificate(JNIEnv *env, jobject instance,jobject coreInterface,
+                                                                          jbyteArray certificate_) {
+    prepareCallbackFunctions(env,instance,coreInterface);
+    jbyte *certificate = (*env)->GetByteArrayElements(env, certificate_, NULL);
+
+    hm_certificate_t cert;
+    hm_cert_get_as_struct(certificate, &cert);
+    hm_api_send_register_access_certificate(&cert);
+
+    (*env)->ReleaseByteArrayElements(env, certificate_, certificate, 0);
 }
 
 JNIEXPORT void JNICALL
