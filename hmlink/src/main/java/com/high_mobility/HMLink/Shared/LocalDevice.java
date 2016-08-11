@@ -31,7 +31,7 @@ public class LocalDevice extends Device implements SharedBleListener {
 
     public enum State { BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING }
 
-    static int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY;
+    static int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
     static int txPowerLevel = AdvertiseSettings.ADVERTISE_TX_POWER_HIGH;
 
     Storage storage;
@@ -57,7 +57,8 @@ public class LocalDevice extends Device implements SharedBleListener {
      * @see AdvertiseSettings
      */
     public static void setAdvertiseMode(int advertiseMode) {
-        if (advertiseMode > AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY) return;
+        if (advertiseMode > AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY
+                || advertiseMode < AdvertiseSettings.ADVERTISE_MODE_LOW_POWER) return;
         LocalDevice.advertiseMode = advertiseMode;
     }
 
@@ -68,7 +69,8 @@ public class LocalDevice extends Device implements SharedBleListener {
      * @see AdvertiseSettings
      */
     public static void setTxPowerLevel(int txPowerLevel) {
-        if (txPowerLevel > AdvertiseSettings.ADVERTISE_TX_POWER_HIGH) return;
+        if (txPowerLevel > AdvertiseSettings.ADVERTISE_TX_POWER_HIGH
+        || txPowerLevel < AdvertiseSettings.ADVERTISE_TX_POWER_ULTRA_LOW) return;
         LocalDevice.txPowerLevel = txPowerLevel;
     }
 
@@ -457,11 +459,9 @@ public class LocalDevice extends Device implements SharedBleListener {
             ///
 
             // create the service
-            BluetoothGattService service = new BluetoothGattService(SERVICE_UUID,
-                    BluetoothGattService.SERVICE_TYPE_PRIMARY);
+            BluetoothGattService service = new BluetoothGattService(SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
 
-            readCharacteristic =
-                    new BluetoothGattCharacteristic(READ_CHAR_UUID,
+            readCharacteristic = new BluetoothGattCharacteristic(READ_CHAR_UUID,
                             BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                             BluetoothGattCharacteristic.PERMISSION_READ);
 
