@@ -218,6 +218,22 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSendCustomCommand(JNIEnv *env, j
 }
 
 JNIEXPORT void JNICALL
+Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSendReadDeviceCertificate(JNIEnv *env, jobject instance,jobject coreInterface,
+                                                                  jbyteArray mac_, jbyteArray nonce_,
+                                                                  jbyteArray caSignature_) {
+    prepareCallbackFunctions(env,instance,coreInterface);
+    jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
+    jbyte *nonce = (*env)->GetByteArrayElements(env, nonce_, NULL);
+    jbyte *caSignature = (*env)->GetByteArrayElements(env, caSignature_, NULL);
+
+    hm_api_send_read_device_certificate(mac, nonce, caSignature);
+
+    (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
+    (*env)->ReleaseByteArrayElements(env, nonce_, nonce, 0);
+    (*env)->ReleaseByteArrayElements(env, caSignature_, caSignature, 0);
+}
+
+JNIEXPORT void JNICALL
 Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreCryptoCreateKeys(JNIEnv *env, jobject instance,
                                                                   jbyteArray privateKey_,
                                                                   jbyteArray publicKey_) {
