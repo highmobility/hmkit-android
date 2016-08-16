@@ -12,7 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.high_mobility.HMLink.Shared.ByteUtils;
 import com.high_mobility.HMLink.Shared.Link;
 import com.high_mobility.HMLink.Shared.LinkListener;
 import com.high_mobility.HMLink.Shared.LocalDevice;
@@ -24,9 +23,9 @@ import com.high_mobility.HMLink.Commands.CommandParseException;
 import com.high_mobility.HMLink.Commands.LockStatusChangedNotification;
 import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.Shared.Device;
-import com.high_mobility.HMLink.DeviceCertificate;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.Shared;
+import com.high_mobility.digitalkey.CertUtils;
 import com.high_mobility.digitalkey.MainActivity;
 import com.high_mobility.digitalkey.R;
 
@@ -36,8 +35,6 @@ import com.high_mobility.digitalkey.R;
 public class BroadcastActivity extends AppCompatActivity implements LocalDeviceListener, LinkListener {
     static final String TAG = "BroadcastActivity";
 
-    TextView serialTextView;
-    TextView publicKeyTextView;
 
     TextView statusTextView;
     Switch broadcastSwitch;
@@ -51,13 +48,10 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
     LocalDevice device;
     Constants.ApprovedCallback pairApproveCallback;
 
-    CertUtils certUtils;
-
     void onBroadcastCheckedChanged() {
         if (broadcastSwitch.isChecked()) {
             if (device.getState() == LocalDevice.State.BROADCASTING) return;
             resetDevice();
-            updateDeviceInfoViews();
 
             try {
                 device.startBroadcasting();
@@ -86,7 +80,6 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
 
         // set the device listener
         device.setListener(this);
-        device.loggingLevel = Device.LoggingLevel.All;
 
         createViews();
 
@@ -186,18 +179,9 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
         // Delete the previous certificates from the device.
         // This is not needed in real scenario where certificates are not faked.
         device.reset();
-
-        if (certUtils == null) {
-            certUtils = new CertUtils(this, MainActivity.DEVICE_SERIAL, MainActivity.DEVICE_PUBLIC_KEY);
-        }
-
-        certUtils.registerAndStoreAllCertificates(device);
     }
 
     void createViews() {
-        serialTextView = (TextView) findViewById(R.id.serial_textview);
-        publicKeyTextView = (TextView) findViewById(R.id.public_key_textview);
-
         statusTextView = (TextView) findViewById(R.id.status_textview);
         broadcastSwitch = (Switch) findViewById(R.id.broadcast_switch);
         broadcastSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -219,11 +203,6 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
         pager = (ViewPager) findViewById(R.id.pager);
         adapter = new LinkPagerAdapter(this, getSupportFragmentManager());
         pager.setAdapter(adapter);
-    }
-
-    void updateDeviceInfoViews() {
-        publicKeyTextView.setText(ByteUtils.hexFromBytes(device.getCertificate().getPublicKey()));
-        serialTextView.setText(ByteUtils.hexFromBytes(device.getCertificate().getSerial()));
     }
 
     void onLockClicked(Link link) {

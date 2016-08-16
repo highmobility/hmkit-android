@@ -2,19 +2,24 @@ package com.high_mobility.digitalkey.scan;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.Switch;
+import android.widget.TextView;
 
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.ExternalDevice;
 import com.high_mobility.HMLink.Shared.ExternalDeviceManager;
 import com.high_mobility.HMLink.Shared.ExternalDeviceManagerListener;
 import com.high_mobility.HMLink.Shared.Shared;
-import com.high_mobility.digitalkey.MainActivity;
 import com.high_mobility.digitalkey.R;
 
 import butterknife.BindView;
@@ -27,9 +32,24 @@ public class ScanActivity extends AppCompatActivity implements ExternalDeviceMan
     private static final String TAG = "Scan";
 
     @BindView(R.id.scan_list_view) ListView listView;
+    @BindView(R.id.scan_switch) Switch scanSwitch;
+    @BindView(R.id.status_textview) TextView statusTextView;
 
     ExternalDeviceManager deviceManager;
     ScanListAdapter adapter;
+
+    void onScanCheckedChanged() {
+        if (scanSwitch.isChecked() && deviceManager.getState() != ExternalDeviceManager.State.SCANNING) {
+            try {
+                deviceManager.startScanning();
+            } catch (LinkException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            deviceManager.stopScanning();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +58,13 @@ public class ScanActivity extends AppCompatActivity implements ExternalDeviceMan
         setContentView(R.layout.scan_view);
 
         ButterKnife.bind(this);
+        scanSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            onScanCheckedChanged();
+            }
+        });
+
         getBlePermission();
     }
 
@@ -76,25 +103,33 @@ public class ScanActivity extends AppCompatActivity implements ExternalDeviceMan
 
         adapter = new ScanListAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, deviceManager.getDevices());
         listView.setAdapter(adapter);
-        byte[][] appIdentifiers = new byte[][] { MainActivity.CaAppId };
-        try {
-            deviceManager.startScanning(appIdentifiers);
-        } catch (LinkException e) {
-            e.printStackTrace();
-        }
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(ScanActivity.this, DeviceActivity.class);
+                intent.putExtra(DeviceActivity.DEVICE_POSITION, position);
+                startActivity(intent);
+
+            }
+        });
+
+        scanSwitch.setChecked(true);
     }
 
     @Override
     public void onStateChanged(ExternalDeviceManager.State oldState) {
         switch (deviceManager.getState()) {
             case BLUETOOTH_UNAVAILABLE:
-                setTitle("BLE Unavailable");
+                statusTextView.setText("BLE Unavailable");
+                scanSwitch.setEnabled(false);
                 break;
             case IDLE:
-                setTitle("Idle");
+                statusTextView.setText("Idle");
+                scanSwitch.setEnabled(true);
                 break;
             case SCANNING:
-                setTitle("Scanning");
+                statusTextView.setText("Scanning");
+                scanSwitch.setEnabled(true);
                 break;
         }
     }
@@ -106,6 +141,6 @@ public class ScanActivity extends AppCompatActivity implements ExternalDeviceMan
 
     @Override
     public void onDeviceExitedProximity(ExternalDevice device) {
-
+        adapter.notifyDataSetChanged();
     }
 }

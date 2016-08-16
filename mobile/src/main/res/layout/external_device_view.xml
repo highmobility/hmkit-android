@@ -3,53 +3,22 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="connect"
-        android:id="@+id/connect_button"
-        android:layout_gravity="center_horizontal" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="authenticate"
-        android:id="@+id/ext_d_authenticate_button"
-        android:layout_gravity="center_horizontal"
-        android:visibility="invisible" />
-
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal"
-        android:id="@+id/ext_d_auth_view"
-        android:weightSum="1"
-        android:visibility="invisible">
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        >
+        <EditText
+            android:id="@+id/command_edit_text"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/send_command_button"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_weight="0.17"
-            android:gravity="center_horizontal">
-
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="lock"
-                android:id="@+id/ext_d_lock_button" />
-
-            <Button
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="unlock"
-                android:id="@+id/ext_d_unlock_button" />
-        </LinearLayout>
+            android:text="send"
+            android:layout_gravity="center_horizontal" />
+            android:layout_height="wrap_content">
     </LinearLayout>
 </LinearLayout>

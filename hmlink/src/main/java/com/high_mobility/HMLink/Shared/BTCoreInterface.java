@@ -120,6 +120,8 @@ class BTCoreInterface implements HMBTCoreInterface {
 
         try {
             shared.getLocalDevice().storage.storeCertificate(cert);
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
+                Log.d(ExternalDeviceManager.TAG, "Cant store certificate.");
         } catch (LinkException e) {
             e.printStackTrace();
             return 1;
@@ -132,8 +134,11 @@ class BTCoreInterface implements HMBTCoreInterface {
     public int HMPersistenceHalgetPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command) {
         AccessCertificate certificate = shared.getLocalDevice().storage.certWithGainingSerial(serial);
         if (certificate == null) {
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
+                Log.d(ExternalDeviceManager.TAG, "No cert with gaining serial " + ByteUtils.hexFromBytes(serial));
             return 1;
         }
+
         copyBytesToJNI(certificate.getGainerPublicKey(), publicKey);
         copyBytesToJNI(certificate.getStartDateBytes(), startDate);
         copyBytesToJNI(certificate.getEndDateBytes(), endDate);
@@ -160,6 +165,9 @@ class BTCoreInterface implements HMBTCoreInterface {
             return 0;
         }
 
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
+            Log.d(ExternalDeviceManager.TAG, "No cert for index " + index);
+
         return 1;
     }
 
@@ -181,6 +189,8 @@ class BTCoreInterface implements HMBTCoreInterface {
 
         try {
             shared.getLocalDevice().storage.storeCertificate(certificate);
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
+                Log.d(ExternalDeviceManager.TAG, "Cant store certificate.");
         } catch (LinkException e) {
             e.printStackTrace();
             return 1;
@@ -197,13 +207,13 @@ class BTCoreInterface implements HMBTCoreInterface {
             if (Arrays.equals(storedCert.getProviderSerial(), serial)) {
                 copyBytesToJNI(storedCert.getBytes(), cert);
                 size[0] = storedCert.getBytes().length;
-                if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+                if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
                     Log.d(LocalDevice.TAG, "Returned stored cert for serial " + ByteUtils.hexFromBytes(serial));
                 return 0;
             }
         }
 
-        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
             Log.d(LocalDevice.TAG, "No stored cert for serial " + ByteUtils.hexFromBytes(serial));
 
         return 1;
@@ -222,13 +232,13 @@ class BTCoreInterface implements HMBTCoreInterface {
                     return 0;
                 }
                 else {
-                    if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+                    if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
                         Log.d(LocalDevice.TAG, "Could not erase cert for serial " + ByteUtils.hexFromBytes(serial));
                     return 1;
                 }
             }
         }
-        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
             Log.d(LocalDevice.TAG, "No cert to erase for serial " + ByteUtils.hexFromBytes(serial));
 
         return 1;
@@ -236,6 +246,9 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMApiCallbackEnteredProximity(HMDevice device) {
+        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+            Log.d(LocalDevice.TAG, "HMCtwEnteredProximity");
+
         // this means core has finished identification of the device (might me authenticated or not) - show device info on screen
         // always update the device with this, auth state might have changed later with this callback as well
         boolean scanningDevice = shared.getExternalDeviceManager().isAuthenticating(device.getMac());
@@ -290,7 +303,7 @@ class BTCoreInterface implements HMBTCoreInterface {
         byte[] CaPrivKey = new byte[] {0x1B, (byte)0x85, (byte)0x93, (byte)0xD0, 0x47, (byte)0x8B, (byte)0x90, 0x17, (byte)0xC2, 0x42, 0x72, 0x56, (byte)0xAA, (byte)0xEE, 0x25, (byte)0xFF, (byte)0x8A, 0x4E, 0x20, (byte)0xEC, 0x66, 0x11, (byte)0xAF, (byte)0xE3, 0x1D, 0x52, (byte)0xB3, 0x2C, (byte)0xE0, (byte)0xBE, (byte)0xCC, (byte)0xA2};
         byte[] signature = Crypto.sign(nonce, CaPrivKey);
 
-        // TODO: return the signature and nonce to core
+        shared.core.HMBTCoreSendReadDeviceCertificate(shared.coreInterface, device.getMac(), nonce, signature);
         return 1;
     }
 

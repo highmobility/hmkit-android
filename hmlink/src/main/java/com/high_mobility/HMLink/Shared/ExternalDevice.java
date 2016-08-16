@@ -18,6 +18,7 @@ import com.high_mobility.btcore.HMDevice;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -111,17 +112,21 @@ public class ExternalDevice extends Device {
 
     void setState(State state) {
         State oldState = state;
+        this.state = state;
         if (listener != null) listener.onStateChanged(oldState);
     }
 
     void writeValue(byte[] value) {
         if (writeCharacteristic != null){
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
+                Log.d(ExternalDeviceManager.TAG, "write value " + ByteUtils.hexFromBytes(value));
+
             writeCharacteristic.setValue(value);
             gatt.writeCharacteristic(writeCharacteristic);
         }
     }
 
-    void readValue() { // TODO: delete offset if not used
+    void readValue() {
         gatt.readCharacteristic(readCharacteristic);
     }
 
@@ -155,7 +160,7 @@ public class ExternalDevice extends Device {
     byte[] onCommandReceived(byte[] bytes) {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
             Log.d(LocalDevice.TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
-                    + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()));
+                    + " from " + btDevice.getAddress());
 
         if (listener == null) {
             Log.d(LocalDevice.TAG, "can't dispatch notification: no listener set");
@@ -168,7 +173,7 @@ public class ExternalDevice extends Device {
     public void onCommandResponseReceived(byte[] data) {
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
             Log.d(LocalDevice.TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
-                    + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()) + " in " +
+                    + " from " + btDevice.getAddress() + " in " +
                     (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime) + "ms");
 
         if (sentCommand == null) {
@@ -187,12 +192,26 @@ public class ExternalDevice extends Device {
                 case BluetoothProfile.STATE_CONNECTED:
                     if (Device.loggingLevel.getValue() >= LoggingLevel.Debug.getValue())
                         Log.d(ExternalDeviceManager.TAG, "STATE_CONNECTED " + this);
+                    manager.shared.mainThread.post(new Runnable() {
+                        @Override
+                        public void run() {
                     manager.shared.core.HMBTCoreSensingConnect(manager.shared.coreInterface, getAddressBytes());
+
+                        }
+                    });
+//                    writeValue(new byte[] {new Random().nextBoolean() == true ? (byte)0x00 : 0x01});
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     if (Device.loggingLevel.getValue() >= LoggingLevel.Debug.getValue())
                         Log.d(ExternalDeviceManager.TAG, "STATE_DISCONNECTED " + this);
+
+                    manager.shared.mainThread.post(new Runnable() {
+                        @Override
+                        public void run() {
                     manager.shared.core.HMBTCoreSensingDisconnect(manager.shared.coreInterface, getAddressBytes());
+
+                        }
+                    });
                     break;
                 default:
                     Log.e(ExternalDeviceManager.TAG, "INVALID CONNECTION STATE " + this);
@@ -227,32 +246,55 @@ public class ExternalDevice extends Device {
             else {
                 // TODO: how failed service discovery/connection should be handled
                 // also remove authenticatingMac from manager
-//                disconnect();
             }
         }
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt,
-                                         BluetoothGattCharacteristic characteristic, int status) {
-            Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName() + " " + ByteUtils.hexFromBytes(characteristic.getValue()));
+                                         final BluetoothGattCharacteristic characteristic, int status) {
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
+                Log.d(ExternalDeviceManager.TAG, "onCharacteristicRead " + ByteUtils.hexFromBytes(characteristic.getValue()));
+            manager.shared.mainThread.post(new Runnable() {
+                @Override
+                public void run() {
             manager.shared.core.HMBTCoreSensingReadResponse(manager.shared.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes());
+
+                }
+            });
         }
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName() + " " + ByteUtils.hexFromBytes(characteristic.getValue()));
+            manager.shared.mainThread.post(new Runnable() {
+                @Override
+                public void run() {
             manager.shared.core.HMBTCoreSensingWriteResponse(manager.shared.coreInterface, getAddressBytes());
+
+                }
+            });
         }
 
         @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            Log.d(ExternalDeviceManager.TAG, new Object(){}.getClass().getEnclosingMethod().getName() + " " + ByteUtils.hexFromBytes(characteristic.getValue()));
-            manager.shared.core.HMBTCoreSensingReadResponse(manager.shared.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes());
+        public void onCharacteristicChanged(BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
+                Log.d(ExternalDeviceManager.TAG, "onCharacteristicChanged " + ByteUtils.hexFromBytes(characteristic.getValue()));
+            manager.shared.mainThread.post(new Runnable() {
+                @Override
+                public void run() {
+                    manager.shared.core.HMBTCoreSensingReadResponse(manager.shared.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes());
+
+                }
+            });
         }
 
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-            manager.shared.core.HMBTCoreSensingDiscoveryEvent(manager.shared.coreInterface, getAddressBytes());
+            manager.shared.mainThread.post(new Runnable() {
+                @Override
+                public void run() {
+                    manager.shared.core.HMBTCoreSensingDiscoveryEvent(manager.shared.coreInterface, getAddressBytes());
+                }
+            });
         }
 
         @Override

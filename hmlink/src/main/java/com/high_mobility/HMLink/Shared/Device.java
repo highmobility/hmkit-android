@@ -22,7 +22,7 @@ public class Device {
         }
     }
 
-    public static LoggingLevel loggingLevel = LoggingLevel.Debug;
+    public static LoggingLevel loggingLevel = LoggingLevel.All;
 
     protected static UUID SERVICE_UUID = UUID.fromString("713D0100-503E-4C75-BA94-3148F18D941E");
     protected static UUID READ_CHAR_UUID = UUID.fromString("713D0102-503E-4C75-BA94-3148F18D941E");

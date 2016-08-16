@@ -60,7 +60,7 @@ public class Shared {
         getLocalDevice().privateKey = privateKey;
 
         core.HMBTCoreInit(coreInterface);
-//        startClock(); // TODO: start clock?
+        startClock();
     }
 
     public LocalDevice getLocalDevice() {
@@ -80,7 +80,12 @@ public class Shared {
         t.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                core.HMBTCoreClock(coreInterface);
+                mainThread.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        core.HMBTCoreClock(coreInterface);
+                    }
+                });
             }
         }, 0, 1000);
     }
