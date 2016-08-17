@@ -13,6 +13,7 @@ import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.ByteUtils;
 import com.high_mobility.HMLink.Shared.ExternalDevice;
+import com.high_mobility.HMLink.Shared.ExternalDeviceListener;
 import com.high_mobility.HMLink.Shared.Shared;
 import com.high_mobility.digitalkey.R;
 
@@ -37,6 +38,7 @@ public class DeviceActivity extends AppCompatActivity {
         Intent intent = getIntent();
         int position = intent.getIntExtra(DEVICE_POSITION, 0);
         device = Shared.getInstance().getExternalDeviceManager().getDevices().get(position);
+        device.setListener(listener);
 
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,4 +52,16 @@ public class DeviceActivity extends AppCompatActivity {
             }
         });
     }
+
+    private ExternalDeviceListener listener = new ExternalDeviceListener() {
+        @Override
+        public void onStateChanged(ExternalDevice.State oldState) {
+
+        }
+
+        @Override
+        public byte[] onCommandReceived(byte[] command) {
+            return new byte[] { 0x01, command.length > 0 ? command[0] : (byte)0x99 };
+        }
+    };
 }

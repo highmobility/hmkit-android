@@ -303,10 +303,8 @@ public class LocalDevice extends Device implements SharedBleListener {
             Link link = links[linkIndex];
             return link.onCommandReceived(data);
         }
-        else {
-            Log.e(TAG, "no link for custom command received");
-            return null;
-        }
+
+        return null;
     }
 
     boolean onCommandResponseReceived(HMDevice device, byte[] data) {

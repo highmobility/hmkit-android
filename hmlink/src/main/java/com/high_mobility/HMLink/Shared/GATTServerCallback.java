@@ -58,13 +58,13 @@ class GATTServerCallback extends BluetoothGattServerCallback {
     }
 
     @Override
-    public void onCharacteristicWriteRequest(BluetoothDevice device,
+    public void onCharacteristicWriteRequest(final BluetoothDevice device,
                                              int requestId,
                                              BluetoothGattCharacteristic characteristic,
                                              boolean preparedWrite,
                                              boolean responseNeeded,
                                              int offset,
-                                             byte[] value) {
+                                             final byte[] value) {
         super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
 
         if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
@@ -73,17 +73,30 @@ class GATTServerCallback extends BluetoothGattServerCallback {
 
         if (responseNeeded) {
             this.device.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
-            this.device.shared.core.HMBTCorelinkIncomingData(this.device.shared.coreInterface, value, value.length, ByteUtils.bytesFromMacString(device.getAddress()));
+            final LocalDevice devicePointer = this.device;
+            this.device.shared.mainThread.post(new Runnable() {
+                @Override
+                public void run() {
+                    devicePointer.shared.core.HMBTCorelinkIncomingData(devicePointer.shared.coreInterface, value, value.length, ByteUtils.bytesFromMacString(device.getAddress()));
+                }
+            });
         }
     }
 
     @Override
-    public void onDescriptorWriteRequest(BluetoothDevice device, int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
+    public void onDescriptorWriteRequest(final BluetoothDevice device, int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
         super.onDescriptorWriteRequest(device, requestId, descriptor, preparedWrite, responseNeeded, offset, value);
         if (responseNeeded) {
             this.device.didReceiveLink(device);
             this.device.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
-            this.device.shared.core.HMBTCorelinkConnect(this.device.shared.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
+
+            final LocalDevice devicePointer = this.device;
+            this.device.shared.mainThread.post(new Runnable() {
+                @Override
+                public void run() {
+                    devicePointer.shared.core.HMBTCorelinkConnect(devicePointer.shared.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
+                }
+            });
         }
     }
 }

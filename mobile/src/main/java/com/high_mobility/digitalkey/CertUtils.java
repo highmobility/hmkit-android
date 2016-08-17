@@ -41,9 +41,6 @@ public class CertUtils {
     static final byte[] CAR_SERIAL_IPHONE = ByteUtils.bytesFromHex("42463136393843362D");
     static final byte[] CAR_PUBLIC_IPHONE = ByteUtils.bytesFromHex("***REMOVED***");
 
-
-
-
     byte[] deviceSerial;
     byte[] devicePublic;
 

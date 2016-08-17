@@ -99,9 +99,12 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
 
     @Override
     protected void onDestroy() {
-        if (device != null) {
-            device.stopBroadcasting();
+        for (Link link : device.getLinks()) {
+            link.setListener(null);
         }
+
+        device.setListener(null);
+        device.stopBroadcasting();
         super.onDestroy();
     }
 
@@ -126,21 +129,9 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         onStateChanged(device.getState(), device.getState());
         device.setListener(this);
 
-        // create the AccessCertificates for the car to read(stored certificate)
-        // and register ourselves with the car already(registeredCertificate)
-        AccessCertificate registeredCertificate = CertUtils.demoRegisteredCertificate(DEVICE_SERIAL);
-        try {
-            device.registerCertificate(registeredCertificate);
-        } catch (LinkException e) {
-            e.printStackTrace();
-        }
 
-        AccessCertificate storedCertificate = CertUtils.demoStoredCertificate(DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
-        try {
-            device.storeCertificate(storedCertificate);
-        } catch (LinkException e) {
-            e.printStackTrace();
-        }
+        CertUtils certUtils = new CertUtils(getApplicationContext(), DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
+        certUtils.registerAndStoreAllCertificates(device);
     }
 
     private byte[] getSerial() {

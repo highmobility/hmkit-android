@@ -119,7 +119,6 @@ public class ExternalDeviceManager {
             shared.core.HMBTCoreSensingProcessAdvertisement(shared.coreInterface,
                     ByteUtils.bytesFromMacString(device.getAddress()),
                     advBytes, advBytes.length);
-
                 }
             });
         }

@@ -25,6 +25,7 @@ import java.util.UUID;
  * Created by ttiganik on 01/06/16.
  */
 public class ExternalDevice extends Device {
+    private static final String TAG = "ExternalDevice";
     public enum State {
         DISCONNECTED, CONNECTED, AUTHENTICATED
     }
@@ -195,11 +196,9 @@ public class ExternalDevice extends Device {
                     manager.shared.mainThread.post(new Runnable() {
                         @Override
                         public void run() {
-                    manager.shared.core.HMBTCoreSensingConnect(manager.shared.coreInterface, getAddressBytes());
-
+                        manager.shared.core.HMBTCoreSensingConnect(manager.shared.coreInterface, getAddressBytes());
                         }
                     });
-//                    writeValue(new byte[] {new Random().nextBoolean() == true ? (byte)0x00 : 0x01});
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     if (Device.loggingLevel.getValue() >= LoggingLevel.Debug.getValue())
@@ -208,8 +207,7 @@ public class ExternalDevice extends Device {
                     manager.shared.mainThread.post(new Runnable() {
                         @Override
                         public void run() {
-                    manager.shared.core.HMBTCoreSensingDisconnect(manager.shared.coreInterface, getAddressBytes());
-
+                        manager.shared.core.HMBTCoreSensingDisconnect(manager.shared.coreInterface, getAddressBytes());
                         }
                     });
                     break;
@@ -222,7 +220,17 @@ public class ExternalDevice extends Device {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             List<BluetoothGattService> services = gatt.getServices();
             for (BluetoothGattService service : services) {
-                if (service.getUuid().equals(Device.SERVICE_UUID)) {
+                // service UUID is reversed
+                UUID uuid = service.getUuid();
+
+                byte[] msb = ByteUtils.longToBytes(uuid.getMostSignificantBits());
+                byte[] lsb = ByteUtils.longToBytes(uuid.getLeastSignificantBits());
+
+                ByteUtils.reverse(msb);
+                ByteUtils.reverse(lsb);
+                UUID reverseUUID = new UUID(ByteUtils.bytesToLong(lsb), ByteUtils.bytesToLong(msb));
+
+                if (reverseUUID.equals(Device.SERVICE_UUID)) {
                     for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
                         if (characteristic.getUuid().equals(Device.READ_CHAR_UUID)) {
                             readCharacteristic = characteristic;
