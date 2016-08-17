@@ -12,21 +12,18 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.high_mobility.HMLink.AutoCommand.AutoCommand;
+import com.high_mobility.HMLink.AutoCommand.AutoCommandNotification;
+import com.high_mobility.HMLink.AutoCommand.AutoCommandResponse;
+import com.high_mobility.HMLink.AutoCommand.CommandParseException;
+import com.high_mobility.HMLink.AutoCommand.LockStatusChangedNotification;
+import com.high_mobility.HMLink.Constants;
+import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.Link;
 import com.high_mobility.HMLink.Shared.LinkListener;
 import com.high_mobility.HMLink.Shared.LocalDevice;
 import com.high_mobility.HMLink.Shared.LocalDeviceListener;
-import com.high_mobility.HMLink.Commands.AutoCommand;
-import com.high_mobility.HMLink.Commands.AutoCommandNotification;
-import com.high_mobility.HMLink.Commands.AutoCommandResponse;
-import com.high_mobility.HMLink.Commands.CommandParseException;
-import com.high_mobility.HMLink.Commands.LockStatusChangedNotification;
-import com.high_mobility.HMLink.Constants;
-import com.high_mobility.HMLink.Shared.Device;
-import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.Shared;
-import com.high_mobility.digitalkey.CertUtils;
-import com.high_mobility.digitalkey.MainActivity;
 import com.high_mobility.digitalkey.R;
 
 /**

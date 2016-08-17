@@ -1,4 +1,4 @@
-package com.high_mobility.HMLink.Commands;
+package com.high_mobility.HMLink.AutoCommand;
 
 /**
  * Created by ttiganik on 07/06/16.

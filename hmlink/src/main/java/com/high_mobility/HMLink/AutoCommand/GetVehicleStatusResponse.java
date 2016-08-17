@@ -1,4 +1,4 @@
-package com.high_mobility.HMLink.Commands;
+package com.high_mobility.HMLink.AutoCommand;
 
 /**
  * Created by ttiganik on 07/06/16.
@@ -13,16 +13,7 @@ public class GetVehicleStatusResponse extends AutoCommandResponse {
             throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
         }
         else {
-            type = Type.GET_VEHICLE_STATUS;
-            if (bytes[2] == 0x00) {
-                lockStatus = Types.LockStatus.UNLOCKED;
-            }
-            else if (bytes[2] == 0x01) {
-                lockStatus = Types.LockStatus.LOCKED;
-            }
-            else {
-                throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
-            }
+            lockStatus = bytes[2] == 0x00 ? Types.LockStatus.UNLOCKED : Types.LockStatus.LOCKED;
         }
     }
 

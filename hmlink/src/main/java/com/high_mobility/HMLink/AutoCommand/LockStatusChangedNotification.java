@@ -1,4 +1,4 @@
-package com.high_mobility.HMLink.Commands;
+package com.high_mobility.HMLink.AutoCommand;
 
 /**
  * Created by ttiganik on 07/06/16.
@@ -18,15 +18,6 @@ public class LockStatusChangedNotification extends AutoCommandNotification {
             throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
         }
 
-        this.type = Type.LOCK_STATUS_CHANGED;
-        if (bytes[1] == 0x00) {
-            lockStatus = Types.LockStatus.UNLOCKED;
-        }
-        else if (bytes[1] == 0x01) {
-            lockStatus = Types.LockStatus.LOCKED;
-        }
-        else {
-            throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
-        }
+        lockStatus = bytes[1] == 0x00 ? Types.LockStatus.UNLOCKED : Types.LockStatus.LOCKED;
     }
 }
