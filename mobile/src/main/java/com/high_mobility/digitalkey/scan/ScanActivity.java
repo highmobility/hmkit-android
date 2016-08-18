@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CompoundButton;
@@ -34,19 +35,19 @@ public class ScanActivity extends AppCompatActivity implements ScannerListener {
     @BindView(R.id.scan_switch) Switch scanSwitch;
     @BindView(R.id.status_textview) TextView statusTextView;
 
-    Scanner deviceManager;
+    Scanner scanner;
     ScanListAdapter adapter;
 
     void onScanCheckedChanged() {
-        if (scanSwitch.isChecked() && deviceManager.getState() != Scanner.State.SCANNING) {
+        if (scanSwitch.isChecked() && scanner.getState() != Scanner.State.SCANNING) {
             try {
-                deviceManager.startScanning();
+                scanner.startScanning();
             } catch (LinkException e) {
                 e.printStackTrace();
             }
         }
         else {
-            deviceManager.stopScanning();
+            scanner.stopScanning();
         }
     }
 
@@ -64,13 +65,14 @@ public class ScanActivity extends AppCompatActivity implements ScannerListener {
             }
         });
 
+        scanSwitch.setEnabled(false);
         getBlePermission();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        deviceManager.stopScanning();
+        scanner.stopScanning();
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -96,11 +98,11 @@ public class ScanActivity extends AppCompatActivity implements ScannerListener {
     }
 
     private void didReceiveBlePermission() {
-        deviceManager = Manager.getInstance().getScanner();
-        deviceManager.setListener(this);
-        onStateChanged(deviceManager.getState());
+        scanner = Manager.getInstance().getScanner();
+        scanner.setListener(this);
+        onStateChanged(scanner.getState());
 
-        adapter = new ScanListAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, deviceManager.getDevices());
+        adapter = new ScanListAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, scanner.getDevices());
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -112,12 +114,13 @@ public class ScanActivity extends AppCompatActivity implements ScannerListener {
             }
         });
 
+        scanSwitch.setEnabled(true);
         scanSwitch.setChecked(true);
     }
 
     @Override
     public void onStateChanged(Scanner.State oldState) {
-        switch (deviceManager.getState()) {
+        switch (scanner.getState()) {
             case BLUETOOTH_UNAVAILABLE:
                 statusTextView.setText("BLE Unavailable");
                 scanSwitch.setEnabled(false);
@@ -135,6 +138,7 @@ public class ScanActivity extends AppCompatActivity implements ScannerListener {
 
     @Override
     public void onDeviceEnteredProximity(ScannedLink device) {
+        Log.i(TAG, "Entered proximity");
         adapter.notifyDataSetChanged();
     }
 

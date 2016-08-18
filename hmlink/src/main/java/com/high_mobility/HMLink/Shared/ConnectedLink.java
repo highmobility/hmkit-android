@@ -32,17 +32,6 @@ public class ConnectedLink extends Link {
         this.listener = listener;
     }
 
-    void setHmDevice(final HMDevice hmDevice) {
-        this.hmDevice = hmDevice;
-
-        if (hmDevice.getIsAuthenticated() == 0) {
-            setState(State.CONNECTED);
-        }
-        else {
-            setState(State.AUTHENTICATED);
-        }
-    }
-
     int pairingResponse = -1;
     int didReceivePairingRequest() {
         if (listener == null) {

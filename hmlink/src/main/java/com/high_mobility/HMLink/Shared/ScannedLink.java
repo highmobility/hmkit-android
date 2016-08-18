@@ -56,29 +56,6 @@ public class ScannedLink extends Link {
         // TODO:
     }
 
-    public void sendCommand(byte[] bytes, Constants.DataResponseCallback responseCallback) {
-        if (state != State.AUTHENTICATED) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
-                Log.d(Broadcaster.TAG, "cant send command, not authenticated");
-            responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.UNAUTHORISED));
-            return;
-        }
-
-        if (sentCommand != null && sentCommand.finished == false) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
-                Log.d(Broadcaster.TAG, "cant send command, custom command in progress");
-            responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.CUSTOM_COMMAND_IN_PROGRESS));
-            return;
-        }
-
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
-            Log.d(Broadcaster.TAG, "send command " + ByteUtils.hexFromBytes(bytes)
-                    + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
-
-        sentCommand = new SentCommand(responseCallback, scanner.manager.mainThread);
-        scanner.manager.core.HMBTCoreSendCustomCommand(scanner.manager.coreInterface, bytes, bytes.length, getAddressBytes());
-    }
-
     public void reset() {
         // TODO:
     }

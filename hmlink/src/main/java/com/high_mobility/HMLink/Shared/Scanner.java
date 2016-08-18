@@ -172,12 +172,11 @@ public class Scanner {
         device.discoverServices();
     }
 
-    void didAuthenticateDevice(HMDevice device) {
+    boolean didResolveDevice(HMDevice device) {
         removeAuthenticatingMac(device.getMac());
         final ScannedLink scannedLink = getLinkForMac(device.getMac());
         if (scannedLink != null) {
-            scannedLink.hmDevice = device;
-            scannedLink.didAuthenticate();
+            scannedLink.setHmDevice(device);
             if (listener != null) {
                 manager.mainThread.post(new Runnable() {
                     @Override
@@ -186,19 +185,9 @@ public class Scanner {
                     }
                 });
             }
+            return true;
         }
-        else {
-            Log.e(TAG, "Invalid authenticated device");
-        }
-    }
 
-    boolean isAuthenticating(byte[] mac) {
-        for (int i = 0; i < authenticatingMacs.size(); i++) {
-            byte[] existingMac = authenticatingMacs.get(i);
-            if (Arrays.equals(existingMac, mac)) {
-                return true;
-            }
-        }
         return false;
     }
 

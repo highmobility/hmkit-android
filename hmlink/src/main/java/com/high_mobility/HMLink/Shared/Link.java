@@ -19,7 +19,7 @@ public class Link {
         DISCONNECTED, CONNECTED, AUTHENTICATED
     }
 
-    State state;
+    State state = State.CONNECTED;
     SentCommand sentCommand;
     LinkListener listener;
     long connectionTime;
@@ -97,6 +97,16 @@ public class Link {
         manager.core.HMBTCoreSendCustomCommand(manager.coreInterface, bytes, bytes.length, getAddressBytes());
     }
 
+    void setHmDevice(final HMDevice hmDevice) {
+        this.hmDevice = hmDevice;
+
+        if (hmDevice.getIsAuthenticated() == 0) {
+            setState(State.CONNECTED);
+        }
+        else {
+            setState(State.AUTHENTICATED);
+        }
+    }
 
     byte[] onCommandReceived(byte[] bytes) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())

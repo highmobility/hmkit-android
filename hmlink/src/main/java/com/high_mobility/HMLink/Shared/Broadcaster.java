@@ -16,7 +16,9 @@ import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.AccessCertificate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -46,7 +48,7 @@ public class Broadcaster implements SharedBleListener {
     BluetoothGattCharacteristic writeCharacteristic;
 
     State state = State.IDLE;
-    ConnectedLink[] links = new ConnectedLink[0];
+    ArrayList<ConnectedLink> links = new ArrayList<>();
     static Broadcaster instance = null;
 
     /**
@@ -119,7 +121,7 @@ public class Broadcaster implements SharedBleListener {
     /**
      * @return The Links currently connected to the Broadcaster.
      */
-    public ConnectedLink[] getLinks() {
+    public List<ConnectedLink> getLinks() {
         return links;
     }
 
@@ -186,8 +188,8 @@ public class Broadcaster implements SharedBleListener {
         // stopAdvertising clears the GATT server as well.
         // This causes all connection to fail with the link because there is no GATT server.
         try {
-            for (int i = getLinks().length - 1; i >= 0; i--) {
-                GATTServer.cancelConnection(getLinks()[i].btDevice);
+            for (int i = getLinks().size() - 1; i >= 0; i--) {
+                GATTServer.cancelConnection(getLinks().get(i).btDevice);
             }
 
             if (mBluetoothLeAdvertiser != null) {
@@ -285,57 +287,24 @@ public class Broadcaster implements SharedBleListener {
         }
     }
 
-    int didResolveDevice(HMDevice device) {
-        for (int i = 0; i < links.length; i++) {
-            ConnectedLink link = links[i];
-            if (Arrays.equals(link.getAddressBytes(), device.getMac())) {
-                link.setHmDevice(device);
-                return i;
-            }
+    boolean didResolveDevice(HMDevice device) {
+        ConnectedLink link = getLinkForMac(device.getMac());
+
+        if (link != null) {
+            link.setHmDevice(device);
+            return true;
         }
 
-        return -1;
-    }
-
-    byte[] onCommandReceived(HMDevice device, byte[] data) {
-        BluetoothDevice btDevice = manager.ble.getAdapter().getRemoteDevice(device.getMac());
-        int linkIndex = linkIndexForBTDevice(btDevice);
-
-        if (linkIndex > -1) {
-            ConnectedLink link = links[linkIndex];
-            return link.onCommandReceived(data);
-        }
-
-        return null;
-    }
-
-    boolean onCommandResponseReceived(HMDevice device, byte[] data) {
-        BluetoothDevice btDevice = manager.ble.getAdapter().getRemoteDevice(device.getMac());
-        int linkIndex = linkIndexForBTDevice(btDevice);
-
-        if (linkIndex < 0) return false;
-
-        ConnectedLink link = links[linkIndex];
-        link.onCommandResponseReceived(data);
-        return true;
+        return false;
     }
 
     void didReceiveLink(BluetoothDevice device) {
         // add a new link to the array
-
         final ConnectedLink link = new ConnectedLink(device, this);
-        ConnectedLink[] newLinks = new ConnectedLink[links.length + 1];
-
-        for (int i = 0; i < links.length; i++) {
-            newLinks[i] = links[i];
-        }
-
-        newLinks[links.length] = link;
-        links = newLinks;
-
-        link.setState(ConnectedLink.State.CONNECTED);
+        links.add(link);
 
         if (listener != null) {
+            // TODO: should this be called from core? eg entered proximity
             final Broadcaster devicePointer = this;
             devicePointer.manager.mainThread.post(new Runnable() {
                 @Override
@@ -346,40 +315,23 @@ public class Broadcaster implements SharedBleListener {
         }
     }
 
-    boolean didLoseLink(HMDevice device) {
+    boolean deviceExitedProximity(HMDevice device) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue()) Log.d(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
-        BluetoothDevice btDevice = manager.ble.getAdapter().getRemoteDevice(device.getMac());
-        int linkIndex = linkIndexForBTDevice(btDevice);
-
-        if (linkIndex < 0) return false;
-
-        // remove the link from the array
-        final ConnectedLink link = links[linkIndex];
+        final ConnectedLink link = getLinkForMac(device.getMac());
+        if (link == null) return false;
 
         if (link.getState() != Link.State.DISCONNECTED) {
             GATTServer.cancelConnection(link.btDevice);
+            link.setState(Link.State.DISCONNECTED);
         }
 
-        ConnectedLink[] newLinks = new ConnectedLink[links.length - 1];
-
-        for (int i = 0; i < links.length; i++) {
-            if (i < linkIndex) {
-                newLinks[i] = links[i];
-            }
-            else if (i > linkIndex) {
-                newLinks[i - 1] = links[i];
-            }
-        }
-
-        links = newLinks;
+        links.remove(link);
 
         // set new adapter name
-        if (links.length == 0) {
+        if (links.size() == 0) {
             manager.ble.setRandomAdapterName();
         }
-
-        link.setState(Link.State.DISCONNECTED);
 
         // invoke the listener listener
         if (listener != null) {
@@ -395,17 +347,28 @@ public class Broadcaster implements SharedBleListener {
         return true;
     }
 
-    int didReceivePairingRequest(HMDevice device) {
-        int linkIndex = didResolveDevice(device);
+    boolean onCommandResponseReceived(HMDevice device, byte[] data) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
 
-        if (linkIndex > -1) {
-            final ConnectedLink link = links[linkIndex];
+        link.onCommandResponseReceived(data);
+        return true;
+    }
+
+    byte[] onCommandReceived(HMDevice device, byte[] data) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return null;
+
+        return link.onCommandReceived(data);
+    }
+
+    int didReceivePairingRequest(HMDevice device) {
+        ConnectedLink link = getLinkForMac(device.getMac());
+        if (link != null) {
             return link.didReceivePairingRequest();
         }
-        else {
-            Log.e(TAG, "no link for pairingResponse");
-            return 1;
-        }
+
+        return 1;
     }
 
     boolean writeData(byte[] mac, byte[] value) {
@@ -421,8 +384,8 @@ public class Broadcaster implements SharedBleListener {
     }
 
     ConnectedLink getLinkForMac(byte[] mac) {
-        for (int i = 0; i < links.length; i++) {
-            ConnectedLink link = links[i];
+        for (int i = 0; i < links.size(); i++) {
+            ConnectedLink link = links.get(i);
 
             if (Arrays.equals(link.getAddressBytes(), mac)) {
                 return link;
@@ -430,18 +393,6 @@ public class Broadcaster implements SharedBleListener {
         }
 
         return null;
-    }
-
-    private int linkIndexForBTDevice(BluetoothDevice device) {
-        for (int i = 0; i < links.length; i++) {
-            ConnectedLink link = links[i];
-
-            if (link.btDevice.getAddress().equals(device.getAddress())) {
-                return i;
-            }
-        }
-
-        return -1;
     }
 
     private void createGATTServer() {

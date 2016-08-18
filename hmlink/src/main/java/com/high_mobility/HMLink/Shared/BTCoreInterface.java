@@ -244,12 +244,10 @@ class BTCoreInterface implements HMBTCoreInterface {
 
         // this means core has finished identification of the broadcaster (might me authenticated or not) - show broadcaster info on screen
         // always update the broadcaster with this, auth state might have changed later with this callback as well
-        boolean scanningDevice = manager.getScanner().isAuthenticating(device.getMac());
-        if (scanningDevice) {
-            manager.getScanner().didAuthenticateDevice(device);
-        }
-        else {
-            manager.getBroadcaster().didResolveDevice(device);
+
+
+        if (manager.getBroadcaster().didResolveDevice(device) == false) {
+            manager.getScanner().didResolveDevice(device);
         }
     }
 
@@ -258,7 +256,7 @@ class BTCoreInterface implements HMBTCoreInterface {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
             Log.d(Broadcaster.TAG, "HMCtwExitedProximity");
 
-        if (manager.getBroadcaster().didLoseLink(device) == false) {
+        if (manager.getBroadcaster().deviceExitedProximity(device) == false) {
             manager.getScanner().deviceExitedProximity(device.getMac());
         }
     }

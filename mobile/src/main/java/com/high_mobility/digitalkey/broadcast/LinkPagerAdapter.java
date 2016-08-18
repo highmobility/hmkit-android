@@ -6,13 +6,15 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.high_mobility.HMLink.Shared.ConnectedLink;
 
+import java.util.List;
+
 /**
  * Created by ttiganik on 25/05/16.
  */
 public class LinkPagerAdapter extends FragmentStatePagerAdapter {
     BroadcastActivity activity;
     FragmentManager fm;
-    ConnectedLink[] links;
+    List<ConnectedLink> links;
     LinkFragment[] fragments;
 
 
@@ -22,16 +24,16 @@ public class LinkPagerAdapter extends FragmentStatePagerAdapter {
         this.fm = fm;
     }
 
-    public void setLinks(ConnectedLink[] links) {
+    public void setLinks(List<ConnectedLink> links) {
         this.links = links;
-        fragments = new LinkFragment[links.length];
+        fragments = new LinkFragment[links.size()];
         notifyDataSetChanged();
     }
 
     public LinkFragment getFragment(ConnectedLink link) {
         int linkIndex = -1;
-        for (int i = 0; i < links.length; i++){
-            if (links[i] == link) {
+        for (int i = 0; i < links.size(); i++){
+            if (links.get(i) == link) {
                 linkIndex = i;
                 break;
             }
@@ -45,14 +47,14 @@ public class LinkPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        LinkFragment fragment = LinkFragment.newInstance(this, links[position]);
+        LinkFragment fragment = LinkFragment.newInstance(this, links.get(position));
         fragments[position] = fragment;
         return fragment;
     }
 
     @Override
     public int getCount() {
-        return links != null ? links.length : 0;
+        return links != null ? links.size() : 0;
     }
 
     @Override

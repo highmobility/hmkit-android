@@ -43,7 +43,7 @@ public class ScannedLinkActivity extends AppCompatActivity {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                link.sendCommand(ByteUtils.bytesFromHex(commandEditText.getText().toString()), new Constants.DataResponseCallback() {
+                link.sendCommand(ByteUtils.bytesFromHex(commandEditText.getText().toString()), true, new Constants.DataResponseCallback() {
                     @Override
                     public void response(byte[] bytes, LinkException exception) {
                         Log.d(TAG, "command response " + ByteUtils.hexFromBytes(bytes) + " " + (exception != null ? exception.code : ""));
