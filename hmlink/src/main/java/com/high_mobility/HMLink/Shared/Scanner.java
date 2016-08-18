@@ -19,8 +19,8 @@ import java.util.Map;
 /**
  * Created by ttiganik on 01/06/16.
  */
-public class ExternalDeviceManager {
-    public static final String TAG = "ExternalDeviceManager";
+public class Scanner {
+    public static final String TAG = "Scanner";
 
     public enum State {
         BLUETOOTH_UNAVAILABLE, IDLE, SCANNING
@@ -28,21 +28,21 @@ public class ExternalDeviceManager {
 
     Map<byte[], byte[]> CaPublicKeyMap = new HashMap<>();
 
-    List<ExternalDevice> devices = new ArrayList<>();  // TODO: test if devices pointer is ok for adapter dataSetChanged
-    ExternalDeviceManagerListener listener;
+    List<ScannedLink> devices = new ArrayList<>();
+    ScannerListener listener;
 
     State state = State.IDLE;
 
-    Shared shared;
+    Manager manager;
     BluetoothLeScanner bleScanner;
 
     ArrayList<byte[]> authenticatingMacs = new ArrayList<>();
 
-    ExternalDeviceManager(Shared shared) {
-        this.shared = shared;
+    Scanner(Manager manager) {
+        this.manager = manager;
     }
 
-    public List<ExternalDevice> getDevices() {
+    public List<ScannedLink> getDevices() {
         return devices;
     }
 
@@ -50,7 +50,7 @@ public class ExternalDeviceManager {
         return state;
     }
 
-    public void setListener(ExternalDeviceManagerListener listener) {
+    public void setListener(ScannerListener listener) {
         this.listener = listener;
     }
 
@@ -62,24 +62,24 @@ public class ExternalDeviceManager {
         // = new byte[][] { array1, array2, array3, array4, array5 };
         if (getState() == State.SCANNING) return;
 
-        if (!shared.ble.isBluetoothSupported()) {
+        if (!manager.ble.isBluetoothSupported()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
             throw new LinkException(LinkException.LinkExceptionCode.UNSUPPORTED);
         }
 
-        if (!shared.ble.isBluetoothOn()) {
+        if (!manager.ble.isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
             throw new LinkException(LinkException.LinkExceptionCode.BLUETOOTH_OFF);
         }
 
-        if (bleScanner == null) bleScanner = shared.ble.getAdapter().getBluetoothLeScanner();
+        if (bleScanner == null) bleScanner = manager.ble.getAdapter().getBluetoothLeScanner();
         final ScanSettings settings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .build();
 
         bleScanner.startScan(null, settings, scanCallback);
         setState(State.SCANNING);
-        shared.core.HMBTCoreSensingScanStart(shared.coreInterface);
+        manager.core.HMBTCoreSensingScanStart(manager.coreInterface);
     }
 
     public void stopScanning() {
@@ -113,10 +113,10 @@ public class ExternalDeviceManager {
             final BluetoothDevice device = result.getDevice();
             final byte[] advBytes = result.getScanRecord().getBytes();
 
-            shared.mainThread.post(new Runnable() {
+            manager.mainThread.post(new Runnable() {
                 @Override
                 public void run() {
-            shared.core.HMBTCoreSensingProcessAdvertisement(shared.coreInterface,
+            manager.core.HMBTCoreSensingProcessAdvertisement(manager.coreInterface,
                     ByteUtils.bytesFromMacString(device.getAddress()),
                     advBytes, advBytes.length);
                 }
@@ -130,22 +130,22 @@ public class ExternalDeviceManager {
         }
 
         addAuthenticatingMac(mac);
-        BluetoothDevice bluetoothDevice = shared.ble.getAdapter().getRemoteDevice(mac);
+        BluetoothDevice bluetoothDevice = manager.ble.getAdapter().getRemoteDevice(mac);
 
-        for (ExternalDevice existingDevice : devices) {
+        for (ScannedLink existingDevice : devices) {
             if (existingDevice.btDevice.getAddress().equals(bluetoothDevice.getAddress())) {
                 existingDevice.connect();
                 return;
             }
         }
 
-        ExternalDevice device = new ExternalDevice(this, bluetoothDevice);
+        ScannedLink device = new ScannedLink(this, bluetoothDevice);
         devices.add(device);
         device.connect();
     }
 
     void disconnect(byte[] mac) {
-        ExternalDevice device = getDeviceForMac(mac);
+        ScannedLink device = getLinkForMac(mac);
         if (device == null) return;
 
         device.disconnect();
@@ -154,7 +154,7 @@ public class ExternalDeviceManager {
     }
 
     boolean deviceExitedProximity(byte[] mac) {
-        ExternalDevice device = getDeviceForMac(mac);
+        ScannedLink device = getLinkForMac(mac);
         if (device == null) return false;
         device.onDeviceExitedProximity();
 
@@ -168,31 +168,21 @@ public class ExternalDeviceManager {
     }
 
     void startServiceDiscovery(byte[] mac) {
-        ExternalDevice device = getDeviceForMac(mac);
+        ScannedLink device = getLinkForMac(mac);
         device.discoverServices();
-    }
-
-    ExternalDevice getDeviceForMac(byte[] mac) {
-        for (ExternalDevice existingDevice : devices) {
-            if (Arrays.equals(ByteUtils.bytesFromMacString(existingDevice.btDevice.getAddress()), mac)) {
-                return existingDevice;
-            }
-        }
-
-        return null;
     }
 
     void didAuthenticateDevice(HMDevice device) {
         removeAuthenticatingMac(device.getMac());
-        final ExternalDevice externalDevice = getDeviceForMac(device.getMac());
-        if (externalDevice != null) {
-            externalDevice.hmDevice = device;
-            externalDevice.didAuthenticate();
+        final ScannedLink scannedLink = getLinkForMac(device.getMac());
+        if (scannedLink != null) {
+            scannedLink.hmDevice = device;
+            scannedLink.didAuthenticate();
             if (listener != null) {
-                shared.mainThread.post(new Runnable() {
+                manager.mainThread.post(new Runnable() {
                     @Override
                     public void run() {
-                        listener.onDeviceEnteredProximity(externalDevice);
+                        listener.onDeviceEnteredProximity(scannedLink);
                     }
                 });
             }
@@ -213,18 +203,45 @@ public class ExternalDeviceManager {
     }
 
     byte[] onCommandReceived(HMDevice device, byte[] data) {
-        ExternalDevice externalDevice = getDeviceForMac(device.getMac());
-        if (externalDevice == null) return null;
-        return externalDevice.onCommandReceived(data);
+        ScannedLink scannedLink = getLinkForMac(device.getMac());
+        if (scannedLink == null) return null;
+        return scannedLink.onCommandReceived(data);
     }
 
     boolean onCommandResponseReceived(HMDevice device, byte[] data) {
-        ExternalDevice externalDevice = getDeviceForMac(device.getMac());
-        if (externalDevice == null) return false;
-        externalDevice.onCommandResponseReceived(data);
+        ScannedLink scannedLink = getLinkForMac(device.getMac());
+        if (scannedLink == null) return false;
+        scannedLink.onCommandResponseReceived(data);
         return true;
     }
 
+    boolean writeData(byte[] mac, byte[] value) {
+        ScannedLink link = getLinkForMac(mac);
+        if (link == null) return false;
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+            Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(link.getAddressBytes()));
+
+        link.writeValue(value);
+
+        return true;
+    }
+
+    boolean readValue(byte[] mac) {
+        ScannedLink link = getLinkForMac(mac);
+        if (link == null) return false;
+        link.readValue();
+        return true;
+    }
+
+    private ScannedLink getLinkForMac(byte[] mac) {
+        for (ScannedLink existingDevice : devices) {
+            if (Arrays.equals(ByteUtils.bytesFromMacString(existingDevice.btDevice.getAddress()), mac)) {
+                return existingDevice;
+            }
+        }
+
+        return null;
+    }
 
     private void setState(final State state) {
         if (this.state != state) {
@@ -232,7 +249,7 @@ public class ExternalDeviceManager {
             this.state = state;
 
             if (listener != null) {
-                shared.mainThread.post(new Runnable() {
+                manager.mainThread.post(new Runnable() {
                     @Override
                     public void run() {
                         listener.onStateChanged(oldState);

@@ -8,23 +8,22 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.high_mobility.HMLink.Shared.ExternalDevice;
-import com.high_mobility.digitalkey.R;
+import com.high_mobility.HMLink.Shared.ScannedLink;
 
 import java.util.List;
 
 /**
  * Created by ttiganik on 02/06/16.
  */
-public class ScanListAdapter extends ArrayAdapter<ExternalDevice> {
+public class ScanListAdapter extends ArrayAdapter<ScannedLink> {
 
-    public ScanListAdapter(Context context, int resource, List<ExternalDevice> devices) {
+    public ScanListAdapter(Context context, int resource, List<ScannedLink> devices) {
         super(context, resource, devices);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ExternalDevice device = getItem(position);
+        ScannedLink device = getItem(position);
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(android.R.layout.simple_list_item_1, parent, false);
         }

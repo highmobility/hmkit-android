@@ -22,7 +22,7 @@
         </activity>
         <activity android:name=".broadcast.BroadcastActivity"> </activity>
         <activity android:name=".scan.ScanActivity"> </activity>
-        <activity android:name=".scan.DeviceActivity"> </activity>
+        <activity android:name=".scan.ScannedLinkActivity"> </activity>
 
     </application>
 

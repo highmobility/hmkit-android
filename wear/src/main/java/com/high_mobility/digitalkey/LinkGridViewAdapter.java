@@ -4,13 +4,13 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.support.wearable.view.FragmentGridPagerAdapter;
 
-import com.high_mobility.HMLink.Shared.Link;
+import com.high_mobility.HMLink.Shared.ConnectedLink;
 
 /**
  * Created by ttiganik on 27/04/16.
  */
 public class LinkGridViewAdapter extends FragmentGridPagerAdapter {
-    Link[] links;
+    ConnectedLink[] links;
     LinkFragment[] fragments;
     PeripheralActivity activity;
     FragmentManager fm;
@@ -21,13 +21,13 @@ public class LinkGridViewAdapter extends FragmentGridPagerAdapter {
         this.fm = fm;
     }
 
-    public void setLinks(Link[] links) {
+    public void setLinks(ConnectedLink[] links) {
         this.links = links;
         fragments = new LinkFragment[links.length];
         notifyDataSetChanged();
     }
 
-    public LinkFragment getFragment(Link link) {
+    public LinkFragment getFragment(ConnectedLink link) {
         int linkIndex = -1;
         for (int i = 0; i < links.length; i++){
             if (links[i] == link) {
@@ -59,11 +59,11 @@ public class LinkGridViewAdapter extends FragmentGridPagerAdapter {
         return links == null ? 0 : links.length;
     }
 
-    void didClickLock(Link link) {
+    void didClickLock(ConnectedLink link) {
         activity.didClickLock(link);
     }
 
-    void didClickUnlock(Link link) {
+    void didClickUnlock(ConnectedLink link) {
         activity.didClickUnlock(link);
     }
 }

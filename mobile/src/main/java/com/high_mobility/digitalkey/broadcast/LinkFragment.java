@@ -11,20 +11,20 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.high_mobility.HMLink.Shared.ByteUtils;
-import com.high_mobility.HMLink.Shared.Link;
+import com.high_mobility.HMLink.Shared.ConnectedLink;
 import com.high_mobility.digitalkey.R;
 
 /**
  * Created by ttiganik on 24/05/16.
  */
 public class LinkFragment extends Fragment {
-    Link link;
+    ConnectedLink link;
     LinkPagerAdapter adapter;
 
     TextView serialTextView;
     LinearLayout authView;
 
-    public static LinkFragment newInstance(LinkPagerAdapter adapter, Link link) {
+    public static LinkFragment newInstance(LinkPagerAdapter adapter, ConnectedLink link) {
         LinkFragment fragment = new LinkFragment();
         fragment.link = link;
         fragment.adapter = adapter;
@@ -55,7 +55,7 @@ public class LinkFragment extends Fragment {
         });
 
         authView = (LinearLayout)layout.findViewById(R.id.link_grid_item_auth_view);
-        ViewUtils.enableView(authView, link.getState() == Link.State.AUTHENTICATED);
+        ViewUtils.enableView(authView, link.getState() == ConnectedLink.State.AUTHENTICATED);
 
         return layout;
     }

@@ -9,7 +9,6 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
-import android.content.Context;
 import android.os.ParcelUuid;
 import android.util.Log;
 
@@ -23,10 +22,10 @@ import java.util.UUID;
 /**
  * Created by ttiganik on 12/04/16.
  *
- * LocalDevice acts as a gateway to the application's capability to broadcast itself and handle Link connectivity.
+ * Broadcaster acts as a gateway to the application's capability to broadcast itself and handle ConnectedLink connectivity.
  *
  */
-public class LocalDevice extends Device implements SharedBleListener {
+public class Broadcaster implements SharedBleListener {
     static final String TAG = "HMLink";
 
     public enum State { BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING }
@@ -35,10 +34,10 @@ public class LocalDevice extends Device implements SharedBleListener {
     static int txPowerLevel = AdvertiseSettings.ADVERTISE_TX_POWER_HIGH;
 
     Storage storage;
-    LocalDeviceListener listener;
+    BroadcasterListener listener;
 
-    Shared shared;
-    byte[] privateKey;
+    Manager manager;
+
     BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     BluetoothGattServer GATTServer;
     GATTServerCallback gattServerCallback;
@@ -47,8 +46,8 @@ public class LocalDevice extends Device implements SharedBleListener {
     BluetoothGattCharacteristic writeCharacteristic;
 
     State state = State.IDLE;
-    Link[] links = new Link[0];
-    static LocalDevice instance = null;
+    ConnectedLink[] links = new ConnectedLink[0];
+    static Broadcaster instance = null;
 
     /**
      * Sets the advertise mode for the AdvertiseSettings
@@ -59,7 +58,7 @@ public class LocalDevice extends Device implements SharedBleListener {
     public static void setAdvertiseMode(int advertiseMode) {
         if (advertiseMode > AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY
                 || advertiseMode < AdvertiseSettings.ADVERTISE_MODE_LOW_POWER) return;
-        LocalDevice.advertiseMode = advertiseMode;
+        Broadcaster.advertiseMode = advertiseMode;
     }
 
     /**
@@ -71,70 +70,78 @@ public class LocalDevice extends Device implements SharedBleListener {
     public static void setTxPowerLevel(int txPowerLevel) {
         if (txPowerLevel > AdvertiseSettings.ADVERTISE_TX_POWER_HIGH
         || txPowerLevel < AdvertiseSettings.ADVERTISE_TX_POWER_ULTRA_LOW) return;
-        LocalDevice.txPowerLevel = txPowerLevel;
+        Broadcaster.txPowerLevel = txPowerLevel;
     }
 
     /**
-     * The possible states of the local device are represented by the enum LocalDevice.State.
+     * The possible states of the local broadcaster are represented by the enum Broadcaster.State.
      *
-     * @return The current state of the LocalDevice.
-     * @see LocalDevice.State
+     * @return The current state of the Broadcaster.
+     * @see Broadcaster.State
      */
     public State getState() {
         return state;
     }
 
     /**
-     * In order to receive LocalDevice events, a listener must be set.
      *
-     * @param listener The listener instance to receive LocalDevice events.
+     * @return The name of the advertised peripheral
      */
-    public void setListener(LocalDeviceListener listener) {
+    public String getName() {
+        return manager.ble.getAdapter().getName();
+    }
+
+    /**
+     * In order to receive Broadcaster events, a listener must be set.
+     *
+     * @param listener The listener instance to receive Broadcaster events.
+     */
+    public void setListener(BroadcasterListener listener) {
         this.listener = listener;
     }
 
 
 
     /**
-     * @return The certificates that are registered on the LocalDevice.
+     * @return The certificates that are registered on the Broadcaster.
      */
     public AccessCertificate[] getRegisteredCertificates() {
-        return storage.getCertificatesWithProvidingSerial(certificate.getSerial());
+        return storage.getCertificatesWithProvidingSerial(manager.certificate.getSerial());
     }
 
     /**
-     * @return The certificates that are stored in the device's database for other devices.
+     * @return The certificates that are stored in the broadcaster's database for other devices.
      */
     public AccessCertificate[] getStoredCertificates() {
-        return storage.getCertificatesWithoutProvidingSerial(certificate.getSerial());
+        return storage.getCertificatesWithoutProvidingSerial(manager.certificate.getSerial());
     }
 
     /**
-     * @return The Links currently connected to the LocalDevice.
+     * @return The Links currently connected to the Broadcaster.
      */
-    public Link[] getLinks() {
+    public ConnectedLink[] getLinks() {
         return links;
     }
 
     /**
-     * Start broadcasting the LocalDevice via BLE advertising.
+     * Start broadcasting the Broadcaster via BLE advertising.
      *
      * @throws LinkException	    An exception with either UNSUPPORTED or BLUETOOTH_OFF code.
      */
     public void startBroadcasting() throws LinkException {
         if (state == State.BROADCASTING) {
-            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
                 Log.d(TAG, "will not start broadcasting: already broadcasting");
 
             return;
         }
 
-        if (!shared.ble.isBluetoothSupported()) {
+        if (!manager.ble.isBluetoothSupported()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
             throw new LinkException(LinkException.LinkExceptionCode.UNSUPPORTED);
         }
 
-        if (!shared.ble.isBluetoothOn()) {
+        if (!manager.ble.isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
             throw new LinkException(LinkException.LinkExceptionCode.BLUETOOTH_OFF);
         }
@@ -143,7 +150,7 @@ public class LocalDevice extends Device implements SharedBleListener {
 
         // start advertising
         if (mBluetoothLeAdvertiser == null) {
-            mBluetoothLeAdvertiser = shared.ble.getAdapter().getBluetoothLeAdvertiser();
+            mBluetoothLeAdvertiser = manager.ble.getAdapter().getBluetoothLeAdvertiser();
             if (mBluetoothLeAdvertiser == null) {
                 // for unsupported devices the system does not return an advertiser
                 setState(State.BLUETOOTH_UNAVAILABLE);
@@ -158,7 +165,7 @@ public class LocalDevice extends Device implements SharedBleListener {
                 .setTxPowerLevel(txPowerLevel)
                 .build();
 
-        final UUID advertiseUUID = ByteUtils.UUIDFromByteArray(ByteUtils.concatBytes(certificate.getIssuer(), certificate.getAppIdentifier()));
+        final UUID advertiseUUID = ByteUtils.UUIDFromByteArray(ByteUtils.concatBytes(manager.certificate.getIssuer(), manager.certificate.getAppIdentifier()));
 
         final AdvertiseData data = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
@@ -173,7 +180,7 @@ public class LocalDevice extends Device implements SharedBleListener {
      */
     public void stopBroadcasting() {
         if (getState() != State.BROADCASTING) {
-            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
                 Log.d(TAG, "already not broadcasting");
         }
         // stopAdvertising clears the GATT server as well.
@@ -195,20 +202,20 @@ public class LocalDevice extends Device implements SharedBleListener {
     }
 
     /**
-     * Registers the AccessCertificate for the device, enabling authenticated
-     * connection to another device.
+     * Registers the AccessCertificate for the broadcaster, enabling authenticated
+     * connection to another broadcaster.
      *
      * @param certificate The certificate that can be used by the Device to authorised Links
-     * @throws LinkException When this device's certificate hasn't been set, the given certificates
-     *                       providing serial doesn't match with this device's serial or
+     * @throws LinkException When this broadcaster's certificate hasn't been set, the given certificates
+     *                       providing serial doesn't match with this broadcaster's serial or
      *                       the storage is full.
      */
     public void registerCertificate(AccessCertificate certificate) throws LinkException {
-        if (this.certificate == null) {
+        if (manager.certificate == null) {
             throw new LinkException(LinkException.LinkExceptionCode.INTERNAL_ERROR);
         }
 
-        if (Arrays.equals(this.certificate.getSerial(), certificate.getProviderSerial()) == false) {
+        if (Arrays.equals(manager.certificate.getSerial(), certificate.getProviderSerial()) == false) {
             throw new LinkException(LinkException.LinkExceptionCode.INTERNAL_ERROR);
         }
 
@@ -229,7 +236,7 @@ public class LocalDevice extends Device implements SharedBleListener {
      * Revokes a stored certificate from Device's storage. The stored certificate and its
      * accompanying registered certificate are deleted from the storage.
      *
-     * @param serial The 9-byte serial number of the access providing device
+     * @param serial The 9-byte serial number of the access providing broadcaster
      * @throws LinkException When there are no matching certificate pairs for this serial.
      */
     public void revokeCertificate(byte[] serial) throws LinkException {
@@ -256,15 +263,10 @@ public class LocalDevice extends Device implements SharedBleListener {
         }
     }
 
-    LocalDevice(Shared shared) {
-        this.shared = shared;
-        shared.ble.addListener(instance);
-        storage = new Storage(shared.ctx);
-    }
-
-    @Override
-    public String getName() {
-        return shared.ble.getAdapter().getName();
+    Broadcaster(Manager manager) {
+        this.manager = manager;
+        manager.ble.addListener(instance);
+        storage = new Storage(manager.ctx);
     }
 
     @Override
@@ -285,7 +287,7 @@ public class LocalDevice extends Device implements SharedBleListener {
 
     int didResolveDevice(HMDevice device) {
         for (int i = 0; i < links.length; i++) {
-            Link link = links[i];
+            ConnectedLink link = links[i];
             if (Arrays.equals(link.getAddressBytes(), device.getMac())) {
                 link.setHmDevice(device);
                 return i;
@@ -296,11 +298,11 @@ public class LocalDevice extends Device implements SharedBleListener {
     }
 
     byte[] onCommandReceived(HMDevice device, byte[] data) {
-        BluetoothDevice btDevice = shared.ble.getAdapter().getRemoteDevice(device.getMac());
+        BluetoothDevice btDevice = manager.ble.getAdapter().getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
 
         if (linkIndex > -1) {
-            Link link = links[linkIndex];
+            ConnectedLink link = links[linkIndex];
             return link.onCommandReceived(data);
         }
 
@@ -308,12 +310,12 @@ public class LocalDevice extends Device implements SharedBleListener {
     }
 
     boolean onCommandResponseReceived(HMDevice device, byte[] data) {
-        BluetoothDevice btDevice = shared.ble.getAdapter().getRemoteDevice(device.getMac());
+        BluetoothDevice btDevice = manager.ble.getAdapter().getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
 
         if (linkIndex < 0) return false;
 
-        Link link = links[linkIndex];
+        ConnectedLink link = links[linkIndex];
         link.onCommandResponseReceived(data);
         return true;
     }
@@ -321,8 +323,8 @@ public class LocalDevice extends Device implements SharedBleListener {
     void didReceiveLink(BluetoothDevice device) {
         // add a new link to the array
 
-        final Link link = new Link(device, this);
-        Link[] newLinks = new Link[links.length + 1];
+        final ConnectedLink link = new ConnectedLink(device, this);
+        ConnectedLink[] newLinks = new ConnectedLink[links.length + 1];
 
         for (int i = 0; i < links.length; i++) {
             newLinks[i] = links[i];
@@ -331,11 +333,11 @@ public class LocalDevice extends Device implements SharedBleListener {
         newLinks[links.length] = link;
         links = newLinks;
 
-        link.setState(Link.State.CONNECTED);
+        link.setState(ConnectedLink.State.CONNECTED);
 
         if (listener != null) {
-            final LocalDevice devicePointer = this;
-            devicePointer.shared.mainThread.post(new Runnable() {
+            final Broadcaster devicePointer = this;
+            devicePointer.manager.mainThread.post(new Runnable() {
                 @Override
                 public void run() {
                     devicePointer.listener.onLinkReceived(link);
@@ -345,21 +347,21 @@ public class LocalDevice extends Device implements SharedBleListener {
     }
 
     boolean didLoseLink(HMDevice device) {
-        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue()) Log.d(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
-        BluetoothDevice btDevice = shared.ble.getAdapter().getRemoteDevice(device.getMac());
+        BluetoothDevice btDevice = manager.ble.getAdapter().getRemoteDevice(device.getMac());
         int linkIndex = linkIndexForBTDevice(btDevice);
 
         if (linkIndex < 0) return false;
 
         // remove the link from the array
-        final Link link = links[linkIndex];
+        final ConnectedLink link = links[linkIndex];
 
-        if (link.state != Link.State.DISCONNECTED) {
+        if (link.getState() != Link.State.DISCONNECTED) {
             GATTServer.cancelConnection(link.btDevice);
         }
 
-        Link[] newLinks = new Link[links.length - 1];
+        ConnectedLink[] newLinks = new ConnectedLink[links.length - 1];
 
         for (int i = 0; i < links.length; i++) {
             if (i < linkIndex) {
@@ -374,15 +376,15 @@ public class LocalDevice extends Device implements SharedBleListener {
 
         // set new adapter name
         if (links.length == 0) {
-            shared.ble.setRandomAdapterName();
+            manager.ble.setRandomAdapterName();
         }
 
         link.setState(Link.State.DISCONNECTED);
 
         // invoke the listener listener
         if (listener != null) {
-            final LocalDevice devicePointer = this;
-            devicePointer.shared.mainThread.post(new Runnable() {
+            final Broadcaster devicePointer = this;
+            devicePointer.manager.mainThread.post(new Runnable() {
                 @Override
                 public void run() {
                     devicePointer.listener.onLinkLost(link);
@@ -397,7 +399,7 @@ public class LocalDevice extends Device implements SharedBleListener {
         int linkIndex = didResolveDevice(device);
 
         if (linkIndex > -1) {
-            final Link link = links[linkIndex];
+            final ConnectedLink link = links[linkIndex];
             return link.didReceivePairingRequest();
         }
         else {
@@ -406,21 +408,21 @@ public class LocalDevice extends Device implements SharedBleListener {
         }
     }
 
-    void writeData(Link link, byte[] value) {
-        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
+    boolean writeData(byte[] mac, byte[] value) {
+        ConnectedLink link = getLinkForMac(mac);
+        if (link == null) return false;
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
             Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(link.getAddressBytes()));
 
         readCharacteristic.setValue(value);
         GATTServer.notifyCharacteristicChanged(link.btDevice, readCharacteristic, false);
+
+        return true;
     }
 
-    boolean isReadCharacteristic(UUID characteristicUUID) {
-        return READ_CHAR_UUID.equals(characteristicUUID);
-    }
-
-    Link getLinkForMac(byte[] mac) {
+    ConnectedLink getLinkForMac(byte[] mac) {
         for (int i = 0; i < links.length; i++) {
-            Link link = links[i];
+            ConnectedLink link = links[i];
 
             if (Arrays.equals(link.getAddressBytes(), mac)) {
                 return link;
@@ -432,7 +434,7 @@ public class LocalDevice extends Device implements SharedBleListener {
 
     private int linkIndexForBTDevice(BluetoothDevice device) {
         for (int i = 0; i < links.length; i++) {
-            Link link = links[i];
+            ConnectedLink link = links[i];
 
             if (link.btDevice.getAddress().equals(device.getAddress())) {
                 return i;
@@ -445,9 +447,9 @@ public class LocalDevice extends Device implements SharedBleListener {
     private void createGATTServer() {
         if (GATTServer == null) {
             gattServerCallback = new GATTServerCallback(this);
-            GATTServer = shared.ble.getManager().openGattServer(shared.ctx, gattServerCallback);
+            GATTServer = manager.ble.getManager().openGattServer(manager.ctx, gattServerCallback);
 
-            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(TAG, "createGATTServer");
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue()) Log.d(TAG, "createGATTServer");
 
             /// bluez hack service
             UUID BLUEZ_HACK_SERVICE_UUID = UUID.fromString("48494D4F-BB81-49AB-BE90-6F25D716E8DE");
@@ -457,17 +459,17 @@ public class LocalDevice extends Device implements SharedBleListener {
             ///
 
             // create the service
-            BluetoothGattService service = new BluetoothGattService(SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
+            BluetoothGattService service = new BluetoothGattService(Constants.SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
 
-            readCharacteristic = new BluetoothGattCharacteristic(READ_CHAR_UUID,
+            readCharacteristic = new BluetoothGattCharacteristic(Constants.READ_CHAR_UUID,
                             BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                             BluetoothGattCharacteristic.PERMISSION_READ);
 
-            readCharacteristic.addDescriptor(new BluetoothGattDescriptor(NOTIFY_DESC_UUID,
+            readCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
                     BluetoothGattDescriptor.PERMISSION_READ | BluetoothGattDescriptor.PERMISSION_WRITE));
 
             writeCharacteristic =
-                    new BluetoothGattCharacteristic(WRITE_CHAR_UUID,
+                    new BluetoothGattCharacteristic(Constants.WRITE_CHAR_UUID,
                             BluetoothGattCharacteristic.PROPERTY_WRITE,
                             BluetoothGattCharacteristic.PERMISSION_WRITE);
 
@@ -477,14 +479,14 @@ public class LocalDevice extends Device implements SharedBleListener {
             GATTServer.addService(service);
         }
         else {
-            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(TAG, "createGATTServer: already exists");
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue()) Log.d(TAG, "createGATTServer: already exists");
         }
     }
 
     private final AdvertiseCallback advertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(TAG, "Start advertise " + shared.ble.getAdapter().getName());
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue()) Log.d(TAG, "Start advertise " + manager.ble.getAdapter().getName());
             setState(State.BROADCASTING);
         }
 
@@ -526,7 +528,7 @@ public class LocalDevice extends Device implements SharedBleListener {
             this.state = state;
 
             if (listener != null) {
-                shared.mainThread.post(new Runnable() {
+                manager.mainThread.post(new Runnable() {
                     @Override
                     public void run() {
                         listener.onStateChanged(state, oldState);

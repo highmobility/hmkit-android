@@ -17,19 +17,20 @@ import com.high_mobility.HMLink.AutoCommand.AutoCommandNotification;
 import com.high_mobility.HMLink.AutoCommand.AutoCommandResponse;
 import com.high_mobility.HMLink.AutoCommand.CommandParseException;
 import com.high_mobility.HMLink.AutoCommand.LockStatusChangedNotification;
-import com.high_mobility.HMLink.Constants;
+import com.high_mobility.HMLink.Shared.BroadcasterListener;
+import com.high_mobility.HMLink.Shared.ConnectedLink;
+import com.high_mobility.HMLink.Shared.ConnectedLinkListener;
+import com.high_mobility.HMLink.Shared.Constants;
 import com.high_mobility.HMLink.LinkException;
+import com.high_mobility.HMLink.Shared.Broadcaster;
 import com.high_mobility.HMLink.Shared.Link;
-import com.high_mobility.HMLink.Shared.LinkListener;
-import com.high_mobility.HMLink.Shared.LocalDevice;
-import com.high_mobility.HMLink.Shared.LocalDeviceListener;
-import com.high_mobility.HMLink.Shared.Shared;
+import com.high_mobility.HMLink.Shared.Manager;
 import com.high_mobility.digitalkey.R;
 
 /**
  * Created by ttiganik on 02/06/16.
  */
-public class BroadcastActivity extends AppCompatActivity implements LocalDeviceListener, LinkListener {
+public class BroadcastActivity extends AppCompatActivity implements BroadcasterListener, ConnectedLinkListener {
     static final String TAG = "BroadcastActivity";
 
 
@@ -42,12 +43,12 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
     ViewPager pager;
     LinkPagerAdapter adapter;
 
-    LocalDevice device;
+    Broadcaster device;
     Constants.ApprovedCallback pairApproveCallback;
 
     void onBroadcastCheckedChanged() {
         if (broadcastSwitch.isChecked()) {
-            if (device.getState() == LocalDevice.State.BROADCASTING) return;
+            if (device.getState() == Broadcaster.State.BROADCASTING) return;
             resetDevice();
 
             try {
@@ -71,9 +72,9 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.broadcast_view);
-        LocalDevice.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY);
-        LocalDevice.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH);
-        device = Shared.getInstance().getLocalDevice();
+        Broadcaster.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY);
+        Broadcaster.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH);
+        device = Manager.getInstance().getBroadcaster();
 
         // set the device listener
         device.setListener(this);
@@ -85,7 +86,7 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
 
     @Override
     protected void onDestroy() {
-        for (Link link : device.getLinks()) {
+        for (ConnectedLink link : device.getLinks()) {
             link.setListener(null);
         }
         device.setListener(null);
@@ -93,15 +94,15 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
         super.onDestroy();
     }
 
-    // LocalDeviceListener
+    // BroadcasterListener
 
     @Override
-    public void onStateChanged(LocalDevice.State state, LocalDevice.State state1) {
-        broadcastSwitch.setEnabled(state != LocalDevice.State.BLUETOOTH_UNAVAILABLE);
+    public void onStateChanged(Broadcaster.State state, Broadcaster.State state1) {
+        broadcastSwitch.setEnabled(state != Broadcaster.State.BLUETOOTH_UNAVAILABLE);
 
         switch (state) {
             case IDLE:
-                if (state1 == LocalDevice.State.BLUETOOTH_UNAVAILABLE && broadcastSwitch.isChecked()) {
+                if (state1 == Broadcaster.State.BLUETOOTH_UNAVAILABLE && broadcastSwitch.isChecked()) {
                     try {
                         device.startBroadcasting();
                     } catch (LinkException e) {
@@ -122,13 +123,13 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
     }
 
     @Override
-    public void onLinkReceived(Link link) {
+    public void onLinkReceived(ConnectedLink link) {
         link.setListener(this);
         adapter.setLinks(device.getLinks());
     }
 
     @Override
-    public void onLinkLost(Link link) {
+    public void onLinkLost(ConnectedLink link) {
         link.setListener(null);
         adapter.setLinks(device.getLinks());
     }
@@ -137,7 +138,7 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
 
     @Override
     public void onStateChanged(Link link, Link.State state) {
-        if (link.getState() == Link.State.AUTHENTICATED) {
+        if (link.getState() == ConnectedLink.State.AUTHENTICATED) {
 //            certUtils.onCertificateReadForSerial(link.getSerial());
         }
 
@@ -162,13 +163,13 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
     }
 
     @Override
-    public void onPairingRequested(Link link, Constants.ApprovedCallback approvedCallback) {
+    public void onPairingRequested(ConnectedLink link, Constants.ApprovedCallback approvedCallback) {
         this.pairApproveCallback = approvedCallback;
         pairingView.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void onPairingRequestTimeout(Link link) {
+    public void onPairingRequestTimeout(ConnectedLink link) {
         pairingView.setVisibility(View.GONE);
     }
 
@@ -202,7 +203,7 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
         pager.setAdapter(adapter);
     }
 
-    void onLockClicked(Link link) {
+    void onLockClicked(ConnectedLink link) {
         final LinkFragment fragment = adapter.getFragment(link);
         ViewUtils.enableView(fragment.authView, false);
 
@@ -233,7 +234,7 @@ public class BroadcastActivity extends AppCompatActivity implements LocalDeviceL
         });
     }
 
-    void onUnlockClicked(Link link) {
+    void onUnlockClicked(ConnectedLink link) {
         final LinkFragment fragment = adapter.getFragment(link);
 
         ViewUtils.enableView(fragment.authView, false);

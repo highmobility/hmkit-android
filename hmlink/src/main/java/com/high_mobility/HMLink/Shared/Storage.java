@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.AccessCertificate;
 import com.high_mobility.HMLink.Certificate;
@@ -17,7 +16,7 @@ import java.util.Set;
 /**
  * Created by ttiganik on 14/04/16.
  *
- * Storage is used to access device's storage, where certificates are stored.
+ * Storage is used to access broadcaster's storage, where certificates are stored.
  *
  * Uses Android SharedPreferences.
  */
@@ -229,7 +228,7 @@ class Storage {
                 && Arrays.equals(cert.getGainerPublicKey(), certificate.getGainerPublicKey())) {
 
                 if (!deleteCertificateWithGainingSerial(certificate.getGainerSerial())) {
-                    Log.e(LocalDevice.TAG, "failed to delete cert");
+                    Log.e(Broadcaster.TAG, "failed to delete cert");
                 }
             }
         }

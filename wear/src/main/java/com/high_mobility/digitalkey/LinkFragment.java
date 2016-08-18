@@ -11,18 +11,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.high_mobility.HMLink.Shared.ByteUtils;
-import com.high_mobility.HMLink.Shared.Link;
+import com.high_mobility.HMLink.Shared.ConnectedLink;
 
 /**
  * Fragment used to show BoxInsetLayout.
  */
 public class LinkFragment extends Fragment {
 	TextView textView;
-	Link link;
+	ConnectedLink link;
 	LinkGridViewAdapter adapter;
 	LinearLayout authView;
 
-	public static LinkFragment newInstance(LinkGridViewAdapter adapter, Link link) {
+	public static LinkFragment newInstance(LinkGridViewAdapter adapter, ConnectedLink link) {
 		LinkFragment fragment = new LinkFragment();
 		fragment.link = link;
 		fragment.adapter = adapter;
@@ -53,7 +53,7 @@ public class LinkFragment extends Fragment {
 		});
 
 		authView = (LinearLayout)layout.findViewById(R.id.link_grid_item_auth_view);
-		ViewUtils.enableView(authView, link.getState() == Link.State.AUTHENTICATED);
+		ViewUtils.enableView(authView, link.getState() == ConnectedLink.State.AUTHENTICATED);
 
 		return layout;
 	}

@@ -3,13 +3,12 @@ package com.high_mobility.digitalkey;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import com.high_mobility.HMLink.DeviceCertificate;
 import com.high_mobility.HMLink.Shared.ByteUtils;
-import com.high_mobility.HMLink.Shared.Shared;
+import com.high_mobility.HMLink.Shared.Manager;
 import com.high_mobility.digitalkey.broadcast.BroadcastActivity;
 import com.high_mobility.digitalkey.scan.ScanActivity;
 
@@ -24,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     public static final byte[] DEVICE_SERIAL = ByteUtils.bytesFromHex("01231910D62CA571EF");
     public static final byte[] CA_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
 
-    Shared shared;
+    Manager manager;
     CertUtils certUtils;
 
     @BindView(R.id.serial_textview) TextView serialTextView;
@@ -37,8 +36,8 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         setDeviceCertificate();
 
-        Intent intent = new Intent(this, ScanActivity.class);
-        startActivity(intent);
+//        Intent intent = new Intent(this, ScanActivity.class);
+//        startActivity(intent);
     }
 
     void setDeviceCertificate() {
@@ -51,8 +50,8 @@ public class MainActivity extends AppCompatActivity {
         DeviceCertificate cert = new DeviceCertificate(ISSUER, APP_IDENTIFIER, DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
         cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***"));
         // set the device certificate.
-        shared = Shared.getInstance();
-        shared.initialize(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
+        manager = Manager.getInstance();
+        manager.initialize(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
 
         serialTextView.setText(ByteUtils.hexFromBytes(cert.getSerial()));
         publicKeyTextView.setText(ByteUtils.hexFromBytes(cert.getPublicKey()));
@@ -61,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
             certUtils = new CertUtils(this, MainActivity.DEVICE_SERIAL, MainActivity.DEVICE_PUBLIC_KEY);
         }
 
-        certUtils.registerAndStoreAllCertificates(shared.getLocalDevice());
+        certUtils.registerAndStoreAllCertificates(manager.getBroadcaster());
     }
 
     public void onBroadcastClicked(View v) {

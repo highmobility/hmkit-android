@@ -4,7 +4,6 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 
-import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.LinkException;
 
 import java.util.Calendar;
@@ -31,7 +30,7 @@ class SentCommand {
         if (timeoutTimer != null) timeoutTimer.cancel();
         finished = true;
         if (commandCallback == null) {
-            Log.d(LocalDevice.TAG, "cannot dispatch the result: no callback reference");
+            Log.d(Broadcaster.TAG, "cannot dispatch the result: no callback reference");
             return;
         }
 

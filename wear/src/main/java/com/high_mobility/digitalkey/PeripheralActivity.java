@@ -13,23 +13,22 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.high_mobility.HMLink.AccessCertificate;
+import com.high_mobility.HMLink.Shared.Broadcaster;
 import com.high_mobility.HMLink.Shared.ByteUtils;
-import com.high_mobility.HMLink.Shared.Link;
+import com.high_mobility.HMLink.Shared.ConnectedLink;
 import com.high_mobility.HMLink.Shared.LinkListener;
-import com.high_mobility.HMLink.Shared.LocalDevice;
-import com.high_mobility.HMLink.Shared.LocalDeviceListener;
-import com.high_mobility.HMLink.Constants;
+import com.high_mobility.HMLink.Shared.BroadcasterListener;
+import com.high_mobility.HMLink.Shared.Constants;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.DeviceCertificate;
-import com.high_mobility.HMLink.Shared.Shared;
+import com.high_mobility.HMLink.Shared.Manager;
 
-public class PeripheralActivity extends WearableActivity implements LocalDeviceListener, LinkListener {
+public class PeripheralActivity extends WearableActivity implements BroadcasterListener, LinkListener {
     private static final byte[] CA_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
 
     static final String TAG = "DigitalKey";
 
-    LocalDevice device;
+    Broadcaster device;
 
     private TextView textView;
     private GridViewPager gridViewPager;
@@ -39,14 +38,14 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
     private BoxInsetLayout container;
 
     public void didTapTitle(View view) {
-        if (device.getState() == LocalDevice.State.IDLE) {
+        if (device.getState() == Broadcaster.State.IDLE) {
             try {
                 device.startBroadcasting();
             } catch (LinkException e) {
                 e.printStackTrace();
             }
         }
-        else if (device.getState() == LocalDevice.State.BROADCASTING) {
+        else if (device.getState() == Broadcaster.State.BROADCASTING) {
             device.stopBroadcasting();
         }
     }
@@ -99,7 +98,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
 
     @Override
     protected void onDestroy() {
-        for (Link link : device.getLinks()) {
+        for (ConnectedLink link : device.getLinks()) {
             link.setListener(null);
         }
 
@@ -123,8 +122,8 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***")); // original
 
 
-        Shared.getInstance().initialize(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
-        device = Shared.getInstance().getLocalDevice();
+        Manager.getInstance().initialize(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
+        device = Manager.getInstance().getBroadcaster();
         device.reset();
         onStateChanged(device.getState(), device.getState());
         device.setListener(this);
@@ -161,7 +160,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
     }
 
     @Override
-    public void onStateChanged(LocalDevice.State state, LocalDevice.State oldState) {
+    public void onStateChanged(Broadcaster.State state, Broadcaster.State oldState) {
         switch (state) {
             case BLUETOOTH_UNAVAILABLE:
                 textView.setText(device.getName() + " / x");
@@ -176,32 +175,32 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
     }
 
     @Override
-    public void onLinkReceived(Link link) {
+    public void onLinkReceived(ConnectedLink link) {
         gridViewAdapter.setLinks(device.getLinks());
         link.setListener(this);
         Log.i(TAG, "onLinkReceived");
     }
 
     @Override
-    public void onLinkLost(Link link) {
+    public void onLinkLost(ConnectedLink link) {
         gridViewAdapter.setLinks(device.getLinks());
         link.setListener(null);
         Log.i(TAG, "onLinkLost");
     }
 
     @Override
-    public void onStateChanged(Link link, Link.State oldState) {
+    public void onStateChanged(ConnectedLink link, ConnectedLink.State oldState) {
         gridViewAdapter.setLinks(device.getLinks());
     }
 
     @Override
-    public byte[] onCommandReceived(Link link, byte[] bytes) {
+    public byte[] onCommandReceived(ConnectedLink link, byte[] bytes) {
         Log.i(TAG, "onCommandReceived " + ByteUtils.hexFromBytes(bytes));
         return new byte[] { 0x01, bytes[0] };
     }
 
     @Override
-    public void onPairingRequested(Link link,
+    public void onPairingRequested(ConnectedLink link,
                                    final Constants.ApprovedCallback approvedCallback) {
         Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         long[] vibrationPattern = {0, 300};
@@ -232,13 +231,13 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
     }
 
     @Override
-    public void onPairingRequestTimeout(Link link) {
+    public void onPairingRequestTimeout(ConnectedLink link) {
         pairingView.declineButton.setOnClickListener(null);
         pairingView.confirmButton.setOnClickListener(null);
         pairingView.setVisibility(View.GONE);
     }
 
-    public void didClickLock(Link link) {
+    public void didClickLock(ConnectedLink link) {
         byte[] cmd = new byte[] { 0x17, 0x01 };
         final LinkFragment fragment = gridViewAdapter.getFragment(link);
 
@@ -254,7 +253,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         });
     }
 
-    public void didClickUnlock(Link link) {
+    public void didClickUnlock(ConnectedLink link) {
         byte[] cmd = new byte[] { 0x17, 0x00 };
         final LinkFragment fragment = gridViewAdapter.getFragment(link);
 

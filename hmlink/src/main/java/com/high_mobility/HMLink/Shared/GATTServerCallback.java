@@ -14,17 +14,17 @@ import java.util.Arrays;
  * Created by ttiganik on 15/04/16.
  */
 class GATTServerCallback extends BluetoothGattServerCallback {
-    LocalDevice device;
-    GATTServerCallback(LocalDevice device) {
+    Broadcaster device;
+    GATTServerCallback(Broadcaster device) {
         this.device = device;
     }
 
     @Override
     public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
         super.onConnectionStateChange(device, status, newState);
-        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(LocalDevice.TAG, "onConnectionStateChange " + newState);
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue()) Log.d(Broadcaster.TAG, "onConnectionStateChange " + newState);
         if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            this.device.shared.core.HMBTCorelinkDisconnect(this.device.shared.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
+            this.device.manager.core.HMBTCorelinkDisconnect(this.device.manager.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
         }
     }
 
@@ -35,10 +35,10 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                                             BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
 
-        if (this.device.isReadCharacteristic(characteristic.getUuid())) {
+        if (characteristic.getUuid().equals(Constants.READ_CHAR_UUID)) {
             // response to read here
             byte[] value = characteristic.getValue();
-//            Log.d(LocalDevice.TAG, "onCharacteristicReadRequest " + ByteUtils.hexFromBytes(value) + " " + offset + " " + value.length);
+//            Log.d(Broadcaster.TAG, "onCharacteristicReadRequest " + ByteUtils.hexFromBytes(value) + " " + offset + " " + value.length);
             byte[] offsetBytes = Arrays.copyOfRange(value, offset, value.length);
 
             this.device.GATTServer.sendResponse(device,
@@ -67,17 +67,17 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                                              final byte[] value) {
         super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
 
-        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
-            Log.d(LocalDevice.TAG, "incoming data " + ByteUtils.hexFromBytes(value) + " from "
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
+            Log.d(Broadcaster.TAG, "incoming data " + ByteUtils.hexFromBytes(value) + " from "
                     + ByteUtils.hexFromBytes(ByteUtils.bytesFromMacString(device.getAddress())));
 
         if (responseNeeded) {
             this.device.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
-            final LocalDevice devicePointer = this.device;
-            this.device.shared.mainThread.post(new Runnable() {
+            final Broadcaster devicePointer = this.device;
+            this.device.manager.mainThread.post(new Runnable() {
                 @Override
                 public void run() {
-                    devicePointer.shared.core.HMBTCorelinkIncomingData(devicePointer.shared.coreInterface, value, value.length, ByteUtils.bytesFromMacString(device.getAddress()));
+                    devicePointer.manager.core.HMBTCorelinkIncomingData(devicePointer.manager.coreInterface, value, value.length, ByteUtils.bytesFromMacString(device.getAddress()));
                 }
             });
         }
@@ -90,11 +90,11 @@ class GATTServerCallback extends BluetoothGattServerCallback {
             this.device.didReceiveLink(device);
             this.device.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
 
-            final LocalDevice devicePointer = this.device;
-            this.device.shared.mainThread.post(new Runnable() {
+            final Broadcaster devicePointer = this.device;
+            this.device.manager.mainThread.post(new Runnable() {
                 @Override
                 public void run() {
-                    devicePointer.shared.core.HMBTCorelinkConnect(devicePointer.shared.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
+                    devicePointer.manager.core.HMBTCorelinkConnect(devicePointer.manager.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
                 }
             });
         }

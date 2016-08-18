@@ -5,11 +5,10 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.high_mobility.HMLink.AccessCertificate;
+import com.high_mobility.HMLink.Shared.Broadcaster;
 import com.high_mobility.HMLink.Shared.ByteUtils;
-import com.high_mobility.HMLink.Shared.LocalDevice;
 import com.high_mobility.HMLink.Crypto;
 import com.high_mobility.HMLink.LinkException;
-import com.high_mobility.digitalkey.broadcast.BroadcastActivity;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -172,7 +171,7 @@ public class CertUtils {
         return certificate;
     }
 
-    void registerAndStoreCertificateForType(BoxType type, LocalDevice device) {
+    void registerAndStoreCertificateForType(BoxType type, Broadcaster device) {
         AccessCertificate registeredCertificate = registerCertificateForBoxType(type);
         try {
             device.registerCertificate(registeredCertificate);
@@ -190,7 +189,7 @@ public class CertUtils {
         }
     }
 
-    public void registerAndStoreAllCertificates(LocalDevice device) {
+    public void registerAndStoreAllCertificates(Broadcaster device) {
         // create the AccessCertificates for the car to read(stored certificate)
         // and register ourselves with the car already(registeredCertificate)
         for (BoxType type : BoxType.values()) {

@@ -1,114 +1,45 @@
 package com.high_mobility.HMLink.Shared;
 
 import android.bluetooth.BluetoothDevice;
-import android.os.CountDownTimer;
 import android.util.Log;
 
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.btcore.HMDevice;
-import com.high_mobility.HMLink.Constants;
 
 import java.util.Calendar;
 
 /**
- * The Link is a representation of the connection between the LocalDevice and a Device
- * that has connected to it. The Link is created by the other Device via discovering
- * and connecting to the LocalDevice. The Link's interface provides the ability
- * to send commands and handle incoming requests from the Link.
- *
- * Created by ttiganik on 13/04/16.
+ * Created by ttiganik on 17/08/16.
  */
 public class Link {
-    public enum State { DISCONNECTED, CONNECTED, AUTHENTICATED }
+    BluetoothDevice btDevice;
+    HMDevice hmDevice;
+
+    public enum State {
+        DISCONNECTED, CONNECTED, AUTHENTICATED
+    }
 
     State state;
-
-    LinkListener listener;
-
-    BluetoothDevice btDevice;
-
-    HMDevice hmDevice;
-    LocalDevice device;
-
     SentCommand sentCommand;
-
+    LinkListener listener;
     long connectionTime;
 
-    Link(BluetoothDevice btDevice, LocalDevice device) {
-        connectionTime = Calendar.getInstance().getTimeInMillis();
+    Manager manager;
+    Link(Manager manager, BluetoothDevice btDevice) {
         this.btDevice = btDevice;
-        this.device = device;
+        this.manager = manager;
+        connectionTime = Calendar.getInstance().getTimeInMillis();
     }
 
-    public byte[] getSerial() {
-        return hmDevice != null ? hmDevice.getSerial() : null;
-    }
-
-    /**
-     * The possible states of the link are represented by the enum Link.State.
-     * @return The current state of the link
-     */
     public State getState() {
         return state;
-    }
-
-    /**
-     * In order to receive Link events, a listener must be set.
-     *
-     * @param listener The listener instance to receive Link events.
-     */
-    public void setListener(LinkListener listener) {
-        this.listener = listener;
-    }
-
-    /**
-     * Send custom command to the Link inside a secure container.
-     *
-     * @param bytes             The bytes that will be sent inside the secure container.
-     * @param secureResponse    Optional boolean defining if the response has a secure HMAC element
-        *                       in it or not - defaults to true
-     * @param responseCallback  DataResponseCallback object that returns the response's byte array
-     *                          or a LinkException if unsuccessful
-     */
-    public void sendCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
-        if (state != State.AUTHENTICATED) {
-            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
-                Log.d(LocalDevice.TAG, "cant send command, not authenticated");
-            responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.UNAUTHORISED));
-            return;
-        }
-
-        if (sentCommand != null && sentCommand.finished == false) {
-            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue())
-                Log.d(LocalDevice.TAG, "cant send command, custom command in progress");
-            responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.CUSTOM_COMMAND_IN_PROGRESS));
-            return;
-        }
-
-        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
-            Log.d(LocalDevice.TAG, "send command " + ByteUtils.hexFromBytes(bytes)
-                    + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
-
-        sentCommand = new SentCommand(responseCallback, device.shared.mainThread);
-        device.shared.core.HMBTCoreSendCustomCommand(device.shared.coreInterface, bytes, bytes.length, getAddressBytes());
-    }
-
-    void setHmDevice(final HMDevice hmDevice) {
-        this.hmDevice = hmDevice;
-
-        if (hmDevice.getIsAuthenticated() == 0) {
-            setState(State.CONNECTED);
-        }
-        else {
-            setState(State.AUTHENTICATED);
-        }
     }
 
     void setState(State state) {
         if (this.state != state) {
             final State oldState = this.state;
-            if (state == State.AUTHENTICATED && Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue()) {
-                Log.d(LocalDevice.TAG, "authenticated in " + (Calendar.getInstance().getTimeInMillis() - connectionTime) + "ms");
+            if (state == State.AUTHENTICATED && Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue()) {
+                Log.d(Broadcaster.TAG, "authenticated in " + (Calendar.getInstance().getTimeInMillis() - connectionTime) + "ms");
             }
 
             this.state = state;
@@ -116,7 +47,7 @@ public class Link {
             if (listener != null) {
                 final Link linkPointer = this;
 
-                device.shared.mainThread.post(new Runnable() {
+                manager.mainThread.post(new Runnable() {
                     @Override
                     public void run() {
                         linkPointer.listener.onStateChanged(linkPointer, oldState);
@@ -126,13 +57,54 @@ public class Link {
         }
     }
 
+    public String getName() {
+        return btDevice.getName();
+    }
+
+    public byte[] getSerial() {
+        return hmDevice != null ? hmDevice.getSerial() : null;
+    }
+
+    /**
+     * Send custom command to the ConnectedLink inside a secure container.
+     *
+     * @param bytes             The bytes that will be sent inside the secure container.
+     * @param secureResponse    Optional boolean defining if the response has a secure HMAC element
+     *                       in it or not - defaults to true
+     * @param responseCallback  DataResponseCallback object that returns the response's byte array
+     *                          or a LinkException if unsuccessful
+     */
+    public void sendCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
+        if (state != State.AUTHENTICATED) {
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
+                Log.d(Broadcaster.TAG, "cant send command, not authenticated");
+            responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.UNAUTHORISED));
+            return;
+        }
+
+        if (sentCommand != null && sentCommand.finished == false) {
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
+                Log.d(Broadcaster.TAG, "cant send command, custom command in progress");
+            responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.CUSTOM_COMMAND_IN_PROGRESS));
+            return;
+        }
+
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+            Log.d(Broadcaster.TAG, "send command " + ByteUtils.hexFromBytes(bytes)
+                    + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
+
+        sentCommand = new SentCommand(responseCallback, manager.mainThread);
+        manager.core.HMBTCoreSendCustomCommand(manager.coreInterface, bytes, bytes.length, getAddressBytes());
+    }
+
+
     byte[] onCommandReceived(byte[] bytes) {
-        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
-            Log.d(LocalDevice.TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+            Log.d(Broadcaster.TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
                     + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
         if (listener == null) {
-            Log.d(LocalDevice.TAG, "can't dispatch notification: no listener set");
+            Log.d(Broadcaster.TAG, "can't dispatch notification: no listener set");
             return null;
         }
 
@@ -140,65 +112,18 @@ public class Link {
     }
 
     void onCommandResponseReceived(final byte[] data) {
-        if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
-            Log.d(LocalDevice.TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+            Log.d(Broadcaster.TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
                     + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()) + " in " +
                     (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime) + "ms");
 
         if (sentCommand == null) {
-            if (Device.loggingLevel.getValue() >= Device.LoggingLevel.Debug.getValue())
-                Log.d(LocalDevice.TAG, "can't dispatch command response: sentCommand = null");
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+                Log.d(Broadcaster.TAG, "can't dispatch command response: sentCommand = null");
             return;
         }
 
         sentCommand.dispatchResult(data, null);
-    }
-
-    int pairingResponse = -1;
-    int didReceivePairingRequest() {
-        if (listener == null) {
-            Log.e(LocalDevice.TAG, "link listener not set");
-            return 1;
-        }
-
-        final Link reference = this;
-        pairingResponse = -1;
-        device.shared.mainThread.post(new Runnable() {
-            @Override
-            public void run() {
-            listener.onPairingRequested(reference, new Constants.ApprovedCallback() {
-                @Override
-                public void approve() {
-                    pairingResponse = 0;
-                }
-
-                @Override
-                public void decline() {
-                    pairingResponse = 1;
-                }
-            });
-            }
-        });
-
-        Calendar c = Calendar.getInstance();
-        int startSeconds = c.get(Calendar.SECOND);
-
-        while(pairingResponse < 0) {
-            int passedSeconds = Calendar.getInstance().get(Calendar.SECOND);
-            if (passedSeconds - startSeconds > Constants.registerTimeout) {
-                device.shared.mainThread.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.onPairingRequestTimeout(reference);
-                    }
-                });
-
-                if (Device.loggingLevel.getValue() >= Device.LoggingLevel.All.getValue()) Log.d(LocalDevice.TAG, "pairing timer exceeded");
-                return 1; // TODO: use correct code
-            }
-        }
-
-        return pairingResponse;
     }
 
     byte[] getAddressBytes() {
