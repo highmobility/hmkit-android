@@ -9,10 +9,6 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.util.Log;
 
-import com.high_mobility.HMLink.LinkException;
-import com.high_mobility.btcore.HMDevice;
-
-import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -105,10 +101,10 @@ public class ScannedLink extends Link {
                 case BluetoothProfile.STATE_CONNECTED:
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
                         Log.d(Scanner.TAG, "STATE_CONNECTED " + this);
-                    scanner.manager.mainThread.post(new Runnable() {
+                    scanner.manager.workHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                        scanner.manager.core.HMBTCoreSensingConnect(scanner.manager.coreInterface, getAddressBytes());
+                            scanner.manager.core.HMBTCoreSensingConnect(scanner.manager.coreInterface, getAddressBytes());
                         }
                     });
                     break;
@@ -116,10 +112,10 @@ public class ScannedLink extends Link {
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
                         Log.d(Scanner.TAG, "STATE_DISCONNECTED " + this);
 
-                    scanner.manager.mainThread.post(new Runnable() {
+                    scanner.manager.workHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                        scanner.manager.core.HMBTCoreSensingDisconnect(scanner.manager.coreInterface, getAddressBytes());
+                            scanner.manager.core.HMBTCoreSensingDisconnect(scanner.manager.coreInterface, getAddressBytes());
                         }
                     });
                     break;
@@ -174,21 +170,20 @@ public class ScannedLink extends Link {
                                          final BluetoothGattCharacteristic characteristic, int status) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
                 Log.d(Scanner.TAG, "onCharacteristicRead " + ByteUtils.hexFromBytes(characteristic.getValue()));
-            scanner.manager.mainThread.post(new Runnable() {
+            scanner.manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
-            scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes());
-
+                    scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes());
                 }
             });
         }
 
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            scanner.manager.mainThread.post(new Runnable() {
+            scanner.manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                scanner.manager.core.HMBTCoreSensingWriteResponse(scanner.manager.coreInterface, getAddressBytes());
+                    scanner.manager.core.HMBTCoreSensingWriteResponse(scanner.manager.coreInterface, getAddressBytes());
                 }
             });
         }
@@ -197,7 +192,7 @@ public class ScannedLink extends Link {
         public void onCharacteristicChanged(BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
                 Log.d(Scanner.TAG, "onCharacteristicChanged " + ByteUtils.hexFromBytes(characteristic.getValue()));
-            scanner.manager.mainThread.post(new Runnable() {
+            scanner.manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes());
@@ -208,7 +203,7 @@ public class ScannedLink extends Link {
 
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
-            scanner.manager.mainThread.post(new Runnable() {
+            scanner.manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     scanner.manager.core.HMBTCoreSensingDiscoveryEvent(scanner.manager.coreInterface, getAddressBytes());

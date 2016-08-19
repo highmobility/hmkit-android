@@ -33,7 +33,6 @@ import com.high_mobility.digitalkey.R;
 public class BroadcastActivity extends AppCompatActivity implements BroadcasterListener, ConnectedLinkListener {
     static final String TAG = "BroadcastActivity";
 
-
     TextView statusTextView;
     Switch broadcastSwitch;
 
@@ -89,8 +88,10 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
         for (ConnectedLink link : device.getLinks()) {
             link.setListener(null);
         }
+
         device.setListener(null);
         device.stopBroadcasting();
+
         super.onDestroy();
     }
 

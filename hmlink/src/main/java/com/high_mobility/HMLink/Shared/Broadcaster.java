@@ -304,7 +304,7 @@ public class Broadcaster implements SharedBleListener {
 
         if (listener != null) {
             final Broadcaster devicePointer = this;
-            devicePointer.manager.mainThread.post(new Runnable() {
+            devicePointer.manager.mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     devicePointer.listener.onLinkReceived(link);
@@ -334,7 +334,7 @@ public class Broadcaster implements SharedBleListener {
         // invoke the listener listener
         if (listener != null) {
             final Broadcaster devicePointer = this;
-            devicePointer.manager.mainThread.post(new Runnable() {
+            devicePointer.manager.mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     devicePointer.listener.onLinkLost(link);
@@ -478,7 +478,7 @@ public class Broadcaster implements SharedBleListener {
             this.state = state;
 
             if (listener != null) {
-                manager.mainThread.post(new Runnable() {
+                manager.mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         listener.onStateChanged(state, oldState);

@@ -74,7 +74,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         if (responseNeeded) {
             broadcaster.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
             final Broadcaster devicePointer = this.broadcaster;
-            broadcaster.manager.mainThread.post(new Runnable() {
+            broadcaster.manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     devicePointer.manager.core.HMBTCorelinkIncomingData(devicePointer.manager.coreInterface, value, value.length, ByteUtils.bytesFromMacString(device.getAddress()));
@@ -90,7 +90,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
             broadcaster.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
 
             final Broadcaster devicePointer = this.broadcaster;
-            broadcaster.manager.mainThread.post(new Runnable() {
+            broadcaster.manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     devicePointer.linkDidConnect(device);

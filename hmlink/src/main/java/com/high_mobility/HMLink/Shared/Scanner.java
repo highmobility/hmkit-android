@@ -113,7 +113,7 @@ public class Scanner {
             final BluetoothDevice device = result.getDevice();
             final byte[] advBytes = result.getScanRecord().getBytes();
 
-            manager.mainThread.post(new Runnable() {
+            manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
             manager.core.HMBTCoreSensingProcessAdvertisement(manager.coreInterface,
@@ -178,7 +178,7 @@ public class Scanner {
         if (scannedLink != null) {
             scannedLink.setHmDevice(device);
             if (listener != null) {
-                manager.mainThread.post(new Runnable() {
+                manager.mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         listener.onDeviceEnteredProximity(scannedLink);
@@ -238,7 +238,7 @@ public class Scanner {
             this.state = state;
 
             if (listener != null) {
-                manager.mainThread.post(new Runnable() {
+                manager.mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         listener.onStateChanged(oldState);

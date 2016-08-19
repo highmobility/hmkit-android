@@ -3,8 +3,6 @@ package com.high_mobility.HMLink.Shared;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
-import com.high_mobility.btcore.HMDevice;
-
 import java.util.Calendar;
 
 /**
@@ -41,38 +39,41 @@ public class ConnectedLink extends Link {
 
         final ConnectedLink reference = this;
         pairingResponse = -1;
-        broadcaster.manager.mainThread.post(new Runnable() {
+        broadcaster.manager.mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                ((ConnectedLinkListener)listener).onPairingRequested(reference, new Constants.ApprovedCallback() {
-                @Override
-                public void approve() {
-                    pairingResponse = 0;
-                }
+                ((ConnectedLinkListener) listener).onPairingRequested(reference, new Constants.ApprovedCallback() {
+                    @Override
+                    public void approve() {
+                        pairingResponse = 0;
+                    }
 
-                @Override
-                public void decline() {
-                    pairingResponse = 1;
-                }
-            });
+                    @Override
+                    public void decline() {
+                        pairingResponse = 1;
+                    }
+                });
             }
         });
 
         Calendar c = Calendar.getInstance();
         int startSeconds = c.get(Calendar.SECOND);
 
-        while(pairingResponse < 0) {
+        while (pairingResponse < 0) {
             int passedSeconds = Calendar.getInstance().get(Calendar.SECOND);
             if (passedSeconds - startSeconds > Constants.registerTimeout) {
-                broadcaster.manager.mainThread.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        ((ConnectedLinkListener)listener).onPairingRequestTimeout(reference);
-                    }
-                });
+                if (listener != null) {
+                    broadcaster.manager.mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            ((ConnectedLinkListener) listener).onPairingRequestTimeout(reference);
+                        }
+                    });
 
-                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue()) Log.d(Broadcaster.TAG, "pairing timer exceeded");
-                return 1; // TODO: use correct code
+                    if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
+                        Log.d(Broadcaster.TAG, "pairing timer exceeded");
+                    return 1; // TODO: use correct code
+                }
             }
         }
 

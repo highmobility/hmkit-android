@@ -2,6 +2,7 @@ package com.high_mobility.HMLink.Shared;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 
 import com.high_mobility.HMLink.DeviceCertificate;
@@ -31,22 +32,22 @@ public class Manager {
     public static LoggingLevel loggingLevel = LoggingLevel.All;
 
     HMBTCore core = new HMBTCore();
+    BTCoreInterface coreInterface;
     SharedBle ble;
+    Context ctx;
 
     static Manager instance;
     DeviceCertificate certificate;
     byte[] privateKey;
-
-    BTCoreInterface coreInterface;
+    byte[] CAPublicKey;
 
     private Scanner scanner;
     private Broadcaster broadcaster;
 
-    Context ctx;
     Timer coreClockTimer;
-    Handler mainThread;
-
-    byte[] CAPublicKey;
+    Handler mainHandler;
+    Handler workHandler = null;
+    private HandlerThread workThread = new HandlerThread("BTCoreThread");
 
     public static Manager getInstance() {
         if (instance == null) {
@@ -69,7 +70,10 @@ public class Manager {
     public void initialize(DeviceCertificate certificate, byte[] privateKey, byte[] CAPublicKey, Context applicationContext) {
         Log.i(Broadcaster.TAG, "Initialized High-Mobility SDK with certificate" + certificate.toString());
         ctx = applicationContext;
-        mainThread = new Handler(ctx.getMainLooper());
+        mainHandler = new Handler(ctx.getMainLooper());
+
+        workThread.start();
+        workHandler = new Handler(workThread.getLooper());
 
         ble = new SharedBle(ctx);
         this.CAPublicKey = CAPublicKey;
@@ -103,7 +107,7 @@ public class Manager {
         coreClockTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                mainThread.post(new Runnable() {
+                workHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         core.HMBTCoreClock(coreInterface);

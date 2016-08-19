@@ -51,7 +51,7 @@ public class Link {
             if (listener != null) {
                 final Link linkPointer = this;
 
-                manager.mainThread.post(new Runnable() {
+                manager.mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         linkPointer.listener.onStateChanged(linkPointer, oldState);
@@ -105,7 +105,7 @@ public class Link {
             Log.d(Broadcaster.TAG, "send command " + ByteUtils.hexFromBytes(bytes)
                     + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
-        sentCommand = new SentCommand(responseCallback, manager.mainThread);
+        sentCommand = new SentCommand(responseCallback, manager.mainHandler);
         manager.core.HMBTCoreSendCustomCommand(manager.coreInterface, bytes, bytes.length, getAddressBytes());
     }
 
