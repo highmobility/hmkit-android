@@ -38,7 +38,6 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         if (characteristic.getUuid().equals(Constants.READ_CHAR_UUID)) {
             // response to read here
             byte[] value = characteristic.getValue();
-//            Log.d(Broadcaster.TAG, "onCharacteristicReadRequest " + ByteUtils.hexFromBytes(value) + " " + offset + " " + value.length);
             byte[] offsetBytes = Arrays.copyOfRange(value, offset, value.length);
 
             broadcaster.GATTServer.sendResponse(device,

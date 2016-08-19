@@ -5,20 +5,17 @@ package com.high_mobility.HMLink.Shared;
  */
 public interface BroadcasterListener {
     /***
-     * Callback for when the state has changed.
-     * This is always called on the main thread when a change in the broadcaster's state occurs,
-     * also when the same state was set again.
+     * Callback for when the Broadcaster's state has changed.
+     * This is always called on the main thread.
      *
-     * @param state The new state of the Broadcaster.
      * @param oldState The old state of the Broadcaster.
      */
-    void onStateChanged(Broadcaster.State state, Broadcaster.State oldState);
+    void onStateChanged(Broadcaster.State oldState);
 
     /***
-     * Callback for when a new link has been received by the Broadcaster.
+     * Callback for when a new link has connected to the Broadcaster.
      *
-     * This is always called on the main thread when a new link has successfully connected to the
-     * broadcaster. If there was an old connection up, then this doesn't trigger.
+     * This is always called on the main thread.
      *
      * @param link The link that connected successfully to the Broadcaster.
      */
@@ -27,8 +24,7 @@ public interface BroadcasterListener {
     /***
      * Callback for when a known link has disconnected from the broadcaster.
      *
-     * This is always called on the main thread when a known link has disconnected, but only when
-     * the link was first received by the broadcaster (no connection alive before).
+     * This is always called on the main thread.
      *
      * @param link The link that disconnected from the broadcaster.
      */

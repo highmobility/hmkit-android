@@ -481,7 +481,7 @@ public class Broadcaster implements SharedBleListener {
                 manager.mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        listener.onStateChanged(state, oldState);
+                        listener.onStateChanged(oldState);
                     }
                 });
             }

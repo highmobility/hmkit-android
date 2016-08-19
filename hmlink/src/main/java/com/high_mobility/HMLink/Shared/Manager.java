@@ -36,7 +36,7 @@ public class Manager {
     SharedBle ble;
     Context ctx;
 
-    static Manager instance;
+    private static Manager instance;
     DeviceCertificate certificate;
     byte[] privateKey;
     byte[] CAPublicKey;
@@ -44,11 +44,15 @@ public class Manager {
     private Scanner scanner;
     private Broadcaster broadcaster;
 
-    Timer coreClockTimer;
     Handler mainHandler;
     Handler workHandler = null;
+    private Timer coreClockTimer;
     private HandlerThread workThread = new HandlerThread("BTCoreThread");
 
+    /**
+     *
+     * @return The singleton instance of Manager.
+     */
     public static Manager getInstance() {
         if (instance == null) {
             instance = new Manager();
@@ -86,21 +90,34 @@ public class Manager {
         startClock();
     }
 
+    /**
+     *
+     * @return The Link Broadcaster instance
+     */
     public Broadcaster getBroadcaster() {
         if (broadcaster == null) broadcaster = new Broadcaster(this);
         return broadcaster;
     }
 
+    /**
+     *
+     * @return The Link Scanner Instance
+     */
     public Scanner getScanner() {
         if (scanner == null) scanner = new Scanner(this);
         return scanner;
     }
 
+    /**
+     *
+     * @return The device certificate that is used by the broadcaster and scanner
+     * to identify themselves.
+     */
     public DeviceCertificate getCertificate() {
         return certificate;
     }
 
-    void startClock() {
+    private void startClock() {
         if (coreClockTimer != null) return;
 
         coreClockTimer = new Timer();

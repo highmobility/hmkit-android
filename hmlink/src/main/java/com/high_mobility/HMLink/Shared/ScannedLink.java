@@ -13,6 +13,12 @@ import java.util.List;
 import java.util.UUID;
 
 /**
+ * The ScannedLink is a representation of the connection between the Scanner and a device that the
+ * Scanner has connected to and validated as a High-Mobility broadcaster.
+ *
+ * The ScannedLinks's interface provides the ability
+ * to send commands and handle incoming requests from the ConnectedLink.
+ *
  * Created by ttiganik on 01/06/16.
  */
 public class ScannedLink extends Link {
@@ -196,7 +202,6 @@ public class ScannedLink extends Link {
                 @Override
                 public void run() {
                     scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes());
-
                 }
             });
         }
