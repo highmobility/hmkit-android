@@ -98,10 +98,10 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
     // BroadcasterListener
 
     @Override
-    public void onStateChanged(Broadcaster.State state, Broadcaster.State state1) {
-        broadcastSwitch.setEnabled(state != Broadcaster.State.BLUETOOTH_UNAVAILABLE);
+    public void onStateChanged(Broadcaster.State state1) {
+        broadcastSwitch.setEnabled(device.getState() != Broadcaster.State.BLUETOOTH_UNAVAILABLE);
 
-        switch (state) {
+        switch (device.getState()) {
             case IDLE:
                 if (state1 == Broadcaster.State.BLUETOOTH_UNAVAILABLE && broadcastSwitch.isChecked()) {
                     try {
