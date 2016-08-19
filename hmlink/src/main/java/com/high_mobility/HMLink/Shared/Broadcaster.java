@@ -48,6 +48,7 @@ public class Broadcaster implements SharedBleListener {
     BluetoothGattCharacteristic writeCharacteristic;
 
     State state = State.IDLE;
+    ArrayList<byte[]> authenticatingMacs = new ArrayList<>();
     ArrayList<ConnectedLink> links = new ArrayList<>();
     static Broadcaster instance = null;
 
@@ -288,23 +289,20 @@ public class Broadcaster implements SharedBleListener {
     }
 
     boolean didResolveDevice(HMDevice device) {
-        ConnectedLink link = getLinkForMac(device.getMac());
+        final ConnectedLink link = getLinkForMac(device.getMac());
+        if (link == null) return false;
 
-        if (link != null) {
-            link.setHmDevice(device);
-            return true;
-        }
+        link.setHmDevice(device);
 
-        return false;
+        return true;
     }
 
-    void didReceiveLink(BluetoothDevice device) {
-        // add a new link to the array
+    void linkDidConnect(BluetoothDevice device) {
+        // need to dispatch the link before authenticating to forward pairing request for instance
         final ConnectedLink link = new ConnectedLink(device, this);
         links.add(link);
 
         if (listener != null) {
-            // TODO: should this be called from core? eg entered proximity
             final Broadcaster devicePointer = this;
             devicePointer.manager.mainThread.post(new Runnable() {
                 @Override
@@ -374,6 +372,7 @@ public class Broadcaster implements SharedBleListener {
     boolean writeData(byte[] mac, byte[] value) {
         ConnectedLink link = getLinkForMac(mac);
         if (link == null) return false;
+
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
             Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(link.getAddressBytes()));
 
@@ -403,10 +402,10 @@ public class Broadcaster implements SharedBleListener {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue()) Log.d(TAG, "createGATTServer");
 
             /// bluez hack service
-            UUID BLUEZ_HACK_SERVICE_UUID = UUID.fromString("48494D4F-BB81-49AB-BE90-6F25D716E8DE");
+            /*UUID BLUEZ_HACK_SERVICE_UUID = UUID.fromString("48494D4F-BB81-49AB-BE90-6F25D716E8DE");
             BluetoothGattService bluezHackService = new BluetoothGattService(BLUEZ_HACK_SERVICE_UUID,
                     BluetoothGattService.SERVICE_TYPE_PRIMARY);
-            GATTServer.addService(bluezHackService);
+            GATTServer.addService(bluezHackService);*/
             ///
 
             // create the service

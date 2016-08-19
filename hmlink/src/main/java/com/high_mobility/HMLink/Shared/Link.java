@@ -31,6 +31,10 @@ public class Link {
         connectionTime = Calendar.getInstance().getTimeInMillis();
     }
 
+    /**
+     *
+     * @return the Link's state
+     */
     public State getState() {
         return state;
     }
@@ -57,10 +61,18 @@ public class Link {
         }
     }
 
+    /**
+     *
+     * @return the name of the Link's bluetooth peripheral
+     */
     public String getName() {
         return btDevice.getName();
     }
 
+    /**
+     *
+     * @return Link's serial
+     */
     public byte[] getSerial() {
         return hmDevice != null ? hmDevice.getSerial() : null;
     }

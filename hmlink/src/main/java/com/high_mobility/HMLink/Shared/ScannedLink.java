@@ -80,10 +80,6 @@ public class ScannedLink extends Link {
         gatt.readCharacteristic(readCharacteristic);
     }
 
-    void didAuthenticate() {
-        setState(State.AUTHENTICATED);
-    }
-
     void onDeviceExitedProximity() {
         setState(State.DISCONNECTED);
     }
