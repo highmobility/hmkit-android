@@ -157,7 +157,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
             }
         }
         catch (CommandParseException e) {
-            Log.e(TAG, "Notification parse exception ", e);
+            Log.d(TAG, "Notification parse exception ", e);
         }
 
         return null;

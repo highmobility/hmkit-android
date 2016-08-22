@@ -154,12 +154,17 @@ public class Scanner {
     }
 
     boolean deviceExitedProximity(byte[] mac) {
-        ScannedLink device = getLinkForMac(mac);
+        final ScannedLink device = getLinkForMac(mac);
         if (device == null) return false;
         device.onDeviceExitedProximity();
 
         if (listener != null) {
-            listener.onDeviceExitedProximity(device);
+            manager.mainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    listener.onDeviceExitedProximity(device);
+                }
+            });
         }
 
         removeAuthenticatingMac(device.getAddressBytes());
