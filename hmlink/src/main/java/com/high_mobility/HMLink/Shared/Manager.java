@@ -3,9 +3,11 @@ package com.high_mobility.HMLink.Shared;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Base64;
 import android.util.Log;
 
 import com.high_mobility.HMLink.DeviceCertificate;
+import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.btcore.HMBTCore;
 
 import java.util.Timer;
@@ -62,16 +64,14 @@ public class Manager {
     }
 
     /**
-     * Set the broadcaster certificate and private key before using any other functionality.
-     *
-     * setContext() has to be called before this to initialize the database.
+     * Initialize the SDK with the necessary properties before using any other functionality.
      *
      * @param certificate The broadcaster certificate.
      * @param privateKey 32 byte private key with elliptic curve Prime 256v1.
-     * @param CAPublicKey 64 byte public key of the Certificate Authority.
+     * @param issuerPublicKey 64 byte public key of the Certificate Authority.
      * @param applicationContext The application context
      */
-    public void initialize(DeviceCertificate certificate, byte[] privateKey, byte[] CAPublicKey, Context applicationContext) {
+    public void initialize(DeviceCertificate certificate, byte[] privateKey, byte[] issuerPublicKey, Context applicationContext) {
         Log.i(Broadcaster.TAG, "Initialized High-Mobility SDK with certificate" + certificate.toString());
         ctx = applicationContext;
         mainHandler = new Handler(ctx.getMainLooper());
@@ -80,7 +80,7 @@ public class Manager {
         workHandler = new Handler(workThread.getLooper());
 
         ble = new SharedBle(ctx);
-        this.CAPublicKey = CAPublicKey;
+        this.CAPublicKey = issuerPublicKey;
         coreInterface = new BTCoreInterface(this);
 
         this.certificate = certificate;
@@ -90,9 +90,27 @@ public class Manager {
         startClock();
     }
 
+
+    /**
+     * Initialize the SDK with the necessary properties before using any other functionality.
+     *
+     * @param certificate The broadcaster certificate, in Base64.
+     * @param privateKey 32 byte private key with elliptic curve Prime 256v1 in Base64.
+     * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64.
+     * @param applicationContext The application context
+     */
+    public void initialize(String certificate, String privateKey, String issuerPublicKey,
+                           Context applicationContext) throws IllegalArgumentException {
+        DeviceCertificate decodedCert = new DeviceCertificate(Base64.decode(certificate, Base64.DEFAULT));
+
+        byte[] decodedPrivateKey = Base64.decode(privateKey, Base64.DEFAULT);
+        byte[] decodedIssuer= Base64.decode(issuerPublicKey, Base64.DEFAULT);
+        initialize(decodedCert, decodedPrivateKey, decodedIssuer, applicationContext);
+    }
+
     /**
      *
-     * @return The Link Broadcaster instance
+     * @return The Broadcaster instance
      */
     public Broadcaster getBroadcaster() {
         if (broadcaster == null) broadcaster = new Broadcaster(this);
@@ -101,7 +119,7 @@ public class Manager {
 
     /**
      *
-     * @return The Link Scanner Instance
+     * @return The Scanner Instance
      */
     public Scanner getScanner() {
         if (scanner == null) scanner = new Scanner(this);

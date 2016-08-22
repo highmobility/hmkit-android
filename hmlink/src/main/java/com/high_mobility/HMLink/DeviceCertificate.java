@@ -1,6 +1,9 @@
 package com.high_mobility.HMLink;
 
 
+import android.bluetooth.BluetoothClass;
+import android.util.Base64;
+
 import com.high_mobility.HMLink.Shared.ByteUtils;
 
 /**
@@ -101,7 +104,7 @@ public class DeviceCertificate extends Certificate {
     }
 
     /**
-     * Initialise Initialise the device certificate with raw bytes.
+     * Initialise the device certificate with raw bytes.
      * @param bytes The bytes making up the certificate (89 bytes are expected).
      * @throws IllegalArgumentException When bytes length is not correct.
      */
@@ -111,6 +114,21 @@ public class DeviceCertificate extends Certificate {
         if (bytes.length < 89) {
             throw new IllegalArgumentException();
         }
+    }
+
+    /**
+     * Initialise the device certificate with raw bytes.
+     * @param bytes The bytes making up the certificate (89 bytes are expected), base64 encoded.
+     * @throws IllegalArgumentException When bytes length is not correct.
+     */
+    public DeviceCertificate(String bytes) throws IllegalArgumentException {
+        super();
+        byte[] bytesDecoded = Base64.decode(bytes, Base64.DEFAULT);
+        if (bytesDecoded.length < 89) {
+            throw new IllegalArgumentException();
+        }
+
+        this.bytes = bytesDecoded;
     }
 
     /**
@@ -142,4 +160,17 @@ public class DeviceCertificate extends Certificate {
 
         this.bytes = bytes;
     }
+
+
+    /*
+        /// Initialise the LocalDevice with essential values before using any other functionality.
+    ///
+    /// - parameter deviceCertificate: The device's certificate in base64
+    /// - parameter devicePrivateKey:  The device's private key in base64, 32 bytes, using elliptic curve p256
+    /// - parameter issuerPublicKey:   The issuer's public key in base64 , 64 bytes
+    ///
+    /// - throws: *LinkError.internalError* when the device cert couldn't be created from the input, or the keys are not the correct length
+    public func initialise(deviceCertificate: Base64, devicePrivateKey: Base64, issuerPublicKey: Base64) throws {
+     */
+
 }

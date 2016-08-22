@@ -3,14 +3,18 @@ package com.high_mobility.digitalkey;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import com.high_mobility.HMLink.DeviceCertificate;
+import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.ByteUtils;
 import com.high_mobility.HMLink.Shared.Manager;
 import com.high_mobility.digitalkey.broadcast.BroadcastActivity;
 import com.high_mobility.digitalkey.scan.ScanActivity;
+
+import java.util.IllegalFormatCodePointException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,12 +53,11 @@ public class MainActivity extends AppCompatActivity {
 
         DeviceCertificate cert = new DeviceCertificate(ISSUER, APP_IDENTIFIER, DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
         cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***"));
-        // set the device certificate.
         manager = Manager.getInstance();
         manager.initialize(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
-
-        serialTextView.setText(ByteUtils.hexFromBytes(cert.getSerial()));
-        publicKeyTextView.setText(ByteUtils.hexFromBytes(cert.getPublicKey()));
+        
+        serialTextView.setText(ByteUtils.hexFromBytes(manager.getCertificate().getSerial()));
+        publicKeyTextView.setText(ByteUtils.hexFromBytes(manager.getCertificate().getPublicKey()));
 
         if (certUtils == null) {
             certUtils = new CertUtils(this, MainActivity.DEVICE_SERIAL, MainActivity.DEVICE_PUBLIC_KEY);
