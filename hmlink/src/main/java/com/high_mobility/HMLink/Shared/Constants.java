@@ -24,6 +24,10 @@ public class Constants {
         void response(byte[] bytes, LinkException exception);
     }
 
+    public interface ResponseCallback {
+        void response(LinkException exception);
+    }
+
     public interface RSSICallback {
         void onRSSIRead(int RSSI);
     }

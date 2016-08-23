@@ -102,7 +102,7 @@ public class ScanActivity extends AppCompatActivity implements ScannerListener {
         scanner.setListener(this);
         onStateChanged(scanner.getState());
 
-        adapter = new ScanListAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, scanner.getDevices());
+        adapter = new ScanListAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, scanner.getLinks());
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

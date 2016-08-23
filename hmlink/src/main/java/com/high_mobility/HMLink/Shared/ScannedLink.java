@@ -9,6 +9,8 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.util.Log;
 
+import com.high_mobility.HMLink.AccessCertificate;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -33,32 +35,43 @@ public class ScannedLink extends Link {
 
     Constants.RSSICallback rssiCallback;
 
+    /**
+     * Read the RSSI of the Link's underlying Bluetooth device.
+     *
+     * @param rssiCallback The callback that is invoked after receiving the RSSI.
+     */
     public void readRSSI(Constants.RSSICallback rssiCallback) {
         this.rssiCallback = rssiCallback;
         gatt.readRemoteRssi();
     }
 
+    /**
+     * Set the Link listener to receive commands and state change events.
+     *
+     * @param listener The object that implements LinkListener.
+     */
     public void setListener(LinkListener listener) {
         this.listener = listener;
     }
 
-    public void registerCertificate() {
+
+    void registerCertificate(AccessCertificate certificate, Constants.ResponseCallback callback) {
         // TODO:
     }
 
-    public void storeCertificate() {
+    void storeCertificate(AccessCertificate certificate, Constants.ResponseCallback callback) {
         // TODO:
     }
 
-    public void getAccessCertificate() {
+    void getAccessCertificate(AccessCertificate certificate, Constants.DataResponseCallback callback) {
         // TODO:
     }
 
-    public void revokeCertificate() {
+    void revokeCertificate(byte[] serial, Constants.ResponseCallback callback) {
         // TODO:
     }
 
-    public void reset() {
+    void reset(Constants.ResponseCallback callback) {
         // TODO:
     }
 

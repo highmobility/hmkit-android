@@ -37,7 +37,7 @@ public class ScannedLinkActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         Intent intent = getIntent();
         int position = intent.getIntExtra(DEVICE_POSITION, 0);
-        link = Manager.getInstance().getScanner().getDevices().get(position);
+        link = Manager.getInstance().getScanner().getLinks().get(position);
         link.setListener(listener);
 
         sendButton.setOnClickListener(new View.OnClickListener() {

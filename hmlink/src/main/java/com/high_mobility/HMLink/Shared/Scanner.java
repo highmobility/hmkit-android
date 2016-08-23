@@ -20,7 +20,7 @@ import java.util.Map;
  * Created by ttiganik on 01/06/16.
  */
 public class Scanner {
-    public static final String TAG = "Scanner";
+    static final String TAG = "Scanner";
 
     public enum State {
         BLUETOOTH_UNAVAILABLE, IDLE, SCANNING
@@ -42,22 +42,49 @@ public class Scanner {
         this.manager = manager;
     }
 
-    public List<ScannedLink> getDevices() {
+    /**
+     *
+     * @return The links currently in proximity
+     */
+    public List<ScannedLink> getLinks() {
         return devices;
     }
 
+    /**
+     *
+     * @return The Scanner state
+     * @see State
+     */
     public State getState() {
         return state;
     }
 
+    /**
+     * Set the ScannerListener to receive state change and Link proximity events.
+     *
+     * @param listener The object that implements as the ScannerListener
+     */
     public void setListener(ScannerListener listener) {
         this.listener = listener;
     }
 
+    /**
+     * Add a trusted Certificate Authority to the scan list. This is used to recognize
+     * Link-enabled devices when scanning.
+     *
+     * @param issuer The CA issuer identifier
+     * @param publicKey The CA public key
+     */
     public void addTrustedCertificateAuthority(byte[] issuer, byte[] publicKey) {
         CaPublicKeyMap.put(issuer, publicKey);
     }
 
+    /**
+     * Start scanning for nearby links.
+     *
+     * @throws LinkException UNSUPPORTED: BLE is not supported with this device
+     *                       BLUETOOTH_OFF: BLE is turned off
+     */
     public void startScanning() throws LinkException {
         // = new byte[][] { array1, array2, array3, array4, array5 };
         if (getState() == State.SCANNING) return;
@@ -82,6 +109,9 @@ public class Scanner {
         manager.core.HMBTCoreSensingScanStart(manager.coreInterface);
     }
 
+    /**
+     * Stop scanning for nearby devices
+     */
     public void stopScanning() {
         if (getState() != State.SCANNING) return;
         bleScanner.stopScan(scanCallback);
