@@ -113,7 +113,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
         try {
             manager.getBroadcaster().storage.storeCertificate(cert);
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(Scanner.TAG, "Cant store certificate.");
         } catch (LinkException e) {
             e.printStackTrace();
@@ -127,7 +127,7 @@ class BTCoreInterface implements HMBTCoreInterface {
     public int HMPersistenceHalgetPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command) {
         AccessCertificate certificate = manager.getBroadcaster().storage.certWithGainingSerial(serial);
         if (certificate == null) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(Scanner.TAG, "No cert with gaining serial " + ByteUtils.hexFromBytes(serial));
             return 1;
         }
@@ -158,7 +158,7 @@ class BTCoreInterface implements HMBTCoreInterface {
             return 0;
         }
 
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(Scanner.TAG, "No cert for index " + index);
 
         return 1;
@@ -182,7 +182,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
         try {
             manager.getBroadcaster().storage.storeCertificate(certificate);
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(Scanner.TAG, "Cant store certificate.");
         } catch (LinkException e) {
             e.printStackTrace();
@@ -200,13 +200,13 @@ class BTCoreInterface implements HMBTCoreInterface {
             if (Arrays.equals(storedCert.getProviderSerial(), serial)) {
                 copyBytesToJNI(storedCert.getBytes(), cert);
                 size[0] = storedCert.getBytes().length;
-                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                     Log.d(Broadcaster.TAG, "Returned stored cert for serial " + ByteUtils.hexFromBytes(serial));
                 return 0;
             }
         }
 
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(Broadcaster.TAG, "No stored cert for serial " + ByteUtils.hexFromBytes(serial));
 
         return 1;
@@ -225,13 +225,13 @@ class BTCoreInterface implements HMBTCoreInterface {
                     return 0;
                 }
                 else {
-                    if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+                    if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                         Log.d(Broadcaster.TAG, "Could not erase cert for serial " + ByteUtils.hexFromBytes(serial));
                     return 1;
                 }
             }
         }
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(Broadcaster.TAG, "No cert to erase for serial " + ByteUtils.hexFromBytes(serial));
 
         return 1;

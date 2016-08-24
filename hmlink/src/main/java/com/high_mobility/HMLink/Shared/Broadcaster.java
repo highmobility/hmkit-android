@@ -48,12 +48,12 @@ public class Broadcaster implements SharedBleListener {
     BluetoothGattCharacteristic writeCharacteristic;
 
     State state = State.IDLE;
-    ArrayList<byte[]> authenticatingMacs = new ArrayList<>();
+
     ArrayList<ConnectedLink> links = new ArrayList<>();
     static Broadcaster instance = null;
 
     /**
-     * Sets the advertise mode for the AdvertiseSettings
+     * Sets the advertise mode for the Bluetooth's AdvertiseSettings. Default is ADVERTISE_MODE_BALANCED.
      *
      * @param advertiseMode the advertise mode
      * @see AdvertiseSettings
@@ -65,7 +65,7 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Sets the TX power level for the AdvertiseSettings
+     * Sets the TX power level for the Bluetooth's AdvertiseSettings. Default is ADVERTISE_TX_POWER_HIGH.
      *
      * @param txPowerLevel the advertise mode
      * @see AdvertiseSettings
@@ -95,17 +95,6 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * In order to receive Broadcaster events, a listener must be set.
-     *
-     * @param listener The listener instance to receive Broadcaster events.
-     */
-    public void setListener(BroadcasterListener listener) {
-        this.listener = listener;
-    }
-
-
-
-    /**
      * @return The certificates that are registered on the Broadcaster.
      */
     public AccessCertificate[] getRegisteredCertificates() {
@@ -124,6 +113,15 @@ public class Broadcaster implements SharedBleListener {
      */
     public List<ConnectedLink> getLinks() {
         return links;
+    }
+
+    /**
+     * In order to receive Broadcaster events, a listener must be set.
+     *
+     * @param listener The listener instance to receive Broadcaster events.
+     */
+    public void setListener(BroadcasterListener listener) {
+        this.listener = listener;
     }
 
     /**
@@ -373,7 +371,7 @@ public class Broadcaster implements SharedBleListener {
         ConnectedLink link = getLinkForMac(mac);
         if (link == null) return false;
 
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(link.getAddressBytes()));
 
         readCharacteristic.setValue(value);

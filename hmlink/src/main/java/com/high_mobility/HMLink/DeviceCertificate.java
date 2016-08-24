@@ -105,6 +105,7 @@ public class DeviceCertificate extends Certificate {
 
     /**
      * Initialise the device certificate with raw bytes.
+     *
      * @param bytes The bytes making up the certificate (89 bytes are expected).
      * @throws IllegalArgumentException When bytes length is not correct.
      */
@@ -114,21 +115,6 @@ public class DeviceCertificate extends Certificate {
         if (bytes.length < 89) {
             throw new IllegalArgumentException();
         }
-    }
-
-    /**
-     * Initialise the device certificate with raw bytes.
-     * @param bytes The bytes making up the certificate (89 bytes are expected), base64 encoded.
-     * @throws IllegalArgumentException When bytes length is not correct.
-     */
-    public DeviceCertificate(String bytes) throws IllegalArgumentException {
-        super();
-        byte[] bytesDecoded = Base64.decode(bytes, Base64.DEFAULT);
-        if (bytesDecoded.length < 89) {
-            throw new IllegalArgumentException();
-        }
-
-        this.bytes = bytesDecoded;
     }
 
     /**

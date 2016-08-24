@@ -83,7 +83,7 @@ public class ScannedLink extends Link {
 
     void writeValue(byte[] value) {
         if (writeCharacteristic != null){
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(Scanner.TAG, "write value " + ByteUtils.hexFromBytes(value));
 
             writeCharacteristic.setValue(value);
@@ -118,7 +118,7 @@ public class ScannedLink extends Link {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
-                    if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+                    if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                         Log.d(Scanner.TAG, "STATE_CONNECTED " + this);
                     scanner.manager.workHandler.post(new Runnable() {
                         @Override
@@ -128,7 +128,7 @@ public class ScannedLink extends Link {
                     });
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
-                    if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+                    if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                         Log.d(Scanner.TAG, "STATE_DISCONNECTED " + this);
 
                     scanner.manager.workHandler.post(new Runnable() {
@@ -187,7 +187,7 @@ public class ScannedLink extends Link {
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          final BluetoothGattCharacteristic characteristic, int status) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(Scanner.TAG, "onCharacteristicRead " + ByteUtils.hexFromBytes(characteristic.getValue()));
             scanner.manager.workHandler.post(new Runnable() {
                 @Override
@@ -209,7 +209,7 @@ public class ScannedLink extends Link {
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(Scanner.TAG, "onCharacteristicChanged " + ByteUtils.hexFromBytes(characteristic.getValue()));
             scanner.manager.workHandler.post(new Runnable() {
                 @Override

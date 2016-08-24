@@ -42,7 +42,7 @@ public class Link {
     void setState(State state) {
         if (this.state != state) {
             final State oldState = this.state;
-            if (state == State.AUTHENTICATED && Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue()) {
+            if (state == State.AUTHENTICATED && Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
                 Log.d(Broadcaster.TAG, "authenticated in " + (Calendar.getInstance().getTimeInMillis() - connectionTime) + "ms");
             }
 
@@ -78,7 +78,7 @@ public class Link {
     }
 
     /**
-     * Send custom command to the ConnectedLink inside a secure container.
+     * Send command to the ConnectedLink inside a secure container.
      *
      * @param bytes             The bytes that will be sent inside the secure container.
      * @param secureResponse    Optional boolean defining if the response has a secure HMAC element
@@ -101,7 +101,7 @@ public class Link {
             return;
         }
 
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(Broadcaster.TAG, "send command " + ByteUtils.hexFromBytes(bytes)
                     + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
@@ -121,7 +121,7 @@ public class Link {
     }
 
     byte[] onCommandReceived(byte[] bytes) {
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(Broadcaster.TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
                     + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
@@ -134,13 +134,13 @@ public class Link {
     }
 
     void onCommandResponseReceived(final byte[] data) {
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(Broadcaster.TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
                     + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()) + " in " +
                     (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime) + "ms");
 
         if (sentCommand == null) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.Debug.getValue())
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(Broadcaster.TAG, "can't dispatch command response: sentCommand = null");
             return;
         }

@@ -7,8 +7,7 @@ public interface LinkListener {
     /**
      * Callback that is invoked when the Link's state changes.
      *
-     * This is always called on the main thread when a change in the link's state occurs, also
-     * when the same state was set again.
+     * This is always called on the main thread when a change in the link's state occurs
      *
      * @param link The link that had a state change.
      * @param oldState The old state of the link.
@@ -22,7 +21,7 @@ public interface LinkListener {
      *
      * @param link The link that received the command.
      * @param bytes The commands bytes that can correspond to the Auto API.
-     * @return response to the command. can be null.
+     * @return The response to the command. Can be null.
      */
     byte[] onCommandReceived(Link link, byte[] bytes);
 }

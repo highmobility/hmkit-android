@@ -18,7 +18,7 @@ import java.util.TimerTask;
  */
 public class Manager {
     public enum LoggingLevel {
-        None(0), Debug(1), All(2);
+        NONE(0), DEBUG(1), All(2);
 
         private Integer level;
 
@@ -92,12 +92,14 @@ public class Manager {
 
 
     /**
-     * Initialize the SDK with the necessary properties before using any other functionality.
+     * Initialize the SDK with the necessary properties. This needs to be done before using any
+     * other functionality.
      *
      * @param certificate The broadcaster certificate, in Base64.
      * @param privateKey 32 byte private key with elliptic curve Prime 256v1 in Base64.
      * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64.
      * @param applicationContext The application context
+     * @throws IllegalArgumentException
      */
     public void initialize(String certificate, String privateKey, String issuerPublicKey,
                            Context applicationContext) throws IllegalArgumentException {
