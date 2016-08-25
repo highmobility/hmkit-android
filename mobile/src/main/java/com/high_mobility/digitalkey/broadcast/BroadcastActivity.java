@@ -219,7 +219,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
 
                 try {
                     // generic ack/error response does not have a separate response class
-                    AutoCommandResponse response = new AutoCommandResponse(bytes);
+                    AutoCommandResponse response = AutoCommandResponse.create(bytes);
 
                     if (response.getErrorCode() == 0) {
                         Log.i(TAG, "successfully locked the vehicle");
@@ -245,7 +245,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
                 ViewUtils.enableView(fragment.authView, true);
                 try {
                     // generic ack/error response does not have a separate response class
-                    AutoCommandResponse response = new AutoCommandResponse(bytes);
+                    AutoCommandResponse response = AutoCommandResponse.create(bytes);
 
                     if (response.getErrorCode() == 0) {
                         Log.i(TAG, "successfully unlocked the vehicle");

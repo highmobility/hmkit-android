@@ -6,44 +6,38 @@ package com.high_mobility.HMLink.AutoCommand;
 public class AutoCommandResponse extends AutoCommand {
     byte errorCode = 0;
 
-    public AutoCommandResponse(byte[] bytes) throws CommandParseException {
-        super(bytes);
-        if (bytes == null || bytes.length < 2) {
+    public static AutoCommandResponse create(byte[] bytes) throws CommandParseException {
+        if (bytes != null && bytes.length > 1) {
+            if (bytes[0] != 0x01 && bytes[0] != 0x02)
+                throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
+
+            AutoCommandResponse response;
+            byte typeByte = bytes[1];
+
+            if (typeByte == Type.CONTROL_MODE_AVAILABLE.getValue()) {
+                response = new ControlModeAvailableResponse(bytes);
+            }
+            else if (typeByte == Type.GET_VEHICLE_STATUS.getValue()) {
+                response = new GetVehicleStatusResponse(bytes);
+            }
+            else {
+                // regular ack/error
+                response = new AutoCommandResponse(bytes);
+            }
+
+
+            return response;
+        }
+        else {
             throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
         }
+    }
+
+    AutoCommandResponse(byte[] bytes) throws CommandParseException {
+        super(bytes);
 
         if (bytes[0] == 0x02) {
             errorCode = bytes[1];
-        }
-        else if (bytes[0] != 0x01) {
-            throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
-        }
-
-        byte typeByte = bytes[1];
-
-        if (typeByte == Type.CONTROL_MODE_AVAILABLE.getValue()) {
-            type = Type.CONTROL_MODE_AVAILABLE;
-        }
-        else if (typeByte == Type.CONTROL_MODE_CHANGED.getValue()) {
-            type = Type.CONTROL_MODE_CHANGED;
-        }
-        else if (typeByte == Type.START_CONTROL_MODE.getValue()) {
-            type = Type.START_CONTROL_MODE;
-        }
-        else if (typeByte == Type.STOP_CONTROL_MODE.getValue()) {
-            type = Type.STOP_CONTROL_MODE;
-        }
-        else if (typeByte == Type.CONTROL_COMMAND.getValue()) {
-            type = Type.CONTROL_COMMAND;
-        }
-        else if (typeByte == Type.ACCESS.getValue()) {
-            type = Type.ACCESS;
-        }
-        else if (typeByte == Type.GET_VEHICLE_STATUS.getValue()) {
-            type = Type.GET_VEHICLE_STATUS;
-        }
-        else if (typeByte == Type.LOCK_STATUS_CHANGED.getValue()) {
-            type = Type.LOCK_STATUS_CHANGED;
         }
     }
 

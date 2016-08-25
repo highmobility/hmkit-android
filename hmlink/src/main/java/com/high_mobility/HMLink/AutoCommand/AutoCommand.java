@@ -73,9 +73,8 @@ public class AutoCommand {
     public static byte[] getVehicleStatusBytes() {
         return new byte[] { Type.GET_VEHICLE_STATUS.getValue() };
     }
-
-
-    public AutoCommand(byte[] bytes) {
+    
+    AutoCommand(byte[] bytes) {
         this.bytes = bytes;
     }
 

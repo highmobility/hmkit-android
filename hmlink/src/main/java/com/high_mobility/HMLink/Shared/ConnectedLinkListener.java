@@ -8,10 +8,10 @@ public interface ConnectedLinkListener extends LinkListener {
      * Callback for when a link received a pairing request from another broadcaster.
      *
      * @param link The link that received the pairing request.
-     * @param approvedCallback The function that must be called after the pairing has been approved
+     * @param callback The function that must be called after the pairing has been approved
      *                         or decline
      */
-    void onPairingRequested(ConnectedLink link, Constants.ApprovedCallback approvedCallback);
+    void onPairingRequested(ConnectedLink link, Constants.ApprovedCallback callback);
 
     /**
      * Callback for when a pairing request has timed out.

@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***"));
         manager = Manager.getInstance();
         manager.initialize(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
-        
+
         serialTextView.setText(ByteUtils.hexFromBytes(manager.getCertificate().getSerial()));
         publicKeyTextView.setText(ByteUtils.hexFromBytes(manager.getCertificate().getPublicKey()));
 

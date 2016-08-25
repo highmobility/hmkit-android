@@ -21,7 +21,7 @@ public class AutoCommandNotification extends AutoCommand {
         }
     }
 
-    public AutoCommandNotification(byte[] bytes) {
+    AutoCommandNotification(byte[] bytes) {
         super(bytes);
     }
 
