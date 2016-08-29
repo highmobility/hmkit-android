@@ -19,4 +19,9 @@ public class ControlModeAvailableResponse extends AutoCommandResponse {
             available = bytes[2] != 0;
         }
     }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
 }

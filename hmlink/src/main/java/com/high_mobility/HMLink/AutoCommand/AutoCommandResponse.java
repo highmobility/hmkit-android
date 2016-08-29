@@ -25,7 +25,6 @@ public class AutoCommandResponse extends AutoCommand {
                 response = new AutoCommandResponse(bytes);
             }
 
-
             return response;
         }
         else {

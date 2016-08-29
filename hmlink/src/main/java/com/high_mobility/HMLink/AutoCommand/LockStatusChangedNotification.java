@@ -5,11 +5,11 @@ package com.high_mobility.HMLink.AutoCommand;
  */
 public class LockStatusChangedNotification extends AutoCommandNotification {
 
-    public Types.LockStatus getLockStatus() {
+    public AutoCommand.LockStatus getLockStatus() {
         return lockStatus;
     }
 
-    Types.LockStatus lockStatus;
+    AutoCommand.LockStatus lockStatus;
 
     public LockStatusChangedNotification(byte[] bytes) throws CommandParseException {
         super(bytes);
@@ -18,6 +18,6 @@ public class LockStatusChangedNotification extends AutoCommandNotification {
             throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
         }
 
-        lockStatus = bytes[1] == 0x00 ? Types.LockStatus.UNLOCKED : Types.LockStatus.LOCKED;
+        lockStatus = bytes[1] == 0x00 ? AutoCommand.LockStatus.UNLOCKED : AutoCommand.LockStatus.LOCKED;
     }
 }

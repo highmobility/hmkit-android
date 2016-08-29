@@ -31,6 +31,10 @@ public class AutoCommand {
         }
     }
 
+    public enum LockStatus {
+        UNLOCKED, LOCKED
+    }
+
     Type type;
 
     byte[] bytes;
@@ -40,19 +44,19 @@ public class AutoCommand {
     //
     // Remote Control
 
-    public static byte[] controlModeAvailableBytes() {
+    public static byte[] controlModeAvailableCommand() {
         return new byte[] { Type.CONTROL_MODE_AVAILABLE.getValue()};
     }
 
-    public static byte[] startControlModeBytes() {
+    public static byte[] startControlModeCommand() {
         return new byte[] { Type.START_CONTROL_MODE.getValue() };
     }
 
-    public static byte[] stopControlMode() {
+    public static byte[] stopControlModeCommand() {
         return new byte[] { Type.STOP_CONTROL_MODE.getValue() };
     }
 
-    public static byte[] controlCommandBytes(int speed, int angle) {
+    public static byte[] controlCommandCommand(int speed, int angle) {
         // TODO: test this
         byte msb = (byte) ((angle & 0xFF00) >> 8);
         byte lsb = (byte) (angle & 0xFF);
@@ -62,15 +66,15 @@ public class AutoCommand {
     //
     // Digital Key
 
-    public static byte[] lockDoorsBytes() {
+    public static byte[] lockDoorsCommand() {
         return new byte[] { Type.ACCESS.getValue(), 0x01 };
     }
 
-    public static byte[] unlockDoorsBytes() {
+    public static byte[] unlockDoorsCommand() {
         return new byte[] { Type.ACCESS.getValue(), 0x00 };
     }
 
-    public static byte[] getVehicleStatusBytes() {
+    public static byte[] getVehicleStatusCommand() {
         return new byte[] { Type.GET_VEHICLE_STATUS.getValue() };
     }
     

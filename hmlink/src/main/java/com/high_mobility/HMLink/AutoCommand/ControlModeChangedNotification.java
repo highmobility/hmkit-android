@@ -56,4 +56,13 @@ public class ControlModeChangedNotification extends AutoCommandNotification {
         mode = ControlMode.controlModeFromByte(bytes[1]);
         angle = (bytes[2] << 8) + bytes[3];
     }
+
+    public int getAngle() {
+        return angle;
+    }
+
+    public ControlMode getMode() {
+        return mode;
+    }
+
 }
