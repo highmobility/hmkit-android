@@ -208,7 +208,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
         final LinkFragment fragment = adapter.getFragment(link);
         ViewUtils.enableView(fragment.authView, false);
 
-        link.sendCommand(AutoCommand.lockDoorsBytes(), true, new Constants.DataResponseCallback() {
+        link.sendCommand(AutoCommand.lockDoorsCommand(), true, new Constants.DataResponseCallback() {
             @Override
             public void response(byte[] bytes, LinkException exception) {
                 ViewUtils.enableView(fragment.authView, true);
@@ -239,7 +239,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
         final LinkFragment fragment = adapter.getFragment(link);
 
         ViewUtils.enableView(fragment.authView, false);
-        link.sendCommand(AutoCommand.unlockDoorsBytes(), true, new Constants.DataResponseCallback() {
+        link.sendCommand(AutoCommand.unlockDoorsCommand(), true, new Constants.DataResponseCallback() {
             @Override
             public void response(byte[] bytes, LinkException exception) {
                 ViewUtils.enableView(fragment.authView, true);

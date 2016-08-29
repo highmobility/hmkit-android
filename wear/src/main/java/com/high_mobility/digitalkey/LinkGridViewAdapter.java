@@ -6,11 +6,13 @@ import android.support.wearable.view.FragmentGridPagerAdapter;
 
 import com.high_mobility.HMLink.Shared.ConnectedLink;
 
+import java.util.List;
+
 /**
  * Created by ttiganik on 27/04/16.
  */
 public class LinkGridViewAdapter extends FragmentGridPagerAdapter {
-    ConnectedLink[] links;
+    List<ConnectedLink> links;
     LinkFragment[] fragments;
     PeripheralActivity activity;
     FragmentManager fm;
@@ -21,16 +23,16 @@ public class LinkGridViewAdapter extends FragmentGridPagerAdapter {
         this.fm = fm;
     }
 
-    public void setLinks(ConnectedLink[] links) {
+    public void setLinks(List<ConnectedLink> links) {
         this.links = links;
-        fragments = new LinkFragment[links.length];
+        fragments = new LinkFragment[links.size()];
         notifyDataSetChanged();
     }
 
     public LinkFragment getFragment(ConnectedLink link) {
         int linkIndex = -1;
-        for (int i = 0; i < links.length; i++){
-            if (links[i] == link) {
+        for (int i = 0; i < links.size(); i++){
+            if (links.get(i) == link) {
                 linkIndex = i;
                 break;
             }
@@ -44,19 +46,19 @@ public class LinkGridViewAdapter extends FragmentGridPagerAdapter {
 
     @Override
     public Fragment getFragment(int row, int column) {
-        LinkFragment fragment = LinkFragment.newInstance(this, links[column]);
+        LinkFragment fragment = LinkFragment.newInstance(this, links.get(column));
         fragments[column] = fragment;
         return fragment;
     }
 
     @Override
     public int getRowCount() {
-        return (links == null || links.length == 0)? 0 : 1;
+        return (links == null || links.size() == 0)? 0 : 1;
     }
 
     @Override
     public int getColumnCount(int i) {
-        return links == null ? 0 : links.length;
+        return links == null ? 0 : links.size();
     }
 
     void didClickLock(ConnectedLink link) {

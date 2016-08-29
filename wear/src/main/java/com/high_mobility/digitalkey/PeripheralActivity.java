@@ -16,6 +16,8 @@ import android.widget.TextView;
 import com.high_mobility.HMLink.Shared.Broadcaster;
 import com.high_mobility.HMLink.Shared.ByteUtils;
 import com.high_mobility.HMLink.Shared.ConnectedLink;
+import com.high_mobility.HMLink.Shared.ConnectedLinkListener;
+import com.high_mobility.HMLink.Shared.Link;
 import com.high_mobility.HMLink.Shared.LinkListener;
 import com.high_mobility.HMLink.Shared.BroadcasterListener;
 import com.high_mobility.HMLink.Shared.Constants;
@@ -23,12 +25,12 @@ import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.DeviceCertificate;
 import com.high_mobility.HMLink.Shared.Manager;
 
-public class PeripheralActivity extends WearableActivity implements BroadcasterListener, LinkListener {
+public class PeripheralActivity extends WearableActivity implements BroadcasterListener, ConnectedLinkListener {
     private static final byte[] CA_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
 
     static final String TAG = "DigitalKey";
 
-    Broadcaster device;
+    Broadcaster broadcaster;
 
     private TextView textView;
     private GridViewPager gridViewPager;
@@ -38,15 +40,15 @@ public class PeripheralActivity extends WearableActivity implements BroadcasterL
     private BoxInsetLayout container;
 
     public void didTapTitle(View view) {
-        if (device.getState() == Broadcaster.State.IDLE) {
+        if (broadcaster.getState() == Broadcaster.State.IDLE) {
             try {
-                device.startBroadcasting();
+                broadcaster.startBroadcasting();
             } catch (LinkException e) {
                 e.printStackTrace();
             }
         }
-        else if (device.getState() == Broadcaster.State.BROADCASTING) {
-            device.stopBroadcasting();
+        else if (broadcaster.getState() == Broadcaster.State.BROADCASTING) {
+            broadcaster.stopBroadcasting();
         }
     }
 
@@ -87,7 +89,7 @@ public class PeripheralActivity extends WearableActivity implements BroadcasterL
                 initializeDevice();
 
                 try {
-                    device.startBroadcasting();
+                    broadcaster.startBroadcasting();
                 } catch (Exception e) {
                     Log.e(TAG, "cannot start broadcasting");
                     e.printStackTrace();
@@ -98,12 +100,12 @@ public class PeripheralActivity extends WearableActivity implements BroadcasterL
 
     @Override
     protected void onDestroy() {
-        for (ConnectedLink link : device.getLinks()) {
+        for (ConnectedLink link : broadcaster.getLinks()) {
             link.setListener(null);
         }
 
-        device.setListener(null);
-        device.stopBroadcasting();
+        broadcaster.setListener(null);
+        broadcaster.stopBroadcasting();
         super.onDestroy();
     }
 
@@ -123,14 +125,14 @@ public class PeripheralActivity extends WearableActivity implements BroadcasterL
 
 
         Manager.getInstance().initialize(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
-        device = Manager.getInstance().getBroadcaster();
-        device.reset();
-        onStateChanged(device.getState(), device.getState());
-        device.setListener(this);
+        broadcaster = Manager.getInstance().getBroadcaster();
+        broadcaster.reset();
+        onStateChanged(broadcaster.getState());
+        broadcaster.setListener(this);
 
 
         CertUtils certUtils = new CertUtils(getApplicationContext(), DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
-        certUtils.registerAndStoreAllCertificates(device);
+        certUtils.registerAndStoreAllCertificates(broadcaster);
     }
 
     private byte[] getSerial() {
@@ -160,41 +162,41 @@ public class PeripheralActivity extends WearableActivity implements BroadcasterL
     }
 
     @Override
-    public void onStateChanged(Broadcaster.State state, Broadcaster.State oldState) {
-        switch (state) {
+    public void onStateChanged(Broadcaster.State oldState) {
+        switch (broadcaster.getState()) {
             case BLUETOOTH_UNAVAILABLE:
-                textView.setText(device.getName() + " / x");
+                textView.setText(broadcaster.getName() + " / x");
                 break;
             case IDLE:
-                textView.setText(device.getName() + " / -");
+                textView.setText(broadcaster.getName() + " / -");
                 break;
             case BROADCASTING:
-                textView.setText(device.getName() + " / +");
+                textView.setText(broadcaster.getName() + " / +");
                 break;
         }
     }
 
     @Override
     public void onLinkReceived(ConnectedLink link) {
-        gridViewAdapter.setLinks(device.getLinks());
+        gridViewAdapter.setLinks(broadcaster.getLinks());
         link.setListener(this);
         Log.i(TAG, "onLinkReceived");
     }
 
     @Override
     public void onLinkLost(ConnectedLink link) {
-        gridViewAdapter.setLinks(device.getLinks());
+        gridViewAdapter.setLinks(broadcaster.getLinks());
         link.setListener(null);
         Log.i(TAG, "onLinkLost");
     }
 
     @Override
-    public void onStateChanged(ConnectedLink link, ConnectedLink.State oldState) {
-        gridViewAdapter.setLinks(device.getLinks());
+    public void onStateChanged(Link link, ConnectedLink.State oldState) {
+        gridViewAdapter.setLinks(broadcaster.getLinks());
     }
 
     @Override
-    public byte[] onCommandReceived(ConnectedLink link, byte[] bytes) {
+    public byte[] onCommandReceived(Link link, byte[] bytes) {
         Log.i(TAG, "onCommandReceived " + ByteUtils.hexFromBytes(bytes));
         return new byte[] { 0x01, bytes[0] };
     }
