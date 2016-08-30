@@ -14,10 +14,10 @@ import java.util.List;
 public class LinkGridViewAdapter extends FragmentGridPagerAdapter {
     List<ConnectedLink> links;
     LinkFragment[] fragments;
-    PeripheralActivity activity;
+    BroadcastActivity activity;
     FragmentManager fm;
 
-    public LinkGridViewAdapter(PeripheralActivity activity, FragmentManager fm) {
+    public LinkGridViewAdapter(BroadcastActivity activity, FragmentManager fm) {
         super(fm);
         this.activity = activity;
         this.fm = fm;

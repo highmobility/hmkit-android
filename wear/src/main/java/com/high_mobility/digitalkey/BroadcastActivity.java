@@ -18,14 +18,13 @@ import com.high_mobility.HMLink.Shared.ByteUtils;
 import com.high_mobility.HMLink.Shared.ConnectedLink;
 import com.high_mobility.HMLink.Shared.ConnectedLinkListener;
 import com.high_mobility.HMLink.Shared.Link;
-import com.high_mobility.HMLink.Shared.LinkListener;
 import com.high_mobility.HMLink.Shared.BroadcasterListener;
 import com.high_mobility.HMLink.Shared.Constants;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.DeviceCertificate;
 import com.high_mobility.HMLink.Shared.Manager;
 
-public class PeripheralActivity extends WearableActivity implements BroadcasterListener, ConnectedLinkListener {
+public class BroadcastActivity extends WearableActivity implements BroadcasterListener, ConnectedLinkListener {
     private static final byte[] CA_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
 
     static final String TAG = "DigitalKey";
@@ -248,7 +247,7 @@ public class PeripheralActivity extends WearableActivity implements BroadcasterL
             @Override
             public void response(byte[] bytes, LinkException exception) {
                 if (exception != null) {
-                    Log.e(PeripheralActivity.TAG, "lock exception", exception);
+                    Log.e(BroadcastActivity.TAG, "lock exception", exception);
                 }
                 ViewUtils.enableView(fragment.authView, true);
             }
@@ -264,7 +263,7 @@ public class PeripheralActivity extends WearableActivity implements BroadcasterL
             @Override
             public void response(byte[] bytes, LinkException exception) {
                 if (exception != null) {
-                    Log.e(PeripheralActivity.TAG, "lock exception", exception);
+                    Log.e(BroadcastActivity.TAG, "lock exception", exception);
                 }
 
                 ViewUtils.enableView(fragment.authView, true);

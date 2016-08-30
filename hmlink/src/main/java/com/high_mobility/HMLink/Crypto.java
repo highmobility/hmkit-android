@@ -10,10 +10,11 @@ import java.util.Random;
 public class Crypto {
     public static KeyPair createKeypair() {
         HMBTCore core = new HMBTCore();
+
         byte[] privateKey = new byte[32];
         byte[] publicKey = new byte[64];
-        core.HMBTCoreCryptoCreateKeys(privateKey, publicKey);
 
+        core.HMBTCoreCryptoCreateKeys(privateKey, publicKey);
         return new KeyPair(privateKey, publicKey);
     }
 

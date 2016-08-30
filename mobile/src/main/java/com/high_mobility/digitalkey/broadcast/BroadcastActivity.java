@@ -71,8 +71,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.broadcast_view);
-        Broadcaster.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY);
-        Broadcaster.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH);
+
         device = Manager.getInstance().getBroadcaster();
 
         // set the device listener
