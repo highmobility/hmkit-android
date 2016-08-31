@@ -1,14 +1,15 @@
 package com.high_mobility.HMLink.Shared;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Base64;
 import android.util.Log;
 
 import com.high_mobility.HMLink.DeviceCertificate;
-import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.btcore.HMBTCore;
+import com.highmobility.hmlink.BuildConfig;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -18,7 +19,7 @@ import java.util.TimerTask;
  */
 public class Manager {
     public enum LoggingLevel {
-        NONE(0), DEBUG(1), All(2);
+        NONE(0), DEBUG(1), ALL(2);
 
         private Integer level;
 
@@ -31,7 +32,7 @@ public class Manager {
         }
     }
 
-    public static LoggingLevel loggingLevel = LoggingLevel.All;
+    public static LoggingLevel loggingLevel = LoggingLevel.ALL;
 
     HMBTCore core = new HMBTCore();
     BTCoreInterface coreInterface;
@@ -76,7 +77,9 @@ public class Manager {
         ctx = applicationContext;
         mainHandler = new Handler(ctx.getMainLooper());
 
-        workThread.start();
+        if (workThread.getState() == Thread.State.NEW)
+            workThread.start();
+
         workHandler = new Handler(workThread.getLooper());
 
         ble = new SharedBle(ctx);
@@ -135,6 +138,20 @@ public class Manager {
      */
     public DeviceCertificate getCertificate() {
         return certificate;
+    }
+
+    String getInfoString() {
+        String infoString = "Android SDK ";
+        infoString += BuildConfig.VERSION_NAME;
+
+        if (ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            infoString += " w";
+        }
+        else {
+            infoString += " m";
+        }
+
+        return infoString;
     }
 
     private void startClock() {

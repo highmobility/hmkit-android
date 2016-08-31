@@ -242,9 +242,7 @@ public class Scanner {
     boolean writeData(byte[] mac, byte[] value) {
         ScannedLink link = getLinkForMac(mac);
         if (link == null) return false;
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(link.getAddressBytes()));
-
+        
         link.writeValue(value);
 
         return true;

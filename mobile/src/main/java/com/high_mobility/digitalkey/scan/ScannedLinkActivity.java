@@ -51,12 +51,21 @@ public class ScannedLinkActivity extends AppCompatActivity {
                 });
             }
         });
+
     }
 
     private LinkListener listener = new LinkListener() {
         @Override
         public void onStateChanged(Link link, Link.State oldState) {
-
+            final ScannedLink scannedLink = (ScannedLink) link;
+            if (link.getState() == Link.State.CONNECTED && scannedLink.versionInfo() == null) {
+                scannedLink.readVersionInfo(new Constants.ResponseCallback() {
+                    @Override
+                    public void response(LinkException exception) {
+                        Log.d(TAG, "version info " + scannedLink.versionInfo());
+                    }
+                });
+            }
         }
 
         @Override

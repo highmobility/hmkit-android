@@ -22,7 +22,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
     @Override
     public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
         super.onConnectionStateChange(device, status, newState);
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue()) Log.d(Broadcaster.TAG, "onConnectionStateChange " + newState);
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(Broadcaster.TAG, "onConnectionStateChange " + newState);
         if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             broadcaster.manager.core.HMBTCorelinkDisconnect(this.broadcaster.manager.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
         }
@@ -35,25 +35,16 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                                             BluetoothGattCharacteristic characteristic) {
         super.onCharacteristicReadRequest(device, requestId, offset, characteristic);
 
-        if (characteristic.getUuid().equals(Constants.READ_CHAR_UUID)) {
-            // response to read here
-            byte[] value = characteristic.getValue();
-            byte[] offsetBytes = Arrays.copyOfRange(value, offset, value.length);
-
-            broadcaster.GATTServer.sendResponse(device,
-                    requestId,
-                    BluetoothGatt.GATT_SUCCESS,
-                    offset,
-                    offsetBytes);
-            
-            return;
-        }
+        byte[] value = characteristic.getValue();
+        byte[] offsetBytes = Arrays.copyOfRange(value, offset, value.length);
 
         broadcaster.GATTServer.sendResponse(device,
-            requestId,
-            BluetoothGatt.GATT_FAILURE,
-            0,
-            null);
+                requestId,
+                BluetoothGatt.GATT_SUCCESS,
+                offset,
+                offsetBytes);
+
+        return;
     }
 
     @Override
@@ -66,7 +57,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                                              final byte[] value) {
         super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
 
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(Broadcaster.TAG, "incoming data " + ByteUtils.hexFromBytes(value) + " from "
                     + ByteUtils.hexFromBytes(ByteUtils.bytesFromMacString(device.getAddress())));
 
@@ -88,14 +79,16 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         if (responseNeeded) {
             broadcaster.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
 
-            final Broadcaster devicePointer = this.broadcaster;
-            broadcaster.manager.workHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    devicePointer.linkDidConnect(device);
-                    devicePointer.manager.core.HMBTCorelinkConnect(devicePointer.manager.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
-                }
-            });
+            if (descriptor.getCharacteristic().getUuid().equals(Constants.READ_CHAR_UUID)) {
+                final Broadcaster devicePointer = this.broadcaster;
+                broadcaster.manager.workHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        devicePointer.linkDidConnect(device);
+                        devicePointer.manager.core.HMBTCorelinkConnect(devicePointer.manager.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
+                    }
+                });
+            }
         }
     }
 }

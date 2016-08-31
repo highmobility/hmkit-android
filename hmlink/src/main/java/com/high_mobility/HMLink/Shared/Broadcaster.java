@@ -46,11 +46,13 @@ public class Broadcaster implements SharedBleListener {
 
     BluetoothGattCharacteristic readCharacteristic;
     BluetoothGattCharacteristic writeCharacteristic;
+    BluetoothGattCharacteristic aliveCharacteristic;
+    BluetoothGattCharacteristic infoCharacteristic;
 
+    boolean isAlivePinging;
     State state = State.IDLE;
 
     ArrayList<ConnectedLink> links = new ArrayList<>();
-    static Broadcaster instance = null;
 
     /**
      * Sets the advertise mode for the Bluetooth's AdvertiseSettings. Default is ADVERTISE_MODE_BALANCED.
@@ -131,7 +133,7 @@ public class Broadcaster implements SharedBleListener {
      */
     public void startBroadcasting() throws LinkException {
         if (state == State.BROADCASTING) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "will not start broadcasting: already broadcasting");
 
             return;
@@ -181,7 +183,7 @@ public class Broadcaster implements SharedBleListener {
      */
     public void stopBroadcasting() {
         if (getState() != State.BROADCASTING) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "already not broadcasting");
         }
         // stopAdvertising clears the GATT server as well.
@@ -199,6 +201,17 @@ public class Broadcaster implements SharedBleListener {
         }
         catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public boolean isAlivePinging() {
+        return isAlivePinging;
+    }
+
+    public void setIsAlivePinging(boolean alivePinging) {
+        isAlivePinging = alivePinging;
+        if (isAlivePinging) {
+            sendAlivePing();
         }
     }
 
@@ -266,7 +279,7 @@ public class Broadcaster implements SharedBleListener {
 
     Broadcaster(Manager manager) {
         this.manager = manager;
-        manager.ble.addListener(instance);
+        manager.ble.addListener(this);
         storage = new Storage(manager.ctx);
     }
 
@@ -312,7 +325,7 @@ public class Broadcaster implements SharedBleListener {
     }
 
     boolean deviceExitedProximity(HMDevice device) {
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue()) Log.d(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
         final ConnectedLink link = getLinkForMac(device.getMac());
         if (link == null) return false;
@@ -397,7 +410,7 @@ public class Broadcaster implements SharedBleListener {
             gattServerCallback = new GATTServerCallback(this);
             GATTServer = manager.ble.getManager().openGattServer(manager.ctx, gattServerCallback);
 
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue()) Log.d(TAG, "createGATTServer");
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "createGATTServer");
 
             /// bluez hack service
             /*UUID BLUEZ_HACK_SERVICE_UUID = UUID.fromString("48494D4F-BB81-49AB-BE90-6F25D716E8DE");
@@ -409,6 +422,7 @@ public class Broadcaster implements SharedBleListener {
             // create the service
             BluetoothGattService service = new BluetoothGattService(Constants.SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
 
+            // add characteristics to the service
             readCharacteristic = new BluetoothGattCharacteristic(Constants.READ_CHAR_UUID,
                             BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                             BluetoothGattCharacteristic.PERMISSION_READ);
@@ -421,20 +435,62 @@ public class Broadcaster implements SharedBleListener {
                             BluetoothGattCharacteristic.PROPERTY_WRITE,
                             BluetoothGattCharacteristic.PERMISSION_WRITE);
 
+
+            aliveCharacteristic = new BluetoothGattCharacteristic(Constants.ALIVE_CHAR_UUID,
+                    BluetoothGattCharacteristic.PROPERTY_NOTIFY,
+                    BluetoothGattCharacteristic.PERMISSION_READ);
+            aliveCharacteristic.setValue(new byte[]{});
+
+            aliveCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
+                    BluetoothGattDescriptor.PERMISSION_READ | BluetoothGattDescriptor.PERMISSION_WRITE));
+
+
+            infoCharacteristic = new BluetoothGattCharacteristic(Constants.INFO_CHAR_UUID,
+                    BluetoothGattCharacteristic.PROPERTY_READ,
+                    BluetoothGattCharacteristic.PERMISSION_READ);
+            infoCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
+                    BluetoothGattDescriptor.PERMISSION_READ | BluetoothGattDescriptor.PERMISSION_WRITE));
+
+            infoCharacteristic.setValue(manager.getInfoString());
+
             service.addCharacteristic(readCharacteristic);
             service.addCharacteristic(writeCharacteristic);
+            service.addCharacteristic(infoCharacteristic);
+            service.addCharacteristic(aliveCharacteristic);
 
             GATTServer.addService(service);
         }
         else {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue()) Log.d(TAG, "createGATTServer: already exists");
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "createGATTServer: already exists");
+        }
+    }
+
+
+    private void sendAlivePing() {
+        if (aliveCharacteristic != null) {
+            for (Link link : links) {
+                GATTServer.notifyCharacteristicChanged(link.btDevice, aliveCharacteristic, false);
+            }
+        }
+        else {
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+            Log.d(TAG, "need to start broadcasting before pinging");
+        }
+
+        if (isAlivePinging) {
+            manager.workHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    sendAlivePing();
+                }
+            }, 55);
         }
     }
 
     private final AdvertiseCallback advertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue()) Log.d(TAG, "Start advertise " + manager.ble.getAdapter().getName());
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "Start advertise " + manager.ble.getAdapter().getName());
             setState(State.BROADCASTING);
         }
 
@@ -442,23 +498,18 @@ public class Broadcaster implements SharedBleListener {
         public void onStartFailure(int errorCode) {
             switch (errorCode) {
                 case AdvertiseCallback.ADVERTISE_FAILED_ALREADY_STARTED:
-                    setState(State.BROADCASTING);
                     break;
                 case AdvertiseCallback.ADVERTISE_FAILED_DATA_TOO_LARGE:
                     Log.e(TAG, "Advertise failed: data too large");
-                    setState(State.IDLE);
                     break;
                 case AdvertiseCallback.ADVERTISE_FAILED_FEATURE_UNSUPPORTED:
                     Log.e(TAG, "Advertise failed: feature unsupported");
-                    setState(State.IDLE);
                     break;
                 case AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR:
                     Log.e(TAG, "Advertise failed: internal error");
-                    setState(State.IDLE);
                     break;
                 case AdvertiseCallback.ADVERTISE_FAILED_TOO_MANY_ADVERTISERS:
                     Log.e(TAG, "Advertise failed: too many advertisers");
-                    setState(State.IDLE);
                     break;
             }
 

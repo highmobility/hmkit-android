@@ -219,7 +219,7 @@ class BTCoreInterface implements HMBTCoreInterface {
         for (AccessCertificate cert : storedCerts) {
             if (Arrays.equals(cert.getProviderSerial(), serial)) {
                 if (manager.getBroadcaster().storage.deleteCertificate(cert)) {
-                    if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
+                    if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                         Log.d(Broadcaster.TAG, "Erased stored cert for serial " + ByteUtils.hexFromBytes(serial));
 
                     return 0;
@@ -239,7 +239,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMApiCallbackEnteredProximity(HMDevice device) {
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(Broadcaster.TAG, "HMCtwEnteredProximity");
 
         // this means core has finished identification of the broadcaster (might me authenticated or not) - show broadcaster info on screen
@@ -253,7 +253,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMApiCallbackExitedProximity(HMDevice device) {
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(Broadcaster.TAG, "HMCtwExitedProximity");
 
         if (manager.getBroadcaster().deviceExitedProximity(device) == false) {

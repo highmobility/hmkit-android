@@ -70,7 +70,7 @@ public class ConnectedLink extends Link {
                         }
                     });
 
-                    if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
+                    if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                         Log.d(Broadcaster.TAG, "pairing timer exceeded");
                     return 1; // TODO: use correct code
                 }

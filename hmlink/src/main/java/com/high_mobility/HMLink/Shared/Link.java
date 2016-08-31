@@ -88,14 +88,14 @@ public class Link {
      */
     public void sendCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
         if (state != State.AUTHENTICATED) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(Broadcaster.TAG, "cant send command, not authenticated");
             responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.UNAUTHORISED));
             return;
         }
 
         if (sentCommand != null && sentCommand.finished == false) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.All.getValue())
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(Broadcaster.TAG, "cant send command, custom command in progress");
             responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.CUSTOM_COMMAND_IN_PROGRESS));
             return;

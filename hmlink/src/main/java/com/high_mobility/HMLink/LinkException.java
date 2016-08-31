@@ -12,6 +12,8 @@ public class LinkException extends Exception {
         CUSTOM_COMMAND_IN_PROGRESS,
         /// Framework encountered an internal error (commonly releated to invalid data received)
         INTERNAL_ERROR,
+        /// Bluetooth failed to act as expected
+        BLUETOOTH_FAILURE,
         /// The signature for the command was invalid
         INVALID_SIGNATURE,
         /// The Certificates storage database is full
