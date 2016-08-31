@@ -97,6 +97,14 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
+     *
+     * @return indiation of whether the alive pinging is active or not
+     */
+    public boolean isAlivePinging() {
+        return isAlivePinging;
+    }
+
+    /**
      * @return The certificates that are registered on the Broadcaster.
      */
     public AccessCertificate[] getRegisteredCertificates() {
@@ -204,10 +212,11 @@ public class Broadcaster implements SharedBleListener {
         }
     }
 
-    public boolean isAlivePinging() {
-        return isAlivePinging;
-    }
-
+    /**
+     * Activate or disable the alive ping mode.
+     *
+     * @param alivePinging Whether the alive ping mode should be actived or stopped
+     */
     public void setIsAlivePinging(boolean alivePinging) {
         isAlivePinging = alivePinging;
         if (isAlivePinging) {
