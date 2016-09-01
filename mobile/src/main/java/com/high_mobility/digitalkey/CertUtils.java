@@ -19,6 +19,7 @@ import java.util.Set;
  * Created by ttiganik on 27/05/16.
  */
 public class CertUtils {
+    static final String TAG = "CertUtils";
     enum BoxType {
         Red, NoBox, Yellow, Raspberry, Iphone
     }
@@ -176,7 +177,7 @@ public class CertUtils {
         try {
             device.registerCertificate(registeredCertificate);
         } catch (LinkException e) {
-            Log.e(MainActivity.TAG, "Cannot register cert " + registeredCertificate.getGainerSerial(), e);
+            Log.e(TAG, "Cannot register cert " + registeredCertificate.getGainerSerial(), e);
         }
 
         if (!isCertificateReadForType(type)) {
@@ -184,7 +185,7 @@ public class CertUtils {
             try {
                 device.storeCertificate(storedCertificate);
             } catch (LinkException e) {
-                Log.e(MainActivity.TAG, "Cannot store cert " + storedCertificate.getProviderSerial(), e);
+                Log.e(TAG, "Cannot store cert " + storedCertificate.getProviderSerial(), e);
             }
         }
     }

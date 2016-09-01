@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Created by ttiganik on 01/06/16.
  */
-public class Scanner {
+class Scanner {
     static final String TAG = "Scanner";
 
     public enum State {

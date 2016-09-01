@@ -5,10 +5,10 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.high_mobility.HMLink.AccessCertificate;
-import com.high_mobility.HMLink.Crypto;
-import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.Broadcaster;
 import com.high_mobility.HMLink.Shared.ByteUtils;
+import com.high_mobility.HMLink.Crypto;
+import com.high_mobility.HMLink.LinkException;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -19,7 +19,7 @@ import java.util.Set;
  * Created by ttiganik on 27/05/16.
  */
 public class CertUtils {
-    private static final String TAG = "CertUtils";
+    static final String TAG = "CertUtils";
     enum BoxType {
         Red, NoBox, Yellow, Raspberry, Iphone
     }
@@ -38,8 +38,8 @@ public class CertUtils {
     static final byte[] CAR_SERIAL_RASPBERRY = ByteUtils.bytesFromHex("010203030303030202");
     static final byte[] CAR_PUBLIC_RASPBERRY = ByteUtils.bytesFromHex("***REMOVED***");
 
-    static final byte[] CAR_SERIAL_EXTRA = ByteUtils.bytesFromHex("01231910D62CA571EF");
-    static final byte[] CAR_PUBLIC_EXTRA = ByteUtils.bytesFromHex("***REMOVED***");
+    static final byte[] CAR_SERIAL_IPHONE = ByteUtils.bytesFromHex("42463136393843362D");
+    static final byte[] CAR_PUBLIC_IPHONE = ByteUtils.bytesFromHex("***REMOVED***");
 
     byte[] deviceSerial;
     byte[] devicePublic;
@@ -128,7 +128,7 @@ public class CertUtils {
             certificate = new AccessCertificate(CAR_SERIAL_RASPBERRY, CAR_PUBLIC_RASPBERRY, deviceSerial, startDate, endDate, null);
         }
         else if (type == BoxType.Iphone) {
-            certificate = new AccessCertificate(CAR_SERIAL_EXTRA, CAR_PUBLIC_EXTRA, deviceSerial, startDate, endDate, null);
+            certificate = new AccessCertificate(CAR_SERIAL_IPHONE, CAR_PUBLIC_IPHONE, deviceSerial, startDate, endDate, null);
         }
         else {
             return null;
@@ -161,7 +161,7 @@ public class CertUtils {
             certificate = new AccessCertificate(deviceSerial, devicePublic, CAR_SERIAL_RASPBERRY, startDate, endDate, null);
         }
         else if (type == BoxType.Iphone) {
-            certificate = new AccessCertificate(deviceSerial, devicePublic, CAR_SERIAL_EXTRA, startDate, endDate, null);
+            certificate = new AccessCertificate(deviceSerial, devicePublic, CAR_SERIAL_IPHONE, startDate, endDate, null);
         }
         else {
             return null;

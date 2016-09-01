@@ -12,7 +12,6 @@ import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.ByteUtils;
 import com.high_mobility.HMLink.Shared.Manager;
 import com.high_mobility.digitalkey.broadcast.BroadcastActivity;
-import com.high_mobility.digitalkey.scan.ScanActivity;
 
 import java.util.IllegalFormatCodePointException;
 
@@ -40,8 +39,8 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         setDeviceCertificate();
 
-//        Intent intent = new Intent(this, ScanActivity.class);
-//        startActivity(intent);
+        Intent intent = new Intent(this, BroadcastActivity.class);
+        startActivity(intent);
     }
 
     void setDeviceCertificate() {
@@ -70,10 +69,10 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, BroadcastActivity.class);
         startActivity(intent);
     }
-
+/*
     public void onScanClicked(View v) {
         Intent intent = new Intent(this, ScanActivity.class);
         startActivity(intent);
     }
-
+*/
 }

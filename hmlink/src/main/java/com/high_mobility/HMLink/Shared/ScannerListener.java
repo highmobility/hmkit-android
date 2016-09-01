@@ -3,7 +3,7 @@ package com.high_mobility.HMLink.Shared;
 /**
  * Created by ttiganik on 01/06/16.
  */
-public interface ScannerListener {
+interface ScannerListener {
     /***
      * Callback for when the Scanner's state has changed.
      * This is always called on the main thread.

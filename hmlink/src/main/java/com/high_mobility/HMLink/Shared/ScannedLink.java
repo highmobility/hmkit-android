@@ -25,7 +25,7 @@ import java.util.UUID;
  *
  * Created by ttiganik on 01/06/16.
  */
-public class ScannedLink extends Link {
+class ScannedLink extends Link {
     private static final String TAG = "ScannedLink";
 
     Scanner scanner;

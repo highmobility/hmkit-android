@@ -126,7 +126,8 @@ public class Manager {
      *
      * @return The Scanner Instance
      */
-    public Scanner getScanner() {
+
+    Scanner getScanner() {
         if (scanner == null) scanner = new Scanner(this);
         return scanner;
     }
