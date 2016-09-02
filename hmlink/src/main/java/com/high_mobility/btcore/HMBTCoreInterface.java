@@ -63,10 +63,10 @@ public interface HMBTCoreInterface {
     int HMPersistenceHaladdStoredCertificate(byte[] cert, int size);
     //Get certificate from storage
     //TT
-    int HMPersistenceHalgetStoredCertificate(byte[] cert, int[] size);
+    int HMPersistenceHalgetStoredCertificate(byte[] serial, byte[] cert, int[] size);
     //Delete certificate from storage
     //TT
-    int HMPersistenceHaleraseStoredCertificate();
+    int HMPersistenceHaleraseStoredCertificate(byte[] serial);
 
 
     //Proximity

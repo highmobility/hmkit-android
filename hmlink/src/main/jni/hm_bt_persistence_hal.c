@@ -52,7 +52,7 @@ uint32_t hm_bt_persistence_hal_get_device_certificate(uint8_t *cert){
   return ret;
 }
 
-uint32_t hm_bt_persistence_hal_add_public_key(uint8_t *serial, uint8_t *public, uint8_t *startDate, uint8_t *endDate, uint8_t commandSize, uint8_t *command){
+uint32_t hm_bt_persistence_hal_add_access_certificate(uint8_t *serial, uint8_t *public, uint8_t *startDate, uint8_t *endDate, uint8_t commandSize, uint8_t *command){
 
   jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
   (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jbyte*) serial );
@@ -74,7 +74,7 @@ uint32_t hm_bt_persistence_hal_add_public_key(uint8_t *serial, uint8_t *public, 
   return ret;
 }
 
-uint32_t hm_bt_persistence_hal_get_public_key_count(uint8_t *count){
+uint32_t hm_bt_persistence_hal_get_access_certificate_count(uint8_t *count){
 
   jintArray count_ = (*envRef)->NewIntArray(envRef,1);
   (*envRef)->SetIntArrayRegion(envRef, count_, 0, 1, (const jint*) count );
@@ -91,7 +91,7 @@ uint32_t hm_bt_persistence_hal_get_public_key_count(uint8_t *count){
   return ret;
 }
 
-uint32_t hm_bt_persistence_hal_get_public_key(uint8_t *serial, uint8_t *public, uint8_t *startDate, uint8_t *endDate, uint8_t *commandSize, uint8_t *command){
+uint32_t hm_bt_persistence_hal_get_access_certificate(uint8_t *serial, uint8_t *public, uint8_t *startDate, uint8_t *endDate, uint8_t *commandSize, uint8_t *command){
 
   jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
   (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jbyte*) serial );
@@ -138,7 +138,7 @@ uint32_t hm_bt_persistence_hal_get_public_key(uint8_t *serial, uint8_t *public, 
   return ret;
 }
 
-uint32_t hm_bt_persistence_hal_get_public_key_by_index(uint8_t index, uint8_t *serial, uint8_t *public, uint8_t *startDate, uint8_t *endDate, uint8_t *commandSize, uint8_t *command){
+uint32_t hm_bt_persistence_hal_get_access_certificate_by_index(uint8_t index, uint8_t *serial, uint8_t *public, uint8_t *startDate, uint8_t *endDate, uint8_t *commandSize, uint8_t *command){
 
   jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
   (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jbyte*) serial );
@@ -185,7 +185,7 @@ uint32_t hm_bt_persistence_hal_get_public_key_by_index(uint8_t index, uint8_t *s
   return ret;
 }
 
-uint32_t hm_bt_persistence_hal_remove_public_key(uint8_t *serial){
+uint32_t hm_bt_persistence_hal_remove_access_certificate(uint8_t *serial){
 
   jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
   (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jbyte*) serial );
@@ -203,7 +203,10 @@ uint32_t hm_bt_persistence_hal_add_stored_certificate(uint8_t *cert, uint16_t si
   return ret;
 }
 
-uint32_t hm_bt_persistence_hal_get_stored_certificate(uint8_t *cert, uint16_t *size){
+uint32_t hm_bt_persistence_hal_get_stored_certificate(uint8_t *serial, uint8_t *cert, uint16_t *size){
+
+  jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
+  (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jbyte*) serial );
 
   jbyteArray cert_ = (*envRef)->NewByteArray(envRef,180);
   (*envRef)->SetByteArrayRegion(envRef, cert_, 0, 180, (const jbyte*) cert );
@@ -211,7 +214,7 @@ uint32_t hm_bt_persistence_hal_get_stored_certificate(uint8_t *cert, uint16_t *s
   jintArray size_ = (*envRef)->NewIntArray(envRef,1);
   (*envRef)->SetIntArrayRegion(envRef, size_, 0, 1, (const jint*) size );
 
-  jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMPersistenceHalgetStoredCertificate, cert_, size_);
+  jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMPersistenceHalgetStoredCertificate, serial_, cert_, size_);
 
   jint* size_array = (*envRef)->GetIntArrayElements(envRef, size_, NULL);
   *size = size_array[0];
@@ -222,9 +225,11 @@ uint32_t hm_bt_persistence_hal_get_stored_certificate(uint8_t *cert, uint16_t *s
   return ret;
 }
 
-uint32_t hm_bt_persistence_hal_erase_stored_certificate(){
+uint32_t hm_bt_persistence_hal_erase_stored_certificate(uint8_t *serial){
 
-  jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMPersistenceHaleraseStoredCertificate);
+  jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
+  (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jbyte*) serial );
+  jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMPersistenceHaleraseStoredCertificate, serial_);
 
   return ret;
 }

@@ -13,26 +13,23 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.high_mobility.HMLink.Broadcasting.ByteUtils;
-import com.high_mobility.HMLink.Broadcasting.Link;
-import com.high_mobility.HMLink.Broadcasting.LinkListener;
-import com.high_mobility.HMLink.Broadcasting.LocalDevice;
-import com.high_mobility.HMLink.Broadcasting.LocalDeviceListener;
-import com.high_mobility.HMLink.Constants;
+import com.high_mobility.HMLink.Shared.Broadcaster;
+import com.high_mobility.HMLink.Shared.ByteUtils;
+import com.high_mobility.HMLink.Shared.ConnectedLink;
+import com.high_mobility.HMLink.Shared.ConnectedLinkListener;
+import com.high_mobility.HMLink.Shared.Link;
+import com.high_mobility.HMLink.Shared.BroadcasterListener;
+import com.high_mobility.HMLink.Shared.Constants;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.DeviceCertificate;
+import com.high_mobility.HMLink.Shared.Manager;
 
-public class PeripheralActivity extends WearableActivity implements LocalDeviceListener, LinkListener {
+public class BroadcastActivity extends WearableActivity implements BroadcasterListener, ConnectedLinkListener {
     private static final byte[] CA_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
-    private static final byte[] CA_APP_IDENTIFIER = ByteUtils.bytesFromHex("***REMOVED***");
-//    private static final byte[] CA_ISSUER = ByteUtils.bytesFromHex("48494D4C");
-    private static final byte[] CA_ISSUER = ByteUtils.bytesFromHex("48494D4F");
-    private static final byte[] DEVICE_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
-    private static final byte[] DEVICE_PRIVATE_KEY = ByteUtils.bytesFromHex("***REMOVED***");
 
     static final String TAG = "DigitalKey";
 
-    LocalDevice device = LocalDevice.getInstance(getApplicationContext());
+    Broadcaster broadcaster;
 
     private TextView textView;
     private GridViewPager gridViewPager;
@@ -42,15 +39,15 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
     private BoxInsetLayout container;
 
     public void didTapTitle(View view) {
-        if (device.getState() == LocalDevice.State.IDLE) {
+        if (broadcaster.getState() == Broadcaster.State.IDLE) {
             try {
-                device.startBroadcasting();
+                broadcaster.startBroadcasting();
             } catch (LinkException e) {
                 e.printStackTrace();
             }
         }
-        else if (device.getState() == LocalDevice.State.BROADCASTING) {
-            device.stopBroadcasting();
+        else if (broadcaster.getState() == Broadcaster.State.BROADCASTING) {
+            broadcaster.stopBroadcasting();
         }
     }
 
@@ -61,13 +58,6 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
 
         setContentView(R.layout.activity_main);
         gridViewAdapter = new LinkGridViewAdapter(this, getFragmentManager());
-
-        DeviceCertificate cert = new DeviceCertificate(CA_ISSUER, CA_APP_IDENTIFIER, getSerial(), DEVICE_PUBLIC_KEY);
-//        cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***")); // 48494D4C sig
-        cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***")); // original
-
-        device.setDeviceCertificate(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY);
-        device.setListener(this);
 
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
@@ -95,10 +85,10 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
                     }
                 });
 
-                onStateChanged(device.getState(), device.getState());
+                initializeDevice();
 
                 try {
-                    device.startBroadcasting();
+                    broadcaster.startBroadcasting();
                 } catch (Exception e) {
                     Log.e(TAG, "cannot start broadcasting");
                     e.printStackTrace();
@@ -109,14 +99,46 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
 
     @Override
     protected void onDestroy() {
-        device.stopBroadcasting();
+        for (ConnectedLink link : broadcaster.getLinks()) {
+            link.setListener(null);
+        }
+
+        broadcaster.setListener(null);
+        broadcaster.stopBroadcasting();
         super.onDestroy();
+    }
+
+    private void initializeDevice() {
+        final byte[] DEVICE_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
+        final byte[] DEVICE_PRIVATE_KEY = ByteUtils.bytesFromHex("***REMOVED***");
+        final byte[] DEVICE_SERIAL = ByteUtils.bytesFromHex("01231910D62CA571F0");
+
+        // Create a demo certificate. In real life situation the certificate should be queried from the server
+        // Reference: http://dc-9141.high-mobility.com/android-tutorial/#setting-device-certificate
+        // Reference: http://dc-9141.high-mobility.com/android-reference-device-certificate/#convenience-init
+        final byte[] APP_IDENTIFIER = ByteUtils.bytesFromHex("***REMOVED***");
+        final byte[] ISSUER = ByteUtils.bytesFromHex("48494D4F");
+
+        DeviceCertificate cert = new DeviceCertificate(ISSUER, APP_IDENTIFIER, DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
+        cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***")); // original
+
+
+        Manager.getInstance().initialize(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
+        broadcaster = Manager.getInstance().getBroadcaster();
+        broadcaster.reset();
+        onStateChanged(broadcaster.getState());
+        broadcaster.setListener(this);
+
+
+        CertUtils certUtils = new CertUtils(getApplicationContext(), DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
+        certUtils.registerAndStoreAllCertificates(broadcaster);
     }
 
     private byte[] getSerial() {
         return new byte [] {0x01, 0x23, 0x19, 0x10, (byte)0xD6, 0x2C, (byte)0xA5, 0x71, (byte)0xEE};
         // TODO: use random serial number when you can get CA sig from web
-      /*  SharedPreferences settings;
+        /*
+        SharedPreferences settings;
         SharedPreferences.Editor editor;
 
         settings = getApplicationContext().getSharedPreferences("com.hm.wearable.UserPrefs",
@@ -134,41 +156,42 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
             new Random().nextBytes(serialBytes);
             editor.putString(serialKey, ByteUtils.hexFromBytes(serialBytes));
             return serialBytes;
-        }*/
+        }
+        */
     }
 
     @Override
-    public void onStateChanged(LocalDevice.State state, LocalDevice.State oldState) {
-        switch (state) {
+    public void onStateChanged(Broadcaster.State oldState) {
+        switch (broadcaster.getState()) {
             case BLUETOOTH_UNAVAILABLE:
-                textView.setText(device.getName() + " / x");
+                textView.setText(broadcaster.getName() + " / x");
                 break;
             case IDLE:
-                textView.setText(device.getName() + " / -");
+                textView.setText(broadcaster.getName() + " / -");
                 break;
             case BROADCASTING:
-                textView.setText(device.getName() + " / +");
+                textView.setText(broadcaster.getName() + " / +");
                 break;
         }
     }
 
     @Override
-    public void onLinkReceived(Link link) {
-        gridViewAdapter.setLinks(device.getLinks());
+    public void onLinkReceived(ConnectedLink link) {
+        gridViewAdapter.setLinks(broadcaster.getLinks());
         link.setListener(this);
         Log.i(TAG, "onLinkReceived");
     }
 
     @Override
-    public void onLinkLost(Link link) {
-        gridViewAdapter.setLinks(device.getLinks());
+    public void onLinkLost(ConnectedLink link) {
+        gridViewAdapter.setLinks(broadcaster.getLinks());
         link.setListener(null);
         Log.i(TAG, "onLinkLost");
     }
 
     @Override
-    public void onStateChanged(Link link, Link.State oldState) {
-        gridViewAdapter.setLinks(device.getLinks());
+    public void onStateChanged(Link link, ConnectedLink.State oldState) {
+        gridViewAdapter.setLinks(broadcaster.getLinks());
     }
 
     @Override
@@ -178,7 +201,7 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
     }
 
     @Override
-    public void onPairingRequested(Link link,
+    public void onPairingRequested(ConnectedLink link,
                                    final Constants.ApprovedCallback approvedCallback) {
         Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         long[] vibrationPattern = {0, 300};
@@ -209,13 +232,13 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
     }
 
     @Override
-    public void onPairingRequestTimeout(Link link) {
+    public void onPairingRequestTimeout(ConnectedLink link) {
         pairingView.declineButton.setOnClickListener(null);
         pairingView.confirmButton.setOnClickListener(null);
         pairingView.setVisibility(View.GONE);
     }
 
-    public void didClickLock(Link link) {
+    public void didClickLock(ConnectedLink link) {
         byte[] cmd = new byte[] { 0x17, 0x01 };
         final LinkFragment fragment = gridViewAdapter.getFragment(link);
 
@@ -223,12 +246,15 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         link.sendCommand(cmd, true, new Constants.DataResponseCallback() {
             @Override
             public void response(byte[] bytes, LinkException exception) {
+                if (exception != null) {
+                    Log.e(BroadcastActivity.TAG, "lock exception", exception);
+                }
                 ViewUtils.enableView(fragment.authView, true);
             }
         });
     }
 
-    public void didClickUnlock(Link link) {
+    public void didClickUnlock(ConnectedLink link) {
         byte[] cmd = new byte[] { 0x17, 0x00 };
         final LinkFragment fragment = gridViewAdapter.getFragment(link);
 
@@ -236,6 +262,10 @@ public class PeripheralActivity extends WearableActivity implements LocalDeviceL
         link.sendCommand(cmd, true, new Constants.DataResponseCallback() {
             @Override
             public void response(byte[] bytes, LinkException exception) {
+                if (exception != null) {
+                    Log.e(BroadcastActivity.TAG, "lock exception", exception);
+                }
+
                 ViewUtils.enableView(fragment.authView, true);
             }
         });
