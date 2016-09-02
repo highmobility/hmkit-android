@@ -244,8 +244,6 @@ class BTCoreInterface implements HMBTCoreInterface {
 
         // this means core has finished identification of the broadcaster (might me authenticated or not) - show broadcaster info on screen
         // always update the broadcaster with this, auth state might have changed later with this callback as well
-
-
         if (manager.getBroadcaster().didResolveDevice(device) == false) {
             manager.getScanner().didResolveDevice(device);
         }
@@ -283,7 +281,7 @@ class BTCoreInterface implements HMBTCoreInterface {
     public void HMApiCallbackCustomCommandResponse(HMDevice device, byte[] data, int length) {
         byte[] trimmedBytes = trimmedBytes(data, length);
         if (manager.getBroadcaster().onCommandResponseReceived(device, trimmedBytes) == false) {
-            manager.getScanner().onCommandResponseReceived(device, trimmedBytes); // TODO: test this
+            manager.getScanner().onCommandResponseReceived(device, trimmedBytes);
         }
     }
 
