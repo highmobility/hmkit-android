@@ -38,7 +38,7 @@ public class CertUtils {
     static final byte[] CAR_SERIAL_RASPBERRY = ByteUtils.bytesFromHex("010203030303030202");
     static final byte[] CAR_PUBLIC_RASPBERRY = ByteUtils.bytesFromHex("***REMOVED***");
 
-    static final byte[] CAR_SERIAL_IPHONE = ByteUtils.bytesFromHex("42463136393843362D");
+    static final byte[] CAR_SERIAL_IPHONE = ByteUtils.bytesFromHex("35324437463039412d");
     static final byte[] CAR_PUBLIC_IPHONE = ByteUtils.bytesFromHex("***REMOVED***");
 
     byte[] deviceSerial;
