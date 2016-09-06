@@ -25,10 +25,8 @@ public class LinkGridViewAdapter extends FragmentGridPagerAdapter {
 
     public void setLinks(List<ConnectedLink> links) {
         this.links = links;
-        if (links.size() > 0) {
-            fragments = new LinkFragment[links.size()];
-            notifyDataSetChanged();
-        }
+        fragments = new LinkFragment[links.size()];
+        notifyDataSetChanged();
     }
 
     public LinkFragment getFragment(ConnectedLink link) {
