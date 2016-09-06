@@ -22,6 +22,11 @@ class GATTServerCallback extends BluetoothGattServerCallback {
     @Override
     public void onConnectionStateChange(BluetoothDevice device, int status, int newState) {
         super.onConnectionStateChange(device, status, newState);
+        if (status != BluetoothGatt.GATT_SUCCESS) {
+            Log.e(Broadcaster.TAG, "connecting failed with status" + status);
+            // TODO: this should be handled
+        }
+
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(Broadcaster.TAG, "onConnectionStateChange " + newState);
         if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             broadcaster.manager.core.HMBTCorelinkDisconnect(this.broadcaster.manager.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));

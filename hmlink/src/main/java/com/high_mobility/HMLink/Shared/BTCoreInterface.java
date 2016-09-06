@@ -126,6 +126,7 @@ class BTCoreInterface implements HMBTCoreInterface {
     @Override
     public int HMPersistenceHalgetPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command) {
         AccessCertificate certificate = manager.getBroadcaster().storage.certWithGainingSerial(serial);
+
         if (certificate == null) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(Scanner.TAG, "No cert with gaining serial " + ByteUtils.hexFromBytes(serial));

@@ -134,32 +134,6 @@ public class BroadcastActivity extends WearableActivity implements BroadcasterLi
         certUtils.registerAndStoreAllCertificates(broadcaster);
     }
 
-    private byte[] getSerial() {
-        return new byte [] {0x01, 0x23, 0x19, 0x10, (byte)0xD6, 0x2C, (byte)0xA5, 0x71, (byte)0xEE};
-        // TODO: use random serial number when you can get CA sig from web
-        /*
-        SharedPreferences settings;
-        SharedPreferences.Editor editor;
-
-        settings = getApplicationContext().getSharedPreferences("com.hm.wearable.UserPrefs",
-                Context.MODE_PRIVATE );
-        editor = settings.edit();
-
-
-        String serialKey = "serialUserDefaultsKey";
-
-        if (settings.contains(serialKey)) {
-            return ByteUtils.bytesFromHex(settings.getString(serialKey, ""));
-        }
-        else {
-            byte[] serialBytes = new byte[9];
-            new Random().nextBytes(serialBytes);
-            editor.putString(serialKey, ByteUtils.hexFromBytes(serialBytes));
-            return serialBytes;
-        }
-        */
-    }
-
     @Override
     public void onStateChanged(Broadcaster.State oldState) {
         switch (broadcaster.getState()) {
