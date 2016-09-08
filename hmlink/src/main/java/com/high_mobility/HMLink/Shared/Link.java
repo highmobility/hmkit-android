@@ -86,7 +86,7 @@ public class Link {
      * @param responseCallback  DataResponseCallback object that returns the response's byte array
      *                          or a LinkException if unsuccessful
      */
-    public void sendCommand(byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
+    public void sendCommand(final byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
         if (state != State.AUTHENTICATED) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(Broadcaster.TAG, "cant send command, not authenticated");
@@ -106,7 +106,12 @@ public class Link {
                     + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
         sentCommand = new SentCommand(responseCallback, manager.mainHandler);
-        manager.core.HMBTCoreSendCustomCommand(manager.coreInterface, bytes, bytes.length, getAddressBytes());
+        manager.workHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                manager.core.HMBTCoreSendCustomCommand(manager.coreInterface, bytes, bytes.length, getAddressBytes());
+            }
+        });
     }
 
     void setHmDevice(final HMDevice hmDevice) {

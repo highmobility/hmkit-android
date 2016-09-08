@@ -106,7 +106,12 @@ class Scanner {
 
         bleScanner.startScan(null, settings, scanCallback);
         setState(State.SCANNING);
-        manager.core.HMBTCoreSensingScanStart(manager.coreInterface);
+        manager.workHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                manager.core.HMBTCoreSensingScanStart(manager.coreInterface);
+            }
+        });
     }
 
     /**
