@@ -48,7 +48,6 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
     void onBroadcastCheckedChanged() {
         if (broadcastSwitch.isChecked()) {
             if (device.getState() == Broadcaster.State.BROADCASTING) return;
-            resetDevice();
 
             try {
                 device.startBroadcasting();
@@ -171,12 +170,6 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
     @Override
     public void onPairingRequestTimeout(ConnectedLink link) {
         pairingView.setVisibility(View.GONE);
-    }
-
-    void resetDevice() {
-        // Delete the previous certificates from the device.
-        // This is not needed in real scenario where certificates are not faked.
-        device.reset();
     }
 
     void createViews() {

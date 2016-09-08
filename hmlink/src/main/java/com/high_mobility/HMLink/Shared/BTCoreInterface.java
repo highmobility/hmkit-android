@@ -14,6 +14,7 @@ import java.util.Arrays;
  * Created by ttiganik on 03/08/16.
  */
 class BTCoreInterface implements HMBTCoreInterface {
+    static final String TAG = "HMBTCoreInterface";
     Manager manager;
     BTCoreInterface(Manager manager) {
         this.manager = manager;
@@ -56,7 +57,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMBTHalDisconnect(byte[] mac) {
-        Log.d(Scanner.TAG, new Object(){}.getClass().getEnclosingMethod().getName());
+        Log.d(TAG, new Object(){}.getClass().getEnclosingMethod().getName());
         manager.getScanner().disconnect(mac);
         return 0;
     }
@@ -111,11 +112,14 @@ class BTCoreInterface implements HMBTCoreInterface {
     public int HMPersistenceHaladdPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int commandSize, byte[] command) {
         AccessCertificate cert = new AccessCertificate(serial, publicKey, manager.getCertificate().getSerial(), startDate, endDate, command);
 
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+            Log.d(TAG, "HMPersistenceHaladdPublicKey: " + ByteUtils.hexFromBytes(serial));
+
         try {
             manager.getBroadcaster().storage.storeCertificate(cert);
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(Scanner.TAG, "Cant store certificate.");
         } catch (LinkException e) {
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+                Log.d(TAG, "Cant register certificate.");
             e.printStackTrace();
             return 1;
         }
@@ -129,7 +133,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
         if (certificate == null) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(Scanner.TAG, "No cert with gaining serial " + ByteUtils.hexFromBytes(serial));
+                Log.d(TAG, "No registered cert with gaining serial " + ByteUtils.hexFromBytes(serial));
             return 1;
         }
 
@@ -160,21 +164,34 @@ class BTCoreInterface implements HMBTCoreInterface {
         }
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(Scanner.TAG, "No cert for index " + index);
+            Log.d(TAG, "No registered cert for index " + index);
 
         return 1;
     }
 
     @Override
     public int HMPersistenceHalgetPublicKeyCount(int[] count) {
-        count[0] = manager.getBroadcaster().storage.getCertificatesWithProvidingSerial(manager.getCertificate().getSerial()).length;
+        int certCount = manager.getBroadcaster().storage.getCertificatesWithProvidingSerial(manager.getCertificate().getSerial()).length;
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+            Log.d(TAG, "HMPersistenceHalgetPublicKeyCount " + certCount);
+        count[0] = certCount;
         return 0;
     }
 
     @Override
     public int HMPersistenceHalremovePublicKey(byte[] serial) {
-        if (manager.getBroadcaster().storage.deleteCertificateWithGainingSerial(serial)) return 0;
-        else return 1;
+        if (manager.getBroadcaster().storage.deleteCertificateWithGainingSerial(serial)){
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+                Log.d(TAG, "HMPersistenceHalremovePublicKey success");
+
+            return 0;
+        }
+        else {
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+                Log.d(TAG, "HMPersistenceHalremovePublicKey failure");
+
+            return 1;
+        }
     }
 
     @Override
@@ -183,9 +200,11 @@ class BTCoreInterface implements HMBTCoreInterface {
 
         try {
             manager.getBroadcaster().storage.storeCertificate(certificate);
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(Scanner.TAG, "Cant store certificate.");
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+                Log.d(TAG, "HMPersistenceHaladdStoredCertificate " + ByteUtils.hexFromBytes(certificate.getGainerSerial()) + " success");
         } catch (LinkException e) {
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+                Log.d(TAG, "Cant store certificate.");
             e.printStackTrace();
             return 1;
         }
@@ -288,7 +307,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMApiCallbackGetDeviceCertificateFailed(HMDevice device, byte[] nonce) {
-        Log.d(Scanner.TAG, "HMApiCallbackGetDeviceCertificateFailed ");
+        Log.d(TAG, "HMApiCallbackGetDeviceCertificateFailed ");
         // Sensing: should ask for CA sig for the nonce
         // if ret false getting the sig start failed
         // if ret true started acquiring signature

@@ -122,16 +122,13 @@ public class BroadcastActivity extends WearableActivity implements BroadcasterLi
         DeviceCertificate cert = new DeviceCertificate(ISSUER, APP_IDENTIFIER, DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
         cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***")); // original
 
-
         Manager.getInstance().initialize(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
         broadcaster = Manager.getInstance().getBroadcaster();
-        broadcaster.reset();
         onStateChanged(broadcaster.getState());
         broadcaster.setListener(this);
 
-
-        CertUtils certUtils = new CertUtils(getApplicationContext(), DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
-        certUtils.registerAndStoreAllCertificates(broadcaster);
+//        CertUtils certUtils = new CertUtils(getApplicationContext(), DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
+//        certUtils.registerAndStoreAllCertificates(broadcaster);
     }
 
     @Override

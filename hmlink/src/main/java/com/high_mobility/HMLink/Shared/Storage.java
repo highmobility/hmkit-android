@@ -228,7 +228,7 @@ class Storage {
                 && Arrays.equals(cert.getGainerPublicKey(), certificate.getGainerPublicKey())) {
 
                 if (!deleteCertificateWithGainingSerial(certificate.getGainerSerial())) {
-                    Log.e(Broadcaster.TAG, "failed to delete cert");
+                    Log.e(Broadcaster.TAG, "failed to delete existing cert");
                 }
             }
         }
