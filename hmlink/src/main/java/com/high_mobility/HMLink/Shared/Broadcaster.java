@@ -442,7 +442,7 @@ public class Broadcaster implements SharedBleListener {
             writeCharacteristic =
                     new BluetoothGattCharacteristic(Constants.WRITE_CHAR_UUID,
                             BluetoothGattCharacteristic.PROPERTY_WRITE,
-                            BluetoothGattCharacteristic.PERMISSION_WRITE_SIGNED_MITM);
+                            BluetoothGattCharacteristic.PERMISSION_WRITE);
 
             aliveCharacteristic = new BluetoothGattCharacteristic(Constants.ALIVE_CHAR_UUID,
                     BluetoothGattCharacteristic.PROPERTY_NOTIFY,
@@ -453,7 +453,7 @@ public class Broadcaster implements SharedBleListener {
                     BluetoothGattCharacteristic.PERMISSION_READ);
 
             if (readCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
-                    BluetoothGattDescriptor.PERMISSION_WRITE_SIGNED_MITM)) == false) {
+                    BluetoothGattDescriptor.PERMISSION_WRITE)) == false) {
                 Log.e(TAG, "Cannot add read descriptor"); return false;
             }
             if (aliveCharacteristic.setValue(new byte[]{}) == false) {
@@ -461,7 +461,7 @@ public class Broadcaster implements SharedBleListener {
             }
 
             if (aliveCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
-                    BluetoothGattDescriptor.PERMISSION_WRITE_SIGNED_MITM)) == false) {
+                    BluetoothGattDescriptor.PERMISSION_WRITE)) == false) {
                 Log.e(TAG, "Cannot add alive descriptor"); return false;
             }
             if (infoCharacteristic.setValue(manager.getInfoString()) == false) {
@@ -476,12 +476,12 @@ public class Broadcaster implements SharedBleListener {
                 Log.e(TAG, "Cannot add write char"); return false;
             }
 
-            if (service.addCharacteristic(infoCharacteristic) == false) {
-                Log.e(TAG, "Cannot add info char"); return false;
-            }
-
             if (service.addCharacteristic(aliveCharacteristic) == false) {
                 Log.e(TAG, "Cannot add alive char"); return false;
+            }
+
+            if (service.addCharacteristic(infoCharacteristic) == false) {
+                Log.e(TAG, "Cannot add info char"); return false;
             }
 
             if (GATTServer.addService(service) == false) {
