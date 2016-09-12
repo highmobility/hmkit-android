@@ -157,7 +157,10 @@ public class Broadcaster implements SharedBleListener {
             throw new LinkException(LinkException.LinkExceptionCode.BLUETOOTH_OFF);
         }
 
-        createGATTServer();
+        if (createGATTServer() == false) {
+            setState(State.BLUETOOTH_UNAVAILABLE);
+            throw new LinkException(LinkException.LinkExceptionCode.BLUETOOTH_FAILURE);
+        }
 
         // start advertising
         if (mBluetoothLeAdvertiser == null) {
@@ -414,7 +417,7 @@ public class Broadcaster implements SharedBleListener {
         return null;
     }
 
-    private void createGATTServer() {
+    private boolean createGATTServer() {
         if (GATTServer == null) {
             gattServerCallback = new GATTServerCallback(this);
             GATTServer = manager.ble.getManager().openGattServer(manager.ctx, gattServerCallback);
@@ -436,42 +439,57 @@ public class Broadcaster implements SharedBleListener {
                             BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                             BluetoothGattCharacteristic.PERMISSION_READ);
 
-            readCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
-                    BluetoothGattDescriptor.PERMISSION_READ | BluetoothGattDescriptor.PERMISSION_WRITE));
-
             writeCharacteristic =
                     new BluetoothGattCharacteristic(Constants.WRITE_CHAR_UUID,
                             BluetoothGattCharacteristic.PROPERTY_WRITE,
-                            BluetoothGattCharacteristic.PERMISSION_WRITE);
-
+                            BluetoothGattCharacteristic.PERMISSION_WRITE_SIGNED_MITM);
 
             aliveCharacteristic = new BluetoothGattCharacteristic(Constants.ALIVE_CHAR_UUID,
                     BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                     BluetoothGattCharacteristic.PERMISSION_READ);
-            aliveCharacteristic.setValue(new byte[]{});
-
-            aliveCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
-                    BluetoothGattDescriptor.PERMISSION_READ | BluetoothGattDescriptor.PERMISSION_WRITE));
-
 
             infoCharacteristic = new BluetoothGattCharacteristic(Constants.INFO_CHAR_UUID,
                     BluetoothGattCharacteristic.PROPERTY_READ,
                     BluetoothGattCharacteristic.PERMISSION_READ);
-            infoCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
-                    BluetoothGattDescriptor.PERMISSION_READ | BluetoothGattDescriptor.PERMISSION_WRITE));
 
-            infoCharacteristic.setValue(manager.getInfoString());
+            if (readCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
+                    BluetoothGattDescriptor.PERMISSION_WRITE_SIGNED_MITM)) == false) {
+                Log.e(TAG, "Cannot add read descriptor"); return false;
+            }
+            if (aliveCharacteristic.setValue(new byte[]{}) == false) {
+                Log.e(TAG, "Cannot set alive char value"); return false;
+            }
 
-            service.addCharacteristic(readCharacteristic);
-            service.addCharacteristic(writeCharacteristic);
-            service.addCharacteristic(infoCharacteristic);
-            service.addCharacteristic(aliveCharacteristic);
+            if (aliveCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
+                    BluetoothGattDescriptor.PERMISSION_WRITE_SIGNED_MITM)) == false) {
+                Log.e(TAG, "Cannot add alive descriptor"); return false;
+            }
+            if (infoCharacteristic.setValue(manager.getInfoString()) == false) {
+                Log.e(TAG, "Cannot set info char value"); return false;
+            }
 
-            GATTServer.addService(service);
+            if (service.addCharacteristic(readCharacteristic) == false) {
+                Log.e(TAG, "Cannot add read char"); return false;
+            }
+
+            if (service.addCharacteristic(writeCharacteristic) == false) {
+                Log.e(TAG, "Cannot add write char"); return false;
+            }
+
+            if (service.addCharacteristic(infoCharacteristic) == false) {
+                Log.e(TAG, "Cannot add info char"); return false;
+            }
+
+            if (service.addCharacteristic(aliveCharacteristic) == false) {
+                Log.e(TAG, "Cannot add alive char"); return false;
+            }
+
+            if (GATTServer.addService(service) == false) {
+                Log.e(TAG, "Cannot add service to GATT server"); return false;
+            }
         }
-        else {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "createGATTServer: already exists");
-        }
+
+        return true;
     }
 
 
