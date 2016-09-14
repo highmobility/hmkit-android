@@ -174,19 +174,17 @@ public class CertUtils {
 
     void registerAndStoreCertificateForType(BoxType type, Broadcaster device) {
         AccessCertificate registeredCertificate = registerCertificateForBoxType(type);
-        try {
-            device.registerCertificate(registeredCertificate);
-        } catch (LinkException e) {
-            Log.e(TAG, "Cannot register cert " + registeredCertificate.getGainerSerial(), e);
+        int errorCode = device.registerCertificate(registeredCertificate);
+        if (errorCode != 0) {
+            Log.e(TAG, "Cannot register cert " + registeredCertificate.getGainerSerial() + " " + errorCode);
+            return;
         }
 
         if (!isCertificateReadForType(type)) {
             AccessCertificate storedCertificate = storedCertificateForBoxType(type);
-            try {
-                device.storeCertificate(storedCertificate);
-            } catch (LinkException e) {
-                Log.e(TAG, "Cannot store cert " + storedCertificate.getProviderSerial(), e);
-            }
+
+            errorCode = device.storeCertificate(storedCertificate);
+            if (errorCode != 0) Log.e(TAG, "Cannot store cert " + registeredCertificate.getGainerSerial() + " " + errorCode);
         }
     }
 

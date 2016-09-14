@@ -3,6 +3,7 @@ package com.high_mobility.HMLink.Shared;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
+import com.high_mobility.HMLink.Command.Command;
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.btcore.HMDevice;
 
@@ -84,20 +85,21 @@ public class Link {
      * @param secureResponse    Optional boolean defining if the response has a secure HMAC element
      *                       in it or not - defaults to true
      * @param responseCallback  DataResponseCallback object that returns the response's byte array
-     *                          or a LinkException if unsuccessful
+     *                          or a LinkException if the command cannot be sent or it timed out.
      */
-    public void sendCommand(final byte[] bytes, boolean secureResponse, Constants.DataResponseCallback responseCallback) {
+    // TODO: comment
+    public void sendCommand(final byte[] bytes, boolean secureResponse, Constants.ResponseCallback responseCallback) {
         if (state != State.AUTHENTICATED) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(Broadcaster.TAG, "cant send command, not authenticated");
-            responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.UNAUTHORISED));
+            responseCallback.response(LinkException.UNAUTHORIZED);
             return;
         }
 
         if (sentCommand != null && sentCommand.finished == false) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(Broadcaster.TAG, "cant send command, custom command in progress");
-            responseCallback.response(null, new LinkException(LinkException.LinkExceptionCode.CUSTOM_COMMAND_IN_PROGRESS));
+            responseCallback.response(LinkException.CUSTOM_COMMAND_IN_PROGRESS);
             return;
         }
 
@@ -125,17 +127,22 @@ public class Link {
         }
     }
 
-    byte[] onCommandReceived(byte[] bytes) {
+    void onCommandReceived(final byte[] bytes) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(Broadcaster.TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
                     + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
         if (listener == null) {
             Log.d(Broadcaster.TAG, "can't dispatch notification: no listener set");
-            return null;
+            return;
         }
 
-        return listener.onCommandReceived(this, bytes);
+        manager.mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+            listener.onCommandReceived(Link.this, bytes);
+            }
+        });
     }
 
     void onCommandResponseReceived(final byte[] data) {
@@ -150,7 +157,7 @@ public class Link {
             return;
         }
 
-        sentCommand.dispatchResult(data, null);
+        sentCommand.dispatchResult(Command.errorCode(data));
     }
 
     byte[] getAddressBytes() {

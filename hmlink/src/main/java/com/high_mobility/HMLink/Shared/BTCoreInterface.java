@@ -115,14 +115,12 @@ class BTCoreInterface implements HMBTCoreInterface {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "HMPersistenceHaladdPublicKey: " + ByteUtils.hexFromBytes(serial));
 
-        try {
-            manager.getBroadcaster().storage.storeCertificate(cert);
-        } catch (LinkException e) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "Cant register certificate.");
-            e.printStackTrace();
-            return 1;
-        }
+
+            int errorCode = manager.getBroadcaster().storage.storeCertificate(cert);
+            if (errorCode != 0) {
+                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+                Log.d(TAG, "Cant register certificate: " + errorCode);
+            }
 
         return 0;
     }
@@ -198,15 +196,14 @@ class BTCoreInterface implements HMBTCoreInterface {
     public int HMPersistenceHaladdStoredCertificate(byte[] cert, int size) {
         AccessCertificate certificate = new AccessCertificate(cert);
 
-        try {
-            manager.getBroadcaster().storage.storeCertificate(certificate);
+        int errorCode = manager.getBroadcaster().storage.storeCertificate(certificate);
+        if (errorCode != 0) {
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+                Log.d(TAG, "Cant store certificate: " + errorCode);
+        }
+        else {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "HMPersistenceHaladdStoredCertificate " + ByteUtils.hexFromBytes(certificate.getGainerSerial()) + " success");
-        } catch (LinkException e) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "Cant store certificate.");
-            e.printStackTrace();
-            return 1;
         }
 
         return 0;
@@ -281,20 +278,12 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMApiCallbackCustomCommandIncoming(HMDevice device, byte[] data, int[] length, int[] error) {
-        byte[] response = manager.getBroadcaster().onCommandReceived(device, trimmedBytes(data, length[0]));
-
-        if (response == null)
-            response = manager.getScanner().onCommandReceived(device, trimmedBytes(data, length[0]));
-
-        if (response != null) {
-            copyBytesToJNI(response, data);
-            length[0] = response.length;
-            error[0] = 0;
+        if (manager.getBroadcaster().onCommandReceived(device, trimmedBytes(data, length[0])) == false) {
+            manager.getScanner().onCommandReceived(device, trimmedBytes(data, length[0]));
         }
-        else {
-            length[0] = 0;
-            error[0] = 0;
-        }
+
+        length[0] = 0;
+        error[0] = 0;
     }
 
     @Override

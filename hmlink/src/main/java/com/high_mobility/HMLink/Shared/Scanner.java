@@ -5,7 +5,6 @@ import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
-import android.util.Log;
 
 import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.btcore.HMDevice;
@@ -85,18 +84,19 @@ class Scanner {
      * @throws LinkException UNSUPPORTED: BLE is not supported with this device
      *                       BLUETOOTH_OFF: BLE is turned off
      */
-    public void startScanning() throws LinkException {
+    // TODO: comment
+    public int startScanning() {
         // = new byte[][] { array1, array2, array3, array4, array5 };
-        if (getState() == State.SCANNING) return;
+        if (getState() == State.SCANNING) return 0;
 
         if (!manager.ble.isBluetoothSupported()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
-            throw new LinkException(LinkException.LinkExceptionCode.UNSUPPORTED);
+            return LinkException.UNSUPPORTED;
         }
 
         if (!manager.ble.isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
-            throw new LinkException(LinkException.LinkExceptionCode.BLUETOOTH_OFF);
+            return LinkException.BLUETOOTH_OFF;
         }
 
         if (bleScanner == null) bleScanner = manager.ble.getAdapter().getBluetoothLeScanner();
@@ -112,6 +112,8 @@ class Scanner {
                 manager.core.HMBTCoreSensingScanStart(manager.coreInterface);
             }
         });
+
+        return 0;
     }
 
     /**
@@ -231,10 +233,11 @@ class Scanner {
         return false;
     }
 
-    byte[] onCommandReceived(HMDevice device, byte[] data) {
+    boolean onCommandReceived(HMDevice device, byte[] data) {
         ScannedLink scannedLink = getLinkForMac(device.getMac());
-        if (scannedLink == null) return null;
-        return scannedLink.onCommandReceived(data);
+        if (scannedLink == null) return false;
+        scannedLink.onCommandReceived(data);
+        return true;
     }
 
     boolean onCommandResponseReceived(HMDevice device, byte[] data) {

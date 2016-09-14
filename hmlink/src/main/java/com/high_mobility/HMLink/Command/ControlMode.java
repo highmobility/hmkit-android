@@ -1,13 +1,10 @@
-package com.high_mobility.HMLink.AutoCommand;
-
-import com.high_mobility.HMLink.AutoCommand.AutoCommandNotification;
-import com.high_mobility.HMLink.AutoCommand.CommandParseException;
+package com.high_mobility.HMLink.Command;
 
 /**
- * Created by ttiganik on 16/08/16.
+ * Created by ttiganik on 13/09/16.
  */
-public class ControlModeChangedNotification extends AutoCommandNotification {
-    public enum ControlMode {
+public class ControlMode extends Incoming {
+    public enum Mode {
         UNAVAILABLE((byte)0x01),
         AVAILABLE((byte)0x02),
         STARTED((byte)0x03),
@@ -17,7 +14,7 @@ public class ControlModeChangedNotification extends AutoCommandNotification {
 
         private byte type;
 
-        ControlMode(byte command) {
+        Mode(byte command) {
             this.type = command;
         }
 
@@ -25,7 +22,7 @@ public class ControlModeChangedNotification extends AutoCommandNotification {
             return type;
         }
 
-        static ControlMode controlModeFromByte(byte value) throws CommandParseException {
+        static Mode controlModeFromByte(byte value) throws CommandParseException {
             switch (value) {
                 case 0x01:
                     return UNAVAILABLE;
@@ -45,23 +42,25 @@ public class ControlModeChangedNotification extends AutoCommandNotification {
         }
     }
 
-    ControlMode mode;
+    Mode mode;
     int angle;
 
-    public ControlModeChangedNotification(byte[] bytes) throws CommandParseException {
-        super(bytes);
+    // TODO: add more ivars
 
+    ControlMode(byte[] bytes) throws CommandParseException {
+        super(bytes);
         if (bytes.length != 4) throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
 
-        mode = ControlMode.controlModeFromByte(bytes[1]);
+        mode = Mode.controlModeFromByte(bytes[1]);
         angle = (bytes[2] << 8) + bytes[3];
     }
+
 
     public int getAngle() {
         return angle;
     }
 
-    public ControlMode getMode() {
+    public Mode getMode() {
         return mode;
     }
 

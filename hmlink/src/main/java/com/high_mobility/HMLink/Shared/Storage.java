@@ -214,12 +214,12 @@ class Storage {
         return null;
     }
 
-    void storeCertificate(AccessCertificate certificate) throws LinkException {
-        if (certificate == null) throw new LinkException(LinkException.LinkExceptionCode.INTERNAL_ERROR);
+    int storeCertificate(AccessCertificate certificate) {
+        if (certificate == null) return LinkException.INTERNAL_ERROR;
 
         AccessCertificate[] certs = getCertificates();
 
-        if (certs.length >= Constants.certificateStorageCount) throw new LinkException(LinkException.LinkExceptionCode.STORAGE_FULL);
+        if (certs.length >= Constants.certificateStorageCount) return LinkException.STORAGE_FULL;
 
         for (int i = 0; i < certs.length; i++) {
             AccessCertificate cert = certs[i];
@@ -243,6 +243,8 @@ class Storage {
         newCerts[newCerts.length - 1] = certificate;
 
         setCertificates(newCerts);
+
+        return 0;
     }
 
     private AccessCertificate[] removeAtIndex(int removedIndex, AccessCertificate[] certs) {

@@ -1,0 +1,52 @@
+package com.high_mobility.HMLink.Command;
+
+import com.high_mobility.HMLink.Shared.ByteUtils;
+
+import java.util.Arrays;
+
+/**
+ * Created by ttiganik on 07/06/16.
+ */
+public class Incoming extends Command {
+    public static Incoming create(byte[] bytes) throws CommandParseException {
+        if (bytes.length > 1) {
+
+            if (ByteUtils.startsWith(bytes, DigitalKey.LOCK_STATE.getIdentifier())) {
+                return new LockState(bytes);
+            }
+            else if (ByteUtils.startsWith(bytes, Auto.VEHICLE_STATUS.getIdentifier())) {
+                return new VehicleStatus(bytes);
+            }
+            else if (ByteUtils.startsWith(bytes, Chassis.WINDSHIELD_HEATING_STATE.getIdentifier())) {
+                return new VehicleStatus(bytes);
+            }
+            else if (ByteUtils.startsWith(bytes, Chassis.ROOFTOP_STATE.getIdentifier())) {
+                return new VehicleStatus(bytes);
+            }
+            else if (ByteUtils.startsWith(bytes, RemoteControl.CONTROL_MODE.getIdentifier())) {
+                return new VehicleStatus(bytes);
+            }
+            else if (ByteUtils.startsWith(bytes, ParcelDelivery.DELIVERED_PARCELS.getIdentifier())) {
+                return new VehicleStatus(bytes);
+            }
+            else {
+                throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
+            }
+        }
+        else {
+            throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
+        }
+    }
+
+    Incoming(byte[] bytes) {
+        super(bytes);
+    }
+
+    public boolean is(Command.Type type) {
+        if (Arrays.equals(identifier, type.getIdentifier())) {
+            return true;
+        }
+
+        return false;
+    }
+}

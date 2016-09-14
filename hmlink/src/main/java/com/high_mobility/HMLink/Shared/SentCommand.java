@@ -14,19 +14,19 @@ import java.util.Calendar;
  */
 class SentCommand {
     boolean finished;
-    Constants.DataResponseCallback commandCallback;
+    Constants.ResponseCallback commandCallback;
     CountDownTimer timeoutTimer;
     Long commandStartTime;
     Handler dispatchThread;
 
-    SentCommand(Constants.DataResponseCallback callback, Handler dispatchThread) {
+    SentCommand(Constants.ResponseCallback callback, Handler dispatchThread) {
         this.dispatchThread = dispatchThread;
         this.commandCallback = callback;
         startTimeoutTimer();
         commandStartTime = Calendar.getInstance().getTimeInMillis();
     }
 
-    void dispatchResult(final byte[] response, final LinkException exception) {
+    void dispatchResult(final int errorCode) {
         if (timeoutTimer != null) timeoutTimer.cancel();
         finished = true;
         if (commandCallback == null) {
@@ -37,7 +37,7 @@ class SentCommand {
         dispatchThread.post(new Runnable() {
             @Override
             public void run() {
-                commandCallback.response(response, exception);
+                commandCallback.response(errorCode);
             }
         });
     }
@@ -48,7 +48,7 @@ class SentCommand {
             }
 
             public void onFinish() {
-                dispatchResult(null, new LinkException(LinkException.LinkExceptionCode.TIME_OUT));
+                dispatchResult(LinkException.TIME_OUT);
             }
         }.start();
     }

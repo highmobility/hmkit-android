@@ -3,17 +3,13 @@ package com.high_mobility.digitalkey;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import com.high_mobility.HMLink.DeviceCertificate;
-import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.ByteUtils;
 import com.high_mobility.HMLink.Shared.Manager;
 import com.high_mobility.digitalkey.broadcast.BroadcastActivity;
-
-import java.util.IllegalFormatCodePointException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

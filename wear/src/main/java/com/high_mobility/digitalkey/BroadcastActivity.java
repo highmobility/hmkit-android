@@ -40,11 +40,8 @@ public class BroadcastActivity extends WearableActivity implements BroadcasterLi
 
     public void didTapTitle(View view) {
         if (broadcaster.getState() == Broadcaster.State.IDLE) {
-            try {
-                broadcaster.startBroadcasting();
-            } catch (LinkException e) {
-                e.printStackTrace();
-            }
+            int errorCode = broadcaster.startBroadcasting();
+            if (errorCode != 0) Log.d(TAG, "Can't start broadcasting");
         }
         else if (broadcaster.getState() == Broadcaster.State.BROADCASTING) {
             broadcaster.stopBroadcasting();
@@ -166,9 +163,8 @@ public class BroadcastActivity extends WearableActivity implements BroadcasterLi
     }
 
     @Override
-    public byte[] onCommandReceived(Link link, byte[] bytes) {
+    public void onCommandReceived(Link link, byte[] bytes) {
         Log.i(TAG, "onCommandReceived " + ByteUtils.hexFromBytes(bytes));
-        return new byte[] { 0x01, bytes[0] };
     }
 
     @Override
@@ -214,11 +210,11 @@ public class BroadcastActivity extends WearableActivity implements BroadcasterLi
         final LinkFragment fragment = gridViewAdapter.getFragment(link);
 
         ViewUtils.enableView(fragment.authView, false);
-        link.sendCommand(cmd, true, new Constants.DataResponseCallback() {
+        link.sendCommand(cmd, true, new Constants.ResponseCallback() {
             @Override
-            public void response(byte[] bytes, LinkException exception) {
-                if (exception != null) {
-                    Log.e(BroadcastActivity.TAG, "lock exception", exception);
+            public void response(int errorCode) {
+                if (errorCode != 0) {
+                    Log.e(BroadcastActivity.TAG, "lock exception: " + errorCode);
                 }
                 ViewUtils.enableView(fragment.authView, true);
             }
@@ -230,13 +226,12 @@ public class BroadcastActivity extends WearableActivity implements BroadcasterLi
         final LinkFragment fragment = gridViewAdapter.getFragment(link);
 
         ViewUtils.enableView(fragment.authView, false);
-        link.sendCommand(cmd, true, new Constants.DataResponseCallback() {
+        link.sendCommand(cmd, true, new Constants.ResponseCallback() {
             @Override
-            public void response(byte[] bytes, LinkException exception) {
-                if (exception != null) {
-                    Log.e(BroadcastActivity.TAG, "lock exception", exception);
+            public void response(int errorCode) {
+                if (errorCode != 0) {
+                    Log.e(BroadcastActivity.TAG, "unlock exception: " + errorCode);
                 }
-
                 ViewUtils.enableView(fragment.authView, true);
             }
         });

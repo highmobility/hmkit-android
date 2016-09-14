@@ -18,6 +18,7 @@ import com.high_mobility.HMLink.AccessCertificate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -139,27 +140,27 @@ public class Broadcaster implements SharedBleListener {
      *
      * @throws LinkException	    An exception with either UNSUPPORTED or BLUETOOTH_OFF code.
      */
-    public void startBroadcasting() throws LinkException {
+    public int startBroadcasting() {
         if (state == State.BROADCASTING) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "will not start broadcasting: already broadcasting");
 
-            return;
+            return 0;
         }
 
         if (!manager.ble.isBluetoothSupported()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
-            throw new LinkException(LinkException.LinkExceptionCode.UNSUPPORTED);
+            return LinkException.UNSUPPORTED;
         }
 
         if (!manager.ble.isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
-            throw new LinkException(LinkException.LinkExceptionCode.BLUETOOTH_OFF);
+            return LinkException.BLUETOOTH_OFF;
         }
 
         if (createGATTServer() == false) {
             setState(State.BLUETOOTH_UNAVAILABLE);
-            throw new LinkException(LinkException.LinkExceptionCode.BLUETOOTH_FAILURE);
+            return LinkException.BLUETOOTH_FAILURE;
         }
 
         // start advertising
@@ -168,7 +169,7 @@ public class Broadcaster implements SharedBleListener {
             if (mBluetoothLeAdvertiser == null) {
                 // for unsupported devices the system does not return an advertiser
                 setState(State.BLUETOOTH_UNAVAILABLE);
-                throw new LinkException(LinkException.LinkExceptionCode.UNSUPPORTED);
+                return LinkException.UNSUPPORTED;
             }
         }
 
@@ -187,6 +188,7 @@ public class Broadcaster implements SharedBleListener {
                 .build();
 
         mBluetoothLeAdvertiser.startAdvertising(settings, data, advertiseCallback);
+        return 0;
     }
 
     /**
@@ -236,16 +238,17 @@ public class Broadcaster implements SharedBleListener {
      *                       providing serial doesn't match with this broadcaster's serial or
      *                       the storage is full.
      */
-    public void registerCertificate(AccessCertificate certificate) throws LinkException {
+    // TODO: update comment
+    public int registerCertificate(AccessCertificate certificate)  {
         if (manager.certificate == null) {
-            throw new LinkException(LinkException.LinkExceptionCode.INTERNAL_ERROR);
+            return LinkException.INTERNAL_ERROR;
         }
 
         if (Arrays.equals(manager.certificate.getSerial(), certificate.getProviderSerial()) == false) {
-            throw new LinkException(LinkException.LinkExceptionCode.INTERNAL_ERROR);
+            return LinkException.INTERNAL_ERROR;
         }
 
-        storage.storeCertificate(certificate);
+        return storage.storeCertificate(certificate);
     }
 
     /**
@@ -254,8 +257,9 @@ public class Broadcaster implements SharedBleListener {
      * @param certificate The certificate that will be saved to the database
      * @throws LinkException When the storage is full or certificate has not been set
      */
-    public void storeCertificate(AccessCertificate certificate) throws LinkException {
-        storage.storeCertificate(certificate);
+    // TODO: comment
+    public int storeCertificate(AccessCertificate certificate) {
+        return storage.storeCertificate(certificate);
     }
 
     /**
@@ -265,14 +269,17 @@ public class Broadcaster implements SharedBleListener {
      * @param serial The 9-byte serial number of the access providing broadcaster
      * @throws LinkException When there are no matching certificate pairs for this serial.
      */
-    public void revokeCertificate(byte[] serial) throws LinkException {
+    // TODO: comment
+    public int revokeCertificate(byte[] serial) {
         if (storage.certWithGainingSerial(serial) == null
                 || storage.certWithProvidingSerial(serial) == null) {
-            throw new LinkException(LinkException.LinkExceptionCode.INTERNAL_ERROR);
+            return LinkException.INTERNAL_ERROR;
         }
 
-        storage.deleteCertificateWithGainingSerial(serial);
-        storage.deleteCertificateWithProvidingSerial(serial);
+        if (storage.deleteCertificateWithGainingSerial(serial) == false) return LinkException.INTERNAL_ERROR;
+        if (storage.deleteCertificateWithProvidingSerial(serial) == false) return LinkException.INTERNAL_ERROR;
+
+        return 0;
     }
 
     /**
@@ -376,11 +383,11 @@ public class Broadcaster implements SharedBleListener {
         return true;
     }
 
-    byte[] onCommandReceived(HMDevice device, byte[] data) {
+    boolean onCommandReceived(HMDevice device, byte[] data) {
         Link link = getLinkForMac(device.getMac());
-        if (link == null) return null;
-
-        return link.onCommandReceived(data);
+        if (link == null) return false;
+        link.onCommandReceived(data);
+        return true;
     }
 
     int didReceivePairingRequest(HMDevice device) {

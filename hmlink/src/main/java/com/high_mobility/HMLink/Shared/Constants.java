@@ -1,7 +1,5 @@
 package com.high_mobility.HMLink.Shared;
 
-import com.high_mobility.HMLink.LinkException;
-
 import java.util.UUID;
 
 public class Constants {
@@ -23,10 +21,10 @@ public class Constants {
     }
 
     public interface DataResponseCallback {
-        void response(byte[] bytes, LinkException exception);
+        void response(byte[] bytes, int errorCode);
     }
 
     public interface ResponseCallback {
-        void response(LinkException exception);
+        void response(int errorCode);
     }
 }

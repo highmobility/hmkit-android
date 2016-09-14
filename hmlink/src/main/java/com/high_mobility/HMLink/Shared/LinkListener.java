@@ -20,8 +20,7 @@ public interface LinkListener {
      * This is always called on the main thread when a command was received.
      *
      * @param link The link that received the command.
-     * @param bytes The commands bytes that can correspond to the Auto API.
      * @return The response to the command. Can be null.
      */
-    byte[] onCommandReceived(Link link, byte[] bytes);
+    void onCommandReceived(Link link, byte[] bytes);
 }

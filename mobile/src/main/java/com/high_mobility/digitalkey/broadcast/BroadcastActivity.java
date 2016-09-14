@@ -1,6 +1,5 @@
 package com.high_mobility.digitalkey.broadcast;
 
-import android.bluetooth.le.AdvertiseSettings;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -12,11 +11,11 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.high_mobility.HMLink.AutoCommand.AutoCommand;
-import com.high_mobility.HMLink.AutoCommand.AutoCommandNotification;
-import com.high_mobility.HMLink.AutoCommand.AutoCommandResponse;
-import com.high_mobility.HMLink.AutoCommand.CommandParseException;
-import com.high_mobility.HMLink.AutoCommand.LockStatusChangedNotification;
+import com.high_mobility.HMLink.Command.Command;
+import com.high_mobility.HMLink.Command.ControlMode;
+import com.high_mobility.HMLink.Command.Incoming;
+import com.high_mobility.HMLink.Command.CommandParseException;
+import com.high_mobility.HMLink.Command.LockState;
 import com.high_mobility.HMLink.Shared.BroadcasterListener;
 import com.high_mobility.HMLink.Shared.ConnectedLink;
 import com.high_mobility.HMLink.Shared.ConnectedLinkListener;
@@ -48,12 +47,8 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
     void onBroadcastCheckedChanged() {
         if (broadcastSwitch.isChecked()) {
             if (device.getState() == Broadcaster.State.BROADCASTING) return;
-
-            try {
-                device.startBroadcasting();
-            } catch (LinkException e) {
-                e.printStackTrace();
-            }
+            int errorCode = device.startBroadcasting();
+            if (errorCode != 0) Log.e(TAG, "cant start broadcasting " + errorCode);
         }
         else {
             device.stopBroadcasting();
@@ -102,11 +97,8 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
         switch (device.getState()) {
             case IDLE:
                 if (state1 == Broadcaster.State.BLUETOOTH_UNAVAILABLE && broadcastSwitch.isChecked()) {
-                    try {
-                        device.startBroadcasting();
-                    } catch (LinkException e) {
-                        e.printStackTrace();
-                    }
+                    int errorCode = device.startBroadcasting();
+                    if (errorCode != 0) Log.e(TAG, "cant start broadcasting " + errorCode);
                 }
                 statusTextView.setText("idle");
                 break;
@@ -145,20 +137,22 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
     }
 
     @Override
-    public byte[] onCommandReceived(Link link, byte[] bytes) {
+    public void onCommandReceived(Link link, byte[] bytes) {
         try {
-            AutoCommandNotification notification = AutoCommandNotification.create(bytes);
+            Incoming notification = Incoming.create(bytes);
 
-            if (notification.getType() == AutoCommand.Type.LOCK_STATUS_CHANGED) {
-                LockStatusChangedNotification changedNotification = (LockStatusChangedNotification)notification;
-                Log.i(TAG, "LockStatusChanged " + changedNotification.getLockStatus());
+            if (notification.is(Command.DigitalKey.LOCK_STATE)) {
+                LockState stateNotification = (LockState) notification;
+                Log.i(TAG, "LockStatusChanged " + stateNotification.getLockStatus());
+            }
+            else if (notification.is(Command.RemoteControl.CONTROL_MODE)) {
+                ControlMode controlModeNotification = (ControlMode) notification;
+                Log.i(TAG, "Control Mode angle " + controlModeNotification.getAngle());
             }
         }
         catch (CommandParseException e) {
             Log.d(TAG, "Notification parse exception ", e);
         }
-
-        return null;
     }
 
     @Override
@@ -200,29 +194,15 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
         final LinkFragment fragment = adapter.getFragment(link);
         ViewUtils.enableView(fragment.authView, false);
 
-        link.sendCommand(AutoCommand.lockDoorsCommand(), true, new Constants.DataResponseCallback() {
+        link.sendCommand(Command.DigitalKey.lockDoors(true), true, new Constants.ResponseCallback() {
             @Override
-            public void response(byte[] bytes, LinkException exception) {
-                ViewUtils.enableView(fragment.authView, true);
-                if (exception != null) {
-                    Log.e(TAG, "command exception", exception);
-                    return;
-                }
-
-                try {
-                    // generic ack/error response does not have a separate response class
-                    AutoCommandResponse response = AutoCommandResponse.create(bytes);
-
-                    if (response.getErrorCode() == 0) {
-                        Log.i(TAG, "successfully locked the vehicle");
-                    }
-                    else {
-                        Log.i(TAG, "failed to lock the vehicle");
-                    }
-                } catch (CommandParseException e) {
-                    Log.e(TAG, "CommandParseException ", e);
-                }
-
+            public void response(int errorCode) {
+            ViewUtils.enableView(fragment.authView, true);
+            if (errorCode != 0) {
+                Log.e(TAG, "command send exception " + errorCode);
+                return;
+            }
+            // all went ok
             }
         });
     }
@@ -231,23 +211,15 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
         final LinkFragment fragment = adapter.getFragment(link);
 
         ViewUtils.enableView(fragment.authView, false);
-        link.sendCommand(AutoCommand.unlockDoorsCommand(), true, new Constants.DataResponseCallback() {
+        link.sendCommand(Command.DigitalKey.lockDoors(false), true, new Constants.ResponseCallback() {
             @Override
-            public void response(byte[] bytes, LinkException exception) {
+            public void response(int errorCode) {
                 ViewUtils.enableView(fragment.authView, true);
-                try {
-                    // generic ack/error response does not have a separate response class
-                    AutoCommandResponse response = AutoCommandResponse.create(bytes);
-
-                    if (response.getErrorCode() == 0) {
-                        Log.i(TAG, "successfully unlocked the vehicle");
-                    }
-                    else {
-                        Log.i(TAG, "failed to unlock the vehicle");
-                    }
-                } catch (CommandParseException e) {
-                    Log.e(TAG, "CommandParseException ", e);
+                if (errorCode != 0) {
+                    Log.e(TAG, "command send exception " + errorCode);
+                    return;
                 }
+                // all went ok
             }
         });
     }}

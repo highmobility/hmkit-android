@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
-import android.os.Debug;
 import android.util.Log;
 
 import com.high_mobility.HMLink.AccessCertificate;
@@ -324,12 +323,12 @@ class ScannedLink extends Link {
             ScannedLink.this.rssi = rssi;
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                if (rssiCallback != null) rssiCallback.response(null);
+                if (rssiCallback != null) rssiCallback.response(0);
             }
             else {
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                     Log.d(TAG, "read rssi failure " + status);
-                if (rssiCallback != null) rssiCallback.response(new LinkException(LinkException.LinkExceptionCode.BLUETOOTH_FAILURE));
+                if (rssiCallback != null) rssiCallback.response(LinkException.BLUETOOTH_FAILURE);
             }
         }
     };
