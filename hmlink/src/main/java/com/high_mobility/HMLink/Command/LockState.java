@@ -10,10 +10,10 @@ public class LockState extends Incoming {
 
     Command.DigitalKey.LockStatus lockStatus;
 
-    LockState(byte[] bytes) throws CommandParseException {
+    public LockState(byte[] bytes) throws CommandParseException {
         super(bytes);
-        if (bytes.length != 2) {
-            throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
+        if (bytes.length != 3) {
+            throw new CommandParseException();
         }
 
         lockStatus = bytes[1] == 0x00 ? Command.DigitalKey.LockStatus.UNLOCKED : Command.DigitalKey.LockStatus.LOCKED;

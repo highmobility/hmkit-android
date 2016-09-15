@@ -5,12 +5,12 @@ package com.high_mobility.HMLink.Command;
  */
 public class ControlMode extends Incoming {
     public enum Mode {
-        UNAVAILABLE((byte)0x01),
-        AVAILABLE((byte)0x02),
-        STARTED((byte)0x03),
-        FAILED_TO_START((byte)0x04),
-        ABORTED((byte)0x05),
-        ENDED((byte)0x06);
+        UNAVAILABLE((byte)0x00),
+        AVAILABLE((byte)0x01),
+        STARTED((byte)0x02),
+        FAILED_TO_START((byte)0x03),
+        ABORTED((byte)0x04),
+        ENDED((byte)0x05);
 
         private byte type;
 
@@ -24,20 +24,20 @@ public class ControlMode extends Incoming {
 
         static Mode controlModeFromByte(byte value) throws CommandParseException {
             switch (value) {
-                case 0x01:
+                case 0x00:
                     return UNAVAILABLE;
-                case 0x02:
+                case 0x01:
                     return AVAILABLE;
-                case 0x03:
+                case 0x02:
                     return STARTED;
-                case 0x04:
+                case 0x03:
                     return FAILED_TO_START;
-                case 0x05:
+                case 0x04:
                     return ABORTED;
-                case 0x06:
+                case 0x05:
                     return ENDED;
                 default:
-                    throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
+                    throw new CommandParseException();
             }
         }
     }
@@ -45,14 +45,12 @@ public class ControlMode extends Incoming {
     Mode mode;
     int angle;
 
-    // TODO: add more ivars
-
-    ControlMode(byte[] bytes) throws CommandParseException {
+    public ControlMode(byte[] bytes) throws CommandParseException {
         super(bytes);
-        if (bytes.length != 4) throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
+        if (bytes.length != 5) throw new CommandParseException();
 
-        mode = Mode.controlModeFromByte(bytes[1]);
-        angle = (bytes[2] << 8) + bytes[3];
+        mode = Mode.controlModeFromByte(bytes[2]);
+        angle = (bytes[3] << 8) + bytes[4];
     }
 
 

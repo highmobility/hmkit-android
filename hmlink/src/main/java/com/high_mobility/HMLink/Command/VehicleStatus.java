@@ -5,27 +5,7 @@ package com.high_mobility.HMLink.Command;
  */
 public class VehicleStatus extends Incoming {
     // TODO:
-    VehicleStatus(byte[] bytes) {
+    public VehicleStatus(byte[] bytes) throws CommandParseException {
         super(bytes);
     }
-
-
-    /*
-    Command.LockStatus lockStatus;
-
-    public GetVehicleStatusResponse(byte[] bytes) throws CommandParseException {
-        super(bytes);
-
-        if (bytes.length != 3) {
-            throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
-        }
-        else {
-            lockStatus = bytes[2] == 0x00 ? Command.LockStatus.UNLOCKED : Command.LockStatus.LOCKED;
-        }
-    }
-
-    public Command.LockStatus getLockStatus() {
-        return lockStatus;
-    }
-     */
 }

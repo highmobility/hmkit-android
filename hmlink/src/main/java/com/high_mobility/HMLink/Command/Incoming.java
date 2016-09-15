@@ -1,5 +1,7 @@
 package com.high_mobility.HMLink.Command;
 
+import android.test.ActivityUnitTestCase;
+
 import com.high_mobility.HMLink.Shared.ByteUtils;
 
 import java.util.Arrays;
@@ -10,12 +12,14 @@ import java.util.Arrays;
 public class Incoming extends Command {
     public static Incoming create(byte[] bytes) throws CommandParseException {
         if (bytes.length > 1) {
-
-            if (ByteUtils.startsWith(bytes, DigitalKey.LOCK_STATE.getIdentifier())) {
-                return new LockState(bytes);
+            if (ByteUtils.startsWith(bytes, Auto.CAPABILITIES.getIdentifier())) {
+                return new Capabilities(bytes);
             }
             else if (ByteUtils.startsWith(bytes, Auto.VEHICLE_STATUS.getIdentifier())) {
                 return new VehicleStatus(bytes);
+            }
+            else if (ByteUtils.startsWith(bytes, DigitalKey.LOCK_STATE.getIdentifier())) {
+                return new LockState(bytes);
             }
             else if (ByteUtils.startsWith(bytes, Chassis.WINDSHIELD_HEATING_STATE.getIdentifier())) {
                 return new VehicleStatus(bytes);
@@ -30,11 +34,11 @@ public class Incoming extends Command {
                 return new VehicleStatus(bytes);
             }
             else {
-                throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
+                throw new CommandParseException();
             }
         }
         else {
-            throw new CommandParseException(CommandParseException.CommandExceptionCode.PARSE_ERROR);
+            throw new CommandParseException();
         }
     }
 

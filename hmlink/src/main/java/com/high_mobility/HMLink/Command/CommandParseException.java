@@ -11,7 +11,7 @@ public class CommandParseException extends Exception{
 
     public CommandExceptionCode code;
 
-    public CommandParseException(CommandExceptionCode code) {
-        this.code = code;
+    public CommandParseException() {
+        this.code = CommandExceptionCode.PARSE_ERROR;
     }
 }

@@ -7,6 +7,7 @@ import android.os.HandlerThread;
 import android.util.Base64;
 import android.util.Log;
 
+import com.high_mobility.HMLink.Command.DeliveredParcels;
 import com.high_mobility.HMLink.DeviceCertificate;
 import com.high_mobility.btcore.HMBTCore;
 import com.highmobility.hmlink.BuildConfig;
