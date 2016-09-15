@@ -87,19 +87,19 @@ public class Command {
 
         // TODO:
         public static byte[] getWindshieldHeatingStateCommand() {
-            return null;
+            return GET_WINDSHIELD_HEATING_STATE.getIdentifier();
         }
 
-        public static byte[] setWindshieldHeatingCommand() {
-            return null;
+        public static byte[] setWindshieldHeatingCommand(boolean active) {
+            return ByteUtils.concatBytes(SET_WINDSHIELD_HEATING.getIdentifier(), (byte)(active ? 0x01 : 0x00));
         }
 
-        public static byte[] GetRooftopStateCommand() {
-            return null;
+        public static byte[] getRooftopStateCommand() {
+            return GET_ROOFTOP_STATE.getIdentifier();
         }
 
-        public static byte[] SetRooftopTransparencyCommand() {
-            return null;
+        public static byte[] setRooftopTransparencyCommand(RooftopState.State opaque) {
+            return ByteUtils.concatBytes(SET_ROOFTOP_TRANSPARENCY.getIdentifier(), (byte)(opaque == RooftopState.State.OPAQUE ? 0x01 : 0x00));
         }
 
         Chassis(byte[] identifier) {
@@ -118,8 +118,6 @@ public class Command {
         STOP_CONTROL_MODE(new byte[] { 0x00, (byte)0x44 }),
         CONTROL_COMMAND(new byte[] { 0x00, (byte)0x45 });
 
-        // TODO: verify
-
         public static byte[] controlModeAvailableCommand() {
             return GET_CONTROL_MODE.getIdentifier();
         }
@@ -133,7 +131,6 @@ public class Command {
         }
 
         public static byte[] controlCommandCommand(int speed, int angle) {
-            // TODO: test this
             byte msb = (byte) ((angle & 0xFF00) >> 8);
             byte lsb = (byte) (angle & 0xFF);
 
@@ -214,7 +211,6 @@ public class Command {
     public byte[] getBytes() {
         return bytes;
     }
-
 
     static int codeForByte(byte errorByte) {
         switch (errorByte) {

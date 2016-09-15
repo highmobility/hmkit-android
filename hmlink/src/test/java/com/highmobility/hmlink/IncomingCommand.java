@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 /**
  * Created by ttiganik on 15/09/16.
  */
-public class IncomingCommandTest {
+public class IncomingCommand {
     @Test
     public void capabilities_init() {
         assertTrue(true);
