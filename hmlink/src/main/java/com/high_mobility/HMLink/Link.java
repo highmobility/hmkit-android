@@ -14,7 +14,7 @@ public class Link {
     /// Bluetooth is off
     public static final int BLUETOOTH_OFF = 1;
     /// A custom command has not yet received a response
-    public static final int CUSTOM_COMMAND_IN_PROGRESS = 2;
+    public static final int COMMAND_IN_PROGRESS = 2;
     /// Framework encountered an internal error (commonly releated to invalid data received)
     public static final int INTERNAL_ERROR = 3;
     /// Bluetooth failed to act as expected
@@ -105,7 +105,7 @@ public class Link {
      *                       in it or not - defaults to true
      * @param responseCallback  ResponseCallback object that returns the errorCode if the command
      *                          failed or 0 if it succeeded.
-     *                          Error codes could be UNAUTHORIZED, CUSTOM_COMMAND_IN_PROGRESS, TIME_OUT.
+     *                          Error codes could be UNAUTHORIZED, COMMAND_IN_PROGRESS, TIME_OUT.
      */
     public void sendCommand(final byte[] bytes, boolean secureResponse, Constants.ResponseCallback responseCallback) {
         if (state != State.AUTHENTICATED) {
@@ -118,7 +118,7 @@ public class Link {
         if (sentCommand != null && sentCommand.finished == false) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(Broadcaster.TAG, "cant send command, custom command in progress");
-            responseCallback.response(Link.CUSTOM_COMMAND_IN_PROGRESS);
+            responseCallback.response(Link.COMMAND_IN_PROGRESS);
             return;
         }
 

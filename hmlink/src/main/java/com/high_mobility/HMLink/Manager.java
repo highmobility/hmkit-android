@@ -94,9 +94,11 @@ public class Manager {
         ble = new SharedBle(ctx);
         coreInterface = new BTCoreInterface(this);
 
-
         core.HMBTCoreInit(coreInterface);
         startClock();
+
+        broadcaster = new Broadcaster(this);
+        scanner = new Scanner(this);
     }
 
 
@@ -124,7 +126,6 @@ public class Manager {
      * @return The Broadcaster instance
      */
     public Broadcaster getBroadcaster() {
-        if (broadcaster == null) broadcaster = new Broadcaster(this);
         return broadcaster;
     }
 
@@ -134,7 +135,6 @@ public class Manager {
      */
 
     Scanner getScanner() {
-        if (scanner == null) scanner = new Scanner(this);
         return scanner;
     }
 

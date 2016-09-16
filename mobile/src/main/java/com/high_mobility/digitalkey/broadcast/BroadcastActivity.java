@@ -138,14 +138,14 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
     @Override
     public void onCommandReceived(Link link, byte[] bytes) {
         try {
-            Incoming notification = Incoming.create(bytes);
+            Incoming command = Incoming.create(bytes);
 
-            if (notification.is(Command.DigitalKey.LOCK_STATE)) {
-                LockState stateNotification = (LockState) notification;
-                Log.i(TAG, "LockStatusChanged " + stateNotification.getLockStatus());
+            if (command.is(Command.DigitalKey.LOCK_STATE)) {
+                LockState stateNotification = (LockState) command;
+                Log.i(TAG, "Lock status changed " + stateNotification.getLockStatus());
             }
-            else if (notification.is(Command.RemoteControl.CONTROL_MODE)) {
-                ControlMode controlModeNotification = (ControlMode) notification;
+            else if (command.is(Command.RemoteControl.CONTROL_MODE)) {
+                ControlMode controlModeNotification = (ControlMode) command;
                 Log.i(TAG, "Control Mode angle " + controlModeNotification.getAngle());
             }
         }

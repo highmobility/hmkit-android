@@ -136,7 +136,7 @@ public class Broadcaster implements SharedBleListener {
     /**
      * Start broadcasting the Broadcaster via BLE advertising.
      *
-     * @throws Link.    An exception with either UNSUPPORTED or BLUETOOTH_OFF code.
+     * @return Link.UNSUPPORTED, Link.BLUETOOTH_OFF, Link.BLUETOOTH_FAILURE
      */
     public int startBroadcasting() {
         if (state == State.BROADCASTING) {
@@ -156,11 +156,6 @@ public class Broadcaster implements SharedBleListener {
             return Link.BLUETOOTH_OFF;
         }
 
-        if (createGATTServer() == false) {
-            setState(State.BLUETOOTH_UNAVAILABLE);
-            return Link.BLUETOOTH_FAILURE;
-        }
-
         // start advertising
         if (mBluetoothLeAdvertiser == null) {
             mBluetoothLeAdvertiser = manager.ble.getAdapter().getBluetoothLeAdvertiser();
@@ -169,6 +164,11 @@ public class Broadcaster implements SharedBleListener {
                 setState(State.BLUETOOTH_UNAVAILABLE);
                 return Link.UNSUPPORTED;
             }
+        }
+
+        if (createGATTServer() == false) {
+            setState(State.BLUETOOTH_UNAVAILABLE);
+            return Link.BLUETOOTH_FAILURE;
         }
 
         final AdvertiseSettings settings = new AdvertiseSettings.Builder()
@@ -232,10 +232,9 @@ public class Broadcaster implements SharedBleListener {
      * connection to another broadcaster.
      *
      * @param certificate The certificate that can be used by the Device to authorised Links
-     * @return Link.INTERNAL_ERROR if the broadcaster's certificate hasn't been set, the given certificates
-     *                       providing serial doesn't match with this broadcaster's serial or the
-     *                       certificate is null.
-     *                       Link.STORAGE_FULL if the storage is full.
+     * @return Link.INTERNAL_ERROR if the given certificates providing serial doesn't match with
+     *                      broadcaster's serial or the certificate is null.
+     *         Link.STORAGE_FULL if the storage is full.
      */
     public int registerCertificate(AccessCertificate certificate)  {
         if (manager.certificate == null) {
