@@ -232,11 +232,11 @@ public class Broadcaster implements SharedBleListener {
      * connection to another broadcaster.
      *
      * @param certificate The certificate that can be used by the Device to authorised Links
-     * @throws Link.When this broadcaster's certificate hasn't been set, the given certificates
-     *                       providing serial doesn't match with this broadcaster's serial or
-     *                       the storage is full.
+     * @return Link.INTERNAL_ERROR if the broadcaster's certificate hasn't been set, the given certificates
+     *                       providing serial doesn't match with this broadcaster's serial or the
+     *                       certificate is null.
+     *                       Link.STORAGE_FULL if the storage is full.
      */
-    // TODO: update comment
     public int registerCertificate(AccessCertificate certificate)  {
         if (manager.certificate == null) {
             return Link.INTERNAL_ERROR;
@@ -253,9 +253,8 @@ public class Broadcaster implements SharedBleListener {
      * Stores a Certificate to Device's storage. This certificate is usually read by other Devices.
      *
      * @param certificate The certificate that will be saved to the database
-     * @throws Link.When the storage is full or certificate has not been set
+     * @return Link.STORAGE_FULL if the storage is full or Link.INTERNAL_ERROR if certificate is null.
      */
-    // TODO: comment
     public int storeCertificate(AccessCertificate certificate) {
         return storage.storeCertificate(certificate);
     }
@@ -265,17 +264,18 @@ public class Broadcaster implements SharedBleListener {
      * accompanying registered certificate are deleted from the storage.
      *
      * @param serial The 9-byte serial number of the access providing broadcaster
-     * @throws Link.When there are no matching certificate pairs for this serial.
+     * @return Link.INTERNAL_ERROR if there are no matching certificate pairs for this serial.
      */
-    // TODO: comment
     public int revokeCertificate(byte[] serial) {
         if (storage.certWithGainingSerial(serial) == null
                 || storage.certWithProvidingSerial(serial) == null) {
             return Link.INTERNAL_ERROR;
         }
 
-        if (storage.deleteCertificateWithGainingSerial(serial) == false) return Link.INTERNAL_ERROR;
-        if (storage.deleteCertificateWithProvidingSerial(serial) == false) return Link.INTERNAL_ERROR;
+        boolean deleteFailed = false;
+        if (storage.deleteCertificateWithGainingSerial(serial) == false) deleteFailed = true;
+        if (storage.deleteCertificateWithProvidingSerial(serial) == false) deleteFailed = true;
+        if (deleteFailed) return Link.INTERNAL_ERROR;
 
         return 0;
     }

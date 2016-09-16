@@ -103,10 +103,10 @@ public class Link {
      * @param bytes             The bytes that will be sent inside the secure container.
      * @param secureResponse    Optional boolean defining if the response has a secure HMAC element
      *                       in it or not - defaults to true
-     * @param responseCallback  DataResponseCallback object that returns the response's byte array
-     *                          or a Link.if the command cannot be sent or it timed out.
+     * @param responseCallback  ResponseCallback object that returns the errorCode if the command
+     *                          failed or 0 if it succeeded.
+     *                          Error codes could be UNAUTHORIZED, CUSTOM_COMMAND_IN_PROGRESS, TIME_OUT.
      */
-    // TODO: comment
     public void sendCommand(final byte[] bytes, boolean secureResponse, Constants.ResponseCallback responseCallback) {
         if (state != State.AUTHENTICATED) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())

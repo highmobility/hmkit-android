@@ -20,7 +20,7 @@ public class DeliveredParcels extends Incoming {
 
         if (count < 1) return;
 
-        if (bytes.length < 3 + count * 8) throw new CommandParseException(); // TODO: test
+        if (bytes.length < 3 + count * 8) throw new CommandParseException();
 
         deliveredParcels = new String[count];
         for (int i = 0; i < count; i++) {
@@ -31,26 +31,5 @@ public class DeliveredParcels extends Incoming {
 
     public String[] getDeliveredParcels() {
         return deliveredParcels;
-    }
-
-    static void test() {
-        // TODO: move to test target
-        byte[] bytes = ByteUtils.bytesFromHex("***REMOVED***");
-
-        DeliveredParcels parcels = null;
-
-        try {
-            parcels = new DeliveredParcels(bytes);
-        } catch (CommandParseException e) {
-            Log.e(TAG, "init parse error");
-            e.printStackTrace();
-        }
-
-        if (parcels.deliveredParcels.length != 2) Log.e(TAG, "invalid parcel count");
-
-        if (parcels.deliveredParcels[0].equals("4B87EFA8B4A6EC08") == false) Log.e(TAG, "invalid parcel 1 " + parcels.deliveredParcels[0]);
-        if (parcels.deliveredParcels[1].equals("4B87EFA8B4A6EC09") == false) Log.e(TAG, "invalid parcel 2 " + parcels.deliveredParcels[1]);
-
-        Log.d(TAG, "parcels pass");
     }
 }

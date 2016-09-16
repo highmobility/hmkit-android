@@ -147,7 +147,7 @@ class ScannedLink extends Link {
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            // TODO: handle status
+            // TODO: handle status.. 
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())

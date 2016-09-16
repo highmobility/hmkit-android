@@ -80,10 +80,9 @@ class Scanner {
     /**
      * Start scanning for nearby links.
      *
-     * @throws Link.UNSUPPORTED: BLE is not supported with this device
-     *                       BLUETOOTH_OFF: BLE is turned off
+     * @return 0 if succeeded or    Link.UNSUPPORTED if BLE is not supported with this device
+     *                              Link.BLUETOOTH_OFF if BLE is turned off
      */
-    // TODO: comment
     public int startScanning() {
         // = new byte[][] { array1, array2, array3, array4, array5 };
         if (getState() == State.SCANNING) return 0;

@@ -25,7 +25,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         super.onConnectionStateChange(device, status, newState);
         if (status != BluetoothGatt.GATT_SUCCESS) {
             Log.e(TAG, "connecting failed with status" + status);
-            // TODO: this should be handled
+            // TOD1O: this should be handled
         }
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "onConnectionStateChange " + newState);

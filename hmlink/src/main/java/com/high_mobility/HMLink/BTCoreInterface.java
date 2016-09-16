@@ -50,7 +50,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMBTHalConnect(byte[] mac) {
-        manager.getScanner().connect(mac); // TODO: what if fails?
+        manager.getScanner().connect(mac);
         return 0;
     }
 
