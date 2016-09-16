@@ -15,11 +15,10 @@ import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.high_mobility.HMLink.LinkException;
 import com.high_mobility.HMLink.Shared.ScannedLink;
 import com.high_mobility.HMLink.Shared.Scanner;
 import com.high_mobility.HMLink.Shared.ScannerListener;
-import com.high_mobility.HMLink.Shared.Manager;
+import com.high_mobility.HMLink.Manager;
 import com.high_mobility.digitalkey.R;
 
 import butterknife.BindView;
@@ -42,7 +41,7 @@ public class ScanActivity extends AppCompatActivity implements ScannerListener {
         if (scanSwitch.isChecked() && scanner.getState() != Scanner.State.SCANNING) {
             try {
                 scanner.startScanning();
-            } catch (LinkException e) {
+            } catch (Link.e) {
                 e.printStackTrace();
             }
         }

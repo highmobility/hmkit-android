@@ -11,19 +11,18 @@ import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.high_mobility.HMLink.Command.Command;
-import com.high_mobility.HMLink.Command.ControlMode;
-import com.high_mobility.HMLink.Command.Incoming;
-import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.LockState;
-import com.high_mobility.HMLink.Shared.BroadcasterListener;
-import com.high_mobility.HMLink.Shared.ConnectedLink;
-import com.high_mobility.HMLink.Shared.ConnectedLinkListener;
-import com.high_mobility.HMLink.Shared.Constants;
-import com.high_mobility.HMLink.LinkException;
-import com.high_mobility.HMLink.Shared.Broadcaster;
-import com.high_mobility.HMLink.Shared.Link;
-import com.high_mobility.HMLink.Shared.Manager;
+import com.high_mobility.HMLink.Command;
+import com.high_mobility.HMLink.ControlMode;
+import com.high_mobility.HMLink.Incoming;
+import com.high_mobility.HMLink.CommandParseException;
+import com.high_mobility.HMLink.LockState;
+import com.high_mobility.HMLink.BroadcasterListener;
+import com.high_mobility.HMLink.ConnectedLink;
+import com.high_mobility.HMLink.ConnectedLinkListener;
+import com.high_mobility.HMLink.Constants;
+import com.high_mobility.HMLink.Broadcaster;
+import com.high_mobility.HMLink.Link;
+import com.high_mobility.HMLink.Manager;
 import com.high_mobility.digitalkey.R;
 
 /**

@@ -1,14 +1,14 @@
 package com.highmobility.hmlink;
 
-import com.high_mobility.HMLink.Command.Command;
-import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.ControlMode;
-import com.high_mobility.HMLink.Command.DeliveredParcels;
-import com.high_mobility.HMLink.Command.LockState;
-import com.high_mobility.HMLink.Command.RooftopState;
-import com.high_mobility.HMLink.Command.VehicleStatus;
-import com.high_mobility.HMLink.Command.WindshieldHeatingState;
-import com.high_mobility.HMLink.Shared.ByteUtils;
+import com.high_mobility.HMLink.Command;
+import com.high_mobility.HMLink.CommandParseException;
+import com.high_mobility.HMLink.ControlMode;
+import com.high_mobility.HMLink.DeliveredParcels;
+import com.high_mobility.HMLink.LockState;
+import com.high_mobility.HMLink.RooftopState;
+import com.high_mobility.HMLink.VehicleStatus;
+import com.high_mobility.HMLink.WindshieldHeatingState;
+import com.high_mobility.HMLink.ByteUtils;
 
 import org.junit.Test;
 

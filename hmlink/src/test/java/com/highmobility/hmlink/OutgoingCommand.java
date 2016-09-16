@@ -1,8 +1,8 @@
 package com.highmobility.hmlink;
 
-import com.high_mobility.HMLink.Command.Command;
-import com.high_mobility.HMLink.Command.RooftopState;
-import com.high_mobility.HMLink.Shared.ByteUtils;
+import com.high_mobility.HMLink.Command;
+import com.high_mobility.HMLink.RooftopState;
+import com.high_mobility.HMLink.ByteUtils;
 
 import org.junit.Test;
 

@@ -6,9 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
-import com.high_mobility.HMLink.DeviceCertificate;
-import com.high_mobility.HMLink.Shared.ByteUtils;
-import com.high_mobility.HMLink.Shared.Manager;
+import com.high_mobility.HMLink.Crypto.DeviceCertificate;
+import com.high_mobility.HMLink.ByteUtils;
+import com.high_mobility.HMLink.Manager;
 import com.high_mobility.digitalkey.broadcast.BroadcastActivity;
 
 import butterknife.BindView;

@@ -13,16 +13,15 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.high_mobility.HMLink.Shared.Broadcaster;
-import com.high_mobility.HMLink.Shared.ByteUtils;
-import com.high_mobility.HMLink.Shared.ConnectedLink;
-import com.high_mobility.HMLink.Shared.ConnectedLinkListener;
-import com.high_mobility.HMLink.Shared.Link;
-import com.high_mobility.HMLink.Shared.BroadcasterListener;
-import com.high_mobility.HMLink.Shared.Constants;
-import com.high_mobility.HMLink.LinkException;
-import com.high_mobility.HMLink.DeviceCertificate;
-import com.high_mobility.HMLink.Shared.Manager;
+import com.high_mobility.HMLink.Broadcaster;
+import com.high_mobility.HMLink.ByteUtils;
+import com.high_mobility.HMLink.ConnectedLink;
+import com.high_mobility.HMLink.ConnectedLinkListener;
+import com.high_mobility.HMLink.Link;
+import com.high_mobility.HMLink.BroadcasterListener;
+import com.high_mobility.HMLink.Constants;
+import com.high_mobility.HMLink.Crypto.DeviceCertificate;
+import com.high_mobility.HMLink.Manager;
 
 public class BroadcastActivity extends WearableActivity implements BroadcasterListener, ConnectedLinkListener {
     private static final byte[] CA_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");

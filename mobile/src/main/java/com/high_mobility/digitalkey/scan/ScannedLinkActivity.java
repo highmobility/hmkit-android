@@ -8,13 +8,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.high_mobility.HMLink.Shared.Constants;
-import com.high_mobility.HMLink.LinkException;
-import com.high_mobility.HMLink.Shared.ByteUtils;
-import com.high_mobility.HMLink.Shared.Link;
-import com.high_mobility.HMLink.Shared.LinkListener;
+import com.high_mobility.HMLink.Constants;
+import com.high_mobility.HMLink.ByteUtils;
+import com.high_mobility.HMLink.Link;
+import com.high_mobility.HMLink.LinkListener;
 import com.high_mobility.HMLink.Shared.ScannedLink;
-import com.high_mobility.HMLink.Shared.Manager;
+import com.high_mobility.HMLink.Manager;
 import com.high_mobility.digitalkey.R;
 
 import butterknife.BindView;
@@ -45,7 +44,7 @@ public class ScannedLinkActivity extends AppCompatActivity {
             public void onClick(View v) {
                 link.sendCommand(ByteUtils.bytesFromHex(commandEditText.getText().toString()), true, new Constants.DataResponseCallback() {
                     @Override
-                    public void response(byte[] bytes, LinkException exception) {
+                    public void response(byte[] bytes, Link.exception) {
                         Log.d(TAG, "command response " + ByteUtils.hexFromBytes(bytes) + " " + (exception != null ? exception.code : ""));
                     }
                 });
@@ -61,7 +60,7 @@ public class ScannedLinkActivity extends AppCompatActivity {
             if (link.getState() == Link.State.CONNECTED && scannedLink.versionInfo() == null) {
                 scannedLink.readVersionInfo(new Constants.ResponseCallback() {
                     @Override
-                    public void response(LinkException exception) {
+                    public void response(Link.exception) {
                         Log.d(TAG, "version info " + scannedLink.versionInfo());
                     }
                 });

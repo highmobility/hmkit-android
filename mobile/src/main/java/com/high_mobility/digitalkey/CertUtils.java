@@ -4,11 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.high_mobility.HMLink.AccessCertificate;
-import com.high_mobility.HMLink.Shared.Broadcaster;
-import com.high_mobility.HMLink.Shared.ByteUtils;
-import com.high_mobility.HMLink.Crypto;
-import com.high_mobility.HMLink.LinkException;
+import com.high_mobility.HMLink.Crypto.AccessCertificate;
+import com.high_mobility.HMLink.Broadcaster;
+import com.high_mobility.HMLink.ByteUtils;
+import com.high_mobility.HMLink.Crypto.Crypto;
 
 import java.util.Calendar;
 import java.util.Date;
