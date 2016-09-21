@@ -23,21 +23,21 @@ public class OutgoingCommand {
     @Test
     public void setWindshieldHeatingState_active() {
         String waitingForBytes = "005C01";
-        String commandBytes = ByteUtils.hexFromBytes(Command.Chassis.setWindshieldHeatingCommand(true));
+        String commandBytes = ByteUtils.hexFromBytes(Command.Chassis.setWindshieldHeating(true));
         assertTrue(waitingForBytes.equals(commandBytes));
     }
 
     @Test
     public void setRooftopTransparency_opaque() {
         String waitingForBytes = "005F01";
-        String commandBytes = ByteUtils.hexFromBytes(Command.Chassis.setRooftopTransparencyCommand(RooftopState.State.OPAQUE));
+        String commandBytes = ByteUtils.hexFromBytes(Command.Chassis.setRooftopTransparency(RooftopState.State.OPAQUE));
         assertTrue(waitingForBytes.equals(commandBytes));
     }
 
     @Test
     public void controlCommand() {
         String waitingForBytes = "0045030032";
-        String commandBytes = ByteUtils.hexFromBytes(Command.RemoteControl.controlCommandCommand(3, 50));
+        String commandBytes = ByteUtils.hexFromBytes(Command.RemoteControl.controlCommand(3, 50));
         assertTrue(waitingForBytes.equals(commandBytes));
     }
 

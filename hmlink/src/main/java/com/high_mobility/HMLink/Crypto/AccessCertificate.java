@@ -88,7 +88,7 @@ public class AccessCertificate extends Certificate {
 
     /**
      * @return  The permissions given for the certificate, up to 16 bytes and can both contain
-     *          arbitrary data as well as permission bytes that correspond to the Auto API.
+     *          arbitrary data as well as permission bytes that correspond to the General API.
      */
     public byte[] getPermissions() {
         int length = bytes[92];

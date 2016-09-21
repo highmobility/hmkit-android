@@ -1,13 +1,14 @@
 package com.high_mobility.HMLink;
 
-import android.util.Log;
-
 import java.util.Arrays;
 
 /**
  * Created by ttiganik on 13/09/16.
+ *
+ * This is an evented notification that is sent from the car every time a new parcel is delivered or
+ * removed. This notification is also sent when a Get Delivered Parcels is received by the car.
  */
-public class DeliveredParcels extends Incoming {
+public class DeliveredParcels extends Notification {
     static final String TAG = "DeliveredParcels";
     String[] deliveredParcels;
 
@@ -29,6 +30,10 @@ public class DeliveredParcels extends Incoming {
         }
     }
 
+    /**
+     *
+     * @return Array of tracking numbers of the parcels.
+     */
     public String[] getDeliveredParcels() {
         return deliveredParcels;
     }

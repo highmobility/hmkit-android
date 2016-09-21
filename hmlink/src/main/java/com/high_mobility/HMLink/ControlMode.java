@@ -2,8 +2,15 @@ package com.high_mobility.HMLink;
 
 /**
  * Created by ttiganik on 13/09/16.
+ *
+ * This is an evented notification that is sent from the car every time the remote control mode changes.
+ * It is also sent when a Get Control Mode is received by the car. The new mode is
+ * included in the notification and may be the result of both user or car triggered action.
  */
-public class ControlMode extends Incoming {
+public class ControlMode extends Notification {
+    /**
+     * The possible control modes
+     */
     public enum Mode {
         UNAVAILABLE((byte)0x00),
         AVAILABLE((byte)0x01),
@@ -53,11 +60,18 @@ public class ControlMode extends Incoming {
         angle = (bytes[3] << 8) + bytes[4];
     }
 
-
+    /**
+     *
+     * @return the angle
+     */
     public int getAngle() {
         return angle;
     }
 
+    /**
+     *
+     * @return the control mode
+     */
     public Mode getMode() {
         return mode;
     }

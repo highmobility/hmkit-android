@@ -2,14 +2,14 @@ package com.high_mobility.HMLink;
 
 /**
  * Created by ttiganik on 13/09/16.
+ *
+ * This is an evented notification that is sent from the car every time the rooftop state changes.
+ * It is also sent when a Get Rooftop State is received by the car.
  */
-public class RooftopState extends Incoming {
-    private boolean opaque;
-
-    public boolean isOpaque() {
-        return opaque;
-    }
-
+public class RooftopState extends Notification {
+    /**
+     * The possible states of the rooftop.
+     */
     public enum State {
         TRANSPARENT, OPAQUE
     }
@@ -29,6 +29,10 @@ public class RooftopState extends Incoming {
         }
     }
 
+    /**
+     *
+     * @return the state of the rooftop
+     */
     public State getState() {
         return state;
     }

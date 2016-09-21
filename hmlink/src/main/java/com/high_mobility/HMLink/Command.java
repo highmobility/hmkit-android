@@ -4,37 +4,39 @@ package com.high_mobility.HMLink;
  * Created by ttiganik on 25/05/16.
  */
 public class Command {
-    static int errorCode(byte[] bytes) {
-        if (bytes != null && bytes.length > 1) {
-            if (bytes[0] != 0x01 && bytes[0] != 0x02) return Link.INTERNAL_ERROR;
-
-            if (bytes[0] == 0x01) return 0;
-
-            return codeForByte(bytes[1]);
-        }
-
-        return Link.INTERNAL_ERROR;
-    }
-
     interface Type {
         byte[] getIdentifier();
     }
 
-    public enum Auto implements Type {
+    /**
+     * Commands of the General category of the Auto API.
+     */
+    public enum General implements Type {
         GET_CAPABILITIES(new byte[] { 0x00, (byte)0x10 }),
         CAPABILITIES(new byte[] { 0x00, (byte)0x11 }),
         GET_VEHICLE_STATUS(new byte[] { 0x00, (byte)0x12 }),
         VEHICLE_STATUS(new byte[] { 0x00, (byte)0x13 });
 
+        /**
+         * Get the vehicle capabilities. The car will respond with the Capabilities notification that
+         * manifests all different APIs that are enabled on the specific car.
+         *
+         * @return the command bytes
+         */
         public static byte[] getCapabilities() {
             return GET_VEHICLE_STATUS.getIdentifier();
         }
 
+        /**
+         * Get the vehicle status. The car will respond with the Vehicle Status notification.
+         *
+         * @return the command bytes
+         */
         public static byte[] getVehicleStatus() {
             return GET_VEHICLE_STATUS.getIdentifier();
         }
 
-        Auto(byte[] identifier) {
+        General(byte[] identifier) {
             this.identifier = identifier;
         }
         private byte[] identifier;
@@ -43,19 +45,30 @@ public class Command {
         }
     }
 
+    /**
+     * Commands of the Digital Key category of the Auto API
+     */
     public enum DigitalKey implements Type {
         GET_LOCK_STATE(new byte[] { 0x00, (byte)0x20 }),
         LOCK_STATE(new byte[] { 0x00, (byte)0x21 }),
         LOCK_UNLOCK(new byte[] { 0x00, (byte)0x22 });
 
-        public enum LockStatus {
-            UNLOCKED, LOCKED
-        }
-
+        /**
+         * Get the lock state, which either locked or unlocked. The car will respond with the
+         * Lock State notification.
+         *
+         * @return the command bytes
+         */
         public static byte[] getLockState() {
             return GET_LOCK_STATE.getIdentifier();
         }
 
+        /**
+         * Attempt to lock or unlock the car. The result is received through the Lock State notification.
+         *
+         * @param lock whether to lock or unlock the car
+         * @return the command bytes
+         */
         public static byte[] lockDoors(boolean lock) {
             byte[] bytes = new byte[3];
             bytes[0] = LOCK_UNLOCK.getIdentifier()[0];
@@ -73,6 +86,9 @@ public class Command {
         }
     }
 
+    /**
+     * Commands of the Chassis category of the Auto API.
+     */
     public enum Chassis implements Type {
         GET_WINDSHIELD_HEATING_STATE(new byte[] { 0x00, (byte)0x5A }),
         WINDSHIELD_HEATING_STATE(new byte[] { 0x00, (byte)0x5B }),
@@ -81,20 +97,44 @@ public class Command {
         ROOFTOP_STATE(new byte[] { 0x00, (byte)0x5E }),
         SET_ROOFTOP_TRANSPARENCY(new byte[] { 0x00, (byte)0x5F });
 
-        public static byte[] getWindshieldHeatingStateCommand() {
+        /**
+         * Get the windshield heating state. The car will respond with the Windshield Heating State
+         * notification.
+         *
+         * @return the command bytes
+         */
+        public static byte[] getWindshieldHeatingState() {
             return GET_WINDSHIELD_HEATING_STATE.getIdentifier();
         }
 
-        public static byte[] setWindshieldHeatingCommand(boolean active) {
+        /**
+         * Set the windshield heating state. The result is sent through the Windshield Heating State
+         * notification.
+         *
+         * @param active whether the heating should be active or not
+         * @return the command bytes
+         */
+        public static byte[] setWindshieldHeating(boolean active) {
             return ByteUtils.concatBytes(SET_WINDSHIELD_HEATING.getIdentifier(), (byte)(active ? 0x01 : 0x00));
         }
 
-        public static byte[] getRooftopStateCommand() {
+        /**
+         * Get the rooftop state. The car will respond with the Rooftop State notification.
+         *
+         *  @return the command bytes
+         */
+        public static byte[] getRooftopState() {
             return GET_ROOFTOP_STATE.getIdentifier();
         }
 
-        public static byte[] setRooftopTransparencyCommand(RooftopState.State opaque) {
-            return ByteUtils.concatBytes(SET_ROOFTOP_TRANSPARENCY.getIdentifier(), (byte)(opaque == RooftopState.State.OPAQUE ? 0x01 : 0x00));
+        /**
+         * Set the rooftop state. The result is sent through the evented Rooftop State notification.
+         *
+         * @param state the rooftop transparency state
+         * @return the command bytes
+         */
+        public static byte[] setRooftopTransparency(RooftopState.State state) {
+            return ByteUtils.concatBytes(SET_ROOFTOP_TRANSPARENCY.getIdentifier(), (byte)(state == RooftopState.State.OPAQUE ? 0x01 : 0x00));
         }
 
         Chassis(byte[] identifier) {
@@ -106,6 +146,9 @@ public class Command {
         }
     }
 
+    /**
+     * Commands of the Remote Control category of the Auto API.
+     */
     public enum RemoteControl implements Type {
         GET_CONTROL_MODE(new byte[] { 0x00, (byte)0x41 }),
         CONTROL_MODE(new byte[] { 0x00, (byte)0x42 }),
@@ -113,19 +156,46 @@ public class Command {
         STOP_CONTROL_MODE(new byte[] { 0x00, (byte)0x44 }),
         CONTROL_COMMAND(new byte[] { 0x00, (byte)0x45 });
 
-        public static byte[] controlModeAvailableCommand() {
+        /**
+         * Get the current remote control mode. The car will respond with the Control Mode notification.
+         *
+         * @return the command bytes
+         */
+        public static byte[] getControlMode() {
             return GET_CONTROL_MODE.getIdentifier();
         }
 
-        public static byte[] startControlModeCommand() {
+        /**
+         * Attempt to start the control mode of the car. The result is sent through the
+         * Control Mode notification with either Control Started or Control Failed to Start mode.
+         *
+         * @return the command bytes
+         */
+        public static byte[] startControlMode() {
             return START_CONTROL_MODE.getIdentifier();
         }
 
-        public static byte[] stopControlModeCommand() {
+        /**
+         * Stop the control mode of the car. The result is sent through the Control Mode
+         * notification with Control Ended mode.
+         *
+         * @return the command bytes
+         */
+        public static byte[] stopControlMode() {
             return STOP_CONTROL_MODE.getIdentifier();
         }
 
-        public static byte[] controlCommandCommand(int speed, int angle) {
+        /**
+         * To be sent every time the controls for the car wants to be changed or once a second if
+         * the controls remain the same. If the car does not receive the command every second it
+         * will stop the control mode.
+         *
+         * @param speed Speed in km/h, can range between -5 to 5 whereas a negative speed will
+         *              reverse the car.
+         * @param angle angle of the car.
+         * @return the command bytes
+         */
+        public static byte[] controlCommand(int speed, int angle) {
             byte msb = (byte) ((angle & 0xFF00) >> 8);
             byte lsb = (byte) (angle & 0xFF);
 
@@ -141,9 +211,18 @@ public class Command {
         }
     }
 
+    /**
+     * Commands of the Health category of the Auto API.
+     */
     public enum Health implements Type {
         HEART_RATE(new byte[] { 0x00, (byte)0x60 });
 
+        /**
+         * Send the driver heart rate to the car.
+         *
+         * @param heartRate The heart rate in BPM.
+         * @return the command bytes
+         */
         public static byte[] heartRate(int heartRate) {
             return ByteUtils.concatBytes(HEART_RATE.getIdentifier(), (byte)heartRate);
         }
@@ -157,9 +236,18 @@ public class Command {
         }
     }
 
+    /**
+     * Commands of the Point Of Interest category of the Auto API.
+     */
     public enum PointOfInterest implements Type {
         SET_DESTINATION(new byte[] { 0x00, (byte)0x70 });
 
+        /**
+         * Set the navigation destination. This will be forwarded to the navigation system of the car.
+         *
+         * @param destination the destination
+         * @return the command bytes
+         */
         public static byte[] setDestination(String destination) {
             return ByteUtils.concatBytes(SET_DESTINATION.getIdentifier(), destination.getBytes());
         }
@@ -173,10 +261,19 @@ public class Command {
         }
     }
 
+    /**
+     * Commands of the Parcel Delivery category of the Auto API.
+     */
     public enum ParcelDelivery implements Type {
         GET_DELIVERED_PARCELS(new byte[] { 0x00, (byte)0x60 }),
         DELIVERED_PARCELS(new byte[] { 0x00, (byte)0x61 });
 
+        /**
+         * Get information about all parcels that have been delivered to the car. The car will
+         * respond with the Delivered Parcels notification.
+         *
+         * @return the command bytes
+         */
         public static byte[] getDeliveredParcels() {
             return GET_DELIVERED_PARCELS.getIdentifier();
         }
@@ -187,37 +284,6 @@ public class Command {
         private byte[] identifier;
         public byte[] getIdentifier() {
             return identifier;
-        }
-    }
-
-    byte[] identifier;
-    byte[] bytes;
-
-    Command(byte[] bytes) {
-        this.bytes = bytes;
-    }
-
-    public byte[] getIdentifier() {
-        return identifier;
-    }
-
-    public byte[] getBytes() {
-        return bytes;
-    }
-
-    static int codeForByte(byte errorByte) {
-        switch (errorByte) {
-            case 0x05:
-                return Link.STORAGE_FULL;
-            case 0x09:
-                return Link.TIME_OUT;
-            case 0x07:
-                return Link.UNAUTHORIZED;
-            case 0x06:
-            case 0x08:
-                return Link.UNAUTHORIZED;
-            default:
-                return Link.INTERNAL_ERROR;
         }
     }
 }
