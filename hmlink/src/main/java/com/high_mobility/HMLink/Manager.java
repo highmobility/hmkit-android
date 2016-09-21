@@ -76,7 +76,7 @@ public class Manager {
      */
     public void initialize(DeviceCertificate certificate, byte[] privateKey, byte[] issuerPublicKey, Context applicationContext) throws IllegalArgumentException {
         Log.i(Broadcaster.TAG, "Initialized High-Mobility SDK with certificate" + certificate.toString());
-        if (privateKey.length != 16 || issuerPublicKey.length != 64 || certificate == null || applicationContext == null) {
+        if (privateKey.length != 32 || issuerPublicKey.length != 64 || certificate == null || applicationContext == null) {
             throw new IllegalArgumentException();
         }
 
