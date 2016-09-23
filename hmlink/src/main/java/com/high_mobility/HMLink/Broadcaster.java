@@ -199,13 +199,7 @@ public class Broadcaster implements SharedBleListener {
                 Log.d(TAG, "already not broadcasting");
         }
 
-        // stopAdvertising cancels all the BT connections as well but there is no callback.
-        // lose links manually
-        for (int i = getLinks().size() - 1; i >= 0; i--) {
-            ConnectedLink device = getLinkForMac(getLinks().get(i).getAddressBytes());
-            manager.core.HMBTCorelinkDisconnect(manager.coreInterface, device.getAddressBytes());
-        }
-
+        // stopAdvertising cancels all the BT connections as well.
         if (mBluetoothLeAdvertiser != null) {
             mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
         }
