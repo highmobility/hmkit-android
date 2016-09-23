@@ -178,7 +178,8 @@ public class Broadcaster implements SharedBleListener {
                 .setTxPowerLevel(txPowerLevel)
                 .build();
 
-        final UUID advertiseUUID = ByteUtils.UUIDFromByteArray(ByteUtils.concatBytes(manager.certificate.getIssuer(), manager.certificate.getAppIdentifier()));
+        final UUID advertiseUUID = ByteUtils.UUIDFromByteArray(ByteUtils.concatBytes(manager.certificate.getIssuer(),
+                manager.certificate.getAppIdentifier()));
 
         final AdvertiseData data = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
@@ -198,22 +199,18 @@ public class Broadcaster implements SharedBleListener {
                 Log.d(TAG, "already not broadcasting");
         }
 
-        try {
-            // stopAdvertising cancels all the BT connections as well. this will invoke onLostLink
-            // eventually
-            for (int i = getLinks().size() - 1; i >= 0; i--) {
-                GATTServer.cancelConnection(getLinks().get(i).btDevice);
-            }
-
-            if (mBluetoothLeAdvertiser != null) {
-                mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
-            }
-
-            setState(State.IDLE);
+        // stopAdvertising cancels all the BT connections as well but there is no callback.
+        // lose links manually
+        for (int i = getLinks().size() - 1; i >= 0; i--) {
+            ConnectedLink device = getLinkForMac(getLinks().get(i).getAddressBytes());
+            manager.core.HMBTCorelinkDisconnect(manager.coreInterface, device.getAddressBytes());
         }
-        catch (Exception e) {
-            e.printStackTrace();
+
+        if (mBluetoothLeAdvertiser != null) {
+            mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
         }
+
+        setState(State.IDLE);
     }
 
     /**
@@ -342,7 +339,8 @@ public class Broadcaster implements SharedBleListener {
     }
 
     boolean deviceExitedProximity(HMDevice device) {
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+            Log.d(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
         final ConnectedLink link = getLinkForMac(device.getMac());
         if (link == null) return false;
@@ -522,7 +520,8 @@ public class Broadcaster implements SharedBleListener {
     private final AdvertiseCallback advertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "Start advertise " + manager.ble.getAdapter().getName());
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+                Log.d(TAG, "Start advertise " + manager.ble.getAdapter().getName());
             setState(State.BROADCASTING);
         }
 
