@@ -283,12 +283,6 @@ public class Broadcaster implements SharedBleListener {
     public void reset() {
         storage.resetStorage();
         stopBroadcasting();
-
-        if (GATTServer != null) {
-            GATTServer.clearServices();
-            GATTServer.close();
-            GATTServer = null;
-        }
     }
 
     Broadcaster(Manager manager) {
