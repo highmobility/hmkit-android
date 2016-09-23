@@ -3,11 +3,11 @@ package com.high_mobility.HMLink;
 /**
  * Created by ttiganik on 13/09/16.
  *
- * This is an evented notification that is sent from the car every time the remote control mode changes.
+ * This is an evented command that is sent from the car every time the remote control mode changes.
  * It is also sent when a Get Control Mode is received by the car. The new mode is
- * included in the notification and may be the result of both user or car triggered action.
+ * included in the command and may be the result of both user or car triggered action.
  */
-public class ControlMode extends Notification {
+public class ControlMode extends IncomingCommand {
     /**
      * The possible control modes
      */

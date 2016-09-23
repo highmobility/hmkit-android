@@ -46,7 +46,7 @@ public class Command {
     }
 
     /**
-     * Commands of the Digital Key category of the Auto API
+     * Commands of the Digital Key category of the Auto API.
      */
     public enum DigitalKey implements Type {
         GET_LOCK_STATE(new byte[] { 0x00, (byte)0x20 }),

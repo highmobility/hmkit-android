@@ -5,8 +5,8 @@ import java.util.Arrays;
 /**
  * Created by ttiganik on 07/06/16.
  */
-public class Notification {
-    public static Notification create(byte[] bytes) throws CommandParseException {
+public class IncomingCommand {
+    public static IncomingCommand create(byte[] bytes) throws CommandParseException {
         if (bytes.length > 1) {
             if (ByteUtils.startsWith(bytes, Command.General.CAPABILITIES.getIdentifier())) {
                 return new Capabilities(bytes);
@@ -69,7 +69,7 @@ public class Notification {
     byte[] identifier;
     byte[] bytes;
 
-    Notification(byte[] bytes) {
+    IncomingCommand(byte[] bytes) {
         this.bytes = bytes;
     }
 

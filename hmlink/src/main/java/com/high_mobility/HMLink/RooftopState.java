@@ -3,10 +3,10 @@ package com.high_mobility.HMLink;
 /**
  * Created by ttiganik on 13/09/16.
  *
- * This is an evented notification that is sent from the car every time the rooftop state changes.
+ * This is an evented command that is sent from the car every time the rooftop state changes.
  * It is also sent when a Get Rooftop State is received by the car.
  */
-public class RooftopState extends Notification {
+public class RooftopState extends IncomingCommand {
     /**
      * The possible states of the rooftop.
      */

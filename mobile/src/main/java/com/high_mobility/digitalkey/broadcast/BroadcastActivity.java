@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.high_mobility.HMLink.Command;
 import com.high_mobility.HMLink.ControlMode;
-import com.high_mobility.HMLink.Notification;
+import com.high_mobility.HMLink.IncomingCommand;
 import com.high_mobility.HMLink.CommandParseException;
 import com.high_mobility.HMLink.LockState;
 import com.high_mobility.HMLink.BroadcasterListener;
@@ -138,11 +138,11 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
     @Override
     public void onCommandReceived(Link link, byte[] bytes) {
         try {
-            Notification command = Notification.create(bytes);
+            IncomingCommand command = IncomingCommand.create(bytes);
 
             if (command.is(Command.DigitalKey.LOCK_STATE)) {
                 LockState stateNotification = (LockState) command;
-                Log.i(TAG, "Lock status changed " + stateNotification.getLockStatus());
+                Log.i(TAG, "Lock status changed " + stateNotification.getState());
             }
             else if (command.is(Command.RemoteControl.CONTROL_MODE)) {
                 ControlMode controlModeNotification = (ControlMode) command;
@@ -150,7 +150,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
             }
         }
         catch (CommandParseException e) {
-            Log.d(TAG, "Notification parse exception ", e);
+            Log.d(TAG, "IncomingCommand parse exception ", e);
         }
     }
 

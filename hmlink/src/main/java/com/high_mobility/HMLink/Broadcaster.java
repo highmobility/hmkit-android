@@ -197,9 +197,10 @@ public class Broadcaster implements SharedBleListener {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "already not broadcasting");
         }
-        // stopAdvertising clears the GATT server as well.
-        // This causes all connection to fail with the link because there is no GATT server.
+
         try {
+            // stopAdvertising cancels all the BT connections as well. this will invoke onLostLink
+            // eventually
             for (int i = getLinks().size() - 1; i >= 0; i--) {
                 GATTServer.cancelConnection(getLinks().get(i).btDevice);
             }

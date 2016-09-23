@@ -5,10 +5,10 @@ import java.util.Arrays;
 /**
  * Created by ttiganik on 13/09/16.
  *
- * This is an evented notification that is sent from the car every time a new parcel is delivered or
- * removed. This notification is also sent when a Get Delivered Parcels is received by the car.
+ * This is an evented command that is sent from the car every time a new parcel is delivered or
+ * removed. This command is also sent when a Get Delivered Parcels is received by the car.
  */
-public class DeliveredParcels extends Notification {
+public class DeliveredParcels extends IncomingCommand {
     static final String TAG = "DeliveredParcels";
     String[] deliveredParcels;
 

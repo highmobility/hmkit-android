@@ -7,23 +7,23 @@ package com.high_mobility.HMLink;
  * notificaiton is also sent when a Get Lock State is received by the car. The new status is included
  * and may be the result of user, device or car triggered action.
  */
-public class LockState extends Notification {
+public class LockState extends IncomingCommand {
     /**
      * The possible states of the car lock.
      */
-    public enum LockStatus {
-        UNLOCKED, LOCKED
+    public enum State {
+        LOCKED, UNLOCKED
     }
 
     /**
      *
      * @return the current lock status of the car
      */
-    public LockStatus getLockStatus() {
-        return lockStatus;
+    public State getState() {
+        return state;
     }
 
-    LockStatus lockStatus;
+    State state;
 
     public LockState(byte[] bytes) throws CommandParseException {
         super(bytes);
@@ -31,6 +31,6 @@ public class LockState extends Notification {
             throw new CommandParseException();
         }
 
-        lockStatus = bytes[1] == 0x00 ? LockStatus.UNLOCKED : LockStatus.LOCKED;
+        state = bytes[1] == 0x00 ? State.UNLOCKED : State.LOCKED;
     }
 }

@@ -176,7 +176,7 @@ public class Link {
             return;
         }
 
-        sentCommand.dispatchResult(Notification.errorCode(data));
+        sentCommand.dispatchResult(IncomingCommand.errorCode(data));
     }
 
     byte[] getAddressBytes() {
