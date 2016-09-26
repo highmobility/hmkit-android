@@ -109,7 +109,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetCaPublicKey(byte[] publicKey) {
-        //TODO;
+        copyBytesToJNI(manager.caPublicKey, publicKey);
         return 0;
     }
 
