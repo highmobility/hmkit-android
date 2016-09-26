@@ -83,22 +83,22 @@ public class Manager {
         this.caPublicKey = caPublicKey;
         this.certificate = certificate;
         this.privateKey = privateKey;
+
         ctx = applicationContext;
         mainHandler = new Handler(ctx.getMainLooper());
 
         if (workThread.getState() == Thread.State.NEW)
             workThread.start();
-
         workHandler = new Handler(workThread.getLooper());
 
         ble = new SharedBle(ctx);
-        coreInterface = new BTCoreInterface(this);
-
-        core.HMBTCoreInit(coreInterface);
-        startClock();
 
         broadcaster = new Broadcaster(this);
         scanner = new Scanner(this);
+
+        coreInterface = new BTCoreInterface(this);
+        core.HMBTCoreInit(coreInterface);
+        startClock();
     }
 
 

@@ -53,6 +53,9 @@ public class Broadcaster implements SharedBleListener {
 
     ArrayList<ConnectedLink> links = new ArrayList<>();
 
+    byte[] issuer; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
+    byte[] appId;
+
     /**
      * Sets the advertise mode for the Bluetooth's AdvertiseSettings. Default is ADVERTISE_MODE_BALANCED.
      *
@@ -178,8 +181,7 @@ public class Broadcaster implements SharedBleListener {
                 .setTxPowerLevel(txPowerLevel)
                 .build();
 
-        final UUID advertiseUUID = ByteUtils.UUIDFromByteArray(ByteUtils.concatBytes(manager.certificate.getIssuer(),
-                manager.certificate.getAppIdentifier()));
+        final UUID advertiseUUID = ByteUtils.UUIDFromByteArray(ByteUtils.concatBytes(issuer, appId));
 
         final AdvertiseData data = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)

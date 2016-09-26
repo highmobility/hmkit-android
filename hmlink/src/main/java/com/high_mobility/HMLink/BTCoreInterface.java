@@ -39,6 +39,8 @@ class BTCoreInterface implements HMBTCoreInterface {
     @Override
     public int HMBTHalAdvertisementStart(byte[] issuer, byte[] appID) {
         // ignored, controlled by the user
+        manager.getBroadcaster().issuer = issuer;
+        manager.getBroadcaster().appId = appID;
         return 0;
     }
 
