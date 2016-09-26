@@ -42,7 +42,7 @@ public class Manager {
     private static Manager instance;
     DeviceCertificate certificate;
     byte[] privateKey;
-    byte[] CAPublicKey;
+    byte[] caPublicKey;
 
     private Scanner scanner;
     private Broadcaster broadcaster;
@@ -69,18 +69,18 @@ public class Manager {
      *
      * @param certificate The broadcaster certificate.
      * @param privateKey 32 byte private key with elliptic curve Prime 256v1.
-     * @param issuerPublicKey 64 byte public key of the Certificate Authority.
+     * @param caPublicKey 64 byte public key of the Certificate Authority.
      * @param applicationContext The application context
      *
      * @throws IllegalArgumentException if the parameters are invalid.
      */
-    public void initialize(DeviceCertificate certificate, byte[] privateKey, byte[] issuerPublicKey, Context applicationContext) throws IllegalArgumentException {
+    public void initialize(DeviceCertificate certificate, byte[] privateKey, byte[] caPublicKey, Context applicationContext) throws IllegalArgumentException {
         Log.i(Broadcaster.TAG, "Initialized High-Mobility SDK with certificate" + certificate.toString());
-        if (privateKey.length != 32 || issuerPublicKey.length != 64 || certificate == null || applicationContext == null) {
+        if (privateKey.length != 32 || caPublicKey.length != 64 || certificate == null || applicationContext == null) {
             throw new IllegalArgumentException();
         }
 
-        this.CAPublicKey = issuerPublicKey;
+        this.caPublicKey = caPublicKey;
         this.certificate = certificate;
         this.privateKey = privateKey;
         ctx = applicationContext;

@@ -108,6 +108,12 @@ class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
+    public int HMPersistenceHalgetCaPublicKey(byte[] publicKey) {
+        copyBytesToJNI(manager.caPublicKey, publicKey);
+        return 0;
+    }
+
+    @Override
     public int HMPersistenceHaladdPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int commandSize, byte[] command) {
         AccessCertificate cert = new AccessCertificate(serial, publicKey, manager.getCertificate().getSerial(), startDate, endDate, command);
 
