@@ -1,5 +1,4 @@
 #include "hm_bt_crypto_hal.h"
-#include "hm_conf_access.h"
 #include "hm_bt_persistence_hal.h"
 #include "Crypto.h"
 #include <string.h>
@@ -83,7 +82,7 @@ uint32_t hm_bt_crypto_hal_ecc_validate_all_signatures(uint8_t *data, uint8_t siz
 
 uint32_t hm_bt_crypto_hal_ecc_validate_ca_signature(uint8_t *data, uint8_t size, uint8_t *signature){
   uint8_t ca_pub[64];
-  hm_conf_access_get_ca_public_key(ca_pub);
+  hm_bt_persistence_hal_get_ca_public_key(ca_pub);
   return hm_crypto_openssl_verify(data, size, ca_pub, signature);
 }
 
