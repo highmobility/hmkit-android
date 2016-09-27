@@ -245,3 +245,11 @@ uint32_t hm_bt_persistence_hal_erase_stored_certificate(uint8_t *serial){
 
   return ret;
 }
+
+uint32_t hm_bt_persistence_hal_get_appid_for_issuer_count(uint8_t *issuer, uint8_t *count){
+ return 0;
+}
+
+uint32_t hm_bt_persistence_hal_get_appid_for_issuer(uint8_t *issuer, uint8_t index, uint8_t *appid){
+ return 0;
+}
