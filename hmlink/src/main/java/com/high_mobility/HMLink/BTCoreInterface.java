@@ -304,7 +304,7 @@ class BTCoreInterface implements HMBTCoreInterface {
     @Override
     public int HMApiCallbackGetDeviceCertificateFailed(HMDevice device, byte[] nonce) {
         Log.d(TAG, "HMApiCallbackGetDeviceCertificateFailed ");
-        // Sensing: should ask for CA sig for the nonce
+        // should ask for CA sig for the nonce
         // if ret false getting the sig start failed
         // if ret true started acquiring signature
 
