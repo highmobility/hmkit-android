@@ -1,9 +1,9 @@
 package com.highmobility.hmlink;
 
-import com.high_mobility.HMLink.Command;
 import com.high_mobility.HMLink.CommandParseException;
 import com.high_mobility.HMLink.ControlMode;
 import com.high_mobility.HMLink.DeliveredParcels;
+import com.high_mobility.HMLink.Failure;
 import com.high_mobility.HMLink.LockState;
 import com.high_mobility.HMLink.RooftopState;
 import com.high_mobility.HMLink.TrunkState;
@@ -12,6 +12,8 @@ import com.high_mobility.HMLink.WindshieldHeatingState;
 import com.high_mobility.HMLink.ByteUtils;
 
 import org.junit.Test;
+
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -160,4 +162,21 @@ public class IncomingCommand {
         assertTrue(command.getLockState() == TrunkState.LockState.UNLOCKED);
         assertTrue(command.getPosition() == TrunkState.Position.OPEN);
     }
+
+    @Test
+    public void failure_init() {
+        byte[] bytes = ByteUtils.bytesFromHex("0002002302");
+
+        Failure command = null;
+
+        try {
+            command = new Failure(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(Arrays.equals(command.getFailedCommandIdentifier(), new byte[] {0x00, 0x23}));
+        assertTrue(command.getFailureReason() == Failure.Reason.INCORRECT_STATE);
+    }
+
 }
