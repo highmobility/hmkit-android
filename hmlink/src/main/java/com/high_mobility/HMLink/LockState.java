@@ -31,6 +31,6 @@ public class LockState extends IncomingCommand {
             throw new CommandParseException();
         }
 
-        state = bytes[1] == 0x00 ? State.UNLOCKED : State.LOCKED;
+        state = bytes[2] == 0x00 ? State.UNLOCKED : State.LOCKED;
     }
 }

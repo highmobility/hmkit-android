@@ -6,6 +6,7 @@ import com.high_mobility.HMLink.ControlMode;
 import com.high_mobility.HMLink.DeliveredParcels;
 import com.high_mobility.HMLink.LockState;
 import com.high_mobility.HMLink.RooftopState;
+import com.high_mobility.HMLink.TrunkState;
 import com.high_mobility.HMLink.VehicleStatus;
 import com.high_mobility.HMLink.WindshieldHeatingState;
 import com.high_mobility.HMLink.ByteUtils;
@@ -58,7 +59,7 @@ public class IncomingCommand {
 
     @Test
     public void lockstate_init() {
-        byte[] bytes = ByteUtils.bytesFromHex("002101");
+        byte[] bytes = ByteUtils.bytesFromHex("002100");
 
         LockState command = null;
 
@@ -68,7 +69,7 @@ public class IncomingCommand {
             fail("init failed");
         }
 
-        assertTrue(command.getState() == LockState.State.LOCKED);
+        assertTrue(command.getState() == LockState.State.UNLOCKED);
     }
 
     @Test
@@ -142,5 +143,21 @@ public class IncomingCommand {
         } catch (CommandParseException e) {
             fail("init failed");
         }
+    }
+
+    @Test
+    public void trunkState_init() {
+        byte[] bytes = ByteUtils.bytesFromHex("00240001");
+
+        TrunkState command = null;
+
+        try {
+            command = new TrunkState(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getLockState() == TrunkState.LockState.UNLOCKED);
+        assertTrue(command.getPosition() == TrunkState.Position.OPEN);
     }
 }

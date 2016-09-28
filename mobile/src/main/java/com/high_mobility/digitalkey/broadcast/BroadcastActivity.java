@@ -23,6 +23,7 @@ import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.Broadcaster;
 import com.high_mobility.HMLink.Link;
 import com.high_mobility.HMLink.Manager;
+import com.high_mobility.HMLink.RooftopState;
 import com.high_mobility.digitalkey.R;
 
 /**
@@ -193,7 +194,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
         final LinkFragment fragment = adapter.getFragment(link);
         ViewUtils.enableView(fragment.authView, false);
 
-        link.sendCommand(Command.DigitalKey.lockDoors(true), true, new Constants.ResponseCallback() {
+        link.sendCommand(Command.Chassis.setWindshieldHeating(true), true, new Constants.ResponseCallback() {
             @Override
             public void response(int errorCode) {
             ViewUtils.enableView(fragment.authView, true);
@@ -210,7 +211,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
         final LinkFragment fragment = adapter.getFragment(link);
 
         ViewUtils.enableView(fragment.authView, false);
-        link.sendCommand(Command.DigitalKey.lockDoors(false), true, new Constants.ResponseCallback() {
+        link.sendCommand(Command.Chassis.controlRooftop(RooftopState.State.OPAQUE), true, new Constants.ResponseCallback() {
             @Override
             public void response(int errorCode) {
                 ViewUtils.enableView(fragment.authView, true);

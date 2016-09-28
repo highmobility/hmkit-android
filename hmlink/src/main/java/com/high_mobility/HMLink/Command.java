@@ -51,7 +51,10 @@ public class Command {
     public enum DigitalKey implements Type {
         GET_LOCK_STATE(new byte[] { 0x00, (byte)0x20 }),
         LOCK_STATE(new byte[] { 0x00, (byte)0x21 }),
-        LOCK_UNLOCK(new byte[] { 0x00, (byte)0x22 });
+        LOCK_UNLOCK(new byte[] { 0x00, (byte)0x22 }),
+        GET_TRUNK_STATE(new byte[] {0x00, (byte)0x23}),
+        TRUNK_STATE(new byte[] {0x00, (byte)0x24}),
+        SET_TRUNK_STATE(new byte[] {0x00, (byte)0x25});
 
         /**
          * Get the lock state, which either locked or unlocked. The car will respond with the
@@ -74,6 +77,33 @@ public class Command {
             bytes[0] = LOCK_UNLOCK.getIdentifier()[0];
             bytes[1] = LOCK_UNLOCK.getIdentifier()[1];
             bytes[2] = (byte)(lock ? 0x01 : 0x00);
+            return bytes;
+        }
+
+        /**
+         * Get the trunk state, if it's locked/unlocked and closed/open. The car will respond with
+         * the Trunk State command.
+         *
+         * @return the command bytes
+         */
+        public static byte[] getTrunkState() {
+            return GET_TRUNK_STATE.getIdentifier();
+        }
+
+        /**
+         * Unlock/Lock and Open/Close the trunk. The result is received through the evented
+         * Trunk State command.
+         *
+         * @param lockState whether to lock or unlock the trunk
+         * @param position whether to open or close the trunk
+         * @return the command bytes
+         */
+        public static byte[] setTrunkState(TrunkState.LockState lockState, TrunkState.Position position) {
+            byte[] bytes = new byte[4];
+            bytes[0] = SET_TRUNK_STATE.getIdentifier()[0];
+            bytes[1] = SET_TRUNK_STATE.getIdentifier()[1];
+            bytes[2] = (byte)(lockState == TrunkState.LockState.UNLOCKED ? 0x00 : 0x01);
+            bytes[3] = (byte)(position == TrunkState.Position.CLOSED ? 0x00 : 0x01);
             return bytes;
         }
 

@@ -1,8 +1,10 @@
 package com.highmobility.hmlink;
 
 import com.high_mobility.HMLink.Command;
+import com.high_mobility.HMLink.LockState;
 import com.high_mobility.HMLink.RooftopState;
 import com.high_mobility.HMLink.ByteUtils;
+import com.high_mobility.HMLink.TrunkState;
 
 import org.junit.Test;
 
@@ -41,5 +43,17 @@ public class OutgoingCommand {
         assertTrue(waitingForBytes.equals(commandBytes));
     }
 
+    @Test
+    public void getTrunkState() {
+        String waitingForBytes = "0023";
+        String commandBytes = ByteUtils.hexFromBytes(Command.DigitalKey.getTrunkState());
+        assertTrue(waitingForBytes.equals(commandBytes));
+    }
 
+    @Test
+    public void setTrunkState() {
+        String waitingForBytes = "00250001";
+        String commandBytes = ByteUtils.hexFromBytes(Command.DigitalKey.setTrunkState(TrunkState.LockState.UNLOCKED, TrunkState.Position.OPEN));
+        assertTrue(waitingForBytes.equals(commandBytes));
+    }
 }
