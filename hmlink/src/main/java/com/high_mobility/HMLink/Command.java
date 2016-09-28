@@ -253,7 +253,7 @@ public class Command {
          * @param heartRate The heart rate in BPM.
          * @return the command bytes
          */
-        public static byte[] heartRate(int heartRate) {
+        public static byte[] sendHeartRate(int heartRate) {
             return ByteUtils.concatBytes(HEART_RATE.getIdentifier(), (byte)heartRate);
         }
 
