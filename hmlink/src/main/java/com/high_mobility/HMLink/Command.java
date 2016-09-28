@@ -18,7 +18,7 @@ public class Command {
         VEHICLE_STATUS(new byte[] { 0x00, (byte)0x13 });
 
         /**
-         * Get the vehicle capabilities. The car will respond with the Capabilities notification that
+         * Get the vehicle capabilities. The car will respond with the Capabilities command that
          * manifests all different APIs that are enabled on the specific car.
          *
          * @return the command bytes
@@ -28,7 +28,7 @@ public class Command {
         }
 
         /**
-         * Get the vehicle status. The car will respond with the Vehicle Status notification.
+         * Get the vehicle status. The car will respond with the Vehicle Status command.
          *
          * @return the command bytes
          */
@@ -55,7 +55,7 @@ public class Command {
 
         /**
          * Get the lock state, which either locked or unlocked. The car will respond with the
-         * Lock State notification.
+         * Lock State command.
          *
          * @return the command bytes
          */
@@ -64,7 +64,7 @@ public class Command {
         }
 
         /**
-         * Attempt to lock or unlock the car. The result is received through the Lock State notification.
+         * Attempt to lock or unlock the car. The result is received through the Lock State command.
          *
          * @param lock whether to lock or unlock the car
          * @return the command bytes
@@ -99,7 +99,7 @@ public class Command {
 
         /**
          * Get the windshield heating state. The car will respond with the Windshield Heating State
-         * notification.
+         * command.
          *
          * @return the command bytes
          */
@@ -109,7 +109,7 @@ public class Command {
 
         /**
          * Set the windshield heating state. The result is sent through the Windshield Heating State
-         * notification.
+         * command.
          *
          * @param active whether the heating should be active or not
          * @return the command bytes
@@ -119,7 +119,7 @@ public class Command {
         }
 
         /**
-         * Get the rooftop state. The car will respond with the Rooftop State notification.
+         * Get the rooftop state. The car will respond with the Rooftop State command.
          *
          *  @return the command bytes
          */
@@ -128,12 +128,12 @@ public class Command {
         }
 
         /**
-         * Set the rooftop state. The result is sent through the evented Rooftop State notification.
+         * Set the rooftop state. The result is sent through the evented Rooftop State command.
          *
          * @param state the rooftop transparency state
          * @return the command bytes
          */
-        public static byte[] setRooftopTransparency(RooftopState.State state) {
+        public static byte[] controlRooftop(RooftopState.State state) {
             return ByteUtils.concatBytes(SET_ROOFTOP_TRANSPARENCY.getIdentifier(), (byte)(state == RooftopState.State.OPAQUE ? 0x01 : 0x00));
         }
 
@@ -157,7 +157,7 @@ public class Command {
         CONTROL_COMMAND(new byte[] { 0x00, (byte)0x45 });
 
         /**
-         * Get the current remote control mode. The car will respond with the Control Mode notification.
+         * Get the current remote control mode. The car will respond with the Control Mode command.
          *
          * @return the command bytes
          */
@@ -167,7 +167,7 @@ public class Command {
 
         /**
          * Attempt to start the control mode of the car. The result is sent through the
-         * Control Mode notification with either Control Started or Control Failed to Start mode.
+         * Control Mode command with either Control Started or Control Failed to Start mode.
          *
          * @return the command bytes
          */
@@ -177,7 +177,7 @@ public class Command {
 
         /**
          * Stop the control mode of the car. The result is sent through the Control Mode
-         * notification with Control Ended mode.
+         * command with Control Ended mode.
          *
          * @return the command bytes
          */
@@ -270,7 +270,7 @@ public class Command {
 
         /**
          * Get information about all parcels that have been delivered to the car. The car will
-         * respond with the Delivered Parcels notification.
+         * respond with the Delivered Parcels command.
          *
          * @return the command bytes
          */

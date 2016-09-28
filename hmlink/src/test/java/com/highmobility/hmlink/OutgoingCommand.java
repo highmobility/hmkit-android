@@ -30,7 +30,7 @@ public class OutgoingCommand {
     @Test
     public void setRooftopTransparency_opaque() {
         String waitingForBytes = "005F01";
-        String commandBytes = ByteUtils.hexFromBytes(Command.Chassis.setRooftopTransparency(RooftopState.State.OPAQUE));
+        String commandBytes = ByteUtils.hexFromBytes(Command.Chassis.controlRooftop(RooftopState.State.OPAQUE));
         assertTrue(waitingForBytes.equals(commandBytes));
     }
 

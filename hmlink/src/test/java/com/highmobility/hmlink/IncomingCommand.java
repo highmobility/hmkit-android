@@ -68,7 +68,7 @@ public class IncomingCommand {
             fail("init failed");
         }
 
-        assertTrue(command.getState() == Command.DigitalKey.LockStatus.LOCKED);
+        assertTrue(command.getState() == LockState.State.LOCKED);
     }
 
     @Test
