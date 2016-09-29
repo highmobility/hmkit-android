@@ -47,9 +47,3 @@ public class Failure extends IncomingCommand {
         return failureReason;
     }
 }
-/*
-- text: 'getFailedCommandIdentifier()'
-        href: '#get-failed-command-identifier'
-      - text: 'getFailureReason()'
-        href: '#get-failure-reason'
- */
