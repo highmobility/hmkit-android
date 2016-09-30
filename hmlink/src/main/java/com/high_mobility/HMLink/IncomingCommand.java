@@ -66,11 +66,13 @@ public class IncomingCommand {
         }
     }
 
-    byte[] identifier;
+    byte[] identifier = new byte[2];
     byte[] bytes;
 
     IncomingCommand(byte[] bytes) {
         this.bytes = bytes;
+        identifier[0] = bytes[0];
+        identifier[1] = bytes[1];
     }
 
     public byte[] getIdentifier() {
