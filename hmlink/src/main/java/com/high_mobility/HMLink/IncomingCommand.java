@@ -17,6 +17,9 @@ public class IncomingCommand {
             else if (ByteUtils.startsWith(bytes, Command.DigitalKey.LOCK_STATE.getIdentifier())) {
                 return new LockState(bytes);
             }
+            else if (ByteUtils.startsWith(bytes, Command.DigitalKey.TRUNK_STATE.getIdentifier())) {
+                return new TrunkState(bytes);
+            }
             else if (ByteUtils.startsWith(bytes, Command.Chassis.WINDSHIELD_HEATING_STATE.getIdentifier())) {
                 return new VehicleStatus(bytes);
             }
@@ -28,6 +31,9 @@ public class IncomingCommand {
             }
             else if (ByteUtils.startsWith(bytes, Command.ParcelDelivery.DELIVERED_PARCELS.getIdentifier())) {
                 return new VehicleStatus(bytes);
+            }
+            else if (ByteUtils.startsWith(bytes, Command.General.FAILURE.getIdentifier())) {
+                return new Failure(bytes);
             }
             else {
                 throw new CommandParseException();

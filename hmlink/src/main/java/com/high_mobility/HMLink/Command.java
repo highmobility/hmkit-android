@@ -15,7 +15,8 @@ public class Command {
         GET_CAPABILITIES(new byte[] { 0x00, (byte)0x10 }),
         CAPABILITIES(new byte[] { 0x00, (byte)0x11 }),
         GET_VEHICLE_STATUS(new byte[] { 0x00, (byte)0x12 }),
-        VEHICLE_STATUS(new byte[] { 0x00, (byte)0x13 });
+        VEHICLE_STATUS(new byte[] { 0x00, (byte)0x13 }),
+        FAILURE(new byte[] {0x00, 0x02});
 
         /**
          * Get the vehicle capabilities. The car will respond with the Capabilities command that
