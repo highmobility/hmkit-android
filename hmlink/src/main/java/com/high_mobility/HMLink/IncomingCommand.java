@@ -45,15 +45,9 @@ public class IncomingCommand {
     }
 
     static int errorCode(byte[] bytes) {
-        if (bytes != null && bytes.length > 1) {
-            if (bytes[0] != 0x01 && bytes[0] != 0x02) return Link.INTERNAL_ERROR;
-
-            if (bytes[0] == 0x01) return 0;
-
-            return codeForByte(bytes[1]);
-        }
-
-        return Link.INTERNAL_ERROR;
+        if (bytes == null || bytes.length < 2) return 0;
+        if (bytes[0] != 0x02) return 0;
+        return codeForByte(bytes[1]);
     }
 
     static int codeForByte(byte errorByte) {
