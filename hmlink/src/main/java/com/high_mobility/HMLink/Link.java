@@ -156,12 +156,13 @@ public class Link {
             return;
         }
 
-        manager.mainHandler.post(new Runnable() {
+        manager.mainHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
             listener.onCommandReceived(Link.this, bytes);
             }
-        });
+        }, 100); // TODO?: core will not the function without this delay and because of that the user
+        // cannot send a new command inside onCommandReceived. Can this be without the delay somehow?
     }
 
     void onCommandResponseReceived(final byte[] data) {
