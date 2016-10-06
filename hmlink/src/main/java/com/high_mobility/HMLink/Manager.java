@@ -75,7 +75,6 @@ public class Manager {
      * @throws IllegalArgumentException if the parameters are invalid.
      */
     public void initialize(DeviceCertificate certificate, byte[] privateKey, byte[] caPublicKey, Context applicationContext) throws IllegalArgumentException {
-        Log.i(Broadcaster.TAG, "Initialized High-Mobility SDK with certificate" + certificate.toString());
         if (privateKey.length != 32 || caPublicKey.length != 64 || certificate == null || applicationContext == null) {
             throw new IllegalArgumentException();
         }
@@ -99,6 +98,7 @@ public class Manager {
         coreInterface = new BTCoreInterface(this);
         core.HMBTCoreInit(coreInterface);
         startClock();
+        Log.i(Broadcaster.TAG, "Initialized High-Mobility " + getInfoString() + certificate.toString());
     }
 
 
