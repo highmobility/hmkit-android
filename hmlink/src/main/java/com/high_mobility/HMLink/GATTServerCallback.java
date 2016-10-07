@@ -104,4 +104,11 @@ class GATTServerCallback extends BluetoothGattServerCallback {
             }
         }
     }
+
+    @Override
+    public void onNotificationSent(BluetoothDevice device, int status) {
+        super.onNotificationSent(device, status);
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+            Log.d(TAG, "onNotificationSent " + status);
+    }
 }

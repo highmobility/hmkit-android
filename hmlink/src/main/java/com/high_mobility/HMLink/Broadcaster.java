@@ -399,8 +399,16 @@ public class Broadcaster implements SharedBleListener {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(link.getAddressBytes()));
 
-        readCharacteristic.setValue(value);
-        GATTServer.notifyCharacteristicChanged(link.btDevice, readCharacteristic, false);
+        if (readCharacteristic.setValue(value) == false) {
+            Log.e(TAG, "can't set read char value");
+            return false;
+        }
+
+        if (GATTServer.notifyCharacteristicChanged(link.btDevice, readCharacteristic, false) == false) {
+            Log.e(TAG, "can't notify characteristic changed");
+            return false;
+        }
+
 
         return true;
     }
