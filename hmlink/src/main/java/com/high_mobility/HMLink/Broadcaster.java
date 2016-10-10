@@ -300,13 +300,15 @@ public class Broadcaster implements SharedBleListener {
             setState(State.IDLE);
         }
         else if (!available && getState() != State.BLUETOOTH_UNAVAILABLE) {
-            if (GATTServer != null) {
-                GATTServer.clearServices();
-                GATTServer.close();
-                GATTServer = null;
-            }
-
             setState(State.BLUETOOTH_UNAVAILABLE);
+        }
+    }
+
+    void terminate() {
+        if (GATTServer != null) {
+            GATTServer.clearServices();
+            GATTServer.close();
+            GATTServer = null;
         }
     }
 
@@ -472,6 +474,7 @@ public class Broadcaster implements SharedBleListener {
                     BluetoothGattDescriptor.PERMISSION_WRITE)) == false) {
                 Log.e(TAG, "Cannot add alive descriptor"); return false;
             }
+
             if (infoCharacteristic.setValue(manager.getInfoString()) == false) {
                 Log.e(TAG, "Cannot set info char value"); return false;
             }

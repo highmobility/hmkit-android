@@ -18,6 +18,8 @@ import java.util.TimerTask;
  * Created by ttiganik on 03/08/16.
  */
 public class Manager {
+    private static final String TAG = "Manager";
+
     public enum LoggingLevel {
         NONE(0), DEBUG(1), ALL(2);
 
@@ -98,7 +100,7 @@ public class Manager {
         coreInterface = new BTCoreInterface(this);
         core.HMBTCoreInit(coreInterface);
         startClock();
-        Log.i(Broadcaster.TAG, "Initialized High-Mobility " + getInfoString() + certificate.toString());
+        Log.i(TAG, "Initialized High-Mobility " + getInfoString() + certificate.toString());
     }
 
 
@@ -119,6 +121,15 @@ public class Manager {
         byte[] decodedPrivateKey = Base64.decode(privateKey, Base64.DEFAULT);
         byte[] decodedIssuer= Base64.decode(issuerPublicKey, Base64.DEFAULT);
         initialize(decodedCert, decodedPrivateKey, decodedIssuer, applicationContext);
+    }
+
+    /**
+     * Call this function when stopping the use of the SDK.
+     * This clears Bluetooth and unregister all BroadcastReceivers.
+     */
+    public void terminate() {
+        ble.terminate();
+        broadcaster.terminate();
     }
 
     /**
