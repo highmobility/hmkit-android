@@ -148,7 +148,7 @@ public class Manager {
     }
 
     String getInfoString() {
-        String infoString = "Android SDK ";
+        String infoString = "Android ";
         infoString += BuildConfig.VERSION_NAME;
 
         if (ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
