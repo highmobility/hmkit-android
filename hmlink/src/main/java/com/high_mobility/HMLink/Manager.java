@@ -124,8 +124,8 @@ public class Manager {
     }
 
     /**
-     * Call this function when stopping the use of the SDK.
-     * This clears Bluetooth and unregister all BroadcastReceivers.
+     * Call this function when the SDK is not used anymore - for instance when killing the app.
+     * This clears the Bluetooth service and unregisters all BroadcastReceivers.
      */
     public void terminate() {
         ble.terminate();

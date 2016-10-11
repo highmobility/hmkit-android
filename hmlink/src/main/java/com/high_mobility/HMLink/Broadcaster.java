@@ -12,8 +12,8 @@ import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.os.ParcelUuid;
 import android.util.Log;
 
-import com.high_mobility.btcore.HMDevice;
 import com.high_mobility.HMLink.Crypto.AccessCertificate;
+import com.high_mobility.btcore.HMDevice;
 
 import java.util.ArrayList;
 import java.util.Arrays;
