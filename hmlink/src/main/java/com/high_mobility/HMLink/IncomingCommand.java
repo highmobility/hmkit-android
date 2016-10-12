@@ -21,16 +21,16 @@ public class IncomingCommand {
                 return new TrunkState(bytes);
             }
             else if (ByteUtils.startsWith(bytes, Command.Chassis.WINDSHIELD_HEATING_STATE.getIdentifier())) {
-                return new VehicleStatus(bytes);
+                return new WindshieldHeatingState(bytes);
             }
             else if (ByteUtils.startsWith(bytes, Command.Chassis.ROOFTOP_STATE.getIdentifier())) {
-                return new VehicleStatus(bytes);
+                return new RooftopState(bytes);
             }
             else if (ByteUtils.startsWith(bytes, Command.RemoteControl.CONTROL_MODE.getIdentifier())) {
-                return new VehicleStatus(bytes);
+                return new ControlMode(bytes);
             }
             else if (ByteUtils.startsWith(bytes, Command.ParcelDelivery.DELIVERED_PARCELS.getIdentifier())) {
-                return new VehicleStatus(bytes);
+                return new DeliveredParcels(bytes);
             }
             else if (ByteUtils.startsWith(bytes, Command.General.FAILURE.getIdentifier())) {
                 return new Failure(bytes);
