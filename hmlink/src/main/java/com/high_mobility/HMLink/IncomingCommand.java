@@ -11,6 +11,9 @@ public class IncomingCommand {
             if (ByteUtils.startsWith(bytes, Command.General.CAPABILITIES.getIdentifier())) {
                 return new Capabilities(bytes);
             }
+            else if (ByteUtils.startsWith(bytes, Command.General.CAPABILITY.getIdentifier())) {
+                return new Capability(bytes);
+            }
             else if (ByteUtils.startsWith(bytes, Command.General.VEHICLE_STATUS.getIdentifier())) {
                 return new VehicleStatus(bytes);
             }

@@ -1,5 +1,6 @@
 package com.highmobility.hmlink;
 
+import com.high_mobility.HMLink.Capabilities;
 import com.high_mobility.HMLink.CommandParseException;
 import com.high_mobility.HMLink.ControlMode;
 import com.high_mobility.HMLink.DeliveredParcels;
@@ -23,7 +24,18 @@ import static org.junit.Assert.*;
 public class IncomingCommand {
     @Test
     public void capabilities_init() {
-        assertTrue(true);
+        byte[] bytes = ByteUtils.bytesFromHex("10110103000101000001");
+
+        Capabilities capabilities= null;
+
+        try {
+            capabilities = new Capabilities(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+
+
     }
 
     @Test
@@ -136,7 +148,7 @@ public class IncomingCommand {
 
     @Test
     public void vehicleStatus_init() {
-        byte[] bytes = ByteUtils.bytesFromHex("***REMOVED***");
+        byte[] bytes = ByteUtils.bytesFromHex("0015000100010002");
 
         VehicleStatus command = null;
 
@@ -145,6 +157,13 @@ public class IncomingCommand {
         } catch (CommandParseException e) {
             fail("init failed");
         }
+
+        assertTrue(command.getDoorLockState() == LockState.State.UNLOCKED);
+        assertTrue(command.getTrunkLockState() == TrunkState.LockState.LOCKED);
+        assertTrue(command.getTrunkPosition() == TrunkState.Position.CLOSED);
+        assertTrue(command.isWindshieldHeatingActive() == true);
+        assertTrue(command.getRooftopState() == RooftopState.State.TRANSPARENT);
+        assertTrue(command.getRemoteControlMode() == ControlMode.Mode.STARTED);
     }
 
     @Test

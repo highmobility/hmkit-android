@@ -12,7 +12,14 @@ public class LockState extends IncomingCommand {
      * The possible states of the car lock.
      */
     public enum State {
-        LOCKED, UNLOCKED
+        LOCKED, UNLOCKED;
+
+        static State lockStateFromByte(byte value) throws CommandParseException {
+            if (value == 0x00) return UNLOCKED;
+            if (value == 0x01) return LOCKED;
+
+            throw new CommandParseException();
+        }
     }
 
     /**
@@ -31,6 +38,6 @@ public class LockState extends IncomingCommand {
             throw new CommandParseException();
         }
 
-        state = bytes[2] == 0x00 ? State.UNLOCKED : State.LOCKED;
+        state = State.lockStateFromByte(bytes[2]);
     }
 }

@@ -1,5 +1,7 @@
 package com.high_mobility.HMLink;
 
+import java.util.concurrent.locks.Lock;
+
 /**
  * Created by ttiganik on 28/09/2016.
  *
@@ -13,14 +15,28 @@ public class TrunkState extends IncomingCommand {
      * The possible lock positions
      */
     public enum LockState {
-        LOCKED, UNLOCKED
+        LOCKED, UNLOCKED;
+
+        static LockState lockStateFromByte(byte value) throws CommandParseException {
+            if (value == 0x00) return UNLOCKED;
+            if (value == 0x01) return LOCKED;
+
+            throw new CommandParseException();
+        }
     }
 
     /**
      * The possible trunk positions
      */
     public enum Position {
-        OPEN, CLOSED
+        OPEN, CLOSED;
+
+        static Position positionFromByte(byte value) throws CommandParseException {
+            if (value == 0x00) return CLOSED;
+            if (value == 0x01) return OPEN;
+
+            throw new CommandParseException();
+        }
     }
 
     /**
@@ -47,7 +63,7 @@ public class TrunkState extends IncomingCommand {
             throw new CommandParseException();
         }
 
-        state = bytes[2] == 0x00 ? LockState.UNLOCKED : LockState.LOCKED;
-        position = bytes[3] == 0x00 ? Position.CLOSED : Position.OPEN;
+        state = LockState.lockStateFromByte(bytes[2]);
+        position = Position.positionFromByte(bytes[3]);
     }
 }

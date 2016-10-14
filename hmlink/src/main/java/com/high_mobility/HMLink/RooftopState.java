@@ -11,7 +11,15 @@ public class RooftopState extends IncomingCommand {
      * The possible states of the rooftop.
      */
     public enum State {
-        TRANSPARENT, OPAQUE
+        TRANSPARENT, OPAQUE;
+
+        static State stateForByte(byte value) throws CommandParseException {
+            switch (value) {
+                case 0: return State.TRANSPARENT;
+                case 1: return State.OPAQUE;
+                default: throw new CommandParseException();
+            }
+        }
     }
 
     State state;
@@ -21,12 +29,7 @@ public class RooftopState extends IncomingCommand {
 
         if (bytes.length != 3) throw new CommandParseException();
 
-        int stateByte = bytes[2];
-        switch (stateByte) {
-            case 0: state = State.TRANSPARENT; break;
-            case 1: state = State.OPAQUE; break;
-            default: throw new CommandParseException();
-        }
+        state = State.stateForByte(bytes[2]);
     }
 
     /**

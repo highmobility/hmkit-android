@@ -15,7 +15,11 @@ public class WindshieldHeatingState extends IncomingCommand {
 
         if (bytes.length != 3) throw new CommandParseException();
 
-        active = bytes[2] != 0x00;
+        active = isWindshieldActiveForByte(bytes[2]);
+    }
+
+    static boolean isWindshieldActiveForByte(byte value) {
+        return value != 0x00;
     }
 
     /**

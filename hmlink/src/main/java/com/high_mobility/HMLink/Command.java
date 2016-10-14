@@ -14,8 +14,10 @@ public class Command {
     public enum General implements Type {
         GET_CAPABILITIES(new byte[] { 0x00, (byte)0x10 }),
         CAPABILITIES(new byte[] { 0x00, (byte)0x11 }),
-        GET_VEHICLE_STATUS(new byte[] { 0x00, (byte)0x12 }),
-        VEHICLE_STATUS(new byte[] { 0x00, (byte)0x13 }),
+        GET_CAPABILITY(new byte[] { 0x00, (byte)0x12 }),
+        CAPABILITY(new byte[] { 0x00, (byte)0x13 }),
+        GET_VEHICLE_STATUS(new byte[] { 0x00, (byte)0x14 }),
+        VEHICLE_STATUS(new byte[] { 0x00, (byte)0x15 }),
         FAILURE(new byte[] {0x00, 0x02});
 
         /**
@@ -25,7 +27,16 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] getCapabilities() {
-            return GET_VEHICLE_STATUS.getIdentifier();
+            return GET_CAPABILITIES.getIdentifier();
+        }
+
+        /**
+         * Get the capability of a certain feature. The car will respond with the Capability command
+         * - to what extent the capability is supported, if at all.
+         * @return
+         */
+        public static byte[] getCapability() {
+            return GET_CAPABILITIES.getIdentifier();
         }
 
         /**

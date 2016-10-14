@@ -5,8 +5,8 @@ package com.high_mobility.HMLink;
  *
  * This command is sent when a Get Capabilities command is received by the car.
  */
-public class Capabilities extends IncomingCommand {
-    Capabilities(byte[] bytes) throws CommandParseException {
+public class Capability extends IncomingCommand {
+    Capability(byte[] bytes) throws CommandParseException {
         super(bytes); // TODO:
     }
 }
