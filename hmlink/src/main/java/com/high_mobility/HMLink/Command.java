@@ -31,7 +31,7 @@ public class Command {
         }
 
         /**
-         * Get the capability of a certain feature. The car will respond with the Capability command
+         * Get the capability of a certain feature. The car will respond with the AvailableCapability command
          * - to what extent the capability is supported, if at all.
          * @return
          */

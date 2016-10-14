@@ -1,6 +1,7 @@
 package com.highmobility.hmlink;
 
 import com.high_mobility.HMLink.Capabilities;
+import com.high_mobility.HMLink.Capability;
 import com.high_mobility.HMLink.CommandParseException;
 import com.high_mobility.HMLink.ControlMode;
 import com.high_mobility.HMLink.DeliveredParcels;
@@ -34,8 +35,28 @@ public class IncomingCommand {
             fail("init failed");
         }
 
+        assertTrue(capabilities.getDoorLocksCapability() == Capabilities.AvailableGetState.AVAILABLE);
+        assertTrue(capabilities.getTrunkAccessCapability() == Capabilities.TrunkAccessCapability.GET_STATE_LOCK_AVAILABLE);
+        assertTrue(capabilities.getWindshieldHeatingCapability() == Capabilities.AvailableGetState.UNAVAILABLE);
+        assertTrue(capabilities.getRooftopCapability() == Capabilities.AvailableGetState.AVAILABLE);
+        assertTrue(capabilities.getRemoteControlCapability() == Capabilities.Available.AVAILABLE);
+        assertTrue(capabilities.getHeartRateCapability() == Capabilities.Available.UNAVAILABLE);
+        assertTrue(capabilities.getSetDestinationCapability() == Capabilities.Available.UNAVAILABLE);
+        assertTrue(capabilities.getDeliveredParcelsCapability() == Capabilities.Available.AVAILABLE);
 
+    }
 
+    @Test
+    public void capability_init() {
+        byte[] bytes = ByteUtils.bytesFromHex("101301");
+
+        Capability capability= null;
+
+        try {
+            capability = new Capability(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
     }
 
     @Test
