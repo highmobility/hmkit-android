@@ -2,11 +2,15 @@ package com.highmobility.hmlink;
 
 import com.high_mobility.HMLink.Capabilities;
 import com.high_mobility.HMLink.Capability;
+import com.high_mobility.HMLink.CapabilityType;
+import com.high_mobility.HMLink.ChassisCapabilities;
 import com.high_mobility.HMLink.CommandParseException;
 import com.high_mobility.HMLink.ControlMode;
 import com.high_mobility.HMLink.DeliveredParcels;
+import com.high_mobility.HMLink.DigitalKeyCapabilities;
 import com.high_mobility.HMLink.Failure;
 import com.high_mobility.HMLink.LockState;
+import com.high_mobility.HMLink.ParkingCapabilities;
 import com.high_mobility.HMLink.RooftopState;
 import com.high_mobility.HMLink.TrunkState;
 import com.high_mobility.HMLink.VehicleStatus;
@@ -35,20 +39,19 @@ public class IncomingCommand {
             fail("init failed");
         }
 
-        assertTrue(capabilities.getDoorLocksCapability() == Capabilities.AvailableGetState.AVAILABLE);
-        assertTrue(capabilities.getTrunkAccessCapability() == Capabilities.TrunkAccessCapability.GET_STATE_LOCK_AVAILABLE);
-        assertTrue(capabilities.getWindshieldHeatingCapability() == Capabilities.AvailableGetState.UNAVAILABLE);
-        assertTrue(capabilities.getRooftopCapability() == Capabilities.AvailableGetState.AVAILABLE);
-        assertTrue(capabilities.getRemoteControlCapability() == Capabilities.Available.AVAILABLE);
-        assertTrue(capabilities.getHeartRateCapability() == Capabilities.Available.UNAVAILABLE);
-        assertTrue(capabilities.getSetDestinationCapability() == Capabilities.Available.UNAVAILABLE);
-        assertTrue(capabilities.getDeliveredParcelsCapability() == Capabilities.Available.AVAILABLE);
-
+        assertTrue(capabilities.getDigitalKeyCapabilities().getDoorLocksCapability() == Capabilities.AvailableGetState.AVAILABLE);
+        assertTrue(capabilities.getDigitalKeyCapabilities().getTrunkAccessCapability() == DigitalKeyCapabilities.TrunkAccessCapability.GET_STATE_LOCK_AVAILABLE);
+        assertTrue(capabilities.getChassisCapabilities().getWindshieldHeatingCapability() == Capabilities.AvailableGetState.UNAVAILABLE);
+        assertTrue(capabilities.getChassisCapabilities().getRooftopControlCapability() == Capabilities.AvailableGetState.AVAILABLE);
+        assertTrue(capabilities.getParkingCapabilities().getRemoteControlCapability() == Capabilities.Available.AVAILABLE);
+        assertTrue(capabilities.getHealthCapabilities().getHeartRateCapability() == Capabilities.Available.UNAVAILABLE);
+        assertTrue(capabilities.getPoiCapabilities().getSetDestinationCapability() == Capabilities.Available.UNAVAILABLE);
+        assertTrue(capabilities.getParcelDeliveryCapabilities().getDeliveredParcelsCapability() == Capabilities.Available.AVAILABLE);
     }
 
     @Test
-    public void capability_init() {
-        byte[] bytes = ByteUtils.bytesFromHex("101301");
+    public void capability_init_chassis() {
+        byte[] bytes = ByteUtils.bytesFromHex("1013110100");
 
         Capability capability= null;
 
@@ -57,6 +60,50 @@ public class IncomingCommand {
         } catch (CommandParseException e) {
             fail("init failed");
         }
+
+        assertTrue(capability.getCapabilityType().getClass() == ChassisCapabilities.class);
+        assertTrue(((ChassisCapabilities)capability.getCapabilityType()).getWindshieldHeatingCapability()
+                == Capabilities.AvailableGetState.AVAILABLE);
+
+        assertTrue(((ChassisCapabilities)capability.getCapabilityType()).getRooftopControlCapability()
+                == Capabilities.AvailableGetState.UNAVAILABLE);
+    }
+
+    @Test
+    public void capability_init_digital_key() {
+        byte[] bytes = ByteUtils.bytesFromHex("1013100003");
+
+        Capability capability= null;
+
+        try {
+            capability = new Capability(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(capability.getCapabilityType().getClass() == DigitalKeyCapabilities.class);
+        assertTrue(((DigitalKeyCapabilities)capability.getCapabilityType()).getDoorLocksCapability()
+                == Capabilities.AvailableGetState.UNAVAILABLE);
+
+        assertTrue(((DigitalKeyCapabilities)capability.getCapabilityType()).getTrunkAccessCapability()
+                == DigitalKeyCapabilities.TrunkAccessCapability.GET_STATE_LOCK_AVAILABLE);
+    }
+
+    @Test
+    public void capability_init_parking() {
+        byte[] bytes = ByteUtils.bytesFromHex("10131201");
+
+        Capability capability= null;
+
+        try {
+            capability = new Capability(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(capability.getCapabilityType().getClass() == ParkingCapabilities.class);
+        assertTrue(((ParkingCapabilities)capability.getCapabilityType()).getRemoteControlCapability()
+                == Capabilities.Available.AVAILABLE);
     }
 
     @Test
