@@ -1,5 +1,6 @@
 package com.highmobility.hmlink;
 
+import com.high_mobility.HMLink.CapabilityType;
 import com.high_mobility.HMLink.Command;
 import com.high_mobility.HMLink.LockState;
 import com.high_mobility.HMLink.RooftopState;
@@ -16,6 +17,12 @@ import static org.junit.Assert.assertTrue;
  * Created by ttiganik on 15/09/16.
  */
 public class OutgoingCommand {
+    @Test
+    public void getCapability() {
+        String waitingForBytes = "001211";
+        String commandBytes = ByteUtils.hexFromBytes(Command.General.getCapability(CapabilityType.Type.CHASSIS));
+        assertTrue(waitingForBytes.equals(commandBytes));
+    }
 
     @Test
     public void lockUnlockDoors_lock() {

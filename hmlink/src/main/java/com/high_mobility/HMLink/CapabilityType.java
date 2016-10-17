@@ -7,7 +7,12 @@ import java.util.Arrays;
  */
 public class CapabilityType {
     public enum Type {
-        DIGITAL_KEY, CHASSIS, PARKING, HEALTH, POI, PARCEL_DELIVERY;
+        DIGITAL_KEY((byte)0x10),
+        CHASSIS((byte)0x11),
+        PARKING((byte)0x12),
+        HEALTH((byte)0x13),
+        POI((byte)0x14),
+        PARCEL_DELIVERY((byte)0x15);
 
         static Type capabilityType(byte value) throws CommandParseException {
             switch (value) {
@@ -26,6 +31,14 @@ public class CapabilityType {
                 default:
                     throw new CommandParseException();
             }
+        }
+
+        Type(byte identifier) {
+            this.identifier = identifier;
+        }
+        private byte identifier;
+        public byte getIdentifier() {
+            return identifier;
         }
     }
 

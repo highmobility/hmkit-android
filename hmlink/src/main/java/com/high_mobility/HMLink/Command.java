@@ -26,7 +26,9 @@ public class Command {
 
         /**
          * Get the vehicle capabilities. The car will respond with the Capabilities command that
-         * manifests all different APIs that are enabled on the specific car.
+         * manifests all different APIs that are enabled on the specific car. It is good practice
+         * to only inspect the vehicle capabilities the first time when access is gained. The
+         * capabilities are fixed for each car type and will not change between every session.
          *
          * @return the command bytes
          */
@@ -37,10 +39,10 @@ public class Command {
         /**
          * Get the capability of a certain feature. The car will respond with the AvailableCapability command
          * - to what extent the capability is supported, if at all.
-         * @return
+         * @return the command bytes
          */
-        public static byte[] getCapability() {
-            return GET_CAPABILITIES.getIdentifier();
+        public static byte[] getCapability(CapabilityType.Type type) {
+            return ByteUtils.concatBytes(GET_CAPABILITY.getIdentifier(), type.getIdentifier());
         }
 
         /**
@@ -307,7 +309,6 @@ public class Command {
             System.arraycopy(longitudeBytes, 0, destinationBytes, 6, 4);
             destinationBytes[10] = (byte)nameBytes.length;
             System.arraycopy(nameBytes, 0, destinationBytes, 11, nameBytes.length);
-
             return destinationBytes;
         }
 
