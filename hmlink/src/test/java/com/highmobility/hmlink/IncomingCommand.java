@@ -9,6 +9,7 @@ import com.high_mobility.HMLink.ControlMode;
 import com.high_mobility.HMLink.DeliveredParcels;
 import com.high_mobility.HMLink.DigitalKeyCapabilities;
 import com.high_mobility.HMLink.Failure;
+import com.high_mobility.HMLink.HealthCapabilities;
 import com.high_mobility.HMLink.LockState;
 import com.high_mobility.HMLink.ParkingCapabilities;
 import com.high_mobility.HMLink.RooftopState;
@@ -104,6 +105,23 @@ public class IncomingCommand {
         assertTrue(capability.getCapabilityType().getClass() == ParkingCapabilities.class);
         assertTrue(((ParkingCapabilities)capability.getCapabilityType()).getRemoteControlCapability()
                 == Capabilities.Available.AVAILABLE);
+    }
+
+    @Test
+    public void capability_init_health() {
+        byte[] bytes = ByteUtils.bytesFromHex("10131300");
+
+        Capability capability= null;
+
+        try {
+            capability = new Capability(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(capability.getCapabilityType().getClass() == HealthCapabilities.class);
+        assertTrue(((HealthCapabilities)capability.getCapabilityType()).getHeartRateCapability()
+                == Capabilities.Available.UNAVAILABLE);
     }
 
     @Test

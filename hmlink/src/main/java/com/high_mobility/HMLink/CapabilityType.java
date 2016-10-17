@@ -1,6 +1,5 @@
 package com.high_mobility.HMLink;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
 /**
@@ -37,12 +36,7 @@ public class CapabilityType {
     }
     Type type;
 
-    CapabilityType(byte[] bytes) throws CommandParseException {
-        this.bytes = bytes;
-        this.type = Type.capabilityType(bytes[2]);
-    }
-
-    CapabilityType(Type type) throws CommandParseException {
+    CapabilityType(Type type) {
         this.type = type;
     }
 
