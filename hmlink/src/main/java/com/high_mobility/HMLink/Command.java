@@ -1,5 +1,9 @@
 package com.high_mobility.HMLink;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
 /**
  * Created by ttiganik on 25/05/16.
  */
@@ -287,11 +291,24 @@ public class Command {
         /**
          * Set the navigation destination. This will be forwarded to the navigation system of the car.
          *
-         * @param destination the destination
+         * @param latitude the latitude of the destination
+         * @param longitude the longitude of the destination
+         * @param name the destination name
          * @return the command bytes
          */
-        public static byte[] setDestination(String destination) {
-            return ByteUtils.concatBytes(SET_DESTINATION.getIdentifier(), destination.getBytes());
+        public static byte[] setDestination(float latitude, float longitude, String name) throws UnsupportedEncodingException {
+            byte[] latitudeBytes = ByteBuffer.allocate(4).putFloat(latitude).array();
+            byte[] longitudeBytes = ByteBuffer.allocate(4).putFloat(longitude).array();
+            byte[] nameBytes = name.getBytes("UTF-8");
+            byte[] destinationBytes = new byte[2 + 8 + 1 + nameBytes.length];
+
+            System.arraycopy(SET_DESTINATION.getIdentifier(), 0, destinationBytes, 0, 2);
+            System.arraycopy(latitudeBytes, 0, destinationBytes, 2, 4);
+            System.arraycopy(longitudeBytes, 0, destinationBytes, 6, 4);
+            destinationBytes[10] = (byte)nameBytes.length;
+            System.arraycopy(nameBytes, 0, destinationBytes, 11, nameBytes.length);
+
+            return destinationBytes;
         }
 
         PointOfInterest(byte[] identifier) {

@@ -8,6 +8,8 @@ import com.high_mobility.HMLink.TrunkState;
 
 import org.junit.Test;
 
+import java.io.UnsupportedEncodingException;
+
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -54,6 +56,19 @@ public class OutgoingCommand {
     public void setTrunkState() {
         String waitingForBytes = "00250001";
         String commandBytes = ByteUtils.hexFromBytes(Command.DigitalKey.setTrunkState(TrunkState.LockState.UNLOCKED, TrunkState.Position.OPEN));
+        assertTrue(waitingForBytes.equals(commandBytes));
+    }
+
+    @Test
+    public void setDestination() {
+        String waitingForBytes = "00704252147D41567AB1064265726C696E";
+
+        String commandBytes = null;
+        try {
+            commandBytes = ByteUtils.hexFromBytes(Command.PointOfInterest.setDestination(52.520008f, 13.404954f, "Berlin"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         assertTrue(waitingForBytes.equals(commandBytes));
     }
 }
