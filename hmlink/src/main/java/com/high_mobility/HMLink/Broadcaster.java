@@ -184,7 +184,9 @@ public class Broadcaster implements SharedBleListener {
                 .setTxPowerLevel(txPowerLevel)
                 .build();
 
-        final UUID advertiseUUID = ByteUtils.UUIDFromByteArray(ByteUtils.concatBytes(issuer, appId));
+        byte[] uuidBytes = ByteUtils.concatBytes(issuer, appId);
+        ByteUtils.reverse(uuidBytes);
+        final UUID advertiseUUID = ByteUtils.UUIDFromByteArray(uuidBytes);
 
         final AdvertiseData data = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
