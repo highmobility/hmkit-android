@@ -24,7 +24,6 @@ public class VehicleStatus extends IncomingCommand {
         windshieldHeatingActive = WindshieldHeatingState.isWindshieldActiveForByte(bytes[5]);
         rooftopState = RooftopState.State.stateForByte(bytes[6]);
         remoteControlMode = ControlMode.Mode.controlModeFromByte(bytes[7]);
-
     }
 
     public LockState.State getDoorLockState() {

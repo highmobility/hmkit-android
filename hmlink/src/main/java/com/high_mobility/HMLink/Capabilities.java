@@ -9,11 +9,11 @@ import java.util.Arrays;
  */
 public class Capabilities extends IncomingCommand {
     public enum Available {
-        UNAVAILABLE, AVAILABLE
+        UNAVAILABLE, AVAILABLE, UNSUPPORTED
     }
 
     public enum AvailableGetState {
-        UNAVAILABLE, AVAILABLE, GET_STATE_AVAILABLE
+        UNAVAILABLE, AVAILABLE, GET_STATE_AVAILABLE, UNSUPPORTED
     }
 
     DigitalKeyCapabilities digitalKeyCapabilities;
@@ -60,31 +60,24 @@ public class Capabilities extends IncomingCommand {
         return poiCapabilities;
     }
 
-    public ParcelDeliveryCapabilities getParcelDeliveryCapabilities() {
-        return parcelDeliveryCapabilities;
-    }
+    public ParcelDeliveryCapabilities getParcelDeliveryCapabilities() { return parcelDeliveryCapabilities; }
 
     static AvailableGetState getStateCapability(byte value) throws CommandParseException {
         switch (value) {
-            case 0x00:
-                return AvailableGetState.UNAVAILABLE;
-            case 0x01:
-                return AvailableGetState.AVAILABLE;
-            case 0x02:
-                return AvailableGetState.GET_STATE_AVAILABLE;
-            default:
-                throw new CommandParseException();
+            case 0x00: return AvailableGetState.UNAVAILABLE;
+            case 0x01: return AvailableGetState.AVAILABLE;
+            case 0x02: return AvailableGetState.GET_STATE_AVAILABLE;
+            case (byte)0xFF: return AvailableGetState.UNSUPPORTED;
+            default: throw new CommandParseException();
         }
     }
 
     static Available availableCapability(byte value) throws CommandParseException {
         switch (value) {
-            case 0x00:
-                return Available.UNAVAILABLE;
-            case 0x01:
-                return Available.AVAILABLE;
-            default:
-                throw new CommandParseException();
+            case 0x00: return Available.UNAVAILABLE;
+            case 0x01: return Available.AVAILABLE;
+            case (byte) 0xFF: return Available.UNSUPPORTED;
+            default: throw new CommandParseException();
         }
     }
 }

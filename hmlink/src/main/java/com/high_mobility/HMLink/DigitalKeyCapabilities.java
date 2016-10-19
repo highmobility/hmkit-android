@@ -6,7 +6,7 @@ package com.high_mobility.HMLink;
 
 public class DigitalKeyCapabilities extends CapabilityType {
     public enum TrunkAccessCapability {
-        UNAVAILABLE, AVAILABLE, GET_STATE_AVAILABLE, GET_STATE_LOCK_AVAILABLE, GET_STATE_POSITION_AVAILABLE
+        UNAVAILABLE, AVAILABLE, GET_STATE_AVAILABLE, GET_STATE_LOCK_AVAILABLE, GET_STATE_POSITION_AVAILABLE, UNSUPPORTED
     }
 
     Capabilities.AvailableGetState doorLocksCapability;
@@ -30,6 +30,7 @@ public class DigitalKeyCapabilities extends CapabilityType {
             case 0x02: trunkAccessCapability = TrunkAccessCapability.GET_STATE_AVAILABLE; break;
             case 0x03: trunkAccessCapability = TrunkAccessCapability.GET_STATE_LOCK_AVAILABLE; break;
             case 0x04: trunkAccessCapability = TrunkAccessCapability.GET_STATE_POSITION_AVAILABLE; break;
+            case (byte)0xFF: trunkAccessCapability = TrunkAccessCapability.UNSUPPORTED; break;
         }
     }
 }

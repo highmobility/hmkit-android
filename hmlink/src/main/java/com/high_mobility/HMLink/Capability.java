@@ -10,8 +10,8 @@ public class Capability extends IncomingCommand {
     public CapabilityType getCapabilityType() {
         return capabilityType;
     }
-    CapabilityType capabilityType;
 
+    CapabilityType capabilityType;
 
      public Capability(byte[] bytes) throws CommandParseException {
         super(bytes);
