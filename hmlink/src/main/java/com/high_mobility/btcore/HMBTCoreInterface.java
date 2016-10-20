@@ -46,6 +46,8 @@ public interface HMBTCoreInterface {
 
     int HMPersistenceHalgetCaPublicKey(byte[] cert);
 
+    int HMPersistenceHalgetOEMCaPublicKey(byte[] cert);
+
     //Add remote device publick key to storagr
     //TT
     int HMPersistenceHaladdPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int commandSize, byte[] command);
