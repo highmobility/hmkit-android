@@ -5,14 +5,14 @@ package com.high_mobility.HMLink;
  */
 
 public class ParkingCapabilities extends CapabilityType {
-    private final Capabilities.Available remoteControlCapability;
+    private final Capability.Available remoteControlCapability;
 
-    public Capabilities.Available getRemoteControlCapability() {
+    public Capability.Available getRemoteControlCapability() {
         return remoteControlCapability;
     }
 
     public ParkingCapabilities(byte aByte) throws CommandParseException {
         super(Type.PARKING);
-        remoteControlCapability = Capabilities.availableCapability(aByte);
+        remoteControlCapability = Capability.availableCapability(aByte);
     }
 }

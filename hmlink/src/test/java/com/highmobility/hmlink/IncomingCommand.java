@@ -40,14 +40,14 @@ public class IncomingCommand {
             fail("init failed");
         }
 
-        assertTrue(capabilities.getDigitalKeyCapabilities().getDoorLocksCapability() == Capabilities.AvailableGetState.AVAILABLE);
+        assertTrue(capabilities.getDigitalKeyCapabilities().getDoorLocksCapability() == Capability.AvailableGetState.AVAILABLE);
         assertTrue(capabilities.getDigitalKeyCapabilities().getTrunkAccessCapability() == DigitalKeyCapabilities.TrunkAccessCapability.GET_STATE_LOCK_AVAILABLE);
-        assertTrue(capabilities.getChassisCapabilities().getWindshieldHeatingCapability() == Capabilities.AvailableGetState.UNAVAILABLE);
-        assertTrue(capabilities.getChassisCapabilities().getRooftopControlCapability() == Capabilities.AvailableGetState.AVAILABLE);
-        assertTrue(capabilities.getParkingCapabilities().getRemoteControlCapability() == Capabilities.Available.AVAILABLE);
-        assertTrue(capabilities.getHealthCapabilities().getHeartRateCapability() == Capabilities.Available.UNAVAILABLE);
-        assertTrue(capabilities.getPoiCapabilities().getSetDestinationCapability() == Capabilities.Available.UNAVAILABLE);
-        assertTrue(capabilities.getParcelDeliveryCapabilities().getDeliveredParcelsCapability() == Capabilities.Available.AVAILABLE);
+        assertTrue(capabilities.getChassisCapabilities().getWindshieldHeatingCapability() == Capability.AvailableGetState.UNAVAILABLE);
+        assertTrue(capabilities.getChassisCapabilities().getRooftopControlCapability() == Capability.AvailableGetState.AVAILABLE);
+        assertTrue(capabilities.getParkingCapabilities().getRemoteControlCapability() == Capability.Available.AVAILABLE);
+        assertTrue(capabilities.getHealthCapabilities().getHeartRateCapability() == Capability.Available.UNAVAILABLE);
+        assertTrue(capabilities.getPoiCapabilities().getSetDestinationCapability() == Capability.Available.UNAVAILABLE);
+        assertTrue(capabilities.getParcelDeliveryCapabilities().getDeliveredParcelsCapability() == Capability.Available.AVAILABLE);
     }
 
     @Test
@@ -64,10 +64,10 @@ public class IncomingCommand {
 
         assertTrue(capability.getCapabilityType().getClass() == ChassisCapabilities.class);
         assertTrue(((ChassisCapabilities)capability.getCapabilityType()).getWindshieldHeatingCapability()
-                == Capabilities.AvailableGetState.AVAILABLE);
+                == Capability.AvailableGetState.AVAILABLE);
 
         assertTrue(((ChassisCapabilities)capability.getCapabilityType()).getRooftopControlCapability()
-                == Capabilities.AvailableGetState.UNAVAILABLE);
+                == Capability.AvailableGetState.UNAVAILABLE);
     }
 
     @Test
@@ -84,7 +84,7 @@ public class IncomingCommand {
 
         assertTrue(capability.getCapabilityType().getClass() == DigitalKeyCapabilities.class);
         assertTrue(((DigitalKeyCapabilities)capability.getCapabilityType()).getDoorLocksCapability()
-                == Capabilities.AvailableGetState.UNAVAILABLE);
+                == Capability.AvailableGetState.UNAVAILABLE);
 
         assertTrue(((DigitalKeyCapabilities)capability.getCapabilityType()).getTrunkAccessCapability()
                 == DigitalKeyCapabilities.TrunkAccessCapability.GET_STATE_LOCK_AVAILABLE);
@@ -104,7 +104,7 @@ public class IncomingCommand {
 
         assertTrue(capability.getCapabilityType().getClass() == ParkingCapabilities.class);
         assertTrue(((ParkingCapabilities)capability.getCapabilityType()).getRemoteControlCapability()
-                == Capabilities.Available.AVAILABLE);
+                == Capability.Available.AVAILABLE);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class IncomingCommand {
 
         assertTrue(capability.getCapabilityType().getClass() == HealthCapabilities.class);
         assertTrue(((HealthCapabilities)capability.getCapabilityType()).getHeartRateCapability()
-                == Capabilities.Available.UNAVAILABLE);
+                == Capability.Available.UNAVAILABLE);
     }
 
     @Test

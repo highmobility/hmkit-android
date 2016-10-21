@@ -6,14 +6,14 @@ package com.high_mobility.HMLink;
 
 public class HealthCapabilities extends CapabilityType {
 
-    private final Capabilities.Available heartRateCapability;
+    private final Capability.Available heartRateCapability;
 
     public HealthCapabilities(byte aByte) throws CommandParseException {
         super(Type.HEALTH);
-        heartRateCapability = Capabilities.availableCapability(aByte);
+        heartRateCapability = Capability.availableCapability(aByte);
     }
 
-    public Capabilities.Available getHeartRateCapability() {
+    public Capability.Available getHeartRateCapability() {
         return heartRateCapability;
     }
 }

@@ -6,14 +6,14 @@ package com.high_mobility.HMLink;
 
 public class ParcelDeliveryCapabilities extends CapabilityType {
 
-    private final Capabilities.Available deliveredParcelsCapability;
+    private final Capability.Available deliveredParcelsCapability;
 
     public ParcelDeliveryCapabilities(byte aByte) throws CommandParseException {
         super(Type.PARCEL_DELIVERY);
-        deliveredParcelsCapability = Capabilities.availableCapability(aByte);
+        deliveredParcelsCapability = Capability.availableCapability(aByte);
     }
 
-    public Capabilities.Available getDeliveredParcelsCapability() {
+    public Capability.Available getDeliveredParcelsCapability() {
         return deliveredParcelsCapability;
     }
 }

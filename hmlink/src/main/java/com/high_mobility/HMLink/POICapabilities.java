@@ -6,14 +6,14 @@ package com.high_mobility.HMLink;
 
 public class POICapabilities extends CapabilityType {
 
-    public Capabilities.Available getSetDestinationCapability() {
+    public Capability.Available getSetDestinationCapability() {
         return setDestinationCapability;
     }
-    private final Capabilities.Available setDestinationCapability;
+    private final Capability.Available setDestinationCapability;
 
     public POICapabilities(byte aByte) throws CommandParseException {
         super(Type.POI);
-        setDestinationCapability = Capabilities.availableCapability(aByte);
+        setDestinationCapability = Capability.availableCapability(aByte);
     }
 
 }

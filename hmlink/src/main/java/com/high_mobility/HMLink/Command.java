@@ -2,7 +2,6 @@ package com.high_mobility.HMLink;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 /**
  * Created by ttiganik on 25/05/16.

@@ -9,10 +9,10 @@ public class DigitalKeyCapabilities extends CapabilityType {
         UNAVAILABLE, AVAILABLE, GET_STATE_AVAILABLE, GET_STATE_LOCK_AVAILABLE, GET_STATE_POSITION_AVAILABLE, UNSUPPORTED
     }
 
-    Capabilities.AvailableGetState doorLocksCapability;
+    Capability.AvailableGetState doorLocksCapability;
     TrunkAccessCapability trunkAccessCapability;
 
-    public Capabilities.AvailableGetState getDoorLocksCapability() {
+    public Capability.AvailableGetState getDoorLocksCapability() {
         return doorLocksCapability;
     }
 
@@ -22,7 +22,7 @@ public class DigitalKeyCapabilities extends CapabilityType {
 
     public DigitalKeyCapabilities(byte[] digitalKeyBytes) throws CommandParseException{
         super(Type.DIGITAL_KEY);
-        doorLocksCapability = Capabilities.getStateCapability(digitalKeyBytes[0]);
+        doorLocksCapability = Capability.getStateCapability(digitalKeyBytes[0]);
 
         switch (digitalKeyBytes[1]) {
             case 0x00: trunkAccessCapability = TrunkAccessCapability.UNAVAILABLE; break;

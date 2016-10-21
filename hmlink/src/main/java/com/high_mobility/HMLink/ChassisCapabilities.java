@@ -6,21 +6,21 @@ package com.high_mobility.HMLink;
 
 public class ChassisCapabilities extends CapabilityType {
 
-    Capabilities.AvailableGetState windshieldHeatingCapability;
+    Capability.AvailableGetState windshieldHeatingCapability;
 
-    Capabilities.AvailableGetState rooftopControlCapability;
+    Capability.AvailableGetState rooftopControlCapability;
 
-    public Capabilities.AvailableGetState getWindshieldHeatingCapability() {
+    public Capability.AvailableGetState getWindshieldHeatingCapability() {
         return windshieldHeatingCapability;
     }
 
-    public Capabilities.AvailableGetState getRooftopControlCapability() {
+    public Capability.AvailableGetState getRooftopControlCapability() {
         return rooftopControlCapability;
     }
 
     public ChassisCapabilities(byte[] chassisBytes) throws CommandParseException {
         super(Type.CHASSIS);
-        windshieldHeatingCapability = Capabilities.getStateCapability(chassisBytes[0]);
-        rooftopControlCapability = Capabilities.getStateCapability(chassisBytes[1]);
+        windshieldHeatingCapability = Capability.getStateCapability(chassisBytes[0]);
+        rooftopControlCapability = Capability.getStateCapability(chassisBytes[1]);
     }
 }
