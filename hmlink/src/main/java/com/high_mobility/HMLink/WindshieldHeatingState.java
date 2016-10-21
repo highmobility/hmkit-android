@@ -8,25 +8,35 @@ package com.high_mobility.HMLink;
  * The state is Active when the heating is turned on.
  */
 public class WindshieldHeatingState extends IncomingCommand {
-    boolean active;
+    State state;
+    public enum State {
+        ACTIVE, INACTIVE, UNSUPPORTED
+    }
 
     public WindshieldHeatingState(byte[] bytes) throws CommandParseException {
         super(bytes);
 
         if (bytes.length != 3) throw new CommandParseException();
 
-        active = isWindshieldActiveForByte(bytes[2]);
+        state = windshieldState(bytes[2]);
     }
 
-    static boolean isWindshieldActiveForByte(byte value) {
-        return value != 0x00;
+    static State windshieldState(byte value) throws CommandParseException {
+
+        switch (value) {
+            case 0x00: return State.INACTIVE;
+            case 0x01: return State.ACTIVE;
+            case (byte)0xFF: return State.UNSUPPORTED;
+        }
+
+       throw new CommandParseException();
     }
 
     /**
      *
-     * @return whether the windshield heating state is active or not
+     * @return whether the windshield heating state is state or not
      */
-    public boolean isActive() {
-        return active;
+    public State getState() {
+        return state;
     }
 }

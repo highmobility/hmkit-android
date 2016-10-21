@@ -15,11 +15,15 @@ public class TrunkState extends IncomingCommand {
      * The possible lock positions
      */
     public enum LockState {
-        LOCKED, UNLOCKED;
+        LOCKED, UNLOCKED, UNSUPPORTED;
 
         static LockState lockStateFromByte(byte value) throws CommandParseException {
-            if (value == 0x00) return UNLOCKED;
-            if (value == 0x01) return LOCKED;
+            switch (value) {
+                case 0x00: return UNLOCKED;
+                case 0x01: return LOCKED;
+                case (byte)0xFF: return UNSUPPORTED;
+            }
+
 
             throw new CommandParseException();
         }
@@ -29,11 +33,14 @@ public class TrunkState extends IncomingCommand {
      * The possible trunk positions
      */
     public enum Position {
-        OPEN, CLOSED;
+        OPEN, CLOSED, UNSUPPORTED;
 
         static Position positionFromByte(byte value) throws CommandParseException {
-            if (value == 0x00) return CLOSED;
-            if (value == 0x01) return OPEN;
+            switch (value) {
+                case 0x00: return CLOSED;
+                case 0x01: return OPEN;
+                case (byte)0xFF: return UNSUPPORTED;
+            }
 
             throw new CommandParseException();
         }

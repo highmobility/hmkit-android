@@ -17,7 +17,8 @@ public class ControlMode extends IncomingCommand {
         STARTED((byte)0x02),
         FAILED_TO_START((byte)0x03),
         ABORTED((byte)0x04),
-        ENDED((byte)0x05);
+        ENDED((byte)0x05),
+        UNSUPPORTED((byte)0xFF);
 
         private byte type;
 
@@ -43,6 +44,8 @@ public class ControlMode extends IncomingCommand {
                     return ABORTED;
                 case 0x05:
                     return ENDED;
+                case (byte)0xFF:
+                    return UNSUPPORTED;
                 default:
                     throw new CommandParseException();
             }

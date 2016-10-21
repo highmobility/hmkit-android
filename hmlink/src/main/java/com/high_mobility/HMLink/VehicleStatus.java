@@ -10,7 +10,7 @@ public class VehicleStatus extends IncomingCommand {
     private LockState.State doorLockStatus;
     private TrunkState.LockState trunkLockStatus;
     private TrunkState.Position trunkPosition;
-    private boolean windshieldHeatingActive;
+    private WindshieldHeatingState.State windshieldHeatingState;
     private RooftopState.State rooftopState;
     private ControlMode.Mode remoteControlMode;
 
@@ -21,7 +21,7 @@ public class VehicleStatus extends IncomingCommand {
         doorLockStatus = LockState.State.lockStateFromByte(bytes[2]);
         trunkLockStatus = TrunkState.LockState.lockStateFromByte(bytes[3]);
         trunkPosition = TrunkState.Position.positionFromByte(bytes[4]);
-        windshieldHeatingActive = WindshieldHeatingState.isWindshieldActiveForByte(bytes[5]);
+        windshieldHeatingState = WindshieldHeatingState.windshieldState(bytes[5]);
         rooftopState = RooftopState.State.stateForByte(bytes[6]);
         remoteControlMode = ControlMode.Mode.controlModeFromByte(bytes[7]);
     }
@@ -38,8 +38,8 @@ public class VehicleStatus extends IncomingCommand {
         return trunkPosition;
     }
 
-    public boolean isWindshieldHeatingActive() {
-        return windshieldHeatingActive;
+    public WindshieldHeatingState.State getWindshieldHeatingState() {
+        return windshieldHeatingState;
     }
 
     public RooftopState.State getRooftopState() {

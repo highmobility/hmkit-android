@@ -2,7 +2,6 @@ package com.highmobility.hmlink;
 
 import com.high_mobility.HMLink.Capabilities;
 import com.high_mobility.HMLink.Capability;
-import com.high_mobility.HMLink.CapabilityType;
 import com.high_mobility.HMLink.ChassisCapabilities;
 import com.high_mobility.HMLink.CommandParseException;
 import com.high_mobility.HMLink.ControlMode;
@@ -174,7 +173,7 @@ public class IncomingCommand {
 
     @Test
     public void windshieldHeatingState_init_active() {
-        byte[] bytes = ByteUtils.bytesFromHex("005B01");
+        byte[] bytes = ByteUtils.bytesFromHex("005BFF");
 
         WindshieldHeatingState command = null;
 
@@ -184,7 +183,7 @@ public class IncomingCommand {
             fail("init failed");
         }
 
-        assertTrue(command.isActive() == true);
+        assertTrue(command.getState() == WindshieldHeatingState.State.UNSUPPORTED);
     }
 
     @Test
@@ -199,7 +198,7 @@ public class IncomingCommand {
             fail("init failed");
         }
 
-        assertTrue(command.isActive() == false);
+        assertTrue(command.getState() == WindshieldHeatingState.State.INACTIVE);
     }
 
     @Test
@@ -234,7 +233,7 @@ public class IncomingCommand {
 
     @Test
     public void vehicleStatus_init() {
-        byte[] bytes = ByteUtils.bytesFromHex("0015000100010002");
+        byte[] bytes = ByteUtils.bytesFromHex("0015000100FF0002");
 
         VehicleStatus command = null;
 
@@ -247,7 +246,7 @@ public class IncomingCommand {
         assertTrue(command.getDoorLockState() == LockState.State.UNLOCKED);
         assertTrue(command.getTrunkLockState() == TrunkState.LockState.LOCKED);
         assertTrue(command.getTrunkPosition() == TrunkState.Position.CLOSED);
-        assertTrue(command.isWindshieldHeatingActive() == true);
+        assertTrue(command.getWindshieldHeatingState() == WindshieldHeatingState.State.UNSUPPORTED);
         assertTrue(command.getRooftopState() == RooftopState.State.TRANSPARENT);
         assertTrue(command.getRemoteControlMode() == ControlMode.Mode.STARTED);
     }
