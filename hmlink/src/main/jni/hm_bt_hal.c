@@ -74,3 +74,7 @@ uint32_t hm_bt_hal_disconnect(uint8_t *mac){
   (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jbyte*) mac );
   return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalDisconnect, mac_);
 }
+
+uint32_t hm_bt_hal_read_info(uint8_t *mac, uint16_t offset){
+  return 0; //TODO for sensing
+}
