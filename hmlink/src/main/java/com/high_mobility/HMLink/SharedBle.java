@@ -71,9 +71,12 @@ public class SharedBle {
     }
 
     void setRandomAdapterName() {
-        byte[] serialBytes = new byte[4];
+        String name = "HM ";
+        byte[] serialBytes = new byte[3];
         new Random().nextBytes(serialBytes);
-        getAdapter().setName(ByteUtils.hexFromBytes(serialBytes));
+        String randomBytesString = ByteUtils.hexFromBytes(serialBytes);
+        name += randomBytesString.substring(1);
+        getAdapter().setName(name);
     }
 
     void createAdapter() {
