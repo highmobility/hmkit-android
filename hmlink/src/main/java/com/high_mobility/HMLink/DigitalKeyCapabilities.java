@@ -6,7 +6,14 @@ package com.high_mobility.HMLink;
 
 public class DigitalKeyCapabilities extends CapabilityType {
     public enum TrunkAccessCapability {
-        UNAVAILABLE, AVAILABLE, GET_STATE_AVAILABLE, GET_STATE_LOCK_AVAILABLE, GET_STATE_POSITION_AVAILABLE, UNSUPPORTED
+        UNAVAILABLE,
+        AVAILABLE,
+        GET_STATE_AVAILABLE,
+        GET_STATE_LOCK_UNLOCK_AVAILABLE,
+        GET_STATE_UNLOCK_AVAILABLE,
+        GET_STATE_OPEN_CLOSE_AVAILABLE,
+        GET_STATE_OPEN_AVAILABLE,
+        UNSUPPORTED
     }
 
     Capability.AvailableGetState doorLocksCapability;
@@ -28,8 +35,10 @@ public class DigitalKeyCapabilities extends CapabilityType {
             case 0x00: trunkAccessCapability = TrunkAccessCapability.UNAVAILABLE; break;
             case 0x01: trunkAccessCapability = TrunkAccessCapability.AVAILABLE; break;
             case 0x02: trunkAccessCapability = TrunkAccessCapability.GET_STATE_AVAILABLE; break;
-            case 0x03: trunkAccessCapability = TrunkAccessCapability.GET_STATE_LOCK_AVAILABLE; break;
-            case 0x04: trunkAccessCapability = TrunkAccessCapability.GET_STATE_POSITION_AVAILABLE; break;
+            case 0x03: trunkAccessCapability = TrunkAccessCapability.GET_STATE_LOCK_UNLOCK_AVAILABLE; break;
+            case 0x04: trunkAccessCapability = TrunkAccessCapability.GET_STATE_UNLOCK_AVAILABLE; break;
+            case 0x05: trunkAccessCapability = TrunkAccessCapability.GET_STATE_OPEN_CLOSE_AVAILABLE; break;
+            case 0x06: trunkAccessCapability = TrunkAccessCapability.GET_STATE_OPEN_AVAILABLE; break;
             case (byte)0xFF: trunkAccessCapability = TrunkAccessCapability.UNSUPPORTED; break;
         }
     }

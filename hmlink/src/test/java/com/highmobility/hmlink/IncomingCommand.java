@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
 public class IncomingCommand {
     @Test
     public void capabilities_init() {
-        byte[] bytes = ByteUtils.bytesFromHex("10110103000101000001");
+        byte[] bytes = ByteUtils.bytesFromHex("10110104000101000001");
 
         Capabilities capabilities= null;
 
@@ -40,7 +40,7 @@ public class IncomingCommand {
         }
 
         assertTrue(capabilities.getDigitalKeyCapabilities().getDoorLocksCapability() == Capability.AvailableGetState.AVAILABLE);
-        assertTrue(capabilities.getDigitalKeyCapabilities().getTrunkAccessCapability() == DigitalKeyCapabilities.TrunkAccessCapability.GET_STATE_LOCK_AVAILABLE);
+        assertTrue(capabilities.getDigitalKeyCapabilities().getTrunkAccessCapability() == DigitalKeyCapabilities.TrunkAccessCapability.GET_STATE_UNLOCK_AVAILABLE);
         assertTrue(capabilities.getChassisCapabilities().getWindshieldHeatingCapability() == Capability.AvailableGetState.UNAVAILABLE);
         assertTrue(capabilities.getChassisCapabilities().getRooftopControlCapability() == Capability.AvailableGetState.AVAILABLE);
         assertTrue(capabilities.getParkingCapabilities().getRemoteControlCapability() == Capability.Available.AVAILABLE);
@@ -71,7 +71,7 @@ public class IncomingCommand {
 
     @Test
     public void capability_init_digital_key() {
-        byte[] bytes = ByteUtils.bytesFromHex("1013100003");
+        byte[] bytes = ByteUtils.bytesFromHex("1013100006");
 
         Capability capability= null;
 
@@ -86,7 +86,7 @@ public class IncomingCommand {
                 == Capability.AvailableGetState.UNAVAILABLE);
 
         assertTrue(((DigitalKeyCapabilities)capability.getCapabilityType()).getTrunkAccessCapability()
-                == DigitalKeyCapabilities.TrunkAccessCapability.GET_STATE_LOCK_AVAILABLE);
+                == DigitalKeyCapabilities.TrunkAccessCapability.GET_STATE_OPEN_AVAILABLE);
     }
 
     @Test
