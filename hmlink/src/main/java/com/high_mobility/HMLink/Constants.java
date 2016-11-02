@@ -11,8 +11,8 @@ public class Constants {
 
     static UUID NOTIFY_DESC_UUID = UUID.fromString("00002902-0000-1000-8000-00805F9B34FB");
 
-    public static final float registerTimeout           = 6.0f;
-    public static final float commandTimeout            = 10.0f;
+    public static final float registerTimeout           = 10.0f;
+    public static final float commandTimeout            = 20.0f;
     public static final int certificateStorageCount     = 30;
 
     public interface ApprovedCallback {
