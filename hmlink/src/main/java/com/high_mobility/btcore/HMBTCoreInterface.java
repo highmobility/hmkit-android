@@ -81,7 +81,7 @@ public interface HMBTCoreInterface {
 
     //Callback
     //TT
-    void HMApiCallbackCustomCommandIncoming(HMDevice device, byte[] data, int[] length, int[] error); // received custom command
+    void HMApiCallbackCustomCommandIncoming(HMDevice device, byte[] data, int length); // received custom command
     void HMApiCallbackCustomCommandResponse(HMDevice device, byte[] data, int length);
     int HMApiCallbackGetDeviceCertificateFailed(HMDevice device, byte[] nonce); //ret false on, et ei jätka
     int HMApiCallbackPairingRequested(HMDevice device); //ret false on, et ei jätka

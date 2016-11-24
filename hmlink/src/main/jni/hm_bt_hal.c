@@ -78,3 +78,7 @@ uint32_t hm_bt_hal_disconnect(uint8_t *mac){
 uint32_t hm_bt_hal_read_info(uint8_t *mac, uint16_t offset){
   return 0; //TODO for sensing
 }
+
+uint32_t hm_bt_hal_get_current_date_time(uint8_t day, uint8_t month, uint8_t year, uint8_t minute, uint8_t hour){
+  return 0;
+}

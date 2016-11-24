@@ -290,13 +290,10 @@ class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public void HMApiCallbackCustomCommandIncoming(HMDevice device, byte[] data, int[] length, int[] error) {
-        if (manager.getBroadcaster().onCommandReceived(device, trimmedBytes(data, length[0])) == false) {
-            manager.getScanner().onCommandReceived(device, trimmedBytes(data, length[0]));
+    public void HMApiCallbackCustomCommandIncoming(HMDevice device, byte[] data, int length) {
+        if (manager.getBroadcaster().onCommandReceived(device, trimmedBytes(data, length)) == false) {
+            manager.getScanner().onCommandReceived(device, trimmedBytes(data, length));
         }
-
-        length[0] = 0;
-        error[0] = 0;
     }
 
     @Override

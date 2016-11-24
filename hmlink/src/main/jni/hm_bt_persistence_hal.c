@@ -264,3 +264,15 @@ uint32_t hm_bt_persistence_hal_get_appid_for_issuer_count(uint8_t *issuer, uint8
 uint32_t hm_bt_persistence_hal_get_appid_for_issuer(uint8_t *issuer, uint8_t index, uint8_t *appid){
  return 0;
 }
+
+uint32_t hm_bt_persistence_hel_set_command_count(uint8_t *serial, uint8_t command, uint8_t count){
+  return 0;
+}
+
+uint32_t hm_bt_persistence_hel_get_command_count(uint8_t *serial, uint8_t command, uint8_t *count){
+  return 0;
+}
+
+uint32_t hm_bt_persistence_hel_remove_all_command_counts(uint8_t *serial){
+  return 0;
+}

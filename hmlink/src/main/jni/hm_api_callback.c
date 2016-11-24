@@ -93,7 +93,7 @@ void hm_api_callback_exited_proximity(hm_device_t *device)
     return (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackExitedProximity, obj);
 }
 
-void hm_api_callback_command_incoming(hm_device_t *device, uint8_t *data, uint16_t *length, uint8_t *error)
+void hm_api_callback_command_incoming(hm_device_t *device, uint8_t *data, uint16_t length)
 {
     jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
@@ -119,28 +119,9 @@ void hm_api_callback_command_incoming(hm_device_t *device, uint8_t *data, uint16
     (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
 
     jbyteArray data_ = (*envRef)->NewByteArray(envRef,255);
-    (*envRef)->SetByteArrayRegion(envRef, data_, 0, *length, (const jbyte*) data );
+    (*envRef)->SetByteArrayRegion(envRef, data_, 0, length, (const jbyte*) data );
 
-    uint32_t lenArr[1];
-    lenArr[0] = (uint32_t)*length;
-    jintArray length_ = (*envRef)->NewIntArray(envRef,1);
-    (*envRef)->SetIntArrayRegion(envRef, length_, 0, 1, (const jint*) lenArr );
-
-    uint32_t errArr[1];
-    errArr[0] = (uint32_t)*error;
-    jintArray error_ = (*envRef)->NewIntArray(envRef,1);
-    (*envRef)->SetIntArrayRegion(envRef, error_, 0, 1, (const jint*) errArr );
-
-    (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackCustomCommandIncoming, obj,data_,length_,error_);
-
-    jint* length_array = (*envRef)->GetIntArrayElements(envRef, length_, NULL);
-    *length = length_array[0];
-
-    jint* error_array = (*envRef)->GetIntArrayElements(envRef, error_, NULL);
-    *error = error_array[0];
-
-    jbyte* data_array = (*envRef)->GetByteArrayElements(envRef, data_, NULL);
-    memcpy(data,data_array,*length);
+    (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackCustomCommandIncoming, obj,data_,length);
 }
 
 void hm_api_callback_command_response(hm_device_t *device, uint8_t *data, uint16_t length)
