@@ -130,7 +130,17 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
     @Override
     public void onStateChanged(Link link, Link.State state) {
         if (link.getState() == ConnectedLink.State.AUTHENTICATED) {
-//            certUtils.onCertificateReadForSerial(link.getSerial());
+            link.sendCommand(Command.General.getVehicleStatus(), true, new Constants.ResponseCallback() {
+                @Override
+                public void response(int i) {
+                    if (i != 0) {
+                        Log.d(TAG, "Get vehicle status failed");
+                    }
+                    else {
+                        Log.d(TAG, "Get vehicle status sent");
+                    }
+                }
+            });
         }
 
         adapter.setLinks(device.getLinks());
@@ -148,6 +158,9 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
             else if (command.is(Command.RemoteControl.CONTROL_MODE)) {
                 ControlMode controlModeNotification = (ControlMode) command;
                 Log.i(TAG, "Control Mode angle " + controlModeNotification.getAngle());
+            }
+            else if (command.is(Command.General.VEHICLE_STATUS)) {
+                Log.d(TAG, "Got vehicle status");
             }
         }
         catch (CommandParseException e) {

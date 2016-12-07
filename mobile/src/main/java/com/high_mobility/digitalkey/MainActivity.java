@@ -40,10 +40,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void setDeviceCertificate() {
+        Manager.getInstance().initialize(
+                "***REMOVED***",
+                "***REMOVED***=",
+                "***REMOVED***==",
+                getApplicationContext()
+        );
+
         // Create a demo certificate. In real life situation the certificate should be queried from the server
         // Reference: http://dc-9141.high-mobility.com/android-tutorial/#setting-device-certificate
         // Reference: http://dc-9141.high-mobility.com/android-reference-device-certificate/#convenience-init
-        final byte[] APP_IDENTIFIER = ByteUtils.bytesFromHex("***REMOVED***");
+        /*final byte[] APP_IDENTIFIER = ByteUtils.bytesFromHex("***REMOVED***");
         final byte[] ISSUER = ByteUtils.bytesFromHex("48494D4F");
 
         DeviceCertificate cert = new DeviceCertificate(ISSUER, APP_IDENTIFIER, DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
@@ -58,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
             certUtils = new CertUtils(this, MainActivity.DEVICE_SERIAL, MainActivity.DEVICE_PUBLIC_KEY);
         }
 
-        certUtils.registerAndStoreAllCertificates(manager.getBroadcaster());
+        certUtils.registerAndStoreAllCertificates(manager.getBroadcaster());*/
     }
 
     public void onBroadcastClicked(View v) {
