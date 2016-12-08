@@ -269,7 +269,7 @@ public class IncomingCommand {
 
     @Test
     public void failure_init() {
-        byte[] bytes = ByteUtils.bytesFromHex("0002002302");
+        byte[] bytes = ByteUtils.bytesFromHex("0002002304");
 
         Failure command = null;
 
@@ -280,7 +280,7 @@ public class IncomingCommand {
         }
 
         assertTrue(Arrays.equals(command.getFailedCommandIdentifier(), new byte[] {0x00, 0x23}));
-        assertTrue(command.getFailureReason() == Failure.Reason.INCORRECT_STATE);
+        assertTrue(command.getFailureReason() == Failure.Reason.VEHICLE_ASLEEP);
     }
 
 }

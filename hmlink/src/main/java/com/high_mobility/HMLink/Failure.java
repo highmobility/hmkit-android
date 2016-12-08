@@ -6,7 +6,7 @@ package com.high_mobility.HMLink;
 
 public class Failure extends IncomingCommand {
     public enum Reason {
-        UNSUPPORTED_CAPABILITY, UNAUTHORIZED, INCORRECT_STATE, EXECUTION_TIMEOUT
+        UNSUPPORTED_CAPABILITY, UNAUTHORIZED, INCORRECT_STATE, EXECUTION_TIMEOUT, VEHICLE_ASLEEP
     }
 
     private byte[] failedIdentifier;
@@ -33,6 +33,9 @@ public class Failure extends IncomingCommand {
                 break;
             case 0x03:
                 failureReason = Reason.EXECUTION_TIMEOUT;
+                break;
+            case 0x04:
+                failureReason = Reason.VEHICLE_ASLEEP;
                 break;
             default:
                 throw new CommandParseException();
