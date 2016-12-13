@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 public class OutgoingCommand {
     @Test
     public void getCapability() {
-        String waitingForBytes = "001211";
+        String waitingForBytes = "00120021";
         String commandBytes = ByteUtils.hexFromBytes(Command.General.getCapability(VehicleStatus.State.TRUNK_ACCESS));
         assertTrue(waitingForBytes.equals(commandBytes));
     }

@@ -26,7 +26,6 @@ public class Capabilities {
     byte[] knownCapabilitiesBytes = ByteUtils.bytesFromHex("00110D030020010400210300030022000300230004002401030400250103050026010000030027010300280103002900030030010300310103003201");
     com.high_mobility.HMLink.Command.Incoming.Capabilities capabilites = null;
 
-
     @Before
     public void setUp() {
         try {
@@ -188,7 +187,6 @@ public class Capabilities {
             assertTrue(((HonkFlashCapability)capability).getHonkHornCapability() == AvailableCapability.Capability.AVAILABLE);
             assertTrue(((HonkFlashCapability)capability).getFlashLightsCapability() == AvailableCapability.Capability.UNAVAILABLE);
             assertTrue(((HonkFlashCapability)capability).getEmergencyFlasherCapability() == AvailableCapability.Capability.UNAVAILABLE);
-
         }
     }
 
@@ -209,7 +207,6 @@ public class Capabilities {
             assertTrue(((AvailableCapability)capability).getCapability() == AvailableCapability.Capability.AVAILABLE);
         }
     }
-
 
     @Test
     public void capabilites_init_valet_mode() {
