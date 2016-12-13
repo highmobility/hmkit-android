@@ -1,4 +1,8 @@
-package com.high_mobility.HMLink;
+package com.high_mobility.HMLink.Command.Incoming;
+
+import com.high_mobility.HMLink.ByteUtils;
+import com.high_mobility.HMLink.Command.Command;
+import com.high_mobility.HMLink.Command.CommandParseException;
 
 import java.util.Arrays;
 
@@ -44,28 +48,6 @@ public class IncomingCommand {
         }
         else {
             throw new CommandParseException();
-        }
-    }
-
-    static int errorCode(byte[] bytes) {
-        if (bytes == null || bytes.length < 2) return 0;
-        if (bytes[0] != 0x02) return 0;
-        return codeForByte(bytes[1]);
-    }
-
-    static int codeForByte(byte errorByte) {
-        switch (errorByte) {
-            case 0x05:
-                return Link.STORAGE_FULL;
-            case 0x09:
-                return Link.TIME_OUT;
-            case 0x07:
-                return Link.UNAUTHORIZED;
-            case 0x06:
-            case 0x08:
-                return Link.UNAUTHORIZED;
-            default:
-                return Link.INTERNAL_ERROR;
         }
     }
 

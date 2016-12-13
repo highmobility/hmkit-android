@@ -1,4 +1,6 @@
-package com.high_mobility.HMLink;
+package com.high_mobility.HMLink.Command.Incoming;
+
+import com.high_mobility.HMLink.Command.CommandParseException;
 
 /**
  * Created by ttiganik on 13/09/16.

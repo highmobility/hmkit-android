@@ -1,11 +1,9 @@
 package com.highmobility.hmlink;
 
-import com.high_mobility.HMLink.CapabilityType;
-import com.high_mobility.HMLink.Command;
-import com.high_mobility.HMLink.LockState;
-import com.high_mobility.HMLink.RooftopState;
+import com.high_mobility.HMLink.Command.Command;
+import com.high_mobility.HMLink.Command.Incoming.*;
 import com.high_mobility.HMLink.ByteUtils;
-import com.high_mobility.HMLink.TrunkState;
+import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
 
 import org.junit.Test;
 
@@ -20,7 +18,7 @@ public class OutgoingCommand {
     @Test
     public void getCapability() {
         String waitingForBytes = "001211";
-        String commandBytes = ByteUtils.hexFromBytes(Command.General.getCapability(CapabilityType.Type.CHASSIS));
+        String commandBytes = ByteUtils.hexFromBytes(Command.General.getCapability(VehicleStatus.State.TRUNK_ACCESS));
         assertTrue(waitingForBytes.equals(commandBytes));
     }
 

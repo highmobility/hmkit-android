@@ -1,4 +1,7 @@
-package com.high_mobility.HMLink;
+package com.high_mobility.HMLink.Command.Incoming;
+
+import com.high_mobility.HMLink.ByteUtils;
+import com.high_mobility.HMLink.Command.CommandParseException;
 
 import java.util.Arrays;
 

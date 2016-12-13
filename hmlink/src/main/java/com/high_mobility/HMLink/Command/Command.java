@@ -1,4 +1,9 @@
-package com.high_mobility.HMLink;
+package com.high_mobility.HMLink.Command;
+
+import com.high_mobility.HMLink.ByteUtils;
+import com.high_mobility.HMLink.Command.Incoming.RooftopState;
+import com.high_mobility.HMLink.Command.Incoming.TrunkState;
+import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -7,7 +12,7 @@ import java.nio.ByteBuffer;
  * Created by ttiganik on 25/05/16.
  */
 public class Command {
-    interface Type {
+    public interface Type {
         byte[] getIdentifier();
     }
 
@@ -36,12 +41,12 @@ public class Command {
         }
 
         /**
-         * Get the capability of a certain feature. The car will respond with the AvailableCapability command
+         * Get the capability of a certain feature. The car will respond with the Capability command
          * - to what extent the capability is supported, if at all.
          * @return the command bytes
          */
-        public static byte[] getCapability(CapabilityType.Type type) {
-            return ByteUtils.concatBytes(GET_CAPABILITY.getIdentifier(), type.getIdentifier());
+        public static byte[] getCapability(VehicleStatus.State state) {
+            return ByteUtils.concatBytes(GET_CAPABILITY.getIdentifier(), state.getIdentifier());
         }
 
         /**

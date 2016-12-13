@@ -24,6 +24,11 @@ class SentCommand {
         commandStartTime = Calendar.getInstance().getTimeInMillis();
     }
 
+    void dispatchResult(byte[] response) {
+        final int errorCode = getErrorCode(response);
+        dispatchResult(errorCode);
+    }
+
     void dispatchResult(final int errorCode) {
         if (timeoutTimer != null) timeoutTimer.cancel();
         finished = true;
@@ -49,5 +54,27 @@ class SentCommand {
                 dispatchResult(Link.TIME_OUT);
             }
         }.start();
+    }
+
+    static int getErrorCode(byte[] bytes) {
+        if (bytes == null || bytes.length < 2) return 0;
+        if (bytes[0] != 0x02) return 0;
+        return errorCodeForByte(bytes[1]);
+    }
+
+    static int errorCodeForByte(byte errorByte) {
+        switch (errorByte) {
+            case 0x05:
+                return Link.STORAGE_FULL;
+            case 0x09:
+                return Link.TIME_OUT;
+            case 0x07:
+                return Link.UNAUTHORIZED;
+            case 0x06:
+            case 0x08:
+                return Link.UNAUTHORIZED;
+            default:
+                return Link.INTERNAL_ERROR;
+        }
     }
 }

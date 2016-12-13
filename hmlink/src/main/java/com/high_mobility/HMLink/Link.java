@@ -103,7 +103,7 @@ public class Link {
      * @param bytes             The bytes that will be sent inside the secure container.
      * @param secureResponse    Optional boolean defining if the response has a secure HMAC element
      *                       in it or not - defaults to true
-     * @param responseCallback  ResponseCallback object that returns the errorCode if the command
+     * @param responseCallback  ResponseCallback object that returns the getErrorCode if the command
      *                          failed or 0 if it succeeded.
      *                          Error codes could be UNAUTHORIZED, COMMAND_IN_PROGRESS, TIME_OUT.
      */
@@ -177,7 +177,7 @@ public class Link {
             return;
         }
 
-        sentCommand.dispatchResult(IncomingCommand.errorCode(data));
+        sentCommand.dispatchResult(data);
     }
 
     byte[] getAddressBytes() {
