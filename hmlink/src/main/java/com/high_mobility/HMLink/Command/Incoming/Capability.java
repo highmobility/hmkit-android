@@ -1,6 +1,5 @@
 package com.high_mobility.HMLink.Command.Incoming;
 
-import com.high_mobility.HMLink.Command.Capability.StateCapability;
 import com.high_mobility.HMLink.Command.CommandParseException;
 
 import java.util.Arrays;
@@ -11,15 +10,15 @@ import java.util.Arrays;
  * This command is sent when a Get Capabilities command is received by the car.
  */
 public class Capability extends IncomingCommand {
-    StateCapability capability;
+    com.high_mobility.HMLink.Command.Capability.Capability capability;
 
-    public StateCapability getCapability() {
+    public com.high_mobility.HMLink.Command.Capability.Capability getCapability() {
         return capability;
     }
 
     public Capability(byte[] bytes) throws CommandParseException {
          super(bytes);
          if (bytes.length < 5) throw new CommandParseException();
-         capability = StateCapability.fromBytes(Arrays.copyOfRange(bytes, 2, bytes.length));
+         capability = com.high_mobility.HMLink.Command.Capability.Capability.fromBytes(Arrays.copyOfRange(bytes, 2, bytes.length));
     }
 }

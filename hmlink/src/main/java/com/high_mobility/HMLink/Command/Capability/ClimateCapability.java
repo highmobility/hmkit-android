@@ -7,7 +7,7 @@ import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
  * Created by ttiganik on 12/12/2016.
  */
 
-public class ClimateCapability extends StateCapability {
+public class ClimateCapability extends Capability {
     public enum ProfileCapability {
         UNAVAILABLE, AVAILABLE, GET_STATE_AVAILABLE, NO_SCHEDULING;
 
@@ -35,11 +35,11 @@ public class ClimateCapability extends StateCapability {
     }
 
     public ClimateCapability(byte[] bytes) throws CommandParseException {
-        super(VehicleStatus.State.CLIMATE);
+        super(VehicleStatus.Feature.CLIMATE);
 
-        if (bytes.length != 4) throw new CommandParseException();
+        if (bytes.length != 5) throw new CommandParseException();
 
-        climateCapability = AvailableGetStateCapability.Capability.fromByte(bytes[2]);
-        profileCapability = ProfileCapability.fromByte(bytes[3]);
+        climateCapability = AvailableGetStateCapability.Capability.fromByte(bytes[3]);
+        profileCapability = ProfileCapability.fromByte(bytes[4]);
     }
 }

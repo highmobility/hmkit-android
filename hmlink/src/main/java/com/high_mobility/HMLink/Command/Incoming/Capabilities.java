@@ -1,6 +1,6 @@
 package com.high_mobility.HMLink.Command.Incoming;
 
-import com.high_mobility.HMLink.Command.Capability.StateCapability;
+import com.high_mobility.HMLink.Command.Capability.Capability;
 import com.high_mobility.HMLink.Command.CommandParseException;
 
 import java.util.Arrays;
@@ -11,7 +11,7 @@ import java.util.Arrays;
  * This command is sent when a Get Capabilities command is received by the car.
  */
 public class Capabilities extends IncomingCommand {
-    StateCapability[] capabilites;
+    Capability[] capabilites;
 
     public Capabilities(byte[] bytes) throws CommandParseException {
         super(bytes);
@@ -21,28 +21,27 @@ public class Capabilities extends IncomingCommand {
         int capabilitiesCount = bytes[2];
         if (capabilitiesCount == 0) return;
 
-        capabilites = new StateCapability[capabilitiesCount];
+        capabilites = new Capability[capabilitiesCount];
         int knownCapabilitesCount = 0;
         int capabilityPosition = 3;
 
         for (int i = 0; i < capabilitiesCount; i++) {
-            int capabilityLength = bytes[capabilityPosition];
-            // use the capability bytes that are after the length byte
-            byte[] capabilityBytes = Arrays.copyOfRange(bytes, capabilityPosition + 1,
-                        capabilityPosition + 1 + capabilityLength);
-            StateCapability capability = StateCapability.fromBytes(capabilityBytes);
+            int capabilityLength = bytes[capabilityPosition + 2];
+            byte[] capabilityBytes = Arrays.copyOfRange(bytes, capabilityPosition,
+                        capabilityPosition + 3 + capabilityLength); // length = 2x identifier byte + length byte + bytes
+            Capability capability = Capability.fromBytes(capabilityBytes);
 
             capabilites[i] = capability;
-            capabilityPosition += capabilityLength + 1;
+            capabilityPosition += capabilityLength + 3;
             if (capability != null) knownCapabilitesCount++;
         }
 
         if (capabilitiesCount != knownCapabilitesCount) {
             // resize the array if any of the capabilities is unknown(null)
-            StateCapability[] trimmedCapabilites = new StateCapability[knownCapabilitesCount];
+            Capability[] trimmedCapabilites = new Capability[knownCapabilitesCount];
             int trimmedCapabilitesPosition = 0;
             for (int i = 0; i < capabilitiesCount; i++) {
-                StateCapability capability = capabilites[i];
+                Capability capability = capabilites[i];
                 if (capability != null) {
                     trimmedCapabilites[trimmedCapabilitesPosition] = capability;
                     trimmedCapabilitesPosition++;
@@ -53,12 +52,7 @@ public class Capabilities extends IncomingCommand {
         }
     }
 
-    public StateCapability[] getCapabilites() {
+    public Capability[] getCapabilites() {
         return capabilites;
-    }
-
-    static boolean capabilityIs(byte[] bytes, int position, VehicleStatus.State type) {
-        return bytes[position] == type.getIdentifier()[0]
-                && bytes[position + 1] == type.getIdentifier()[1];
     }
 }

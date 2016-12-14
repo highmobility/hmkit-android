@@ -7,7 +7,7 @@ import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
  * Created by ttiganik on 12/12/2016.
  */
 
-public class TrunkAccessCapability extends StateCapability {
+public class TrunkAccessCapability extends Capability {
     /**
      * The possible lock positions
      */
@@ -63,10 +63,9 @@ public class TrunkAccessCapability extends StateCapability {
     }
 
     public TrunkAccessCapability(byte[] bytes) throws CommandParseException {
-        super(VehicleStatus.State.TRUNK_ACCESS);
-        if (bytes.length != 4) throw new CommandParseException();
-
-        lockCapability = LockCapability.fromByte(bytes[2]);
-        position = PositionCapability.fromByte(bytes[3]);
+        super(VehicleStatus.Feature.TRUNK_ACCESS);
+        if (bytes.length != 5) throw new CommandParseException();
+        lockCapability = LockCapability.fromByte(bytes[3]);
+        position = PositionCapability.fromByte(bytes[4]);
     }
 }

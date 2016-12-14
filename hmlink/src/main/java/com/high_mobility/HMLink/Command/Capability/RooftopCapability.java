@@ -7,7 +7,7 @@ import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
  * Created by ttiganik on 13/12/2016.
  */
 
-public class RooftopCapability extends StateCapability {
+public class RooftopCapability extends Capability {
     public enum DimmingCapability {
         UNAVAILABLE, AVAILABLE, GET_STATE_AVAILABLE, ONLY_OPAQUE_OR_TRANSPARENT;
 
@@ -50,11 +50,11 @@ public class RooftopCapability extends StateCapability {
     }
 
     public RooftopCapability(byte[] bytes) throws CommandParseException {
-        super(VehicleStatus.State.ROOFTOP);
+        super(VehicleStatus.Feature.ROOFTOP);
 
-        if (bytes.length != 4) throw new CommandParseException();
-        dimmingCapability = DimmingCapability.fromByte(bytes[2]);
-        openCloseCapability = OpenCloseCapability.fromByte(bytes[3]);
+        if (bytes.length != 5) throw new CommandParseException();
+        dimmingCapability = DimmingCapability.fromByte(bytes[3]);
+        openCloseCapability = OpenCloseCapability.fromByte(bytes[4]);
     }
 
 }

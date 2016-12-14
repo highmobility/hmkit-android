@@ -45,8 +45,8 @@ public class Command {
          * - to what extent the capability is supported, if at all.
          * @return the command bytes
          */
-        public static byte[] getCapability(VehicleStatus.State state) {
-            return ByteUtils.concatBytes(GET_CAPABILITY.getIdentifier(), state.getIdentifier());
+        public static byte[] getCapability(VehicleStatus.Feature feature) {
+            return ByteUtils.concatBytes(GET_CAPABILITY.getIdentifier(), feature.getIdentifier());
         }
 
         /**

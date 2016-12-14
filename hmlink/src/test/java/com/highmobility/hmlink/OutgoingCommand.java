@@ -18,7 +18,7 @@ public class OutgoingCommand {
     @Test
     public void getCapability() {
         String waitingForBytes = "00120021";
-        String commandBytes = ByteUtils.hexFromBytes(Command.General.getCapability(VehicleStatus.State.TRUNK_ACCESS));
+        String commandBytes = ByteUtils.hexFromBytes(Command.General.getCapability(VehicleStatus.Feature.TRUNK_ACCESS));
         assertTrue(waitingForBytes.equals(commandBytes));
     }
 

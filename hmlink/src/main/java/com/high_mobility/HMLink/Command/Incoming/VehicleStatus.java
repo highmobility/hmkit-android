@@ -1,6 +1,7 @@
 package com.high_mobility.HMLink.Command.Incoming;
 
 import com.high_mobility.HMLink.Command.CommandParseException;
+import com.high_mobility.HMLink.Command.VehicleStatus.FeatureState;
 
 /**
  * Created by ttiganik on 13/09/16.
@@ -9,7 +10,7 @@ import com.high_mobility.HMLink.Command.CommandParseException;
  *
  */
 public class VehicleStatus extends IncomingCommand {
-    public enum State {
+    public enum Feature {
         DOOR_LOCKS(new byte[] { 0x00, (byte)0x20 }),
         TRUNK_ACCESS(new byte[] { 0x00, (byte)0x21 }),
         WAKE_UP(new byte[] { 0x00, (byte)0x22 }),
@@ -24,11 +25,11 @@ public class VehicleStatus extends IncomingCommand {
         NAVI_DESTINATION(new byte[] { 0x00, (byte)0x31 }),
         DELIVERED_PARCELS(new byte[] { 0x00, (byte)0x32 });
 
-        public static State fromIdentifier(byte[] bytes) {
+        public static Feature fromIdentifier(byte[] bytes) {
             return fromIdentifier(bytes[0], bytes[1]);
         }
 
-        public static State fromIdentifier(byte firstByte, byte secondByte) {
+        public static Feature fromIdentifier(byte firstByte, byte secondByte) {
             if (firstByte == 0x00 && secondByte == 0x20) {
                 return DOOR_LOCKS;
             }
@@ -73,7 +74,7 @@ public class VehicleStatus extends IncomingCommand {
             }
         }
 
-        State(byte[] identifier) {
+        Feature(byte[] identifier) {
             this.identifier = identifier;
         }
         private byte[] identifier;
@@ -82,8 +83,14 @@ public class VehicleStatus extends IncomingCommand {
         }
     }
 
+    FeatureState[] featureStates;
+
     public VehicleStatus(byte[] bytes) throws CommandParseException {
         super(bytes);
+        // TODO:
+    }
 
+    public FeatureState[] getFeatureStates() {
+        return featureStates;
     }
 }

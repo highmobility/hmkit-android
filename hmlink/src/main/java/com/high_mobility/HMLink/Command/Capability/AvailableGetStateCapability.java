@@ -7,7 +7,7 @@ import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
  * Created by ttiganik on 12/12/2016.
  */
 
-public class AvailableGetStateCapability extends StateCapability {
+public class AvailableGetStateCapability extends Capability {
     public enum Capability {
         UNAVAILABLE, AVAILABLE, GET_STATE_AVAILABLE;
 
@@ -28,9 +28,9 @@ public class AvailableGetStateCapability extends StateCapability {
         return capability;
     }
 
-    public AvailableGetStateCapability(VehicleStatus.State state, byte[] bytes) throws CommandParseException {
-        super(state);
-        if (bytes.length != 3) throw new CommandParseException();
-        capability = Capability.fromByte(bytes[2]);
+    public AvailableGetStateCapability(VehicleStatus.Feature feature, byte[] bytes) throws CommandParseException {
+        super(feature);
+        if (bytes.length != 4) throw new CommandParseException();
+        capability = Capability.fromByte(bytes[3]);
     }
 }

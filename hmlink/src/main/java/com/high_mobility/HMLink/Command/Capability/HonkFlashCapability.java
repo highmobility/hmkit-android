@@ -7,7 +7,7 @@ import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
  * Created by ttiganik on 13/12/2016.
  */
 
-public class HonkFlashCapability extends StateCapability {
+public class HonkFlashCapability extends Capability {
     AvailableCapability.Capability honkHornCapability;
     AvailableCapability.Capability flashLightsCapability;
     AvailableCapability.Capability emergencyFlasherCapability;
@@ -25,10 +25,10 @@ public class HonkFlashCapability extends StateCapability {
     }
 
     public HonkFlashCapability(byte[] bytes) throws CommandParseException {
-        super(VehicleStatus.State.HONK_FLASH);
-        if (bytes.length != 5) throw new CommandParseException();
-        honkHornCapability = AvailableCapability.Capability.fromByte(bytes[2]);
-        flashLightsCapability = AvailableCapability.Capability.fromByte(bytes[3]);
-        emergencyFlasherCapability = AvailableCapability.Capability.fromByte(bytes[4]);
+        super(VehicleStatus.Feature.HONK_FLASH);
+        if (bytes.length != 6) throw new CommandParseException();
+        honkHornCapability = AvailableCapability.Capability.fromByte(bytes[3]);
+        flashLightsCapability = AvailableCapability.Capability.fromByte(bytes[4]);
+        emergencyFlasherCapability = AvailableCapability.Capability.fromByte(bytes[5]);
     }
 }
