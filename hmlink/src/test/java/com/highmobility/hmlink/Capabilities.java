@@ -3,13 +3,12 @@ package com.highmobility.hmlink;
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.Capability.AvailableCapability;
 import com.high_mobility.HMLink.Command.Capability.AvailableGetStateCapability;
-import com.high_mobility.HMLink.Command.Capability.StateCapability;
+import com.high_mobility.HMLink.Command.Capability.Capability;
 import com.high_mobility.HMLink.Command.Capability.ClimateCapability;
 import com.high_mobility.HMLink.Command.Capability.HonkFlashCapability;
 import com.high_mobility.HMLink.Command.Capability.RooftopCapability;
 import com.high_mobility.HMLink.Command.Capability.TrunkAccessCapability;
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.Incoming.Capability;
 import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
 
 import org.junit.Before;
@@ -23,7 +22,7 @@ import static org.junit.Assert.fail;
  */
 
 public class Capabilities {
-    byte[] knownCapabilitiesBytes = ByteUtils.bytesFromHex("00110D030020010400210300030022000300230004002401030400250103050026010000030027010300280103002900030030010300310103003201");
+    byte[] knownCapabilitiesBytes = ByteUtils.bytesFromHex("00110D002001010021020300002201000023010000240201030025020101002603010101002701010028010100290100003001010031010100320101");
     com.high_mobility.HMLink.Command.Incoming.Capabilities capabilites = null;
 
     @Before
@@ -44,7 +43,7 @@ public class Capabilities {
     @Test
     public void unknownCapabilities_init() {
         // 00 59 unknown
-        byte[] unknownCapabilitiesBytes = ByteUtils.bytesFromHex("00110D030059010400210300030022000300230004002401030400250103050026010000030027010300280103002900030030010300310103003201");
+        byte[] unknownCapabilitiesBytes = ByteUtils.bytesFromHex("00110D005901010021020300002201000023010000240201030025020101002603010101002701010028010100290100003001010031010100320101");
         com.high_mobility.HMLink.Command.Incoming.Capabilities unknownCapabilities= null;
 
         try {
@@ -61,10 +60,10 @@ public class Capabilities {
 
     @Test
     public void capabilites_init_door_locks() {
-        StateCapability capability = null;
+        Capability capability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            StateCapability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getState() == VehicleStatus.State.DOOR_LOCKS) {
+            Capability iteratingCapability = capabilites.getCapabilites()[i];
+            if (iteratingCapability.getFeature() == VehicleStatus.Feature.DOOR_LOCKS) {
                 capability = iteratingCapability;
                 break;
             }
@@ -79,10 +78,10 @@ public class Capabilities {
 
     @Test
     public void capabilites_init_trunk_access() {
-        StateCapability capability = null;
+        Capability capability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            StateCapability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getState() == VehicleStatus.State.TRUNK_ACCESS) {
+            Capability iteratingCapability = capabilites.getCapabilites()[i];
+            if (iteratingCapability.getFeature() == VehicleStatus.Feature.TRUNK_ACCESS) {
                 capability = iteratingCapability;
                 break;
             }
@@ -98,10 +97,10 @@ public class Capabilities {
 
     @Test
     public void capabilites_init_wake_up() {
-        StateCapability capability = null;
+        Capability capability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            StateCapability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getState() == VehicleStatus.State.WAKE_UP) {
+            Capability iteratingCapability = capabilites.getCapabilites()[i];
+            if (iteratingCapability.getFeature() == VehicleStatus.Feature.WAKE_UP) {
                 capability = iteratingCapability;
                 break;
             }
@@ -116,10 +115,10 @@ public class Capabilities {
 
     @Test
     public void capabilites_init_charging() {
-        StateCapability capability = null;
+        Capability capability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            StateCapability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getState() == VehicleStatus.State.CHARGING) {
+            Capability iteratingCapability = capabilites.getCapabilites()[i];
+            if (iteratingCapability.getFeature() == VehicleStatus.Feature.CHARGING) {
                 capability = iteratingCapability;
                 break;
             }
@@ -134,10 +133,10 @@ public class Capabilities {
 
     @Test
     public void capabilites_init_climate() {
-        StateCapability capability = null;
+        Capability capability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            StateCapability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getState() == VehicleStatus.State.CLIMATE) {
+            Capability iteratingCapability = capabilites.getCapabilites()[i];
+            if (iteratingCapability.getFeature() == VehicleStatus.Feature.CLIMATE) {
                 capability = iteratingCapability;
                 break;
             }
@@ -153,10 +152,10 @@ public class Capabilities {
 
     @Test
     public void capabilites_init_rooftop() {
-        StateCapability capability = null;
+        Capability capability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            StateCapability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getState() == VehicleStatus.State.ROOFTOP) {
+            Capability iteratingCapability = capabilites.getCapabilites()[i];
+            if (iteratingCapability.getFeature() == VehicleStatus.Feature.ROOFTOP) {
                 capability = iteratingCapability;
                 break;
             }
@@ -166,16 +165,16 @@ public class Capabilities {
         assertTrue(capability.getClass() == RooftopCapability.class);
         if (capability.getClass() == RooftopCapability.class) {
             assertTrue(((RooftopCapability)capability).getDimmingCapability() == RooftopCapability.DimmingCapability.AVAILABLE);
-            assertTrue(((RooftopCapability)capability).getOpenCloseCapability() == RooftopCapability.OpenCloseCapability.ONLY_FULLY_OPEN_OR_CLOSED);
+            assertTrue(((RooftopCapability)capability).getOpenCloseCapability() == RooftopCapability.OpenCloseCapability.AVAILABLE);
         }
     }
 
     @Test
     public void capabilites_init_honkflash() {
-        StateCapability capability = null;
+        Capability capability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            StateCapability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getState() == VehicleStatus.State.HONK_FLASH) {
+            Capability iteratingCapability = capabilites.getCapabilites()[i];
+            if (iteratingCapability.getFeature() == VehicleStatus.Feature.HONK_FLASH) {
                 capability = iteratingCapability;
                 break;
             }
@@ -185,17 +184,17 @@ public class Capabilities {
         assertTrue(capability.getClass() == HonkFlashCapability.class);
         if (capability.getClass() == HonkFlashCapability.class) {
             assertTrue(((HonkFlashCapability)capability).getHonkHornCapability() == AvailableCapability.Capability.AVAILABLE);
-            assertTrue(((HonkFlashCapability)capability).getFlashLightsCapability() == AvailableCapability.Capability.UNAVAILABLE);
-            assertTrue(((HonkFlashCapability)capability).getEmergencyFlasherCapability() == AvailableCapability.Capability.UNAVAILABLE);
+            assertTrue(((HonkFlashCapability)capability).getFlashLightsCapability() == AvailableCapability.Capability.AVAILABLE);
+            assertTrue(((HonkFlashCapability)capability).getEmergencyFlasherCapability() == AvailableCapability.Capability.AVAILABLE);
         }
     }
 
     @Test
     public void capabilites_init_remote_control() {
-        StateCapability capability = null;
+        Capability capability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            StateCapability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getState() == VehicleStatus.State.REMOTE_CONTROL) {
+            Capability iteratingCapability = capabilites.getCapabilites()[i];
+            if (iteratingCapability.getFeature() == VehicleStatus.Feature.REMOTE_CONTROL) {
                 capability = iteratingCapability;
                 break;
             }
@@ -210,10 +209,10 @@ public class Capabilities {
 
     @Test
     public void capabilites_init_valet_mode() {
-        StateCapability capability = null;
+        Capability capability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            StateCapability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getState() == VehicleStatus.State.VALET_MODE) {
+            Capability iteratingCapability = capabilites.getCapabilites()[i];
+            if (iteratingCapability.getFeature() == VehicleStatus.Feature.VALET_MODE) {
                 capability = iteratingCapability;
                 break;
             }
@@ -228,10 +227,10 @@ public class Capabilities {
 
     @Test
     public void capabilites_init_heart_rate() {
-        StateCapability capability = null;
+        Capability capability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            StateCapability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getState() == VehicleStatus.State.HEART_RATE) {
+            Capability iteratingCapability = capabilites.getCapabilites()[i];
+            if (iteratingCapability.getFeature() == VehicleStatus.Feature.HEART_RATE) {
                 capability = iteratingCapability;
                 break;
             }
@@ -246,10 +245,10 @@ public class Capabilities {
 
     @Test
     public void capabilites_init_vehicle_location() {
-        StateCapability capability = null;
+        Capability capability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            StateCapability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getState() == VehicleStatus.State.VEHICLE_LOCATION) {
+            Capability iteratingCapability = capabilites.getCapabilites()[i];
+            if (iteratingCapability.getFeature() == VehicleStatus.Feature.VEHICLE_LOCATION) {
                 capability = iteratingCapability;
                 break;
             }
@@ -264,10 +263,10 @@ public class Capabilities {
 
     @Test
     public void capabilites_init_navi_destination() {
-        StateCapability capability = null;
+        Capability capability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            StateCapability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getState() == VehicleStatus.State.NAVI_DESTINATION) {
+            Capability iteratingCapability = capabilites.getCapabilites()[i];
+            if (iteratingCapability.getFeature() == VehicleStatus.Feature.NAVI_DESTINATION) {
                 capability = iteratingCapability;
                 break;
             }
@@ -282,10 +281,10 @@ public class Capabilities {
 
     @Test
     public void capabilites_init_delivered_parcels() {
-        StateCapability capability = null;
+        Capability capability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            StateCapability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getState() == VehicleStatus.State.DELIVERED_PARCELS) {
+            Capability iteratingCapability = capabilites.getCapabilites()[i];
+            if (iteratingCapability.getFeature() == VehicleStatus.Feature.DELIVERED_PARCELS) {
                 capability = iteratingCapability;
                 break;
             }
@@ -302,10 +301,10 @@ public class Capabilities {
 
     @Test
     public void capability_init_climate() {
-        byte[] message = ByteUtils.bytesFromHex("101300240002");
-        Capability capability = null;
+        byte[] message = ByteUtils.bytesFromHex("00130024020002");
+        com.high_mobility.HMLink.Command.Incoming.Capability capability = null;
         try {
-            capability = new Capability(message);
+            capability = new com.high_mobility.HMLink.Command.Incoming.Capability(message);
         } catch (CommandParseException e) {
             fail("climate capability init failed");
             e.printStackTrace();
@@ -323,10 +322,10 @@ public class Capabilities {
 
     @Test
     public void capability_init_heartrate() {
-        byte[] message = ByteUtils.bytesFromHex("1013002901");
-        Capability capability = null;
+        byte[] message = ByteUtils.bytesFromHex("001300290101");
+        com.high_mobility.HMLink.Command.Incoming.Capability capability = null;
         try {
-            capability = new Capability(message);
+            capability = new com.high_mobility.HMLink.Command.Incoming.Capability(message);
         } catch (CommandParseException e) {
             fail("climate capability init failed");
             e.printStackTrace();
