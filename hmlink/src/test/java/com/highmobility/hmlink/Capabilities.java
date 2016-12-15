@@ -3,13 +3,13 @@ package com.highmobility.hmlink;
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.Capability.AvailableCapability;
 import com.high_mobility.HMLink.Command.Capability.AvailableGetStateCapability;
-import com.high_mobility.HMLink.Command.Capability.Capability;
+import com.high_mobility.HMLink.Command.Capability.FeatureCapability;
 import com.high_mobility.HMLink.Command.Capability.ClimateCapability;
 import com.high_mobility.HMLink.Command.Capability.HonkFlashCapability;
 import com.high_mobility.HMLink.Command.Capability.RooftopCapability;
 import com.high_mobility.HMLink.Command.Capability.TrunkAccessCapability;
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
+import com.high_mobility.HMLink.Command.VehicleFeature;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,240 +60,240 @@ public class Capabilities {
 
     @Test
     public void capabilites_init_door_locks() {
-        Capability capability = null;
+        FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            Capability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getFeature() == VehicleStatus.Feature.DOOR_LOCKS) {
-                capability = iteratingCapability;
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getFeature() == VehicleFeature.DOOR_LOCKS) {
+                featureCapability = iteratingFeatureCapability;
                 break;
             }
         }
 
-        assertTrue(capability != null);
-        assertTrue(capability.getClass() == AvailableGetStateCapability.class);
-        if (capability.getClass() == AvailableGetStateCapability.class) {
-            assertTrue(((AvailableGetStateCapability)capability).getCapability() == AvailableGetStateCapability.Capability.AVAILABLE);
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableGetStateCapability.class);
+        if (featureCapability.getClass() == AvailableGetStateCapability.class) {
+            assertTrue(((AvailableGetStateCapability) featureCapability).getCapability() == AvailableGetStateCapability.Capability.AVAILABLE);
         }
     }
 
     @Test
     public void capabilites_init_trunk_access() {
-        Capability capability = null;
+        FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            Capability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getFeature() == VehicleStatus.Feature.TRUNK_ACCESS) {
-                capability = iteratingCapability;
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getFeature() == VehicleFeature.TRUNK_ACCESS) {
+                featureCapability = iteratingFeatureCapability;
                 break;
             }
         }
 
-        assertTrue(capability != null);
-        assertTrue(capability.getClass() == TrunkAccessCapability.class);
-        if (capability.getClass() == TrunkAccessCapability.class) {
-            assertTrue(((TrunkAccessCapability)capability).getLockCapability() == TrunkAccessCapability.LockCapability.GET_STATE_UNLOCK_AVAILABLE);
-            assertTrue(((TrunkAccessCapability)capability).getPositionCapability() == TrunkAccessCapability.PositionCapability.UNAVAILABLE);
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == TrunkAccessCapability.class);
+        if (featureCapability.getClass() == TrunkAccessCapability.class) {
+            assertTrue(((TrunkAccessCapability) featureCapability).getLockCapability() == TrunkAccessCapability.LockCapability.GET_STATE_UNLOCK_AVAILABLE);
+            assertTrue(((TrunkAccessCapability) featureCapability).getPositionCapability() == TrunkAccessCapability.PositionCapability.UNAVAILABLE);
         }
     }
 
     @Test
     public void capabilites_init_wake_up() {
-        Capability capability = null;
+        FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            Capability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getFeature() == VehicleStatus.Feature.WAKE_UP) {
-                capability = iteratingCapability;
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getFeature() == VehicleFeature.WAKE_UP) {
+                featureCapability = iteratingFeatureCapability;
                 break;
             }
         }
 
-        assertTrue(capability != null);
-        assertTrue(capability.getClass() == AvailableCapability.class);
-        if (capability.getClass() == AvailableCapability.class) {
-            assertTrue(((AvailableCapability)capability).getCapability() == AvailableCapability.Capability.UNAVAILABLE);
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableCapability.class);
+        if (featureCapability.getClass() == AvailableCapability.class) {
+            assertTrue(((AvailableCapability) featureCapability).getCapability() == AvailableCapability.Capability.UNAVAILABLE);
         }
     }
 
     @Test
     public void capabilites_init_charging() {
-        Capability capability = null;
+        FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            Capability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getFeature() == VehicleStatus.Feature.CHARGING) {
-                capability = iteratingCapability;
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getFeature() == VehicleFeature.CHARGING) {
+                featureCapability = iteratingFeatureCapability;
                 break;
             }
         }
 
-        assertTrue(capability != null);
-        assertTrue(capability.getClass() == AvailableGetStateCapability.class);
-        if (capability.getClass() == AvailableGetStateCapability.class) {
-            assertTrue(((AvailableGetStateCapability)capability).getCapability() == AvailableGetStateCapability.Capability.UNAVAILABLE);
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableGetStateCapability.class);
+        if (featureCapability.getClass() == AvailableGetStateCapability.class) {
+            assertTrue(((AvailableGetStateCapability) featureCapability).getCapability() == AvailableGetStateCapability.Capability.UNAVAILABLE);
         }
     }
 
     @Test
     public void capabilites_init_climate() {
-        Capability capability = null;
+        FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            Capability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getFeature() == VehicleStatus.Feature.CLIMATE) {
-                capability = iteratingCapability;
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getFeature() == VehicleFeature.CLIMATE) {
+                featureCapability = iteratingFeatureCapability;
                 break;
             }
         }
 
-        assertTrue(capability != null);
-        assertTrue(capability.getClass() == ClimateCapability.class);
-        if (capability.getClass() == ClimateCapability.class) {
-            assertTrue(((ClimateCapability)capability).getClimateCapability() == AvailableGetStateCapability.Capability.AVAILABLE);
-            assertTrue(((ClimateCapability)capability).getProfileCapability() == ClimateCapability.ProfileCapability.NO_SCHEDULING);
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == ClimateCapability.class);
+        if (featureCapability.getClass() == ClimateCapability.class) {
+            assertTrue(((ClimateCapability) featureCapability).getClimateCapability() == AvailableGetStateCapability.Capability.AVAILABLE);
+            assertTrue(((ClimateCapability) featureCapability).getProfileCapability() == ClimateCapability.ProfileCapability.NO_SCHEDULING);
         }
     }
 
     @Test
     public void capabilites_init_rooftop() {
-        Capability capability = null;
+        FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            Capability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getFeature() == VehicleStatus.Feature.ROOFTOP) {
-                capability = iteratingCapability;
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getFeature() == VehicleFeature.ROOFTOP) {
+                featureCapability = iteratingFeatureCapability;
                 break;
             }
         }
 
-        assertTrue(capability != null);
-        assertTrue(capability.getClass() == RooftopCapability.class);
-        if (capability.getClass() == RooftopCapability.class) {
-            assertTrue(((RooftopCapability)capability).getDimmingCapability() == RooftopCapability.DimmingCapability.AVAILABLE);
-            assertTrue(((RooftopCapability)capability).getOpenCloseCapability() == RooftopCapability.OpenCloseCapability.AVAILABLE);
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == RooftopCapability.class);
+        if (featureCapability.getClass() == RooftopCapability.class) {
+            assertTrue(((RooftopCapability) featureCapability).getDimmingCapability() == RooftopCapability.DimmingCapability.AVAILABLE);
+            assertTrue(((RooftopCapability) featureCapability).getOpenCloseCapability() == RooftopCapability.OpenCloseCapability.AVAILABLE);
         }
     }
 
     @Test
     public void capabilites_init_honkflash() {
-        Capability capability = null;
+        FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            Capability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getFeature() == VehicleStatus.Feature.HONK_FLASH) {
-                capability = iteratingCapability;
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getFeature() == VehicleFeature.HONK_FLASH) {
+                featureCapability = iteratingFeatureCapability;
                 break;
             }
         }
 
-        assertTrue(capability != null);
-        assertTrue(capability.getClass() == HonkFlashCapability.class);
-        if (capability.getClass() == HonkFlashCapability.class) {
-            assertTrue(((HonkFlashCapability)capability).getHonkHornCapability() == AvailableCapability.Capability.AVAILABLE);
-            assertTrue(((HonkFlashCapability)capability).getFlashLightsCapability() == AvailableCapability.Capability.AVAILABLE);
-            assertTrue(((HonkFlashCapability)capability).getEmergencyFlasherCapability() == AvailableCapability.Capability.AVAILABLE);
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == HonkFlashCapability.class);
+        if (featureCapability.getClass() == HonkFlashCapability.class) {
+            assertTrue(((HonkFlashCapability) featureCapability).getHonkHornCapability() == AvailableCapability.Capability.AVAILABLE);
+            assertTrue(((HonkFlashCapability) featureCapability).getFlashLightsCapability() == AvailableCapability.Capability.AVAILABLE);
+            assertTrue(((HonkFlashCapability) featureCapability).getEmergencyFlasherCapability() == AvailableCapability.Capability.AVAILABLE);
         }
     }
 
     @Test
     public void capabilites_init_remote_control() {
-        Capability capability = null;
+        FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            Capability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getFeature() == VehicleStatus.Feature.REMOTE_CONTROL) {
-                capability = iteratingCapability;
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getFeature() == VehicleFeature.REMOTE_CONTROL) {
+                featureCapability = iteratingFeatureCapability;
                 break;
             }
         }
 
-        assertTrue(capability != null);
-        assertTrue(capability.getClass() == AvailableCapability.class);
-        if (capability.getClass() == AvailableCapability.class) {
-            assertTrue(((AvailableCapability)capability).getCapability() == AvailableCapability.Capability.AVAILABLE);
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableCapability.class);
+        if (featureCapability.getClass() == AvailableCapability.class) {
+            assertTrue(((AvailableCapability) featureCapability).getCapability() == AvailableCapability.Capability.AVAILABLE);
         }
     }
 
     @Test
     public void capabilites_init_valet_mode() {
-        Capability capability = null;
+        FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            Capability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getFeature() == VehicleStatus.Feature.VALET_MODE) {
-                capability = iteratingCapability;
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getFeature() == VehicleFeature.VALET_MODE) {
+                featureCapability = iteratingFeatureCapability;
                 break;
             }
         }
 
-        assertTrue(capability != null);
-        assertTrue(capability.getClass() == AvailableGetStateCapability.class);
-        if (capability.getClass() == AvailableGetStateCapability.class) {
-            assertTrue(((AvailableGetStateCapability)capability).getCapability() == AvailableGetStateCapability.Capability.AVAILABLE);
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableGetStateCapability.class);
+        if (featureCapability.getClass() == AvailableGetStateCapability.class) {
+            assertTrue(((AvailableGetStateCapability) featureCapability).getCapability() == AvailableGetStateCapability.Capability.AVAILABLE);
         }
     }
 
     @Test
     public void capabilites_init_heart_rate() {
-        Capability capability = null;
+        FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            Capability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getFeature() == VehicleStatus.Feature.HEART_RATE) {
-                capability = iteratingCapability;
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getFeature() == VehicleFeature.HEART_RATE) {
+                featureCapability = iteratingFeatureCapability;
                 break;
             }
         }
 
-        assertTrue(capability != null);
-        assertTrue(capability.getClass() == AvailableCapability.class);
-        if (capability.getClass() == AvailableCapability.class) {
-            assertTrue(((AvailableCapability)capability).getCapability() == AvailableCapability.Capability.UNAVAILABLE);
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableCapability.class);
+        if (featureCapability.getClass() == AvailableCapability.class) {
+            assertTrue(((AvailableCapability) featureCapability).getCapability() == AvailableCapability.Capability.UNAVAILABLE);
         }
     }
 
     @Test
     public void capabilites_init_vehicle_location() {
-        Capability capability = null;
+        FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            Capability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getFeature() == VehicleStatus.Feature.VEHICLE_LOCATION) {
-                capability = iteratingCapability;
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getFeature() == VehicleFeature.VEHICLE_LOCATION) {
+                featureCapability = iteratingFeatureCapability;
                 break;
             }
         }
 
-        assertTrue(capability != null);
-        assertTrue(capability.getClass() == AvailableCapability.class);
-        if (capability.getClass() == AvailableCapability.class) {
-            assertTrue(((AvailableCapability)capability).getCapability() == AvailableCapability.Capability.AVAILABLE);
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableCapability.class);
+        if (featureCapability.getClass() == AvailableCapability.class) {
+            assertTrue(((AvailableCapability) featureCapability).getCapability() == AvailableCapability.Capability.AVAILABLE);
         }
     }
 
     @Test
     public void capabilites_init_navi_destination() {
-        Capability capability = null;
+        FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            Capability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getFeature() == VehicleStatus.Feature.NAVI_DESTINATION) {
-                capability = iteratingCapability;
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getFeature() == VehicleFeature.NAVI_DESTINATION) {
+                featureCapability = iteratingFeatureCapability;
                 break;
             }
         }
 
-        assertTrue(capability != null);
-        assertTrue(capability.getClass() == AvailableCapability.class);
-        if (capability.getClass() == AvailableCapability.class) {
-            assertTrue(((AvailableCapability)capability).getCapability() == AvailableCapability.Capability.AVAILABLE);
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableCapability.class);
+        if (featureCapability.getClass() == AvailableCapability.class) {
+            assertTrue(((AvailableCapability) featureCapability).getCapability() == AvailableCapability.Capability.AVAILABLE);
         }
     }
 
     @Test
     public void capabilites_init_delivered_parcels() {
-        Capability capability = null;
+        FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
-            Capability iteratingCapability = capabilites.getCapabilites()[i];
-            if (iteratingCapability.getFeature() == VehicleStatus.Feature.DELIVERED_PARCELS) {
-                capability = iteratingCapability;
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getFeature() == VehicleFeature.DELIVERED_PARCELS) {
+                featureCapability = iteratingFeatureCapability;
                 break;
             }
         }
 
-        assertTrue(capability != null);
-        assertTrue(capability.getClass() == AvailableCapability.class);
-        if (capability.getClass() == AvailableCapability.class) {
-            assertTrue(((AvailableCapability)capability).getCapability() == AvailableCapability.Capability.AVAILABLE);
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableCapability.class);
+        if (featureCapability.getClass() == AvailableCapability.class) {
+            assertTrue(((AvailableCapability) featureCapability).getCapability() == AvailableCapability.Capability.AVAILABLE);
         }
     }
 

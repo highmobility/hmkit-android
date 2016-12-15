@@ -12,34 +12,31 @@ public class RooftopState extends IncomingCommand {
     /**
      * The possible states of the rooftop.
      */
-    public enum State {
-        TRANSPARENT, OPAQUE, UNSUPPORTED;
-
-        static State stateForByte(byte value) throws CommandParseException {
-            switch (value) {
-                case 0: return State.TRANSPARENT;
-                case 1: return State.OPAQUE;
-                case (byte)0xFF: return State.UNSUPPORTED;
-                default: throw new CommandParseException();
-            }
-        }
-    }
-
-    State state;
+    float dimmingPercentage;
+    float openPercentage;
 
     public RooftopState(byte[] bytes) throws CommandParseException {
         super(bytes);
 
-        if (bytes.length != 3) throw new CommandParseException();
+        if (bytes.length != 5) throw new CommandParseException();
 
-        state = State.stateForByte(bytes[2]);
+        dimmingPercentage =  (int)bytes[3] / 100f;
+        openPercentage =  (int)bytes[4] / 100f;
     }
 
     /**
      *
-     * @return the state of the rooftop
+     * @return the dim percentage of the rooftop
      */
-    public State getState() {
-        return state;
+    public float getDimmingPercentage() {
+        return dimmingPercentage;
+    }
+
+    /**
+     *
+     * @return the percentage of how much the rooftop is open
+     */
+    public float getOpenPercentage() {
+        return openPercentage;
     }
 }

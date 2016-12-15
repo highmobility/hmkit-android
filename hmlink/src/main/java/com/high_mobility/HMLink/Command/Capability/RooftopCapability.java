@@ -1,13 +1,13 @@
 package com.high_mobility.HMLink.Command.Capability;
 
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
+import com.high_mobility.HMLink.Command.VehicleFeature;
 
 /**
  * Created by ttiganik on 13/12/2016.
  */
 
-public class RooftopCapability extends Capability {
+public class RooftopCapability extends FeatureCapability {
     public enum DimmingCapability {
         UNAVAILABLE, AVAILABLE, GET_STATE_AVAILABLE, ONLY_OPAQUE_OR_TRANSPARENT;
 
@@ -50,7 +50,7 @@ public class RooftopCapability extends Capability {
     }
 
     public RooftopCapability(byte[] bytes) throws CommandParseException {
-        super(VehicleStatus.Feature.ROOFTOP);
+        super(VehicleFeature.ROOFTOP);
 
         if (bytes.length != 5) throw new CommandParseException();
         dimmingCapability = DimmingCapability.fromByte(bytes[3]);

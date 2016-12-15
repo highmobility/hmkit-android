@@ -18,9 +18,9 @@ public class DeliveredParcels extends IncomingCommand {
     public DeliveredParcels(byte[] bytes) throws CommandParseException {
         super(bytes);
 
-        if (bytes.length < 3) throw new CommandParseException();
+        if (bytes.length < 4) throw new CommandParseException();
 
-        int count = bytes[2];
+        int count = bytes[3];
 
         if (count < 1) return;
 
@@ -28,7 +28,7 @@ public class DeliveredParcels extends IncomingCommand {
 
         deliveredParcels = new String[count];
         for (int i = 0; i < count; i++) {
-            byte[] identifier = Arrays.copyOfRange(bytes, 3 + i * 8, 3 + i * 8 + 8);
+            byte[] identifier = Arrays.copyOfRange(bytes, 4 + i * 8, 4 + i * 8 + 8);
             deliveredParcels[i] = ByteUtils.hexFromBytes(identifier);
         }
     }

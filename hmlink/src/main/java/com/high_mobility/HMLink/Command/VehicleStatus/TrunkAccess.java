@@ -1,14 +1,13 @@
 package com.high_mobility.HMLink.Command.VehicleStatus;
 
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
+import com.high_mobility.HMLink.Command.VehicleFeature;
 
 /**
  * Created by ttiganik on 14/12/2016.
  */
 
 public class TrunkAccess extends FeatureState {
-    // TODO:
     public enum LockState {
         LOCKED, UNLOCKED, UNSUPPORTED;
 
@@ -41,7 +40,7 @@ public class TrunkAccess extends FeatureState {
     Position position;
 
     TrunkAccess(byte[] bytes) throws CommandParseException {
-        super(VehicleStatus.Feature.TRUNK_ACCESS);
+        super(VehicleFeature.TRUNK_ACCESS);
 
         lockState = LockState.fromByte(bytes[3]);
         position = Position.fromByte(bytes[4]);

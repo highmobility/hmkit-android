@@ -11,35 +11,32 @@ import java.util.Arrays;
  */
 public class IncomingCommand {
     public static IncomingCommand create(byte[] bytes) throws CommandParseException {
-        if (bytes.length > 1) {
-            if (ByteUtils.startsWith(bytes, Command.General.CAPABILITIES.getIdentifier())) {
+        if (bytes.length > 2) { // TODO: this is invalid if VS or capabilities does not use type byte
+            if (ByteUtils.startsWith(bytes, Command.Capabilities.CAPABILITIES.getMessageIdentifierAndType())) {
                 return new Capabilities(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.General.CAPABILITY.getIdentifier())) {
+            else if (ByteUtils.startsWith(bytes, Command.Capabilities.CAPABILITY.getMessageIdentifierAndType())) {
                 return new Capability(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.General.VEHICLE_STATUS.getIdentifier())) {
+            else if (ByteUtils.startsWith(bytes, Command.VehicleStatus.VEHICLE_STATUS.getMessageIdentifierAndType())) {
                 return new VehicleStatus(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.DigitalKey.LOCK_STATE.getIdentifier())) {
+            else if (ByteUtils.startsWith(bytes, Command.DoorLocks.LOCK_STATE.getMessageIdentifierAndType())) {
                 return new LockState(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.DigitalKey.TRUNK_STATE.getIdentifier())) {
+            else if (ByteUtils.startsWith(bytes, Command.TrunkAccess.TRUNK_STATE.getMessageIdentifierAndType())) {
                 return new TrunkState(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.Chassis.WINDSHIELD_HEATING_STATE.getIdentifier())) {
-                return new WindshieldHeatingState(bytes);
-            }
-            else if (ByteUtils.startsWith(bytes, Command.Chassis.ROOFTOP_STATE.getIdentifier())) {
+            else if (ByteUtils.startsWith(bytes, Command.RooftopControl.ROOFTOP_STATE.getMessageIdentifierAndType())) {
                 return new RooftopState(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.RemoteControl.CONTROL_MODE.getIdentifier())) {
+            else if (ByteUtils.startsWith(bytes, Command.RemoteControl.CONTROL_MODE.getMessageIdentifierAndType())) {
                 return new ControlMode(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.ParcelDelivery.DELIVERED_PARCELS.getIdentifier())) {
+            else if (ByteUtils.startsWith(bytes, Command.DeliveredParcels.DELIVERED_PARCELS.getMessageIdentifierAndType())) {
                 return new DeliveredParcels(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.General.FAILURE.getIdentifier())) {
+            else if (ByteUtils.startsWith(bytes, Command.failureIdentifier)) {
                 return new Failure(bytes);
             }
             else {
@@ -51,13 +48,14 @@ public class IncomingCommand {
         }
     }
 
-    byte[] identifier = new byte[2];
+    byte[] identifier = new byte[3];
     byte[] bytes;
 
     IncomingCommand(byte[] bytes) {
         this.bytes = bytes;
         identifier[0] = bytes[0];
         identifier[1] = bytes[1];
+        identifier[2] = bytes[2]; // TODO: this is invalid if VS or capabilities does not use type byte
     }
 
     public byte[] getIdentifier() {
@@ -69,7 +67,7 @@ public class IncomingCommand {
     }
 
     public boolean is(Command.Type type) {
-        if (Arrays.equals(getIdentifier(), type.getIdentifier())) {
+        if (Arrays.equals(getIdentifier(), type.getMessageIdentifierAndType())) {
             return true;
         }
 

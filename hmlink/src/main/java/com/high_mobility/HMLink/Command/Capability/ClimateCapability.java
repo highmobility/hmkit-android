@@ -1,13 +1,13 @@
 package com.high_mobility.HMLink.Command.Capability;
 
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
+import com.high_mobility.HMLink.Command.VehicleFeature;
 
 /**
  * Created by ttiganik on 12/12/2016.
  */
 
-public class ClimateCapability extends Capability {
+public class ClimateCapability extends FeatureCapability {
     public enum ProfileCapability {
         UNAVAILABLE, AVAILABLE, GET_STATE_AVAILABLE, NO_SCHEDULING;
 
@@ -35,7 +35,7 @@ public class ClimateCapability extends Capability {
     }
 
     public ClimateCapability(byte[] bytes) throws CommandParseException {
-        super(VehicleStatus.Feature.CLIMATE);
+        super(VehicleFeature.CLIMATE);
 
         if (bytes.length != 5) throw new CommandParseException();
 

@@ -3,7 +3,6 @@ package com.high_mobility.HMLink.Command;
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.Incoming.RooftopState;
 import com.high_mobility.HMLink.Command.Incoming.TrunkState;
-import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -12,21 +11,73 @@ import java.nio.ByteBuffer;
  * Created by ttiganik on 25/05/16.
  */
 public class Command {
+    public static byte[] failureIdentifier = new byte[] { 0x00, 0x02 }; // TODO: this should ideally be internal
+    static byte[] vehicleStatusIdentifier = new byte[] { 0x00, 0x14 };
+    static byte[] capabilitiesIdentifier = new byte[] { 0x00, 0x10 };
+
+    static byte[] doorLocksIdentifer = new byte[] { 0x00, 0x20 };
+    static byte[] trunkAccessIdentifer = new byte[] { 0x00, 0x21 };
+    static byte[] wakeupIdentifer = new byte[] { 0x00, 0x22 };
+    static byte[] chargingIdentifer = new byte[] { 0x00, 0x23 };
+    static byte[] climateIdentifer = new byte[] { 0x00, 0x24 };
+    static byte[] rooftopControlIdentifer = new byte[] { 0x00, 0x25 };
+    static byte[] honkFlashIdentifer = new byte[] { 0x00, 0x26 };
+    static byte[] remoteControlIdentifer = new byte[] { 0x00, 0x27 };
+    static byte[] valetModeIdentifer = new byte[] { 0x00, 0x28 };
+    static byte[] heartRateIdentifer = new byte[] { 0x00, 0x29 };
+    static byte[] vehicleLocationIdentifer = new byte[] { 0x00, 0x30 };
+    static byte[] naviDestinationIdentifer = new byte[] { 0x00, 0x31 };
+    static byte[] deliveredParcelsIdentifer = new byte[] { 0x00, 0x32 };
+
     public interface Type {
-        byte[] getIdentifier();
+        byte getMessageType();
+        byte[] getMessageIdentifier();
+        byte[] getMessageIdentifierAndType();
     }
 
     /**
-     * Commands of the General category of the Auto API.
+     * Commands for the Vehicle Status category of the Auto API.
      */
-    public enum General implements Type {
-        GET_CAPABILITIES(new byte[] { 0x00, (byte)0x10 }),
-        CAPABILITIES(new byte[] { 0x00, (byte)0x11 }),
-        GET_CAPABILITY(new byte[] { 0x00, (byte)0x12 }),
-        CAPABILITY(new byte[] { 0x00, (byte)0x13 }),
-        GET_VEHICLE_STATUS(new byte[] { 0x00, (byte)0x14 }),
-        VEHICLE_STATUS(new byte[] { 0x00, (byte)0x15 }),
-        FAILURE(new byte[] {0x00, 0x02});
+    public enum VehicleStatus implements Type {
+        GET_VEHICLE_STATUS((byte)0x00),
+        VEHICLE_STATUS((byte)0x01);
+
+        /**
+         * Get the vehicle status. The car will respond with the Vehicle Status command.
+         *
+         * @return the command bytes
+         */
+        public static byte[] getVehicleStatus() {
+            return GET_VEHICLE_STATUS.getMessageIdentifierAndType();
+        }
+
+        VehicleStatus(byte messageType) {
+            this.messageType = messageType;
+        }
+        private byte messageType;
+        public byte getMessageType() {
+            return messageType;
+        }
+
+        @Override
+        public byte[] getMessageIdentifier() {
+            return vehicleStatusIdentifier;
+        }
+
+        @Override
+        public byte[] getMessageIdentifierAndType() {
+            return ByteUtils.concatBytes(getMessageIdentifier(), getMessageType());
+        }
+    }
+
+    /**
+     * Commands for the Vehicle Status category of the Auto API.
+     */
+    public enum Capabilities implements Type {
+        GET_CAPABILITIES((byte)0x00),
+        CAPABILITIES((byte)0x01),
+        GET_CAPABILITY((byte)0x02),
+        CAPABILITY((byte)0x03);
 
         /**
          * Get the vehicle capabilities. The car will respond with the Capabilities command that
@@ -37,7 +88,7 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] getCapabilities() {
-            return GET_CAPABILITIES.getIdentifier();
+            return GET_CAPABILITIES.getMessageIdentifierAndType();
         }
 
         /**
@@ -45,38 +96,36 @@ public class Command {
          * - to what extent the capability is supported, if at all.
          * @return the command bytes
          */
-        public static byte[] getCapability(VehicleStatus.Feature feature) {
-            return ByteUtils.concatBytes(GET_CAPABILITY.getIdentifier(), feature.getIdentifier());
+        public static byte[] getCapability(VehicleFeature feature) {
+            return ByteUtils.concatBytes(GET_CAPABILITY.getMessageIdentifierAndType(), feature.getIdentifier());
         }
 
-        /**
-         * Get the vehicle status. The car will respond with the Vehicle Status command.
-         *
-         * @return the command bytes
-         */
-        public static byte[] getVehicleStatus() {
-            return GET_VEHICLE_STATUS.getIdentifier();
+        Capabilities(byte messageType) {
+            this.messageType = messageType;
+        }
+        private byte messageType;
+        public byte getMessageType() {
+            return messageType;
         }
 
-        General(byte[] identifier) {
-            this.identifier = identifier;
+        @Override
+        public byte[] getMessageIdentifier() {
+            return capabilitiesIdentifier;
         }
-        private byte[] identifier;
-        public byte[] getIdentifier() {
-            return identifier;
+
+        @Override
+        public byte[] getMessageIdentifierAndType() {
+            return ByteUtils.concatBytes(getMessageIdentifier(), getMessageType());
         }
     }
 
     /**
-     * Commands of the Digital Key category of the Auto API.
+     * Commands for the Door Locks category of the Auto API.
      */
-    public enum DigitalKey implements Type {
-        GET_LOCK_STATE(new byte[] { 0x00, (byte)0x20 }),
-        LOCK_STATE(new byte[] { 0x00, (byte)0x21 }),
-        LOCK_UNLOCK(new byte[] { 0x00, (byte)0x22 }),
-        GET_TRUNK_STATE(new byte[] {0x00, (byte)0x23}),
-        TRUNK_STATE(new byte[] {0x00, (byte)0x24}),
-        SET_TRUNK_STATE(new byte[] {0x00, (byte)0x25});
+    public enum DoorLocks implements Type {
+        GET_LOCK_STATE((byte)0x00),
+        LOCK_STATE((byte)0x01),
+        LOCK_UNLOCK((byte)0x02);
 
         /**
          * Get the lock state, which either locked or unlocked. The car will respond with the
@@ -85,7 +134,7 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] getLockState() {
-            return GET_LOCK_STATE.getIdentifier();
+            return GET_LOCK_STATE.getMessageIdentifierAndType();
         }
 
         /**
@@ -95,12 +144,35 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] lockDoors(boolean lock) {
-            byte[] bytes = new byte[3];
-            bytes[0] = LOCK_UNLOCK.getIdentifier()[0];
-            bytes[1] = LOCK_UNLOCK.getIdentifier()[1];
-            bytes[2] = (byte)(lock ? 0x01 : 0x00);
-            return bytes;
+            return ByteUtils.concatBytes(LOCK_UNLOCK.getMessageIdentifierAndType(), (byte)(lock ? 0x01 : 0x00));
         }
+
+        DoorLocks(byte messageType) {
+            this.messageType = messageType;
+        }
+        private byte messageType;
+        public byte getMessageType() {
+            return messageType;
+        }
+
+        @Override
+        public byte[] getMessageIdentifier() {
+            return doorLocksIdentifer;
+        }
+
+        @Override
+        public byte[] getMessageIdentifierAndType() {
+            return ByteUtils.concatBytes(getMessageIdentifier(), getMessageType());
+        }
+    }
+
+    /**
+     * Commands for the Trunk Access category of the Auto API.
+     */
+    public enum TrunkAccess implements Type {
+        GET_TRUNK_STATE((byte)0x00),
+        TRUNK_STATE((byte)0x01),
+        OPEN_CLOSE((byte)0x02);
 
         /**
          * Get the trunk state, if it's locked/unlocked and closed/open. The car will respond with
@@ -109,7 +181,7 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] getTrunkState() {
-            return GET_TRUNK_STATE.getIdentifier();
+            return GET_TRUNK_STATE.getMessageIdentifierAndType();
         }
 
         /**
@@ -121,92 +193,104 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] setTrunkState(TrunkState.LockState lockState, TrunkState.Position position) {
-            byte[] bytes = new byte[4];
-            bytes[0] = SET_TRUNK_STATE.getIdentifier()[0];
-            bytes[1] = SET_TRUNK_STATE.getIdentifier()[1];
-            bytes[2] = (byte)(lockState == TrunkState.LockState.UNLOCKED ? 0x00 : 0x01);
-            bytes[3] = (byte)(position == TrunkState.Position.CLOSED ? 0x00 : 0x01);
+            byte[] bytes = new byte[5];
+            bytes[0] = OPEN_CLOSE.getMessageIdentifier()[0];
+            bytes[1] = OPEN_CLOSE.getMessageIdentifier()[1];
+            bytes[2] = OPEN_CLOSE.getMessageType();
+            bytes[3] = (byte)(lockState == TrunkState.LockState.UNLOCKED ? 0x00 : 0x01);
+            bytes[4] = (byte)(position == TrunkState.Position.CLOSED ? 0x00 : 0x01);
             return bytes;
         }
 
-        DigitalKey(byte[] identifier) {
-            this.identifier = identifier;
+        TrunkAccess(byte messageType) {
+            this.messageType = messageType;
         }
-        private byte[] identifier;
-        public byte[] getIdentifier() {
-            return identifier;
+        private byte messageType;
+        public byte getMessageType() {
+            return messageType;
+        }
+
+        @Override
+        public byte[] getMessageIdentifier() {
+            return trunkAccessIdentifer;
+        }
+
+        @Override
+        public byte[] getMessageIdentifierAndType() {
+            return ByteUtils.concatBytes(getMessageIdentifier(), getMessageType());
         }
     }
 
+    // TODO: add wakeup, charging, climate
+
     /**
-     * Commands of the Chassis category of the Auto API.
+     * Commands for the Rooftop Control category of the Auto API.
      */
-    public enum Chassis implements Type {
-        GET_WINDSHIELD_HEATING_STATE(new byte[] { 0x00, (byte)0x5A }),
-        WINDSHIELD_HEATING_STATE(new byte[] { 0x00, (byte)0x5B }),
-        SET_WINDSHIELD_HEATING(new byte[] { 0x00, (byte)0x5C }),
-        GET_ROOFTOP_STATE(new byte[] { 0x00, (byte)0x5D }),
-        ROOFTOP_STATE(new byte[] { 0x00, (byte)0x5E }),
-        SET_ROOFTOP_TRANSPARENCY(new byte[] { 0x00, (byte)0x5F });
-
-        /**
-         * Get the windshield heating state. The car will respond with the Windshield Heating State
-         * command.
-         *
-         * @return the command bytes
-         */
-        public static byte[] getWindshieldHeatingState() {
-            return GET_WINDSHIELD_HEATING_STATE.getIdentifier();
-        }
-
-        /**
-         * Set the windshield heating state. The result is sent through the Windshield Heating State
-         * command.
-         *
-         * @param active whether the heating should be active or not
-         * @return the command bytes
-         */
-        public static byte[] setWindshieldHeating(boolean active) {
-            return ByteUtils.concatBytes(SET_WINDSHIELD_HEATING.getIdentifier(), (byte)(active ? 0x01 : 0x00));
-        }
-
+    public enum RooftopControl implements Type {
+        GET_ROOFTOP_STATE((byte)0x00),
+        ROOFTOP_STATE((byte)0x01),
+        CONTROL_ROOFTOP((byte)0x02);
         /**
          * Get the rooftop state. The car will respond with the Rooftop State command.
          *
          *  @return the command bytes
          */
         public static byte[] getRooftopState() {
-            return GET_ROOFTOP_STATE.getIdentifier();
+            return GET_ROOFTOP_STATE.getMessageIdentifierAndType();
         }
 
         /**
          * Set the rooftop state. The result is sent through the evented Rooftop State command.
          *
-         * @param state the rooftop transparency state
+         * @param dimPercentage 0 - 1 percentage of how dimmed the rooftop should be
+         * @param openPercentage 0 - 1 percentage of how open the rooftop should be
          * @return the command bytes
          */
-        public static byte[] controlRooftop(RooftopState.State state) {
-            return ByteUtils.concatBytes(SET_ROOFTOP_TRANSPARENCY.getIdentifier(), (byte)(state == RooftopState.State.OPAQUE ? 0x01 : 0x00));
+        public static byte[] controlRooftop(float dimPercentage, float openPercentage) throws IllegalArgumentException {
+            if (dimPercentage < 0f || dimPercentage > 1f || openPercentage < 0f || openPercentage > 1f) {
+                throw new IllegalArgumentException();
+            }
+
+            byte[] identifier = CONTROL_ROOFTOP.getMessageIdentifierAndType();
+            byte[] message = new byte[5];
+            message[0] = identifier[0];
+            message[1] = identifier[1];
+            message[2] = identifier[2];
+            message[3] = (byte)(int)(dimPercentage * 100);
+            message[4] = (byte)(int)(openPercentage * 100);
+            return message;
         }
 
-        Chassis(byte[] identifier) {
-            this.identifier = identifier;
+        RooftopControl(byte messageType) {
+            this.messageType = messageType;
         }
-        private byte[] identifier;
-        public byte[] getIdentifier() {
-            return identifier;
+        private byte messageType;
+        public byte getMessageType() {
+            return messageType;
+        }
+
+        @Override
+        public byte[] getMessageIdentifier() {
+            return rooftopControlIdentifer;
+        }
+
+        @Override
+        public byte[] getMessageIdentifierAndType() {
+            return ByteUtils.concatBytes(getMessageIdentifier(), getMessageType());
         }
     }
+
+    // TODO: add honkflash
 
     /**
      * Commands of the Remote Control category of the Auto API.
      */
     public enum RemoteControl implements Type {
-        GET_CONTROL_MODE(new byte[] { 0x00, (byte)0x41 }),
-        CONTROL_MODE(new byte[] { 0x00, (byte)0x42 }),
-        START_CONTROL_MODE(new byte[] { 0x00, (byte)0x43 }),
-        STOP_CONTROL_MODE(new byte[] { 0x00, (byte)0x44 }),
-        CONTROL_COMMAND(new byte[] { 0x00, (byte)0x45 });
+        GET_CONTROL_MODE((byte)0x00),
+        CONTROL_MODE((byte)0x01),
+        START_CONTROL_MODE((byte)0x02),
+        STOP_CONTROL_MODE((byte)0x03),
+        CONTROL_COMMAND((byte)0x04);
 
         /**
          * Get the current remote control mode. The car will respond with the Control Mode command.
@@ -214,7 +298,7 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] getControlMode() {
-            return GET_CONTROL_MODE.getIdentifier();
+            return GET_CONTROL_MODE.getMessageIdentifierAndType();
         }
 
         /**
@@ -224,7 +308,7 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] startControlMode() {
-            return START_CONTROL_MODE.getIdentifier();
+            return START_CONTROL_MODE.getMessageIdentifierAndType();
         }
 
         /**
@@ -234,7 +318,7 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] stopControlMode() {
-            return STOP_CONTROL_MODE.getIdentifier();
+            return STOP_CONTROL_MODE.getMessageIdentifierAndType();
         }
 
         /**
@@ -251,23 +335,32 @@ public class Command {
             byte msb = (byte) ((angle & 0xFF00) >> 8);
             byte lsb = (byte) (angle & 0xFF);
 
-            return ByteUtils.concatBytes(CONTROL_COMMAND.getIdentifier(), new byte[] {(byte)speed, msb, lsb});
+            return ByteUtils.concatBytes(CONTROL_COMMAND.getMessageIdentifierAndType(), new byte[] {(byte)speed, msb, lsb});
         }
 
-        RemoteControl(byte[] identifier) {
-            this.identifier = identifier;
+        RemoteControl(byte messageType) {
+            this.messageType = messageType;
         }
-        private byte[] identifier;
-        public byte[] getIdentifier() {
-            return identifier;
+        private byte messageType;
+        public byte getMessageType() {
+            return messageType;
+        }
+
+        @Override
+        public byte[] getMessageIdentifier() {
+            return remoteControlIdentifer;
+        }
+
+        @Override
+        public byte[] getMessageIdentifierAndType() {
+            return ByteUtils.concatBytes(getMessageIdentifier(), getMessageType());
         }
     }
 
-    /**
-     * Commands of the Health category of the Auto API.
-     */
-    public enum Health implements Type {
-        HEART_RATE(new byte[] { 0x00, (byte)0x60 });
+    // TODO: add valet
+
+    public enum HeartRate implements Type {
+        SEND_HEART_RATE((byte)0x00);
 
         /**
          * Send the driver heart rate to the car.
@@ -276,23 +369,35 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] sendHeartRate(int heartRate) {
-            return ByteUtils.concatBytes(HEART_RATE.getIdentifier(), (byte)heartRate);
+            return ByteUtils.concatBytes(SEND_HEART_RATE.getMessageIdentifierAndType(), (byte)heartRate);
         }
 
-        Health(byte[] identifier) {
-            this.identifier = identifier;
+        HeartRate(byte messageType) {
+            this.messageType = messageType;
         }
-        private byte[] identifier;
-        public byte[] getIdentifier() {
-            return identifier;
+        private byte messageType;
+        public byte getMessageType() {
+            return messageType;
+        }
+
+        @Override
+        public byte[] getMessageIdentifier() {
+            return heartRateIdentifer;
+        }
+
+        @Override
+        public byte[] getMessageIdentifierAndType() {
+            return ByteUtils.concatBytes(getMessageIdentifier(), getMessageType());
         }
     }
 
+    // TODO: add vehicle location
+
     /**
-     * Commands of the Point Of Interest category of the Auto API.
+     * Commands of the Navi Destination category of the Auto API.
      */
-    public enum PointOfInterest implements Type {
-        SET_DESTINATION(new byte[] { 0x00, (byte)0x70 });
+    public enum NaviDestination implements Type {
+        SET_DESTINATION((byte)0x00);
 
         /**
          * Set the navigation destination. This will be forwarded to the navigation system of the car.
@@ -306,31 +411,41 @@ public class Command {
             byte[] latitudeBytes = ByteBuffer.allocate(4).putFloat(latitude).array();
             byte[] longitudeBytes = ByteBuffer.allocate(4).putFloat(longitude).array();
             byte[] nameBytes = name.getBytes("UTF-8");
-            byte[] destinationBytes = new byte[2 + 8 + 1 + nameBytes.length];
+            byte[] destinationBytes = new byte[3 + 8 + 1 + nameBytes.length];
 
-            System.arraycopy(SET_DESTINATION.getIdentifier(), 0, destinationBytes, 0, 2);
-            System.arraycopy(latitudeBytes, 0, destinationBytes, 2, 4);
-            System.arraycopy(longitudeBytes, 0, destinationBytes, 6, 4);
-            destinationBytes[10] = (byte)nameBytes.length;
-            System.arraycopy(nameBytes, 0, destinationBytes, 11, nameBytes.length);
+            System.arraycopy(SET_DESTINATION.getMessageIdentifierAndType(), 0, destinationBytes, 0, 3);
+            System.arraycopy(latitudeBytes, 0, destinationBytes, 3, 4);
+            System.arraycopy(longitudeBytes, 0, destinationBytes, 7, 4);
+            destinationBytes[11] = (byte)nameBytes.length;
+            System.arraycopy(nameBytes, 0, destinationBytes, 12, nameBytes.length);
             return destinationBytes;
         }
 
-        PointOfInterest(byte[] identifier) {
-            this.identifier = identifier;
+        NaviDestination(byte messageType) {
+            this.messageType = messageType;
         }
-        private byte[] identifier;
-        public byte[] getIdentifier() {
-            return identifier;
+        private byte messageType;
+        public byte getMessageType() {
+            return messageType;
+        }
+
+        @Override
+        public byte[] getMessageIdentifier() {
+            return naviDestinationIdentifer;
+        }
+
+        @Override
+        public byte[] getMessageIdentifierAndType() {
+            return ByteUtils.concatBytes(getMessageIdentifier(), getMessageType());
         }
     }
 
     /**
-     * Commands of the Parcel Delivery category of the Auto API.
+     * Commands for the Delivered Parcels category of the Auto API.
      */
-    public enum ParcelDelivery implements Type {
-        GET_DELIVERED_PARCELS(new byte[] { 0x00, (byte)0x60 }),
-        DELIVERED_PARCELS(new byte[] { 0x00, (byte)0x61 });
+    public enum DeliveredParcels implements Type {
+        GET_DELIVERED_PARCELS((byte)0x00),
+        DELIVERED_PARCELS((byte)0x01);
 
         /**
          * Get information about all parcels that have been delivered to the car. The car will
@@ -339,15 +454,25 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] getDeliveredParcels() {
-            return GET_DELIVERED_PARCELS.getIdentifier();
+            return GET_DELIVERED_PARCELS.getMessageIdentifierAndType();
         }
 
-        ParcelDelivery(byte[] identifier) {
-            this.identifier = identifier;
+        DeliveredParcels(byte messageType) {
+            this.messageType = messageType;
         }
-        private byte[] identifier;
-        public byte[] getIdentifier() {
-            return identifier;
+        private byte messageType;
+        public byte getMessageType() {
+            return messageType;
+        }
+
+        @Override
+        public byte[] getMessageIdentifier() {
+            return deliveredParcelsIdentifer;
+        }
+
+        @Override
+        public byte[] getMessageIdentifierAndType() {
+            return ByteUtils.concatBytes(getMessageIdentifier(), getMessageType());
         }
     }
 }

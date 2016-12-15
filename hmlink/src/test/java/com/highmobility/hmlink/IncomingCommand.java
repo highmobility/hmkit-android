@@ -7,7 +7,6 @@ import com.high_mobility.HMLink.Command.Incoming.Failure;
 import com.high_mobility.HMLink.Command.Incoming.LockState;
 import com.high_mobility.HMLink.Command.Incoming.RooftopState;
 import com.high_mobility.HMLink.Command.Incoming.TrunkState;
-import com.high_mobility.HMLink.Command.Incoming.WindshieldHeatingState;
 import com.high_mobility.HMLink.ByteUtils;
 
 import org.junit.Test;
@@ -20,87 +19,16 @@ import static org.junit.Assert.*;
  * Created by ttiganik on 15/09/16.
  */
 public class IncomingCommand {
-
-
-    /*
-    @Test
-    public void capability_init_chassis() {
-        byte[] bytes = ByteUtils.bytesFromHex("1013110100");
-
-        Capability capability= null;
-
-        try {
-            capability = new Capability(bytes);
-        } catch (CommandParseException e) {
-            fail("init failed");
-        }
-
-        assertTrue(capability.getCapabilityType().getClass() == ChassisCapabilities.class);
-        assertTrue(((ChassisCapabilities)capability.getCapabilityType()).getWindshieldHeatingCapability()
-                == Capability.Capability.AVAILABLE);
-
-        assertTrue(((ChassisCapabilities)capability.getCapabilityType()).getRooftopControlCapability()
-                == Capability.Capability.UNAVAILABLE);
-    }
-
-    @Test
-    public void capability_init_digital_key() {
-        byte[] bytes = ByteUtils.bytesFromHex("1013100006");
-
-        Capability capability= null;
-
-        try {
-            capability = new Capability(bytes);
-        } catch (CommandParseException e) {
-            fail("init failed");
-        }
-
-        assertTrue(capability.getCapabilityType().getClass() == DigitalKeyCapabilities.class);
-        assertTrue(((DigitalKeyCapabilities)capability.getCapabilityType()).getDoorLocksCapability()
-                == Capability.Capability.UNAVAILABLE);
-
-        assertTrue(((DigitalKeyCapabilities)capability.getCapabilityType()).getTrunkAccessCapability()
-                == DigitalKeyCapabilities.TrunkAccessCapability.GET_STATE_OPEN_AVAILABLE);
-    }
-
-    @Test
-    public void capability_init_parking() {
-        byte[] bytes = ByteUtils.bytesFromHex("10131201");
-
-        Capability capability= null;
-
-        try {
-            capability = new Capability(bytes);
-        } catch (CommandParseException e) {
-            fail("init failed");
-        }
-
-        assertTrue(capability.getCapabilityType().getClass() == ParkingCapabilities.class);
-        assertTrue(((ParkingCapabilities)capability.getCapabilityType()).getRemoteControlCapability()
-                == Capability.Capability.AVAILABLE);
-    }
-
-    @Test
-    public void capability_init_health() {
-        byte[] bytes = ByteUtils.bytesFromHex("10131300");
-
-        Capability capability= null;
-
-        try {
-            capability = new Capability(bytes);
-        } catch (CommandParseException e) {
-            fail("init failed");
-        }
-
-        assertTrue(capability.getCapabilityType().getClass() == HealthCapabilities.class);
-        assertTrue(((HealthCapabilities)capability.getCapabilityType()).getHeartRateCapability()
-                == Capability.Capability.UNAVAILABLE);
-    }
-    */
-
     @Test
     public void deliveredParcels_init() {
-        byte[] bytes = ByteUtils.bytesFromHex("***REMOVED***");
+        /*
+        0x00, 0x32, # MSB, LSB Message Identifier for Delivered Parcels
+        0x01,       # Message Type for Delivered Parcels
+        0x02,       # Two parcels in the car
+        0x4B87EFA8B4A6EC08, # Tracking number for first parcel
+        0x4B87EFA8B4A6EC09  # Tracking number for second parcel
+         */
+        byte[] bytes = ByteUtils.bytesFromHex("003201024B87EFA8B4A6EC084B87EFA8B4A6EC09");
 
         DeliveredParcels parcels = null;
 
@@ -117,7 +45,7 @@ public class IncomingCommand {
 
     @Test
     public void controlMode_init() {
-        byte[] bytes = ByteUtils.bytesFromHex("0042020032");
+        byte[] bytes = ByteUtils.bytesFromHex("002701020032");
 
         ControlMode controlMode = null;
 
@@ -133,7 +61,7 @@ public class IncomingCommand {
 
     @Test
     public void lockstate_init() {
-        byte[] bytes = ByteUtils.bytesFromHex("002100");
+        byte[] bytes = ByteUtils.bytesFromHex("00200100");
 
         LockState command = null;
 
@@ -147,38 +75,24 @@ public class IncomingCommand {
     }
 
     @Test
-    public void windshieldHeatingState_init_active() {
-        byte[] bytes = ByteUtils.bytesFromHex("005BFF");
+    public void rooftopState_init_random() {
+        byte[] bytes = ByteUtils.bytesFromHex("0025010135");
 
-        WindshieldHeatingState command = null;
+        RooftopState command = null;
 
         try {
-            command = new WindshieldHeatingState(bytes);
+            command = new RooftopState(bytes);
         } catch (CommandParseException e) {
             fail("init failed");
         }
 
-        assertTrue(command.getState() == WindshieldHeatingState.State.UNSUPPORTED);
-    }
-
-    @Test
-    public void windshieldHeatingState_init_inactive() {
-        byte[] bytes = ByteUtils.bytesFromHex("005B00");
-
-        WindshieldHeatingState command = null;
-
-        try {
-            command = new WindshieldHeatingState(bytes);
-        } catch (CommandParseException e) {
-            fail("init failed");
-        }
-
-        assertTrue(command.getState() == WindshieldHeatingState.State.INACTIVE);
+        assertTrue(command.getDimmingPercentage() == .01f);
+        assertTrue(command.getOpenPercentage() == .53f);
     }
 
     @Test
     public void rooftopState_init_opaque() {
-        byte[] bytes = ByteUtils.bytesFromHex("005E01");
+        byte[] bytes = ByteUtils.bytesFromHex("0025016400");
 
         RooftopState command = null;
 
@@ -188,28 +102,13 @@ public class IncomingCommand {
             fail("init failed");
         }
 
-        assertTrue(command.getState() == RooftopState.State.OPAQUE);
+        assertTrue(command.getDimmingPercentage() == 1f);
+        assertTrue(command.getOpenPercentage() == 0f);
     }
-
-    @Test
-    public void rooftopState_init_transparent() {
-        byte[] bytes = ByteUtils.bytesFromHex("005E00");
-
-        RooftopState command = null;
-
-        try {
-            command = new RooftopState(bytes);
-        } catch (CommandParseException e) {
-            fail("init failed");
-        }
-
-        assertTrue(command.getState() == RooftopState.State.TRANSPARENT);
-    }
-
 
     @Test
     public void trunkState_init() {
-        byte[] bytes = ByteUtils.bytesFromHex("00240001");
+        byte[] bytes = ByteUtils.bytesFromHex("0021010001");
 
         TrunkState command = null;
 

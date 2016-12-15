@@ -66,11 +66,11 @@ public class TrunkState extends IncomingCommand {
 
     public TrunkState(byte[] bytes) throws CommandParseException {
         super(bytes);
-        if (bytes.length != 4) {
+        if (bytes.length != 5) {
             throw new CommandParseException();
         }
 
-        state = LockState.lockStateFromByte(bytes[2]);
-        position = Position.positionFromByte(bytes[3]);
+        state = LockState.lockStateFromByte(bytes[3]);
+        position = Position.positionFromByte(bytes[4]);
     }
 }

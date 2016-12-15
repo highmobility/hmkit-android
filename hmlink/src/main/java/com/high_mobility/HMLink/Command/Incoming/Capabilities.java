@@ -1,6 +1,6 @@
 package com.high_mobility.HMLink.Command.Incoming;
 
-import com.high_mobility.HMLink.Command.Capability.Capability;
+import com.high_mobility.HMLink.Command.Capability.FeatureCapability;
 import com.high_mobility.HMLink.Command.CommandParseException;
 
 import java.util.Arrays;
@@ -11,7 +11,7 @@ import java.util.Arrays;
  * This command is sent when a Get Capabilities command is received by the car.
  */
 public class Capabilities extends IncomingCommand {
-    Capability[] capabilites;
+    FeatureCapability[] capabilites;
 
     public Capabilities(byte[] bytes) throws CommandParseException {
         super(bytes);
@@ -21,7 +21,7 @@ public class Capabilities extends IncomingCommand {
         int capabilitiesCount = bytes[2];
         if (capabilitiesCount == 0) return;
 
-        capabilites = new Capability[capabilitiesCount];
+        capabilites = new FeatureCapability[capabilitiesCount];
         int knownCapabilitesCount = 0;
         int capabilityPosition = 3;
 
@@ -29,21 +29,21 @@ public class Capabilities extends IncomingCommand {
             int capabilityLength = bytes[capabilityPosition + 2];
             byte[] capabilityBytes = Arrays.copyOfRange(bytes, capabilityPosition,
                         capabilityPosition + 3 + capabilityLength); // length = 2x identifier byte + length byte + bytes
-            Capability capability = Capability.fromBytes(capabilityBytes);
+            FeatureCapability featureCapability = FeatureCapability.fromBytes(capabilityBytes);
 
-            capabilites[i] = capability;
+            capabilites[i] = featureCapability;
             capabilityPosition += capabilityLength + 3;
-            if (capability != null) knownCapabilitesCount++;
+            if (featureCapability != null) knownCapabilitesCount++;
         }
 
         if (capabilitiesCount != knownCapabilitesCount) {
             // resize the array if any of the capabilities is unknown(null)
-            Capability[] trimmedCapabilites = new Capability[knownCapabilitesCount];
+            FeatureCapability[] trimmedCapabilites = new FeatureCapability[knownCapabilitesCount];
             int trimmedCapabilitesPosition = 0;
             for (int i = 0; i < capabilitiesCount; i++) {
-                Capability capability = capabilites[i];
-                if (capability != null) {
-                    trimmedCapabilites[trimmedCapabilitesPosition] = capability;
+                FeatureCapability featureCapability = capabilites[i];
+                if (featureCapability != null) {
+                    trimmedCapabilites[trimmedCapabilitesPosition] = featureCapability;
                     trimmedCapabilitesPosition++;
                 }
             }
@@ -52,7 +52,7 @@ public class Capabilities extends IncomingCommand {
         }
     }
 
-    public Capability[] getCapabilites() {
+    public FeatureCapability[] getCapabilites() {
         return capabilites;
     }
 }

@@ -59,10 +59,10 @@ public class ControlMode extends IncomingCommand {
 
     public ControlMode(byte[] bytes) throws CommandParseException {
         super(bytes);
-        if (bytes.length != 5) throw new CommandParseException();
+        if (bytes.length != 6) throw new CommandParseException();
 
-        mode = Mode.controlModeFromByte(bytes[2]);
-        angle = (bytes[3] << 8) + bytes[4];
+        mode = Mode.controlModeFromByte(bytes[3]);
+        angle = (bytes[4] << 8) + bytes[5];
     }
 
     /**

@@ -2,6 +2,7 @@ package com.highmobility.hmlink;
 
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.CommandParseException;
+import com.high_mobility.HMLink.Command.VehicleFeature;
 import com.high_mobility.HMLink.Command.VehicleStatus.DoorLocks;
 import com.high_mobility.HMLink.Command.VehicleStatus.FeatureState;
 import com.high_mobility.HMLink.Command.VehicleStatus.RemoteControl;
@@ -18,7 +19,6 @@ import static org.junit.Assert.fail;
  */
 
 public class VehicleStatus {
-    // TODO:
     com.high_mobility.HMLink.Command.Incoming.VehicleStatus vehicleStatus;
     @Before
     public void setup() {
@@ -51,7 +51,6 @@ public class VehicleStatus {
         for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
             assertTrue(vehicleStatus.getFeatureStates()[i] != null);
         }
-
     }
 
     @Test
@@ -59,7 +58,7 @@ public class VehicleStatus {
         FeatureState state = null;
         for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
             FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
-            if (iteratingState.getFeature() == com.high_mobility.HMLink.Command.Incoming.VehicleStatus.Feature.DOOR_LOCKS) {
+            if (iteratingState.getFeature() == VehicleFeature.DOOR_LOCKS) {
                 state = iteratingState;
                 break;
             }
@@ -78,7 +77,7 @@ public class VehicleStatus {
         FeatureState state = null;
         for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
             FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
-            if (iteratingState.getFeature() == com.high_mobility.HMLink.Command.Incoming.VehicleStatus.Feature.TRUNK_ACCESS) {
+            if (iteratingState.getFeature() == VehicleFeature.TRUNK_ACCESS) {
                 state = iteratingState;
                 break;
             }
@@ -98,7 +97,7 @@ public class VehicleStatus {
         FeatureState state = null;
         for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
             FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
-            if (iteratingState.getFeature() == com.high_mobility.HMLink.Command.Incoming.VehicleStatus.Feature.REMOTE_CONTROL) {
+            if (iteratingState.getFeature() == VehicleFeature.REMOTE_CONTROL) {
                 state = iteratingState;
                 break;
             }
