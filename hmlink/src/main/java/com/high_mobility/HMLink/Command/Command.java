@@ -12,8 +12,8 @@ import java.nio.ByteBuffer;
  */
 public class Command {
     public static byte[] failureIdentifier = new byte[] { 0x00, 0x02 }; // TODO: this should ideally be internal
-    static byte[] vehicleStatusIdentifier = new byte[] { 0x00, 0x14 };
     static byte[] capabilitiesIdentifier = new byte[] { 0x00, 0x10 };
+    static byte[] vehicleStatusIdentifier = new byte[] { 0x00, 0x11 };
 
     static byte[] doorLocksIdentifer = new byte[] { 0x00, 0x20 };
     static byte[] trunkAccessIdentifer = new byte[] { 0x00, 0x21 };

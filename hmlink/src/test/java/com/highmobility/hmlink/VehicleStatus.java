@@ -22,9 +22,11 @@ public class VehicleStatus {
     com.high_mobility.HMLink.Command.Incoming.VehicleStatus vehicleStatus;
     @Before
     public void setup() {
-        byte[] bytes = ByteUtils.bytesFromHex("00150300200101002102000100270102"); // TODO: add new states to test
+        byte[] bytes = ByteUtils.bytesFromHex("0011010300200101002102000100270102"); // TODO: add new states to test
         try {
-            vehicleStatus = new com.high_mobility.HMLink.Command.Incoming.VehicleStatus(bytes);
+            com.high_mobility.HMLink.Command.Incoming.IncomingCommand command = com.high_mobility.HMLink.Command.Incoming.IncomingCommand.create(bytes);
+            assertTrue(command.getClass() == com.high_mobility.HMLink.Command.Incoming.VehicleStatus.class);
+            vehicleStatus = (com.high_mobility.HMLink.Command.Incoming.VehicleStatus)command;
         } catch (CommandParseException e) {
             e.printStackTrace();
             fail("init failed");
@@ -38,7 +40,7 @@ public class VehicleStatus {
 
     @Test
     public void unknown_state() {
-        byte[] bytes = ByteUtils.bytesFromHex("00150300570101002102000100270102");
+        byte[] bytes = ByteUtils.bytesFromHex("0011010300590101002102000100270102");
         try {
             vehicleStatus = new com.high_mobility.HMLink.Command.Incoming.VehicleStatus(bytes);
         } catch (CommandParseException e) {

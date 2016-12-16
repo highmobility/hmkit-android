@@ -15,14 +15,14 @@ public class VehicleStatus extends IncomingCommand {
 
     public VehicleStatus(byte[] bytes) throws CommandParseException {
         super(bytes);
-        if (bytes.length < 3) throw new CommandParseException();
+        if (bytes.length < 4) throw new CommandParseException();
 
-        int stateCount = bytes[2];
+        int stateCount = bytes[3];
         if (stateCount == 0) return;
 
         featureStates = new FeatureState[stateCount];
         int knownStatesCount = 0;
-        int statePosition = 3;
+        int statePosition = 4;
 
         for (int i = 0; i < stateCount; i++) {
             int stateLength = bytes[statePosition + 2];
