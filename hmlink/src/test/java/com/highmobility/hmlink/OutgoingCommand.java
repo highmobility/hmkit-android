@@ -1,12 +1,14 @@
 package com.highmobility.hmlink;
 
 import com.high_mobility.HMLink.Command.Command;
+import com.high_mobility.HMLink.Command.Constants;
 import com.high_mobility.HMLink.Command.Incoming.*;
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
 import com.high_mobility.HMLink.Command.VehicleFeature;
 
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.UnsupportedEncodingException;
 
@@ -68,7 +70,7 @@ public class OutgoingCommand {
     @Test
     public void setTrunkState() {
         String waitingForBytes = "0021020001";
-        String commandBytes = ByteUtils.hexFromBytes(Command.TrunkAccess.setTrunkState(TrunkState.LockState.UNLOCKED, TrunkState.Position.OPEN));
+        String commandBytes = ByteUtils.hexFromBytes(Command.TrunkAccess.setTrunkState(Constants.TrunkLockState.UNLOCKED, Constants.TrunkPosition.OPEN));
         assertTrue(waitingForBytes.equals(commandBytes));
     }
 
@@ -118,6 +120,25 @@ public class OutgoingCommand {
     public void setChargeLimit() {
         String waitingForBytes = "0023035A";
         String commandBytes = ByteUtils.hexFromBytes(Command.Charging.setChargeLimit(.9f));
+        assertTrue(waitingForBytes.equals(commandBytes));
+    }
+
+    @Test
+    public void honkFlash() {
+        String waitingForBytes = "0026000103";
+        String commandBytes = ByteUtils.hexFromBytes(Command.HonkFlash.honkFlash(1, 3));
+        assertTrue(waitingForBytes.equals(commandBytes));
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void honkFlashInvalidParameter() {
+        ByteUtils.hexFromBytes(Command.HonkFlash.honkFlash(0, 0));
+    }
+
+    @Test
+    public void emergencyFlasher() {
+        String waitingForBytes = "00260101";
+        String commandBytes = ByteUtils.hexFromBytes(Command.HonkFlash.startEmergencyFlasher(true));
         assertTrue(waitingForBytes.equals(commandBytes));
     }
 }

@@ -2,6 +2,7 @@ package com.highmobility.hmlink;
 
 import com.high_mobility.HMLink.Command.Command;
 import com.high_mobility.HMLink.Command.CommandParseException;
+import com.high_mobility.HMLink.Command.Constants;
 import com.high_mobility.HMLink.Command.Incoming.ControlMode;
 import com.high_mobility.HMLink.Command.Incoming.DeliveredParcels;
 import com.high_mobility.HMLink.Command.Incoming.Failure;
@@ -93,7 +94,7 @@ public class IncomingCommand {
             fail("init failed");
         }
 
-        assertTrue(((LockState)command).getState() == LockState.State.UNLOCKED);
+        assertTrue(((LockState)command).getState() == Constants.LockState.UNLOCKED);
     }
 
     @Test
@@ -140,7 +141,7 @@ public class IncomingCommand {
             fail("init failed");
         }
 
-        assertTrue(((TrunkState)command).getLockState() == TrunkState.LockState.UNLOCKED);
-        assertTrue(((TrunkState)command).getPosition() == TrunkState.Position.OPEN);
+        assertTrue(((TrunkState)command).getLockState() == Constants.TrunkLockState.UNLOCKED);
+        assertTrue(((TrunkState)command).getPosition() == Constants.TrunkPosition.OPEN);
     }
 }

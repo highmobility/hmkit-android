@@ -18,7 +18,7 @@ public class Command {
      * Commands for the Failure Message category of the Auto API.
      */
     public enum FailureMessage implements Type {
-        FAILURE_MESSAGE((byte)0x00);
+        FAILURE_MESSAGE((byte)0x01);
 
         FailureMessage(byte messageType) {
             this.messageType = messageType;
@@ -413,7 +413,39 @@ public class Command {
         HONK_FLASH((byte)0x00),
         EMERGENCY_FLASHER((byte)0x01);
 
-        // TODO:
+        /**
+         * Honk the horn and/or flash the lights. This can be done simultaneously or just one
+         * action at the time. It is also possible to pass in how many times the lights should
+         * be flashed and how many seconds the horn should be honked.
+         *
+         * @param seconds how many seconds the horn should be honked, between 1 and 5
+         * @param lightFlashCount how many times the light should be flashed, between 1 and 10
+         * @return the command bytes
+         * @throws IllegalArgumentException when the seconds or lightCount parameter is not in the
+         * valid range
+         */
+        public static byte[] honkFlash(int seconds, int lightFlashCount) throws IllegalArgumentException {
+            if (seconds < 1 || seconds > 5 || lightFlashCount < 1 || lightFlashCount > 10) { // TODO: verify
+                throw new IllegalArgumentException();
+            }
+
+            byte[] payLoad = new byte[2];
+            payLoad[0] = (byte)seconds;
+            payLoad[1] = (byte)lightFlashCount;
+            return ByteUtils.concatBytes(HONK_FLASH.getMessageIdentifierAndType(), payLoad);
+        }
+
+        /**
+         * This activates or deactivates the emergency flashers of the car, typically the blinkers
+         * to alarm other drivers.
+         *
+         * @param start wheter to start the emergency flasher or not
+         * @return the command bytes
+         */
+        public static byte[] startEmergencyFlasher(boolean start) {
+            byte startByte = (byte)(start == true ? 0x01 : 0x00);
+            return ByteUtils.concatBytes(EMERGENCY_FLASHER.getMessageIdentifierAndType(), startByte);
+        }
 
         HonkFlash(byte messageType) {
             this.messageType = messageType;

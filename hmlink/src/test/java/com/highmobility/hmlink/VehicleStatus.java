@@ -2,6 +2,7 @@ package com.highmobility.hmlink;
 
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.CommandParseException;
+import com.high_mobility.HMLink.Command.Constants;
 import com.high_mobility.HMLink.Command.VehicleFeature;
 import com.high_mobility.HMLink.Command.VehicleStatus.DoorLocks;
 import com.high_mobility.HMLink.Command.VehicleStatus.FeatureState;
@@ -70,7 +71,7 @@ public class VehicleStatus {
         assertTrue(state.getClass() == DoorLocks.class);
 
         if (state.getClass() == DoorLocks.class) {
-            assertTrue(((DoorLocks)state).getState() == DoorLocks.State.LOCKED);
+            assertTrue(((DoorLocks)state).getState() == Constants.LockState.LOCKED);
         }
     }
 
@@ -89,8 +90,8 @@ public class VehicleStatus {
         assertTrue(state.getClass() == TrunkAccess.class);
 
         if (state.getClass() == TrunkAccess.class) {
-            assertTrue(((TrunkAccess)state).getLockState() == TrunkAccess.LockState.UNLOCKED);
-            assertTrue(((TrunkAccess)state).getPosition() == TrunkAccess.Position.OPEN);
+            assertTrue(((TrunkAccess)state).getLockState() == Constants.TrunkLockState.UNLOCKED);
+            assertTrue(((TrunkAccess)state).getPosition() == Constants.TrunkPosition.OPEN);
         }
     }
 
