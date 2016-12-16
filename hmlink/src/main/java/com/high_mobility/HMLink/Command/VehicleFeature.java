@@ -5,6 +5,9 @@ package com.high_mobility.HMLink.Command;
  */
 
 public enum VehicleFeature {
+    FAILURE(new byte[] { 0x00, (byte)0x02 }),
+    CAPABILITIES(new byte[] { 0x00, (byte)0x10 }),
+    VEHICLE_STATUS(new byte[] { 0x00, (byte)0x11 }),
     DOOR_LOCKS(new byte[] { 0x00, (byte)0x20 }),
     TRUNK_ACCESS(new byte[] { 0x00, (byte)0x21 }),
     WAKE_UP(new byte[] { 0x00, (byte)0x22 }),
@@ -24,43 +27,52 @@ public enum VehicleFeature {
     }
 
     public static VehicleFeature fromIdentifier(byte firstByte, byte secondByte) {
-        if (firstByte == 0x00 && secondByte == 0x20) {
+        if (is(FAILURE, firstByte, secondByte)) {
+            return FAILURE;
+        }
+        else if (is(CAPABILITIES, firstByte, secondByte)) {
+            return CAPABILITIES;
+        }
+        else if (is(VEHICLE_STATUS, firstByte, secondByte)) {
+            return VEHICLE_STATUS;
+        }
+        else if (is(DOOR_LOCKS, firstByte, secondByte)) {
             return DOOR_LOCKS;
         }
-        else if (firstByte == 0x00 && secondByte == 0x21) {
+        else if (is(TRUNK_ACCESS, firstByte, secondByte)) {
             return TRUNK_ACCESS;
         }
-        else if (firstByte == 0x00 && secondByte == 0x22) {
+        else if (is(WAKE_UP, firstByte, secondByte)) {
             return WAKE_UP;
         }
-        else if (firstByte == 0x00 && secondByte == 0x23) {
+        else if (is(CHARGING, firstByte, secondByte)) {
             return CHARGING;
         }
-        else if (firstByte == 0x00 && secondByte == 0x24) {
+        else if (is(CLIMATE, firstByte, secondByte)) {
             return CLIMATE;
         }
-        else if (firstByte == 0x00 && secondByte == 0x25) {
+        else if (is(ROOFTOP, firstByte, secondByte)) {
             return ROOFTOP;
         }
-        else if (firstByte == 0x00 && secondByte == 0x26) {
+        else if (is(HONK_FLASH, firstByte, secondByte)) {
             return HONK_FLASH;
         }
-        else if (firstByte == 0x00 && secondByte == 0x27) {
+        else if (is(REMOTE_CONTROL, firstByte, secondByte)) {
             return REMOTE_CONTROL;
         }
-        else if (firstByte == 0x00 && secondByte == 0x28) {
+        else if (is(VALET_MODE, firstByte, secondByte)) {
             return VALET_MODE;
         }
-        else if (firstByte == 0x00 && secondByte == 0x29) {
+        else if (is(HEART_RATE, firstByte, secondByte)) {
             return HEART_RATE;
         }
-        else if (firstByte == 0x00 && secondByte == 0x30) {
+        else if (is(VEHICLE_LOCATION, firstByte, secondByte)) {
             return VEHICLE_LOCATION;
         }
-        else if (firstByte == 0x00 && secondByte == 0x31) {
+        else if (is(NAVI_DESTINATION, firstByte, secondByte)) {
             return NAVI_DESTINATION;
         }
-        else if (firstByte == 0x00 && secondByte == 0x32) {
+        else if (is(DELIVERED_PARCELS, firstByte, secondByte)) {
             return DELIVERED_PARCELS;
         }
         else {
@@ -74,5 +86,9 @@ public enum VehicleFeature {
     private byte[] identifier;
     public byte[] getIdentifier() {
         return identifier;
+    }
+
+    static boolean is (VehicleFeature feature, byte firstByte, byte secondByte) {
+        return feature.getIdentifier()[0] == firstByte && feature.getIdentifier()[1] == secondByte;
     }
 }

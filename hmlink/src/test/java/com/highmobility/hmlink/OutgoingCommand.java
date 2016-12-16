@@ -91,4 +91,33 @@ public class OutgoingCommand {
         }
         assertTrue(waitingForBytes.equals(commandBytes));
     }
+
+    @Test
+    public void wakeUp() {
+        String waitingForBytes = "002202";
+        String commandBytes = ByteUtils.hexFromBytes(Command.WakeUp.wakeUp());
+        assertTrue(waitingForBytes.equals(commandBytes));
+    }
+
+    @Test
+    public void getChargeState() {
+        String waitingForBytes = "002300";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Charging.getChargeState());
+        assertTrue(waitingForBytes.equals(commandBytes));
+    }
+
+    @Test
+    public void startCharging() {
+        String waitingForBytes = "00230201";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Charging.startCharging(true));
+        assertTrue(waitingForBytes.equals(commandBytes));
+    }
+
+
+    @Test
+    public void setChargeLimit() {
+        String waitingForBytes = "0023035A";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Charging.setChargeLimit(.9f));
+        assertTrue(waitingForBytes.equals(commandBytes));
+    }
 }

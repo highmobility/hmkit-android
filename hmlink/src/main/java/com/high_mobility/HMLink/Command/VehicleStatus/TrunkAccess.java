@@ -1,6 +1,7 @@
 package com.high_mobility.HMLink.Command.VehicleStatus;
 
 import com.high_mobility.HMLink.Command.CommandParseException;
+import com.high_mobility.HMLink.Command.Constants;
 import com.high_mobility.HMLink.Command.VehicleFeature;
 
 /**
@@ -8,49 +9,21 @@ import com.high_mobility.HMLink.Command.VehicleFeature;
  */
 
 public class TrunkAccess extends FeatureState {
-    public enum LockState {
-        LOCKED, UNLOCKED, UNSUPPORTED;
-
-        static LockState fromByte(byte value) throws CommandParseException {
-            switch (value) {
-                case 0x00: return UNLOCKED;
-                case 0x01: return LOCKED;
-                case (byte)0xFF: return UNSUPPORTED;
-            }
-
-            throw new CommandParseException();
-        }
-    }
-
-    public enum Position {
-        CLOSED, OPEN, UNSUPPORTED;
-
-        static Position fromByte(byte value) throws CommandParseException {
-            switch (value) {
-                case 0x00: return CLOSED;
-                case 0x01: return OPEN;
-                case (byte)0xFF: return UNSUPPORTED;
-            }
-
-            throw new CommandParseException();
-        }
-    }
-
-    LockState lockState;
-    Position position;
+    Constants.TrunkLockState lockState;
+    Constants.TrunkPosition position;
 
     TrunkAccess(byte[] bytes) throws CommandParseException {
         super(VehicleFeature.TRUNK_ACCESS);
 
-        lockState = LockState.fromByte(bytes[3]);
-        position = Position.fromByte(bytes[4]);
+        lockState = Constants.TrunkLockState.fromByte(bytes[3]);
+        position = Constants.TrunkPosition.fromByte(bytes[4]);
     }
 
-    public LockState getLockState() {
+    public Constants.TrunkLockState getLockState() {
         return lockState;
     }
 
-    public Position getPosition() {
+    public Constants.TrunkPosition getPosition() {
         return position;
     }
 }

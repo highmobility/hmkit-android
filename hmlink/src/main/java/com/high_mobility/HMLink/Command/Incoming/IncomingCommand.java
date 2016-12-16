@@ -27,16 +27,28 @@ public class IncomingCommand {
             else if (ByteUtils.startsWith(bytes, Command.TrunkAccess.TRUNK_STATE.getMessageIdentifierAndType())) {
                 return new TrunkState(bytes);
             }
+            else if (ByteUtils.startsWith(bytes, Command.Charging.CHARGE_STATE.getMessageIdentifierAndType())) {
+                return new ChargeState(bytes);
+            }
+            else if (ByteUtils.startsWith(bytes, Command.Climate.CLIMATE_STATE.getMessageIdentifierAndType())) {
+                return new ClimateState(bytes);
+            }
             else if (ByteUtils.startsWith(bytes, Command.RooftopControl.ROOFTOP_STATE.getMessageIdentifierAndType())) {
                 return new RooftopState(bytes);
             }
             else if (ByteUtils.startsWith(bytes, Command.RemoteControl.CONTROL_MODE.getMessageIdentifierAndType())) {
                 return new ControlMode(bytes);
             }
+            else if (ByteUtils.startsWith(bytes, Command.ValetMode.VALET_MODE.getMessageIdentifierAndType())) {
+                return new ValetMode(bytes);
+            }
+            else if (ByteUtils.startsWith(bytes, Command.VehicleLocation.VEHICLE_LOCATION.getMessageIdentifierAndType())) {
+                return new VehicleLocation(bytes);
+            }
             else if (ByteUtils.startsWith(bytes, Command.DeliveredParcels.DELIVERED_PARCELS.getMessageIdentifierAndType())) {
                 return new DeliveredParcels(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.failureIdentifier)) {
+            else if (ByteUtils.startsWith(bytes, Command.FailureMessage.FAILURE_MESSAGE.getMessageIdentifierAndType())) {
                 return new Failure(bytes);
             }
             else {
@@ -48,18 +60,27 @@ public class IncomingCommand {
         }
     }
 
-    byte[] identifier = new byte[3];
+    byte[] identifier = new byte[2];
+    byte type;
     byte[] bytes;
 
     IncomingCommand(byte[] bytes) {
         this.bytes = bytes;
         identifier[0] = bytes[0];
         identifier[1] = bytes[1];
-        identifier[2] = bytes[2]; // TODO: this is invalid if VS or capabilities does not use type byte
+        type = bytes[2];
     }
 
     public byte[] getIdentifier() {
         return identifier;
+    }
+
+    public byte getType() {
+        return type;
+    }
+
+    public byte[] getIdentifierAndType() {
+        return ByteUtils.concatBytes(identifier, type);
     }
 
     public byte[] getBytes() {

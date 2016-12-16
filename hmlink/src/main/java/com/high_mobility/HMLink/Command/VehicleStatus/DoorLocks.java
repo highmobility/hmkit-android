@@ -1,5 +1,6 @@
 package com.high_mobility.HMLink.Command.VehicleStatus;
 import com.high_mobility.HMLink.Command.CommandParseException;
+import com.high_mobility.HMLink.Command.Constants;
 import com.high_mobility.HMLink.Command.VehicleFeature;
 
 /**
@@ -7,27 +8,15 @@ import com.high_mobility.HMLink.Command.VehicleFeature;
  */
 
 public class DoorLocks extends FeatureState {
-    public enum State {
-        LOCKED, UNLOCKED;
 
-        static State fromByte(byte value) throws CommandParseException {
-            switch (value) {
-                case 0x00: return UNLOCKED;
-                case 0x01: return LOCKED;
-            }
-
-            throw new CommandParseException();
-        }
-    }
-
-    State state;
+    Constants.LockState state;
 
     DoorLocks(byte[] bytes) throws CommandParseException {
         super(VehicleFeature.DOOR_LOCKS);
-        state = State.fromByte(bytes[3]);
+        state = Constants.LockState.fromByte(bytes[3]);
     }
 
-    public State getState() {
+    public Constants.LockState getState() {
         return state;
     }
 }

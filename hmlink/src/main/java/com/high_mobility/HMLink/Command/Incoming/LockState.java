@@ -1,6 +1,7 @@
 package com.high_mobility.HMLink.Command.Incoming;
 
 import com.high_mobility.HMLink.Command.CommandParseException;
+import com.high_mobility.HMLink.Command.Constants;
 
 /**
  * Created by ttiganik on 13/09/16.
@@ -11,30 +12,14 @@ import com.high_mobility.HMLink.Command.CommandParseException;
  */
 public class LockState extends IncomingCommand {
     /**
-     * The possible states of the car lock.
-     */
-    public enum State {
-        LOCKED, UNLOCKED;
-
-        static State lockStateFromByte(byte value) throws CommandParseException {
-            switch (value) {
-                case 0x00: return UNLOCKED;
-                case 0x01: return LOCKED;
-            }
-
-            throw new CommandParseException();
-        }
-    }
-
-    /**
      *
      * @return the current lock status of the car
      */
-    public State getState() {
+    public Constants.LockState getState() {
         return state;
     }
 
-    State state;
+    Constants.LockState state;
 
     public LockState(byte[] bytes) throws CommandParseException {
         super(bytes);
@@ -43,6 +28,6 @@ public class LockState extends IncomingCommand {
             throw new CommandParseException();
         }
 
-        state = State.lockStateFromByte(bytes[3]);
+        state = Constants.LockState.fromByte(bytes[3]);
     }
 }
