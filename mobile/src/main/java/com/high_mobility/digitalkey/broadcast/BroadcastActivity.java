@@ -130,7 +130,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
     @Override
     public void onStateChanged(Link link, Link.State state) {
         if (link.getState() == ConnectedLink.State.AUTHENTICATED) {
-            link.sendCommand(Command.General.getVehicleStatus(), true, new Constants.ResponseCallback() {
+            link.sendCommand(Command.VehicleStatus.getVehicleStatus(), true, new Constants.ResponseCallback() {
                 @Override
                 public void response(int i) {
                     if (i != 0) {
@@ -151,7 +151,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
         try {
             IncomingCommand command = IncomingCommand.create(bytes);
 
-            if (command.is(Command.DigitalKey.LOCK_STATE)) {
+            if (command.is(Command.DoorLocks.LOCK_STATE)) {
                 LockState stateNotification = (LockState) command;
                 Log.i(TAG, "Lock status changed " + stateNotification.getState());
             }
@@ -159,7 +159,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
                 ControlMode controlModeNotification = (ControlMode) command;
                 Log.i(TAG, "Control Mode angle " + controlModeNotification.getAngle());
             }
-            else if (command.is(Command.General.VEHICLE_STATUS)) {
+            else if (command.is(Command.VehicleStatus.VEHICLE_STATUS)) {
                 Log.d(TAG, "Got vehicle status");
             }
         }
@@ -207,7 +207,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
         final LinkFragment fragment = adapter.getFragment(link);
         ViewUtils.enableView(fragment.authView, false);
 
-        link.sendCommand(Command.Chassis.setWindshieldHeating(true), true, new Constants.ResponseCallback() {
+        link.sendCommand(Command.DoorLocks.lockDoors(true), true, new Constants.ResponseCallback() {
             @Override
             public void response(int errorCode) {
             ViewUtils.enableView(fragment.authView, true);
@@ -224,7 +224,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
         final LinkFragment fragment = adapter.getFragment(link);
 
         ViewUtils.enableView(fragment.authView, false);
-        link.sendCommand(Command.Chassis.controlRooftop(RooftopState.State.OPAQUE), true, new Constants.ResponseCallback() {
+        link.sendCommand(Command.DoorLocks.lockDoors(true), true, new Constants.ResponseCallback() {
             @Override
             public void response(int errorCode) {
                 ViewUtils.enableView(fragment.authView, true);
@@ -235,4 +235,5 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
                 // all went ok
             }
         });
-    }}
+    }
+}
