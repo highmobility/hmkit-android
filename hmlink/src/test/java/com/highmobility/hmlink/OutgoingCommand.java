@@ -25,7 +25,7 @@ public class OutgoingCommand {
 
     @Test
     public void getVehicleStatus() {
-        String waitingForBytes = "001400";
+        String waitingForBytes = "001100";
         String commandBytes = ByteUtils.hexFromBytes(Command.VehicleStatus.getVehicleStatus());
         assertTrue(waitingForBytes.equals(commandBytes));
     }

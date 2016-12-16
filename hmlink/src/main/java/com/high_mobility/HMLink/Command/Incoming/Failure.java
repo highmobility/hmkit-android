@@ -1,5 +1,6 @@
 package com.high_mobility.HMLink.Command.Incoming;
 
+import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.CommandParseException;
 
 /**
@@ -12,18 +13,20 @@ public class Failure extends IncomingCommand {
     }
 
     private byte[] failedIdentifier;
+    private byte failedType;
     private Reason failureReason;
 
     public Failure(byte[] bytes) throws CommandParseException {
         super(bytes);
 
-        if (bytes.length != 5) throw new CommandParseException();
+        if (bytes.length != 7) throw new CommandParseException();
 
         failedIdentifier = new byte[2];
-        failedIdentifier[0] = bytes[2];
-        failedIdentifier[1] = bytes[3];
+        failedIdentifier[0] = bytes[3];
+        failedIdentifier[1] = bytes[4];
+        failedType = bytes[5];
 
-        switch (bytes[4]) {
+        switch (bytes[6]) {
             case 0x00:
                 failureReason = Reason.UNSUPPORTED_CAPABILITY;
                 break;
@@ -50,5 +53,13 @@ public class Failure extends IncomingCommand {
 
     public Reason getFailureReason() {
         return failureReason;
+    }
+
+    public byte getFailedType() {
+        return failedType;
+    }
+
+    public byte[] getFailedIdentifierAndType() {
+        return ByteUtils.concatBytes(failedIdentifier, failedType);
     }
 }
