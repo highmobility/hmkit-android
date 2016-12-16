@@ -22,13 +22,15 @@ import static org.junit.Assert.fail;
  */
 
 public class Capabilities {
-    byte[] knownCapabilitiesBytes = ByteUtils.bytesFromHex("00110D002001010021020300002201000023010000240201030025020101002603010101002701010028010100290100003001010031010100320101");
-    com.high_mobility.HMLink.Command.Incoming.Capabilities capabilites = null;
+    byte[] knownCapabilitiesBytes = ByteUtils.bytesFromHex("0010010D002001010021020300002201000023010000240201000025020101002603010101002701010028010100290100003001010031010100320101");
+    com.high_mobility.HMLink.Command.Incoming.Capabilities capabilites = null; // TODO: fix test
 
     @Before
     public void setUp() {
         try {
-            capabilites = new com.high_mobility.HMLink.Command.Incoming.Capabilities(knownCapabilitiesBytes);
+            com.high_mobility.HMLink.Command.Incoming.IncomingCommand command = com.high_mobility.HMLink.Command.Incoming.IncomingCommand.create(knownCapabilitiesBytes);
+            assertTrue(command.getClass() == com.high_mobility.HMLink.Command.Incoming.Capabilities.class);
+            capabilites = (com.high_mobility.HMLink.Command.Incoming.Capabilities)command;
         } catch (CommandParseException e) {
             fail("capabilities init failed");
         }
@@ -43,7 +45,7 @@ public class Capabilities {
     @Test
     public void unknownCapabilities_init() {
         // 00 59 unknown
-        byte[] unknownCapabilitiesBytes = ByteUtils.bytesFromHex("00110D005901010021020300002201000023010000240201030025020101002603010101002701010028010100290100003001010031010100320101");
+        byte[] unknownCapabilitiesBytes = ByteUtils.bytesFromHex("0010010D005901010021020300002201000023010000240201030025020101002603010101002701010028010100290100003001010031010100320101");
         com.high_mobility.HMLink.Command.Incoming.Capabilities unknownCapabilities= null;
 
         try {
@@ -146,7 +148,7 @@ public class Capabilities {
         assertTrue(featureCapability.getClass() == ClimateCapability.class);
         if (featureCapability.getClass() == ClimateCapability.class) {
             assertTrue(((ClimateCapability) featureCapability).getClimateCapability() == AvailableGetStateCapability.Capability.AVAILABLE);
-            assertTrue(((ClimateCapability) featureCapability).getProfileCapability() == ClimateCapability.ProfileCapability.NO_SCHEDULING);
+            assertTrue(((ClimateCapability) featureCapability).getProfileCapability() == ClimateCapability.ProfileCapability.UNAVAILABLE);
         }
     }
 

@@ -11,7 +11,7 @@ import java.util.Arrays;
  */
 public class IncomingCommand {
     public static IncomingCommand create(byte[] bytes) throws CommandParseException {
-        if (bytes.length > 2) { // TODO: this is invalid if VS or capabilities does not use type byte
+        if (bytes.length > 2) {
             if (ByteUtils.startsWith(bytes, Command.Capabilities.CAPABILITIES.getMessageIdentifierAndType())) {
                 return new Capabilities(bytes);
             }

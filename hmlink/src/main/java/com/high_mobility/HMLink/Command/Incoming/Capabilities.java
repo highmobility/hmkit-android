@@ -16,14 +16,14 @@ public class Capabilities extends IncomingCommand {
     public Capabilities(byte[] bytes) throws CommandParseException {
         super(bytes);
 
-        if (bytes.length < 3) throw new CommandParseException();
+        if (bytes.length < 4) throw new CommandParseException();
 
-        int capabilitiesCount = bytes[2];
+        int capabilitiesCount = bytes[3];
         if (capabilitiesCount == 0) return;
 
         capabilites = new FeatureCapability[capabilitiesCount];
         int knownCapabilitesCount = 0;
-        int capabilityPosition = 3;
+        int capabilityPosition = 4;
 
         for (int i = 0; i < capabilitiesCount; i++) {
             int capabilityLength = bytes[capabilityPosition + 2];

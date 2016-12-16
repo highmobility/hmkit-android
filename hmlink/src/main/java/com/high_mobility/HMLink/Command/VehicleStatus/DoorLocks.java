@@ -1,7 +1,5 @@
 package com.high_mobility.HMLink.Command.VehicleStatus;
-
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
 import com.high_mobility.HMLink.Command.VehicleFeature;
 
 /**
