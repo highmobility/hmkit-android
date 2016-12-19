@@ -115,7 +115,6 @@ public class OutgoingCommand {
         assertTrue(waitingForBytes.equals(commandBytes));
     }
 
-
     @Test
     public void setChargeLimit() {
         String waitingForBytes = "0023035A";

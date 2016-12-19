@@ -3,6 +3,7 @@ package com.highmobility.hmlink;
 import com.high_mobility.HMLink.Command.Command;
 import com.high_mobility.HMLink.Command.CommandParseException;
 import com.high_mobility.HMLink.Command.Constants;
+import com.high_mobility.HMLink.Command.Incoming.ChargeState;
 import com.high_mobility.HMLink.Command.Incoming.ControlMode;
 import com.high_mobility.HMLink.Command.Incoming.DeliveredParcels;
 import com.high_mobility.HMLink.Command.Incoming.Failure;
@@ -11,6 +12,7 @@ import com.high_mobility.HMLink.Command.Incoming.RooftopState;
 import com.high_mobility.HMLink.Command.Incoming.TrunkState;
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.VehicleStatus.Charging;
 
 import org.junit.Test;
 
@@ -42,7 +44,6 @@ public class IncomingCommand {
         }
 
         assertTrue(command.getClass() == DeliveredParcels.class);
-
         assertTrue(((DeliveredParcels)command).getDeliveredParcels().length == 2);
         assertTrue(((DeliveredParcels)command).getDeliveredParcels()[0].equals("4B87EFA8B4A6EC08"));
         assertTrue(((DeliveredParcels)command).getDeliveredParcels()[1].equals("4B87EFA8B4A6EC09"));
@@ -78,6 +79,7 @@ public class IncomingCommand {
             fail("init failed");
         }
 
+        assertTrue(command.getClass() == ControlMode.class);
         assertTrue(((ControlMode)command).getMode() == ControlMode.Mode.STARTED);
         assertTrue(((ControlMode)command).getAngle() == 50);
     }
@@ -94,6 +96,7 @@ public class IncomingCommand {
             fail("init failed");
         }
 
+        assertTrue(command.getClass() == LockState.class);
         assertTrue(((LockState)command).getState() == Constants.LockState.UNLOCKED);
     }
 
@@ -109,6 +112,7 @@ public class IncomingCommand {
             fail("init failed");
         }
 
+        assertTrue(command.getClass() == RooftopState.class);
         assertTrue(((RooftopState)command).getDimmingPercentage() == .01f);
         assertTrue(((RooftopState)command).getOpenPercentage() == .53f);
     }
@@ -125,6 +129,7 @@ public class IncomingCommand {
             fail("init failed");
         }
 
+        assertTrue(command.getClass() == RooftopState.class);
         assertTrue(((RooftopState)command).getDimmingPercentage() == 1f);
         assertTrue(((RooftopState)command).getOpenPercentage() == 0f);
     }
@@ -141,7 +146,33 @@ public class IncomingCommand {
             fail("init failed");
         }
 
+        assertTrue(command.getClass() == TrunkState.class);
         assertTrue(((TrunkState)command).getLockState() == Constants.TrunkLockState.UNLOCKED);
         assertTrue(((TrunkState)command).getPosition() == Constants.TrunkPosition.OPEN);
+    }
+
+
+    @Test
+    public void charging_init() {
+        byte[] bytes = ByteUtils.bytesFromHex("0023010200FF32BF19999A01905A003C3F5EB85201");
+
+        com.high_mobility.HMLink.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.high_mobility.HMLink.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == ChargeState.class);
+        assertTrue(((ChargeState)command).getChargingState() == Constants.ChargingState.CHARGING);
+        assertTrue(((ChargeState)command).getEstimatedRange() == 255f);
+        assertTrue(((ChargeState)command).getBatteryLevel() == .5f);
+        assertTrue(((ChargeState)command).getChargerVoltage() == 400f);
+        assertTrue(((ChargeState)command).getChargeLimit() == .9f);
+        assertTrue(((ChargeState)command).getTimeToCompleteCharge() == 60f);
+        assertTrue(((ChargeState)command).getChargingRate() == .87f);
+        assertTrue(((ChargeState)command).getBatteryCurrent() == -.6f);
+        assertTrue(((ChargeState)command).getChargePortState() == Constants.ChargePortState.OPEN);
     }
 }

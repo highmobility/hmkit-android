@@ -1,16 +1,47 @@
 package com.high_mobility.HMLink.Command.VehicleStatus;
 
+import com.high_mobility.HMLink.Command.CommandParseException;
+import com.high_mobility.HMLink.Command.Constants;
 import com.high_mobility.HMLink.Command.VehicleFeature;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  * Created by ttiganik on 16/12/2016.
  */
 
 public class Charging extends FeatureState {
+    Constants.ChargingState chargingState;
+    float estimatedRange;
+    float batteryLevel;
+    float batteryCurrent;
 
-    Charging(byte[] bytes) {
+    Charging(byte[] bytes) throws CommandParseException {
         super(VehicleFeature.CHARGING);
 
-        // TODO:
+        if (bytes.length != 11) throw new CommandParseException();
+
+        chargingState = Constants.ChargingState.fromByte(bytes[3]);
+        estimatedRange = ((bytes[4] & 0xff) << 8) | (bytes[5] & 0xff);
+        batteryLevel = bytes[6] / 100f;
+        byte[] batteryCurrentBytes = Arrays.copyOfRange(bytes, 7, 7 + 4);
+        batteryCurrent = ByteBuffer.wrap(batteryCurrentBytes).getFloat();
+    }
+
+    public Constants.ChargingState getChargingState() {
+        return chargingState;
+    }
+
+    public float getEstimatedRange() {
+        return estimatedRange;
+    }
+
+    public float getBatteryLevel() {
+        return batteryLevel;
+    }
+
+    public float getBatteryCurrent() {
+        return batteryCurrent;
     }
 }

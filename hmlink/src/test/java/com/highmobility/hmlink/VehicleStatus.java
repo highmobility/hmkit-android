@@ -4,6 +4,7 @@ import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.CommandParseException;
 import com.high_mobility.HMLink.Command.Constants;
 import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.VehicleStatus.Charging;
 import com.high_mobility.HMLink.Command.VehicleStatus.DoorLocks;
 import com.high_mobility.HMLink.Command.VehicleStatus.FeatureState;
 import com.high_mobility.HMLink.Command.VehicleStatus.RemoteControl;
@@ -23,7 +24,7 @@ public class VehicleStatus {
     com.high_mobility.HMLink.Command.Incoming.VehicleStatus vehicleStatus;
     @Before
     public void setup() {
-        byte[] bytes = ByteUtils.bytesFromHex("0011010300200101002102000100270102"); // TODO: add new states to test
+        byte[] bytes = ByteUtils.bytesFromHex("00110104002001010021020001002701020023080200FF32bf19999a"); // TODO: add new states to test
         try {
             com.high_mobility.HMLink.Command.Incoming.IncomingCommand command = com.high_mobility.HMLink.Command.Incoming.IncomingCommand.create(bytes);
             assertTrue(command.getClass() == com.high_mobility.HMLink.Command.Incoming.VehicleStatus.class);
@@ -36,7 +37,7 @@ public class VehicleStatus {
 
     @Test
     public void states_size() {
-        assertTrue(vehicleStatus.getFeatureStates().length == 3);
+        assertTrue(vehicleStatus.getFeatureStates().length == 4);
     }
 
     @Test
@@ -108,9 +109,27 @@ public class VehicleStatus {
 
         assertTrue(state != null);
         assertTrue(state.getClass() == RemoteControl.class);
+        assertTrue(((RemoteControl)state).getState() == RemoteControl.State.STARTED);
+    }
 
-        if (state.getClass() == RemoteControl.class) {
-            assertTrue(((RemoteControl)state).getState() == RemoteControl.State.STARTED);
+    @Test
+    public void charging() {
+        FeatureState state = null;
+        for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
+            FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
+            if (iteratingState.getFeature() == VehicleFeature.CHARGING) {
+                state = iteratingState;
+                break;
+            }
         }
+
+        // TODO: add to VS byte string
+
+        assertTrue(state != null);
+        assertTrue(state.getClass() == Charging.class);
+        assertTrue(((Charging)state).getChargingState() == Constants.ChargingState.CHARGING);
+        assertTrue(((Charging)state).getEstimatedRange() == 255f);
+        assertTrue(((Charging)state).getBatteryLevel() == .5f);
+        assertTrue(((Charging)state).getBatteryCurrent() == -.6f);
     }
 }
