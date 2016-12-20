@@ -10,6 +10,7 @@ import com.high_mobility.HMLink.Command.VehicleStatus.DoorLocks;
 import com.high_mobility.HMLink.Command.VehicleStatus.FeatureState;
 import com.high_mobility.HMLink.Command.VehicleStatus.RemoteControl;
 import com.high_mobility.HMLink.Command.VehicleStatus.TrunkAccess;
+import com.high_mobility.HMLink.Command.VehicleStatus.ValetMode;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +26,16 @@ public class VehicleStatus {
     com.high_mobility.HMLink.Command.Incoming.VehicleStatus vehicleStatus;
     @Before
     public void setup() {
-        byte[] bytes = ByteUtils.bytesFromHex("00110105002001010021020001002701020023080200FF32bf19999a00240C419800004140000001000060"); // TODO: add new states to test
+        String vehicleStatusHexString = "00110107" +
+                "00200101" +
+                "0021020001" +
+                "00270102" +
+                "0023080200FF32bf19999a" +
+                "00240C419800004140000001000060" + // climate
+                "00280101" + // valet mode
+                "0030084252147d41567ab1"; // location 52.520008 13.404954
+
+        byte[] bytes = ByteUtils.bytesFromHex(vehicleStatusHexString);
 
         try {
             com.high_mobility.HMLink.Command.Incoming.IncomingCommand command = com.high_mobility.HMLink.Command.Incoming.IncomingCommand.create(bytes);
@@ -39,7 +49,7 @@ public class VehicleStatus {
 
     @Test
     public void states_size() {
-        assertTrue(vehicleStatus.getFeatureStates().length == 5);
+        assertTrue(vehicleStatus.getFeatureStates().length == 7);
     }
 
     @Test
@@ -162,5 +172,21 @@ public class VehicleStatus {
         assertTrue(autoHvacStates[0] == false);
         assertTrue(autoHvacStates[5] == true);
         assertTrue(autoHvacStates[6] == true);
+    }
+
+    @Test
+    public void valetMode() {
+        FeatureState state = null;
+        for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
+            FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
+            if (iteratingState.getFeature() == VehicleFeature.VALET_MODE) {
+                state = iteratingState;
+                break;
+            }
+        }
+
+        assertTrue(state != null);
+        assertTrue(state.getClass() == ValetMode.class);
+        assertTrue(((ValetMode)state).isActive() == true);
     }
 }

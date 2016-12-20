@@ -637,7 +637,27 @@ public class Command {
         VALET_MODE((byte)0x01),
         ACTIVATE_DEACTIVATE_VALET_MODE((byte)0x02);
 
-        // TODO:
+        /**
+         * Get the valet mode, which either activated or not. The car will respond with the Valet
+         * Mode message.
+         *
+         * @return The command bytes
+         */
+        public static byte[] getValetMode() {
+            return GET_VALET_MODE.getMessageIdentifierAndType();
+        }
+
+        /**
+         * Activate or deacticate valet mode. The result is sent through the evented Valet Mode
+         * message with either the mode Deactivated or Activated.
+         *
+         * @param activate Whether to activate the Valet Mode
+         * @return The command bytes
+         */
+        public static byte[] activateValetMode(boolean activate) {
+            return ByteUtils.concatBytes(ACTIVATE_DEACTIVATE_VALET_MODE.getMessageIdentifierAndType(),
+                    booleanByte(activate));
+        }
 
         ValetMode(byte messageType) {
             this.messageType = messageType;

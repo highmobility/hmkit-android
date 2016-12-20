@@ -13,6 +13,7 @@ import com.high_mobility.HMLink.Command.Incoming.LockState;
 import com.high_mobility.HMLink.Command.Incoming.RooftopState;
 import com.high_mobility.HMLink.Command.Incoming.TrunkState;
 import com.high_mobility.HMLink.ByteUtils;
+import com.high_mobility.HMLink.Command.Incoming.ValetMode;
 import com.high_mobility.HMLink.Command.VehicleFeature;
 import com.high_mobility.HMLink.Command.VehicleStatus.Charging;
 import com.high_mobility.HMLink.Command.VehicleStatus.Climate;
@@ -217,5 +218,21 @@ public class IncomingCommand {
         assertTrue(autoHvacStates[6].getDay() == 6);
         assertTrue(autoHvacStates[6].getStartHour() == 7);
         assertTrue(autoHvacStates[6].getStartMinute() == 31);
+    }
+
+    @Test
+    public void valetMode() {
+        byte[] bytes = ByteUtils.bytesFromHex("00280101");
+
+        com.high_mobility.HMLink.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.high_mobility.HMLink.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == ValetMode.class);
+        assertTrue(((ValetMode)command).isActive() == true);
     }
 }

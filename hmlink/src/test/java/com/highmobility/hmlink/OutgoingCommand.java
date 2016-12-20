@@ -195,4 +195,18 @@ public class OutgoingCommand {
         String commandBytes = ByteUtils.hexFromBytes(Command.Climate.startDefrost(true));
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
+
+    @Test
+    public void getValetMode() {
+        String waitingForBytes = "002800";
+        String commandBytes = ByteUtils.hexFromBytes(Command.ValetMode.getValetMode());
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void activateValetMode() {
+        String waitingForBytes = "00280201";
+        String commandBytes = ByteUtils.hexFromBytes(Command.ValetMode.activateValetMode(true));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
 }
