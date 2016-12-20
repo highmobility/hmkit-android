@@ -51,6 +51,10 @@ public class VehicleStatus extends IncomingCommand {
         }
     }
 
+    /**
+     *
+     * @return The specific states for the vehicle's features.
+     */
     public FeatureState[] getFeatureStates() {
         return featureStates;
     }

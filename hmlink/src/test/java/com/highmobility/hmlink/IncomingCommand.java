@@ -14,6 +14,7 @@ import com.high_mobility.HMLink.Command.Incoming.RooftopState;
 import com.high_mobility.HMLink.Command.Incoming.TrunkState;
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.Incoming.ValetMode;
+import com.high_mobility.HMLink.Command.Incoming.VehicleLocation;
 import com.high_mobility.HMLink.Command.VehicleFeature;
 import com.high_mobility.HMLink.Command.VehicleStatus.Charging;
 import com.high_mobility.HMLink.Command.VehicleStatus.Climate;
@@ -235,4 +236,19 @@ public class IncomingCommand {
         assertTrue(command.getClass() == ValetMode.class);
         assertTrue(((ValetMode)command).isActive() == true);
     }
+
+    @Test
+    public void location() {
+        byte[] bytes = ByteUtils.bytesFromHex("0030014252147d41567ab1");
+        com.high_mobility.HMLink.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.high_mobility.HMLink.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == VehicleLocation.class);
+        assertTrue(((VehicleLocation)command).getLatitude() == 52.520008f);
+        assertTrue(((VehicleLocation)command).getLongitude() == 13.404954f);    }
 }

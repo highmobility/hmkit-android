@@ -209,4 +209,11 @@ public class OutgoingCommand {
         String commandBytes = ByteUtils.hexFromBytes(Command.ValetMode.activateValetMode(true));
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
+
+    @Test
+    public void getLocation() {
+        String waitingForBytes = "003000";
+        String commandBytes = ByteUtils.hexFromBytes(Command.VehicleLocation.getLocation());
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
 }

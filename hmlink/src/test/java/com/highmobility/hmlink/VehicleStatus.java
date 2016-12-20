@@ -11,6 +11,7 @@ import com.high_mobility.HMLink.Command.VehicleStatus.FeatureState;
 import com.high_mobility.HMLink.Command.VehicleStatus.RemoteControl;
 import com.high_mobility.HMLink.Command.VehicleStatus.TrunkAccess;
 import com.high_mobility.HMLink.Command.VehicleStatus.ValetMode;
+import com.high_mobility.HMLink.Command.VehicleStatus.VehicleLocation;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +34,7 @@ public class VehicleStatus {
                 "0023080200FF32bf19999a" +
                 "00240C419800004140000001000060" + // climate
                 "00280101" + // valet mode
-                "0030084252147d41567ab1"; // location 52.520008 13.404954
+                "00300842561eb941567ab1"; // location 53.530003 13.404954
 
         byte[] bytes = ByteUtils.bytesFromHex(vehicleStatusHexString);
 
@@ -189,4 +190,23 @@ public class VehicleStatus {
         assertTrue(state.getClass() == ValetMode.class);
         assertTrue(((ValetMode)state).isActive() == true);
     }
+
+    @Test
+    public void vehicleLocation() {
+        FeatureState state = null;
+        for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
+            FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
+            if (iteratingState.getFeature() == VehicleFeature.VEHICLE_LOCATION) {
+                state = iteratingState;
+                break;
+            }
+        }
+
+        assertTrue(state != null);
+        assertTrue(state.getClass() == VehicleLocation.class);
+        assertTrue(((VehicleLocation)state).getLatitude() == 53.530003f);
+        assertTrue(((VehicleLocation)state).getLongitude() == 13.404954f);
+    }
+
+
 }

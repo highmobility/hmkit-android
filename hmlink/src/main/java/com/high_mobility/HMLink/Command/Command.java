@@ -717,7 +717,15 @@ public class Command {
         GET_VEHICLE_LOCATION((byte)0x00),
         VEHICLE_LOCATION((byte)0x01);
 
-        // TODO:
+        /**
+         * Get the vehicle location, which will return the latest recorded coordinates of the car.
+         * The car will respond with the Vehicle Location message.
+         *
+         * @return The command bytes
+         */
+        public static byte[] getLocation() {
+            return GET_VEHICLE_LOCATION.getMessageIdentifierAndType();
+        }
 
         VehicleLocation(byte messageType) {
             this.messageType = messageType;
