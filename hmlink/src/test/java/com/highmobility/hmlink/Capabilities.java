@@ -23,7 +23,7 @@ import static org.junit.Assert.fail;
 
 public class Capabilities {
     byte[] knownCapabilitiesBytes = ByteUtils.bytesFromHex("0010010D002001010021020300002201000023010000240201000025020101002603010101002701010028010100290100003001010031010100320101");
-    com.high_mobility.HMLink.Command.Incoming.Capabilities capabilites = null; // TODO: fix test
+    com.high_mobility.HMLink.Command.Incoming.Capabilities capabilites = null;
 
     @Before
     public void setUp() {

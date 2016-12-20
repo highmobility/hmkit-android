@@ -9,8 +9,11 @@ import java.util.Arrays;
 
 /**
  * Created by ttiganik on 16/12/2016.
+ *
+ * This message is sent when a Get Charge State message is received by the car. It is also sent
+ * when the car is plugged in, disconnected, starts or stops charging, or when the charge limit
+ * is changed.
  */
-
 public class ChargeState extends IncomingCommand {
     Constants.ChargingState chargingState;
     float estimatedRange;

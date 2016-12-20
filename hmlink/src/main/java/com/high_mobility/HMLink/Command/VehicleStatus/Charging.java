@@ -33,14 +33,26 @@ public class Charging extends FeatureState {
         return chargingState;
     }
 
+    /**
+     *
+     * @return Estimated range in km
+     */
     public float getEstimatedRange() {
         return estimatedRange;
     }
 
+    /**
+     *
+     * @return Battery level percentage
+     */
     public float getBatteryLevel() {
         return batteryLevel;
     }
 
+    /**
+     *
+     * @return Battery current
+     */
     public float getBatteryCurrent() {
         return batteryCurrent;
     }

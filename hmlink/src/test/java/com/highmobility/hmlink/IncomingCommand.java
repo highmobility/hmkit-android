@@ -1,9 +1,11 @@
 package com.highmobility.hmlink;
 
+import com.high_mobility.HMLink.Command.AutoHvacState;
 import com.high_mobility.HMLink.Command.Command;
 import com.high_mobility.HMLink.Command.CommandParseException;
 import com.high_mobility.HMLink.Command.Constants;
 import com.high_mobility.HMLink.Command.Incoming.ChargeState;
+import com.high_mobility.HMLink.Command.Incoming.ClimateState;
 import com.high_mobility.HMLink.Command.Incoming.ControlMode;
 import com.high_mobility.HMLink.Command.Incoming.DeliveredParcels;
 import com.high_mobility.HMLink.Command.Incoming.Failure;
@@ -13,6 +15,7 @@ import com.high_mobility.HMLink.Command.Incoming.TrunkState;
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.VehicleFeature;
 import com.high_mobility.HMLink.Command.VehicleStatus.Charging;
+import com.high_mobility.HMLink.Command.VehicleStatus.Climate;
 
 import org.junit.Test;
 
@@ -174,5 +177,45 @@ public class IncomingCommand {
         assertTrue(((ChargeState)command).getChargingRate() == .87f);
         assertTrue(((ChargeState)command).getBatteryCurrent() == -.6f);
         assertTrue(((ChargeState)command).getChargePortState() == Constants.ChargePortState.OPEN);
+    }
+
+    @Test
+    public void climate() {
+        byte[] bytes = ByteUtils.bytesFromHex("002401419800004140000041ac000041ac00000100006000000000000000000000071E071F");
+
+        com.high_mobility.HMLink.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.high_mobility.HMLink.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == ClimateState.class);
+        assertTrue(((ClimateState)command).getInsideTemperature() == 19f);
+        assertTrue(((ClimateState)command).getOutsideTemperature() == 12f);
+        assertTrue(((ClimateState)command).getDriverTemperatureSetting() == 21.5f);
+        assertTrue(((ClimateState)command).getPassengerTemperatureSetting() == 21.5f);
+
+        assertTrue(((ClimateState)command).isHvacActive() == true);
+        assertTrue(((ClimateState)command).isDefoggingActive() == false);
+        assertTrue(((ClimateState)command).isDefrostingActive() == false);
+
+        assertTrue(((ClimateState)command).isAutoHvacConstant() == false);
+        AutoHvacState[] autoHvacStates = ((ClimateState)command).getAutoHvacStates();
+        assertTrue(autoHvacStates != null);
+        assertTrue(autoHvacStates.length == 7);
+
+        assertTrue(autoHvacStates[0].isActive() == false);
+
+        assertTrue(autoHvacStates[5].isActive() == true);
+        assertTrue(autoHvacStates[5].getDay() == 5);
+        assertTrue(autoHvacStates[5].getStartHour() == 7);
+        assertTrue(autoHvacStates[5].getStartMinute() == 30);
+
+        assertTrue(autoHvacStates[6].isActive() == true);
+        assertTrue(autoHvacStates[6].getDay() == 6);
+        assertTrue(autoHvacStates[6].getStartHour() == 7);
+        assertTrue(autoHvacStates[6].getStartMinute() == 31);
     }
 }

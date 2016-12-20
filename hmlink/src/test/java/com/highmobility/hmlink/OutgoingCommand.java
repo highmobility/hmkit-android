@@ -1,5 +1,6 @@
 package com.highmobility.hmlink;
 
+import com.high_mobility.HMLink.Command.AutoHvacState;
 import com.high_mobility.HMLink.Command.Command;
 import com.high_mobility.HMLink.Command.Constants;
 import com.high_mobility.HMLink.Command.Incoming.*;
@@ -131,7 +132,12 @@ public class OutgoingCommand {
 
     @Test(expected=IllegalArgumentException.class)
     public void honkFlashInvalidParameter() {
-        ByteUtils.hexFromBytes(Command.HonkFlash.honkFlash(0, 0));
+        ByteUtils.hexFromBytes(Command.HonkFlash.honkFlash(6, 11));
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void honkFlashInvalidParameterTwo() {
+        ByteUtils.hexFromBytes(Command.HonkFlash.honkFlash(-1, -1));
     }
 
     @Test
@@ -139,5 +145,54 @@ public class OutgoingCommand {
         String waitingForBytes = "00260101";
         String commandBytes = ByteUtils.hexFromBytes(Command.HonkFlash.startEmergencyFlasher(true));
         assertTrue(waitingForBytes.equals(commandBytes));
+    }
+
+    @Test
+    public void getClimateState() {
+        String waitingForBytes = "002400";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Climate.getClimateState());
+        assertTrue(waitingForBytes.equals(commandBytes));
+    }
+
+    @Test
+    public void setClimateProfile() {
+        String waitingForBytes = "0024026000000000000000000000071E071E41ac000041ac0000";
+        AutoHvacState[] states = new AutoHvacState[7];
+        for (int i = 0; i < 7; i++) {
+            AutoHvacState state;
+            if (i < 5)
+                state = new AutoHvacState(false, i, 0, 0);
+            else
+                state = new AutoHvacState(true, i, 7, 30);
+
+            states[i] = state;
+        }
+
+        boolean autoHvacConstant = false;
+        float driverTemp = 21.5f;
+        float passengerTemp = 21.5f;
+        String commandBytes = ByteUtils.hexFromBytes(Command.Climate.setClimateProfile(states, autoHvacConstant, driverTemp, passengerTemp));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void startStopHVAC() {
+        String waitingForBytes = "00240301";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Climate.startHvac(true));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void startStopDefog() {
+        String waitingForBytes = "00240401";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Climate.startDefog(true));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void startStopDefrost() {
+        String waitingForBytes = "00240501";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Climate.startDefrost(true));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
 }

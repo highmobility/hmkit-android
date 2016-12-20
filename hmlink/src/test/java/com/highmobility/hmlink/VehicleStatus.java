@@ -5,6 +5,7 @@ import com.high_mobility.HMLink.Command.CommandParseException;
 import com.high_mobility.HMLink.Command.Constants;
 import com.high_mobility.HMLink.Command.VehicleFeature;
 import com.high_mobility.HMLink.Command.VehicleStatus.Charging;
+import com.high_mobility.HMLink.Command.VehicleStatus.Climate;
 import com.high_mobility.HMLink.Command.VehicleStatus.DoorLocks;
 import com.high_mobility.HMLink.Command.VehicleStatus.FeatureState;
 import com.high_mobility.HMLink.Command.VehicleStatus.RemoteControl;
@@ -24,7 +25,8 @@ public class VehicleStatus {
     com.high_mobility.HMLink.Command.Incoming.VehicleStatus vehicleStatus;
     @Before
     public void setup() {
-        byte[] bytes = ByteUtils.bytesFromHex("00110104002001010021020001002701020023080200FF32bf19999a"); // TODO: add new states to test
+        byte[] bytes = ByteUtils.bytesFromHex("00110105002001010021020001002701020023080200FF32bf19999a00240C419800004140000001000060"); // TODO: add new states to test
+
         try {
             com.high_mobility.HMLink.Command.Incoming.IncomingCommand command = com.high_mobility.HMLink.Command.Incoming.IncomingCommand.create(bytes);
             assertTrue(command.getClass() == com.high_mobility.HMLink.Command.Incoming.VehicleStatus.class);
@@ -37,7 +39,7 @@ public class VehicleStatus {
 
     @Test
     public void states_size() {
-        assertTrue(vehicleStatus.getFeatureStates().length == 4);
+        assertTrue(vehicleStatus.getFeatureStates().length == 5);
     }
 
     @Test
@@ -123,13 +125,42 @@ public class VehicleStatus {
             }
         }
 
-        // TODO: add to VS byte string
-
         assertTrue(state != null);
         assertTrue(state.getClass() == Charging.class);
         assertTrue(((Charging)state).getChargingState() == Constants.ChargingState.CHARGING);
         assertTrue(((Charging)state).getEstimatedRange() == 255f);
         assertTrue(((Charging)state).getBatteryLevel() == .5f);
         assertTrue(((Charging)state).getBatteryCurrent() == -.6f);
+    }
+
+    @Test
+    public void climate() {
+        FeatureState state = null;
+        for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
+            FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
+            if (iteratingState.getFeature() == VehicleFeature.CLIMATE) {
+                state = iteratingState;
+                break;
+            }
+        }
+
+        assertTrue(state != null);
+        assertTrue(state.getClass() == Climate.class);
+
+        assertTrue(((Climate)state).getInsideTemperature() == 19f);
+        assertTrue(((Climate)state).getOutsideTemperature() == 12f);
+
+        assertTrue(((Climate)state).isHvacActive() == true);
+        assertTrue(((Climate)state).isDefoggingActive() == false);
+        assertTrue(((Climate)state).isDefrostingActive() == false);
+        assertTrue(((Climate)state).isAutoHvacConstant() == false);
+
+        boolean[] autoHvacStates = ((Climate)state).getHvacActiveOnDays();
+        assertTrue(autoHvacStates != null);
+        assertTrue(autoHvacStates.length == 7);
+
+        assertTrue(autoHvacStates[0] == false);
+        assertTrue(autoHvacStates[5] == true);
+        assertTrue(autoHvacStates[6] == true);
     }
 }

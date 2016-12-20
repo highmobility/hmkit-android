@@ -149,7 +149,7 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] lockDoors(boolean lock) {
-            return ByteUtils.concatBytes(LOCK_UNLOCK.getMessageIdentifierAndType(), (byte)(lock ? 0x01 : 0x00));
+            return ByteUtils.concatBytes(LOCK_UNLOCK.getMessageIdentifierAndType(), booleanByte(lock));
         }
 
         DoorLocks(byte messageType) {
@@ -289,10 +289,16 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] startCharging(boolean start) {
-            byte chargingByte = (byte)(start == true ? 0x01 : 0x00);
-            return ByteUtils.concatBytes(START_STOP_CHARGING.getMessageIdentifierAndType(), chargingByte);
+            return ByteUtils.concatBytes(START_STOP_CHARGING.getMessageIdentifierAndType(), booleanByte(start));
         }
 
+        /**
+         * Set the charge limit, to which point the car will charge itself. The result is sent
+         * through the evented Charge State message.
+         *
+         * @param limit The charge limit as percentage between 0-1
+         * @return the command bytes
+         */
         public static byte[] setChargeLimit(float limit) {
             byte limitByte = (byte)(int)(limit * 100);
             return ByteUtils.concatBytes(SET_CHARGE_LIMIT.getMessageIdentifierAndType(), limitByte);
@@ -325,10 +331,8 @@ public class Command {
         CLIMATE_STATE((byte)0x01),
         SET_CLIMATE_PROFILE((byte)0x02),
         START_STOP_HVAC((byte)0x03),
-        START_STOP_DEFOGGING((byte)0x02),
-        START_STOP_DEFROSTING((byte)0x03);
-
-        // TODO:
+        START_STOP_DEFOGGING((byte)0x04),
+        START_STOP_DEFROSTING((byte)0x05);
 
         Climate(byte messageType) {
             this.messageType = messageType;
@@ -346,6 +350,91 @@ public class Command {
         @Override
         public byte[] getMessageIdentifierAndType() {
             return ByteUtils.concatBytes(getMessageIdentifier(), getMessageType());
+        }
+
+        /**
+         * Get the climate state. The car will respond with the Climate State message.
+         *
+         * @return The command bytes
+         */
+        public static byte[] getClimateState() {
+            return GET_CLIMATE_STATE.getMessageIdentifierAndType();
+        }
+
+        /**
+         * Set the climate profile. The result is sent through the evented Climate State message
+         * with either the state.
+         *
+         * @param states The Auto HVAC states for every weekday. State is expected even if the HVAC
+         *               is not active on that day.
+         * @param autoHvacConstant Whether the auto HVAC is constant
+         * @param driverTemperature The driver temperature in Celsius // TODO: what is the limit? test as well
+         * @param passengerTemperature The passenger temperature in Celsius
+         * @return The command bytes
+         * @throws IllegalArgumentException When the input is incorrect
+         */
+        public static byte[] setClimateProfile(AutoHvacState[] states,
+                                               boolean autoHvacConstant,
+                                               float driverTemperature,
+                                               float passengerTemperature) throws IllegalArgumentException {
+            if (states.length != 7) throw new IllegalArgumentException();
+            byte[] command = new byte[26];
+            ByteUtils.setBytes(command, SET_CLIMATE_PROFILE.getMessageIdentifierAndType(), 0);
+
+            byte autoHvacDatesByte = 0x00;
+            for (int i = 0; i < 7; i++) {
+                if (states[i].isActive()) {
+                    autoHvacDatesByte = (byte) (autoHvacDatesByte | (1 << i));
+
+                }
+
+                command[4 + i * 2] = (byte)states[i].getStartHour();
+                command[4 + i * 2 + 1] = (byte)states[i].getStartMinute();
+            }
+            if (autoHvacConstant) autoHvacDatesByte = (byte)(autoHvacDatesByte | (1 << 7));
+            command[3] = autoHvacDatesByte;
+
+            byte[] driverTempByte = ByteBuffer.allocate(4).putFloat(driverTemperature).array();
+            ByteUtils.setBytes(command, driverTempByte, 18);
+
+            byte[] passengerTempByte = ByteBuffer.allocate(4).putFloat(passengerTemperature).array();
+            ByteUtils.setBytes(command, passengerTempByte, 22);
+
+            return command;
+        }
+
+        /**
+         * Start or stop the HVAC system to reach driver and passenger set temperatures. The car
+         * will use cooling, defrosting and defogging as appropriate. The result is sent through
+         * the evented Climate State message.
+         *
+         * @param start Whether to start the HVAC
+         * @return The command bytes
+         */
+        public static byte[] startHvac(boolean start) {
+            return ByteUtils.concatBytes(START_STOP_HVAC.getMessageIdentifierAndType(), booleanByte(start));
+        }
+
+        /**
+         * Manually start or stop defogging. The result is sent through the evented Climate State
+         * message.
+         *
+         * @param start Whether to start the defog
+         * @return The command bytes
+         */
+        public static byte[] startDefog(boolean start) {
+            return ByteUtils.concatBytes(START_STOP_DEFOGGING.getMessageIdentifierAndType(), booleanByte(start));
+        }
+
+        /**
+         * Manually start or stop defrosting. The result is sent through the evented Climate State
+         * message.
+         *
+         * @param start Whether to start the defrost
+         * @return The command bytes
+         */
+        public static byte[] startDefrost(boolean start) {
+            return ByteUtils.concatBytes(START_STOP_DEFROSTING.getMessageIdentifierAndType(), booleanByte(start));
         }
     }
 
@@ -418,14 +507,14 @@ public class Command {
          * action at the time. It is also possible to pass in how many times the lights should
          * be flashed and how many seconds the horn should be honked.
          *
-         * @param seconds how many seconds the horn should be honked, between 1 and 5
-         * @param lightFlashCount how many times the light should be flashed, between 1 and 10
+         * @param seconds how many seconds the horn should be honked, between 0 and 5
+         * @param lightFlashCount how many times the light should be flashed, between 0 and 10
          * @return the command bytes
          * @throws IllegalArgumentException when the seconds or lightCount parameter is not in the
          * valid range
          */
         public static byte[] honkFlash(int seconds, int lightFlashCount) throws IllegalArgumentException {
-            if (seconds < 1 || seconds > 5 || lightFlashCount < 1 || lightFlashCount > 10) { // TODO: verify
+            if (seconds < 0 || seconds > 5 || lightFlashCount < 0 || lightFlashCount > 10) {
                 throw new IllegalArgumentException();
             }
 
@@ -443,8 +532,7 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] startEmergencyFlasher(boolean start) {
-            byte startByte = (byte)(start == true ? 0x01 : 0x00);
-            return ByteUtils.concatBytes(EMERGENCY_FLASHER.getMessageIdentifierAndType(), startByte);
+            return ByteUtils.concatBytes(EMERGENCY_FLASHER.getMessageIdentifierAndType(), booleanByte(start));
         }
 
         HonkFlash(byte messageType) {
@@ -711,5 +799,9 @@ public class Command {
         public byte[] getMessageIdentifierAndType() {
             return ByteUtils.concatBytes(getMessageIdentifier(), getMessageType());
         }
+    }
+
+    static byte booleanByte(boolean value) {
+        return (byte)(value == true ? 0x01 : 0x00);
     }
 }

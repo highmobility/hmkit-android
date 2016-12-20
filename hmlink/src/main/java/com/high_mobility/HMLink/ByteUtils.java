@@ -1,5 +1,7 @@
 package com.high_mobility.HMLink;
 
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
@@ -50,6 +52,13 @@ public class ByteUtils {
         return c;
     }
 
+    public static void setBytes(byte[] inArray, byte[] toBytes, int offset) {
+        for (int i = offset; i < offset + toBytes.length; i++) {
+            if (i > inArray.length - 1) return;
+            inArray[offset + (i - offset)] = toBytes[i - offset];
+        }
+    }
+
     /**
      * Does this byte array begin with match array content?
      *
@@ -86,6 +95,10 @@ public class ByteUtils {
             }
         }
         return true;
+    }
+
+    public static boolean getBit(int n, int k) {
+        return ((n >> k) & 1) == 1;
     }
 
     static UUID UUIDFromByteArray(byte[] bytes) {
