@@ -2,6 +2,7 @@ package com.high_mobility.HMLink.Command.Incoming;
 
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.AutoHvacState;
+import com.high_mobility.HMLink.Command.CommandParseException;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -24,8 +25,10 @@ public class ClimateState extends IncomingCommand {
     boolean autoHvacConstant;
     AutoHvacState[] autoHvacStates;
 
-    ClimateState(byte[] bytes) {
+    ClimateState(byte[] bytes) throws CommandParseException {
         super(bytes);
+
+        if (bytes.length != 37) throw new CommandParseException();
 
         insideTemperature = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 3, 3 + 4)).getFloat();
         outsideTemperature = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 7, 7 + 4)).getFloat();

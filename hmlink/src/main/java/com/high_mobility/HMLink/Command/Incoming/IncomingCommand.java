@@ -3,6 +3,7 @@ package com.high_mobility.HMLink.Command.Incoming;
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.Command;
 import com.high_mobility.HMLink.Command.CommandParseException;
+import com.high_mobility.HMLink.Command.VehicleFeature;
 
 import java.util.Arrays;
 
@@ -60,19 +61,19 @@ public class IncomingCommand {
         }
     }
 
-    byte[] identifier = new byte[2];
+    VehicleFeature feature;
     byte type;
     byte[] bytes;
 
-    IncomingCommand(byte[] bytes) {
+    IncomingCommand(byte[] bytes) throws CommandParseException {
+        if (bytes.length < 3) throw new CommandParseException();
         this.bytes = bytes;
-        identifier[0] = bytes[0];
-        identifier[1] = bytes[1];
+        feature = VehicleFeature.fromIdentifier(bytes);
         type = bytes[2];
     }
 
-    public byte[] getIdentifier() {
-        return identifier;
+    public VehicleFeature getFeature() {
+        return feature;
     }
 
     public byte getType() {
@@ -80,7 +81,7 @@ public class IncomingCommand {
     }
 
     public byte[] getIdentifierAndType() {
-        return ByteUtils.concatBytes(identifier, type);
+        return ByteUtils.concatBytes(feature.getIdentifier(), type);
     }
 
     public byte[] getBytes() {
@@ -88,7 +89,7 @@ public class IncomingCommand {
     }
 
     public boolean is(Command.Type type) {
-        if (Arrays.equals(getIdentifier(), type.getMessageIdentifierAndType())) {
+        if (Arrays.equals(getIdentifierAndType(), type.getMessageIdentifierAndType())) {
             return true;
         }
 
