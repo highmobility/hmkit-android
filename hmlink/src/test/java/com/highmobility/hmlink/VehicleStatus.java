@@ -9,6 +9,7 @@ import com.high_mobility.HMLink.Command.VehicleStatus.Climate;
 import com.high_mobility.HMLink.Command.VehicleStatus.DoorLocks;
 import com.high_mobility.HMLink.Command.VehicleStatus.FeatureState;
 import com.high_mobility.HMLink.Command.VehicleStatus.RemoteControl;
+import com.high_mobility.HMLink.Command.VehicleStatus.RooftopState;
 import com.high_mobility.HMLink.Command.VehicleStatus.TrunkAccess;
 import com.high_mobility.HMLink.Command.VehicleStatus.ValetMode;
 import com.high_mobility.HMLink.Command.VehicleStatus.VehicleLocation;
@@ -27,12 +28,13 @@ public class VehicleStatus {
     com.high_mobility.HMLink.Command.Incoming.VehicleStatus vehicleStatus;
     @Before
     public void setup() {
-        String vehicleStatusHexString = "00110107" +
+        String vehicleStatusHexString = "00110108" +
                 "00200101" +
                 "0021020001" +
-                "00270102" +
                 "0023080200FF32bf19999a" +
                 "00240C419800004140000001000060" + // climate
+                "0025020135" + // rooftop state
+                "00270102" +
                 "00280101" + // valet mode
                 "00300842561eb941567ab1"; // location 53.530003 13.404954
 
@@ -50,7 +52,7 @@ public class VehicleStatus {
 
     @Test
     public void states_size() {
-        assertTrue(vehicleStatus.getFeatureStates().length == 7);
+        assertTrue(vehicleStatus.getFeatureStates().length == 8);
     }
 
     @Test
@@ -208,5 +210,20 @@ public class VehicleStatus {
         assertTrue(((VehicleLocation)state).getLongitude() == 13.404954f);
     }
 
+    @Test
+    public void rooftopState() {
+        FeatureState state = null;
+        for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
+            FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
+            if (iteratingState.getFeature() == VehicleFeature.ROOFTOP) {
+                state = iteratingState;
+                break;
+            }
+        }
 
+        assertTrue(state != null);
+        assertTrue(state.getClass() == RooftopState.class);
+        assertTrue(((RooftopState)state).getDimmingPercentage() == .01f);
+        assertTrue(((RooftopState)state).getOpenPercentage() == .53f);
+    }
 }

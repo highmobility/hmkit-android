@@ -8,6 +8,7 @@ import static com.high_mobility.HMLink.Command.VehicleFeature.CHARGING;
 import static com.high_mobility.HMLink.Command.VehicleFeature.CLIMATE;
 import static com.high_mobility.HMLink.Command.VehicleFeature.DOOR_LOCKS;
 import static com.high_mobility.HMLink.Command.VehicleFeature.REMOTE_CONTROL;
+import static com.high_mobility.HMLink.Command.VehicleFeature.ROOFTOP;
 import static com.high_mobility.HMLink.Command.VehicleFeature.TRUNK_ACCESS;
 import static com.high_mobility.HMLink.Command.VehicleFeature.VALET_MODE;
 import static com.high_mobility.HMLink.Command.VehicleFeature.VEHICLE_LOCATION;
@@ -34,6 +35,7 @@ public class FeatureState {
         if (feature == CLIMATE) return new Climate(bytes);
         if (feature == VEHICLE_LOCATION) return new VehicleLocation(bytes);
         if (feature == VALET_MODE) return new ValetMode(bytes);
+        if (feature == ROOFTOP) return new RooftopState(bytes);
 
         return null;
     }

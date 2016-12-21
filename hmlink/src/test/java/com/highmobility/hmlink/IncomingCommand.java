@@ -15,9 +15,6 @@ import com.high_mobility.HMLink.Command.Incoming.TrunkState;
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.Incoming.ValetMode;
 import com.high_mobility.HMLink.Command.Incoming.VehicleLocation;
-import com.high_mobility.HMLink.Command.VehicleFeature;
-import com.high_mobility.HMLink.Command.VehicleStatus.Charging;
-import com.high_mobility.HMLink.Command.VehicleStatus.Climate;
 
 import org.junit.Test;
 
