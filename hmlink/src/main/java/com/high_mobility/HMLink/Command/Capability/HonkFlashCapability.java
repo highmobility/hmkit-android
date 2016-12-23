@@ -1,7 +1,7 @@
 package com.high_mobility.HMLink.Command.Capability;
 
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.Command.Identifier;
 
 /**
  * Created by ttiganik on 13/12/2016.
@@ -25,7 +25,7 @@ public class HonkFlashCapability extends FeatureCapability {
     }
 
     public HonkFlashCapability(byte[] bytes) throws CommandParseException {
-        super(VehicleFeature.HONK_FLASH);
+        super(Identifier.HONK_FLASH);
         if (bytes.length != 6) throw new CommandParseException();
         honkHornCapability = AvailableCapability.Capability.fromByte(bytes[3]);
         flashLightsCapability = AvailableCapability.Capability.fromByte(bytes[4]);

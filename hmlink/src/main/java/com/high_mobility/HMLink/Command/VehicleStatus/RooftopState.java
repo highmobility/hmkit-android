@@ -1,7 +1,7 @@
 package com.high_mobility.HMLink.Command.VehicleStatus;
 
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.Command.Identifier;
 
 /**
  * Created by ttiganik on 21/12/2016.
@@ -15,7 +15,7 @@ public class RooftopState extends FeatureState {
     float openPercentage;
 
     RooftopState(byte[] bytes) throws CommandParseException {
-        super(VehicleFeature.ROOFTOP);
+        super(Identifier.ROOFTOP);
 
         if (bytes.length != 5) throw new CommandParseException();
 

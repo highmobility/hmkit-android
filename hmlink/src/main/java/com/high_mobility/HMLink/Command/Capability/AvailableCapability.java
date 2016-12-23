@@ -1,6 +1,6 @@
 package com.high_mobility.HMLink.Command.Capability;
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.Command.Identifier;
 
 /**
  * Created by ttiganik on 12/12/2016.
@@ -26,7 +26,7 @@ public class AvailableCapability extends FeatureCapability {
         return capability;
     }
 
-    public AvailableCapability(VehicleFeature feature, byte[] bytes) throws CommandParseException {
+    public AvailableCapability(Identifier feature, byte[] bytes) throws CommandParseException {
         super(feature);
         if (bytes.length != 4) throw new CommandParseException();
         capability = Capability.fromByte(bytes[3]);

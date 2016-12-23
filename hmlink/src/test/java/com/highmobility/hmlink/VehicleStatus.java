@@ -3,7 +3,7 @@ package com.highmobility.hmlink;
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.CommandParseException;
 import com.high_mobility.HMLink.Command.Constants;
-import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.Command.Identifier;
 import com.high_mobility.HMLink.Command.VehicleStatus.Charging;
 import com.high_mobility.HMLink.Command.VehicleStatus.Climate;
 import com.high_mobility.HMLink.Command.VehicleStatus.DoorLocks;
@@ -77,7 +77,7 @@ public class VehicleStatus {
         FeatureState state = null;
         for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
             FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
-            if (iteratingState.getFeature() == VehicleFeature.DOOR_LOCKS) {
+            if (iteratingState.getFeature() == Identifier.DOOR_LOCKS) {
                 state = iteratingState;
                 break;
             }
@@ -96,7 +96,7 @@ public class VehicleStatus {
         FeatureState state = null;
         for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
             FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
-            if (iteratingState.getFeature() == VehicleFeature.TRUNK_ACCESS) {
+            if (iteratingState.getFeature() == Identifier.TRUNK_ACCESS) {
                 state = iteratingState;
                 break;
             }
@@ -116,7 +116,7 @@ public class VehicleStatus {
         FeatureState state = null;
         for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
             FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
-            if (iteratingState.getFeature() == VehicleFeature.REMOTE_CONTROL) {
+            if (iteratingState.getFeature() == Identifier.REMOTE_CONTROL) {
                 state = iteratingState;
                 break;
             }
@@ -132,7 +132,7 @@ public class VehicleStatus {
         FeatureState state = null;
         for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
             FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
-            if (iteratingState.getFeature() == VehicleFeature.CHARGING) {
+            if (iteratingState.getFeature() == Identifier.CHARGING) {
                 state = iteratingState;
                 break;
             }
@@ -151,7 +151,7 @@ public class VehicleStatus {
         FeatureState state = null;
         for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
             FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
-            if (iteratingState.getFeature() == VehicleFeature.CLIMATE) {
+            if (iteratingState.getFeature() == Identifier.CLIMATE) {
                 state = iteratingState;
                 break;
             }
@@ -182,7 +182,7 @@ public class VehicleStatus {
         FeatureState state = null;
         for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
             FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
-            if (iteratingState.getFeature() == VehicleFeature.VALET_MODE) {
+            if (iteratingState.getFeature() == Identifier.VALET_MODE) {
                 state = iteratingState;
                 break;
             }
@@ -198,7 +198,7 @@ public class VehicleStatus {
         FeatureState state = null;
         for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
             FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
-            if (iteratingState.getFeature() == VehicleFeature.VEHICLE_LOCATION) {
+            if (iteratingState.getFeature() == Identifier.VEHICLE_LOCATION) {
                 state = iteratingState;
                 break;
             }
@@ -215,7 +215,7 @@ public class VehicleStatus {
         FeatureState state = null;
         for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
             FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
-            if (iteratingState.getFeature() == VehicleFeature.ROOFTOP) {
+            if (iteratingState.getFeature() == Identifier.ROOFTOP) {
                 state = iteratingState;
                 break;
             }

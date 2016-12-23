@@ -1,7 +1,7 @@
 package com.high_mobility.HMLink.Command.Capability;
 
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.Command.Identifier;
 
 /**
  * Created by ttiganik on 12/12/2016.
@@ -35,7 +35,7 @@ public class ClimateCapability extends FeatureCapability {
     }
 
     public ClimateCapability(byte[] bytes) throws CommandParseException {
-        super(VehicleFeature.CLIMATE);
+        super(Identifier.CLIMATE);
 
         if (bytes.length != 5) throw new CommandParseException();
 

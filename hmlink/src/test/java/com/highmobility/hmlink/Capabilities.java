@@ -9,7 +9,7 @@ import com.high_mobility.HMLink.Command.Capability.HonkFlashCapability;
 import com.high_mobility.HMLink.Command.Capability.RooftopCapability;
 import com.high_mobility.HMLink.Command.Capability.TrunkAccessCapability;
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.Command.Identifier;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -65,7 +65,7 @@ public class Capabilities {
         FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
             FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
-            if (iteratingFeatureCapability.getFeature() == VehicleFeature.DOOR_LOCKS) {
+            if (iteratingFeatureCapability.getFeature() == Identifier.DOOR_LOCKS) {
                 featureCapability = iteratingFeatureCapability;
                 break;
             }
@@ -83,7 +83,7 @@ public class Capabilities {
         FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
             FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
-            if (iteratingFeatureCapability.getFeature() == VehicleFeature.TRUNK_ACCESS) {
+            if (iteratingFeatureCapability.getFeature() == Identifier.TRUNK_ACCESS) {
                 featureCapability = iteratingFeatureCapability;
                 break;
             }
@@ -102,7 +102,7 @@ public class Capabilities {
         FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
             FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
-            if (iteratingFeatureCapability.getFeature() == VehicleFeature.WAKE_UP) {
+            if (iteratingFeatureCapability.getFeature() == Identifier.WAKE_UP) {
                 featureCapability = iteratingFeatureCapability;
                 break;
             }
@@ -120,7 +120,7 @@ public class Capabilities {
         FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
             FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
-            if (iteratingFeatureCapability.getFeature() == VehicleFeature.CHARGING) {
+            if (iteratingFeatureCapability.getFeature() == Identifier.CHARGING) {
                 featureCapability = iteratingFeatureCapability;
                 break;
             }
@@ -138,7 +138,7 @@ public class Capabilities {
         FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
             FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
-            if (iteratingFeatureCapability.getFeature() == VehicleFeature.CLIMATE) {
+            if (iteratingFeatureCapability.getFeature() == Identifier.CLIMATE) {
                 featureCapability = iteratingFeatureCapability;
                 break;
             }
@@ -157,7 +157,7 @@ public class Capabilities {
         FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
             FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
-            if (iteratingFeatureCapability.getFeature() == VehicleFeature.ROOFTOP) {
+            if (iteratingFeatureCapability.getFeature() == Identifier.ROOFTOP) {
                 featureCapability = iteratingFeatureCapability;
                 break;
             }
@@ -176,7 +176,7 @@ public class Capabilities {
         FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
             FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
-            if (iteratingFeatureCapability.getFeature() == VehicleFeature.HONK_FLASH) {
+            if (iteratingFeatureCapability.getFeature() == Identifier.HONK_FLASH) {
                 featureCapability = iteratingFeatureCapability;
                 break;
             }
@@ -196,7 +196,7 @@ public class Capabilities {
         FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
             FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
-            if (iteratingFeatureCapability.getFeature() == VehicleFeature.REMOTE_CONTROL) {
+            if (iteratingFeatureCapability.getFeature() == Identifier.REMOTE_CONTROL) {
                 featureCapability = iteratingFeatureCapability;
                 break;
             }
@@ -214,7 +214,7 @@ public class Capabilities {
         FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
             FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
-            if (iteratingFeatureCapability.getFeature() == VehicleFeature.VALET_MODE) {
+            if (iteratingFeatureCapability.getFeature() == Identifier.VALET_MODE) {
                 featureCapability = iteratingFeatureCapability;
                 break;
             }
@@ -232,7 +232,7 @@ public class Capabilities {
         FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
             FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
-            if (iteratingFeatureCapability.getFeature() == VehicleFeature.HEART_RATE) {
+            if (iteratingFeatureCapability.getFeature() == Identifier.HEART_RATE) {
                 featureCapability = iteratingFeatureCapability;
                 break;
             }
@@ -250,7 +250,7 @@ public class Capabilities {
         FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
             FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
-            if (iteratingFeatureCapability.getFeature() == VehicleFeature.VEHICLE_LOCATION) {
+            if (iteratingFeatureCapability.getFeature() == Identifier.VEHICLE_LOCATION) {
                 featureCapability = iteratingFeatureCapability;
                 break;
             }
@@ -268,7 +268,7 @@ public class Capabilities {
         FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
             FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
-            if (iteratingFeatureCapability.getFeature() == VehicleFeature.NAVI_DESTINATION) {
+            if (iteratingFeatureCapability.getFeature() == Identifier.NAVI_DESTINATION) {
                 featureCapability = iteratingFeatureCapability;
                 break;
             }
@@ -286,7 +286,7 @@ public class Capabilities {
         FeatureCapability featureCapability = null;
         for (int i = 0; i < capabilites.getCapabilites().length; i++) {
             FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
-            if (iteratingFeatureCapability.getFeature() == VehicleFeature.DELIVERED_PARCELS) {
+            if (iteratingFeatureCapability.getFeature() == Identifier.DELIVERED_PARCELS) {
                 featureCapability = iteratingFeatureCapability;
                 break;
             }

@@ -1,7 +1,7 @@
 package com.high_mobility.HMLink.Command.VehicleStatus;
 
 import com.high_mobility.HMLink.ByteUtils;
-import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.Command.Identifier;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -22,7 +22,7 @@ public class Climate extends FeatureState {
     boolean[] hvacActiveOnDays;
 
     Climate(byte[] bytes) {
-        super(VehicleFeature.CLIMATE);
+        super(Identifier.CLIMATE);
 
         insideTemperature = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 3, 3 + 4)).getFloat();
         outsideTemperature = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 7, 7 + 4)).getFloat();

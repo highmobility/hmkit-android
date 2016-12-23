@@ -3,7 +3,6 @@ package com.high_mobility.HMLink.Command.Incoming;
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.Command;
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.VehicleFeature;
 
 import java.util.Arrays;
 
@@ -13,43 +12,43 @@ import java.util.Arrays;
 public class IncomingCommand {
     public static IncomingCommand create(byte[] bytes) throws CommandParseException {
         if (bytes.length > 2) {
-            if (ByteUtils.startsWith(bytes, Command.Capabilities.CAPABILITIES.getMessageIdentifierAndType())) {
+            if (ByteUtils.startsWith(bytes, Command.Capabilities.CAPABILITIES.getIdentifierAndType())) {
                 return new Capabilities(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.Capabilities.CAPABILITY.getMessageIdentifierAndType())) {
+            else if (ByteUtils.startsWith(bytes, Command.Capabilities.CAPABILITY.getIdentifierAndType())) {
                 return new Capability(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.VehicleStatus.VEHICLE_STATUS.getMessageIdentifierAndType())) {
+            else if (ByteUtils.startsWith(bytes, Command.VehicleStatus.VEHICLE_STATUS.getIdentifierAndType())) {
                 return new VehicleStatus(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.DoorLocks.LOCK_STATE.getMessageIdentifierAndType())) {
+            else if (ByteUtils.startsWith(bytes, Command.DoorLocks.LOCK_STATE.getIdentifierAndType())) {
                 return new LockState(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.TrunkAccess.TRUNK_STATE.getMessageIdentifierAndType())) {
+            else if (ByteUtils.startsWith(bytes, Command.TrunkAccess.TRUNK_STATE.getIdentifierAndType())) {
                 return new TrunkState(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.Charging.CHARGE_STATE.getMessageIdentifierAndType())) {
+            else if (ByteUtils.startsWith(bytes, Command.Charging.CHARGE_STATE.getIdentifierAndType())) {
                 return new ChargeState(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.Climate.CLIMATE_STATE.getMessageIdentifierAndType())) {
+            else if (ByteUtils.startsWith(bytes, Command.Climate.CLIMATE_STATE.getIdentifierAndType())) {
                 return new ClimateState(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.RooftopControl.ROOFTOP_STATE.getMessageIdentifierAndType())) {
+            else if (ByteUtils.startsWith(bytes, Command.RooftopControl.ROOFTOP_STATE.getIdentifierAndType())) {
                 return new RooftopState(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.RemoteControl.CONTROL_MODE.getMessageIdentifierAndType())) {
+            else if (ByteUtils.startsWith(bytes, Command.RemoteControl.CONTROL_MODE.getIdentifierAndType())) {
                 return new ControlMode(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.ValetMode.VALET_MODE.getMessageIdentifierAndType())) {
+            else if (ByteUtils.startsWith(bytes, Command.ValetMode.VALET_MODE.getIdentifierAndType())) {
                 return new ValetMode(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.VehicleLocation.VEHICLE_LOCATION.getMessageIdentifierAndType())) {
+            else if (ByteUtils.startsWith(bytes, Command.VehicleLocation.VEHICLE_LOCATION.getIdentifierAndType())) {
                 return new VehicleLocation(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.DeliveredParcels.DELIVERED_PARCELS.getMessageIdentifierAndType())) {
+            else if (ByteUtils.startsWith(bytes, Command.DeliveredParcels.DELIVERED_PARCELS.getIdentifierAndType())) {
                 return new DeliveredParcels(bytes);
             }
-            else if (ByteUtils.startsWith(bytes, Command.FailureMessage.FAILURE_MESSAGE.getMessageIdentifierAndType())) {
+            else if (ByteUtils.startsWith(bytes, Command.FailureMessage.FAILURE_MESSAGE.getIdentifierAndType())) {
                 return new Failure(bytes);
             }
             else {
@@ -61,35 +60,40 @@ public class IncomingCommand {
         }
     }
 
-    VehicleFeature feature;
+    Command.Identifier feature;
     byte type;
     byte[] bytes;
 
     IncomingCommand(byte[] bytes) throws CommandParseException {
         if (bytes.length < 3) throw new CommandParseException();
         this.bytes = bytes;
-        feature = VehicleFeature.fromIdentifier(bytes);
+        feature = Command.Identifier.fromIdentifier(bytes);
         type = bytes[2];
     }
 
-    public VehicleFeature getFeature() {
+    Command.Identifier getFeature() {
         return feature;
     }
 
-    public byte getType() {
+    byte getType() {
         return type;
     }
 
-    public byte[] getIdentifierAndType() {
+    byte[] getIdentifierAndType() {
         return ByteUtils.concatBytes(feature.getIdentifier(), type);
     }
 
-    public byte[] getBytes() {
+    byte[] getBytes() {
         return bytes;
     }
 
+    /**
+     *
+     * @param type The type to compare the command with.
+     * @return True if the command has the given type.
+     */
     public boolean is(Command.Type type) {
-        if (Arrays.equals(getIdentifierAndType(), type.getMessageIdentifierAndType())) {
+        if (Arrays.equals(getIdentifierAndType(), type.getIdentifierAndType())) {
             return true;
         }
 

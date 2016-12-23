@@ -1,7 +1,7 @@
 package com.high_mobility.HMLink.Command.VehicleStatus;
 
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.Command.Identifier;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -15,7 +15,7 @@ public class VehicleLocation extends FeatureState {
     float longitude;
 
     VehicleLocation(byte[] bytes) throws CommandParseException {
-        super(VehicleFeature.VEHICLE_LOCATION);
+        super(Identifier.VEHICLE_LOCATION);
 
         if (bytes.length != 11) throw new CommandParseException();
         latitude = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 3, 3 + 4)).getFloat();

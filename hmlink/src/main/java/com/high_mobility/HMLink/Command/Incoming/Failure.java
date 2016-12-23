@@ -1,7 +1,11 @@
 package com.high_mobility.HMLink.Command.Incoming;
 
 import com.high_mobility.HMLink.ByteUtils;
+import com.high_mobility.HMLink.Command.Command;
 import com.high_mobility.HMLink.Command.CommandParseException;
+import com.high_mobility.HMLink.Command.Command.Identifier;
+
+import java.util.Arrays;
 
 /**
  * Created by ttiganik on 28/09/2016.
@@ -12,8 +16,7 @@ public class Failure extends IncomingCommand {
         UNSUPPORTED_CAPABILITY, UNAUTHORIZED, INCORRECT_STATE, EXECUTION_TIMEOUT, VEHICLE_ASLEEP
     }
 
-    private byte[] failedIdentifier;
-    private byte failedType;
+    private Command.Type failedType;
     private Reason failureReason;
 
     public Failure(byte[] bytes) throws CommandParseException {
@@ -21,10 +24,7 @@ public class Failure extends IncomingCommand {
 
         if (bytes.length != 7) throw new CommandParseException();
 
-        failedIdentifier = new byte[2];
-        failedIdentifier[0] = bytes[3];
-        failedIdentifier[1] = bytes[4];
-        failedType = bytes[5];
+        failedType = Command.typeFromBytes(bytes[3], bytes[4], bytes[5]);
 
         switch (bytes[6]) {
             case 0x00:
@@ -47,19 +47,32 @@ public class Failure extends IncomingCommand {
         }
     }
 
-    public byte[] getFailedCommandIdentifier() {
-        return failedIdentifier;
+    /**
+     *
+     * @return The type of the failed command.
+     */
+    public Command.Type getFailedType() {
+        return failedType;
     }
 
+    /**
+     *
+     * @return The failure reason.
+     */
     public Reason getFailureReason() {
         return failureReason;
     }
 
-    public byte getFailedType() {
-        return failedType;
-    }
+    /**
+     *
+     * @param type The command type to compare the failed command's type with.
+     * @return True if the failed command had the argument's type.
+     */
+    public boolean is(Command.Type type) {
+        if (Arrays.equals(failedType.getIdentifierAndType(), type.getIdentifierAndType())) {
+            return true;
+        }
 
-    public byte[] getFailedIdentifierAndType() {
-        return ByteUtils.concatBytes(failedIdentifier, failedType);
+        return false;
     }
 }

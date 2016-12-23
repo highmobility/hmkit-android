@@ -2,7 +2,7 @@ package com.high_mobility.HMLink.Command.VehicleStatus;
 
 import com.high_mobility.HMLink.Command.CommandParseException;
 import com.high_mobility.HMLink.Command.Constants;
-import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.Command.Identifier;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -18,7 +18,7 @@ public class Charging extends FeatureState {
     float batteryCurrent;
 
     Charging(byte[] bytes) throws CommandParseException {
-        super(VehicleFeature.CHARGING);
+        super(Identifier.CHARGING);
 
         if (bytes.length != 11) throw new CommandParseException();
 

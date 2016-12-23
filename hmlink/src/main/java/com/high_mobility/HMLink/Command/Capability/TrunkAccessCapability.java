@@ -1,7 +1,7 @@
 package com.high_mobility.HMLink.Command.Capability;
 
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.Command.Identifier;
 
 /**
  * Created by ttiganik on 12/12/2016.
@@ -63,7 +63,7 @@ public class TrunkAccessCapability extends FeatureCapability {
     }
 
     public TrunkAccessCapability(byte[] bytes) throws CommandParseException {
-        super(VehicleFeature.TRUNK_ACCESS);
+        super(Identifier.TRUNK_ACCESS);
         if (bytes.length != 5) throw new CommandParseException();
         lockCapability = LockCapability.fromByte(bytes[3]);
         position = PositionCapability.fromByte(bytes[4]);

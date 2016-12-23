@@ -1,7 +1,7 @@
 package com.high_mobility.HMLink.Command.Capability;
 
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.Command.Identifier;
 
 /**
  * Created by ttiganik on 13/12/2016.
@@ -50,7 +50,7 @@ public class RooftopCapability extends FeatureCapability {
     }
 
     public RooftopCapability(byte[] bytes) throws CommandParseException {
-        super(VehicleFeature.ROOFTOP);
+        super(Identifier.ROOFTOP);
 
         if (bytes.length != 5) throw new CommandParseException();
         dimmingCapability = DimmingCapability.fromByte(bytes[3]);

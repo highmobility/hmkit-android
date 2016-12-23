@@ -52,6 +52,10 @@ public class Capabilities extends IncomingCommand {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public FeatureCapability[] getCapabilites() {
         return capabilites;
     }

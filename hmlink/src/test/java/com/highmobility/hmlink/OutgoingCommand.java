@@ -3,13 +3,10 @@ package com.highmobility.hmlink;
 import com.high_mobility.HMLink.Command.AutoHvacState;
 import com.high_mobility.HMLink.Command.Command;
 import com.high_mobility.HMLink.Command.Constants;
-import com.high_mobility.HMLink.Command.Incoming.*;
 import com.high_mobility.HMLink.ByteUtils;
-import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
-import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.Command.Identifier;
 
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import java.io.UnsupportedEncodingException;
 
@@ -22,7 +19,7 @@ public class OutgoingCommand {
     @Test
     public void getCapability() {
         String waitingForBytes = "0010020021";
-        String commandBytes = ByteUtils.hexFromBytes(Command.Capabilities.getCapability(VehicleFeature.TRUNK_ACCESS));
+        String commandBytes = ByteUtils.hexFromBytes(Command.Capabilities.getCapability(Identifier.TRUNK_ACCESS));
         assertTrue(waitingForBytes.equals(commandBytes));
     }
 

@@ -1,8 +1,7 @@
 package com.high_mobility.HMLink.Command.VehicleStatus;
 
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
-import com.high_mobility.HMLink.Command.VehicleFeature;
+import com.high_mobility.HMLink.Command.Command.Identifier;
 
 /**
  * Created by ttiganik on 14/12/2016.
@@ -30,7 +29,7 @@ public class RemoteControl extends FeatureState {
     }
 
     RemoteControl(byte[] bytes) throws CommandParseException {
-        super(VehicleFeature.REMOTE_CONTROL);
+        super(Identifier.REMOTE_CONTROL);
 
         if (bytes.length != 4) throw new CommandParseException();
         state = State.fromByte(bytes[3]);

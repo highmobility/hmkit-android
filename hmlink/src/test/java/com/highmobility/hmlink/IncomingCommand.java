@@ -64,8 +64,7 @@ public class IncomingCommand {
         }
 
         assertTrue(command.getClass() == Failure.class);
-        assertTrue(Arrays.equals(((Failure)command).getFailedCommandIdentifier(), Command.TrunkAccess.GET_TRUNK_STATE.getMessageIdentifier()));
-        assertTrue(((Failure)command).getFailedType() == Command.TrunkAccess.GET_TRUNK_STATE.getMessageType());
+        assertTrue(((Failure)command).getFailedType() == Command.TrunkAccess.GET_TRUNK_STATE);
         assertTrue(((Failure)command).getFailureReason() == Failure.Reason.UNAUTHORIZED);
     }
 

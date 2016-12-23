@@ -1,15 +1,15 @@
 package com.high_mobility.HMLink.Command.Capability;
 
+import com.high_mobility.HMLink.Command.Command.Identifier;
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.VehicleFeature;
 
 /**
  * Created by ttiganik on 14/10/2016.
  */
 public class FeatureCapability {
-    VehicleFeature feature;
+    Identifier feature;
 
-    FeatureCapability(VehicleFeature feature) {
+    FeatureCapability(Identifier feature) {
         this.feature = feature;
     }
 
@@ -17,38 +17,38 @@ public class FeatureCapability {
         if (capabilityBytes.length < 4) throw new CommandParseException();
 
         FeatureCapability featureCapability = null;
-        VehicleFeature feature = VehicleFeature.fromIdentifier(capabilityBytes[0], capabilityBytes[1]);
+        Identifier feature = Identifier.fromIdentifier(capabilityBytes[0], capabilityBytes[1]);
 
-        if (feature == VehicleFeature.DOOR_LOCKS ||
-                feature == VehicleFeature.CHARGING ||
-                feature == VehicleFeature.VALET_MODE) {
+        if (feature == Identifier.DOOR_LOCKS ||
+                feature == Identifier.CHARGING ||
+                feature == Identifier.VALET_MODE) {
             featureCapability = new AvailableGetStateCapability(feature, capabilityBytes);
         }
-        else if (feature == VehicleFeature.TRUNK_ACCESS) {
+        else if (feature == Identifier.TRUNK_ACCESS) {
             featureCapability = new TrunkAccessCapability(capabilityBytes);
         }
-        else if (feature == VehicleFeature.WAKE_UP
-                || feature == VehicleFeature.REMOTE_CONTROL
-                || feature == VehicleFeature.HEART_RATE
-                || feature == VehicleFeature.VEHICLE_LOCATION
-                || feature == VehicleFeature.NAVI_DESTINATION
-                || feature == VehicleFeature.DELIVERED_PARCELS) {
+        else if (feature == Identifier.WAKE_UP
+                || feature == Identifier.REMOTE_CONTROL
+                || feature == Identifier.HEART_RATE
+                || feature == Identifier.VEHICLE_LOCATION
+                || feature == Identifier.NAVI_DESTINATION
+                || feature == Identifier.DELIVERED_PARCELS) {
             featureCapability =  new AvailableCapability(feature, capabilityBytes);
         }
-        else if (feature == VehicleFeature.CLIMATE) {
+        else if (feature == Identifier.CLIMATE) {
             featureCapability = new ClimateCapability(capabilityBytes);
         }
-        else if (feature == VehicleFeature.ROOFTOP) {
+        else if (feature == Identifier.ROOFTOP) {
             featureCapability = new RooftopCapability(capabilityBytes);
         }
-        else if (feature == VehicleFeature.HONK_FLASH) {
+        else if (feature == Identifier.HONK_FLASH) {
             featureCapability = new HonkFlashCapability(capabilityBytes);
         }
 
         return featureCapability;
     }
 
-    public VehicleFeature getFeature() {
+    public Identifier getFeature() {
         return feature;
     }
 }
