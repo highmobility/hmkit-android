@@ -4,7 +4,6 @@ package com.high_mobility.HMLink.Command;
  * Created by ttiganik on 20/12/2016.
  */
 public class AutoHvacState {
-    // TODO: add to doc
     boolean active;
     int day;
     int startHour;

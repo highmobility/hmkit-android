@@ -605,7 +605,7 @@ public class Command {
          *
          * @param states The Auto HVAC states for every weekday. States for all 7 days of the week are expected.
          * @param autoHvacConstant Whether the auto HVAC is constant.
-         * @param driverTemperature The driver temperature in Celsius. // TODO: what is the limit? test as well
+         * @param driverTemperature The driver temperature in Celsius.
          * @param passengerTemperature The passenger temperature in Celsius.
          * @return The command bytes
          * @throws IllegalArgumentException When the input is incorrect

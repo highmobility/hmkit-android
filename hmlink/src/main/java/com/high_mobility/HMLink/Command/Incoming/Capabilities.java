@@ -54,7 +54,7 @@ public class Capabilities extends IncomingCommand {
 
     /**
      *
-     * @return
+     * @return All of the Capabilities that are available for the vehicle.
      */
     public FeatureCapability[] getCapabilites() {
         return capabilites;

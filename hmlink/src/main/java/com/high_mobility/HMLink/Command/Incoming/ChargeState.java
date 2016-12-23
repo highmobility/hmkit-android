@@ -93,7 +93,7 @@ public class ChargeState extends IncomingCommand {
 
     /**
      *
-     * @return The to complete charge in minutes
+     * @return The time to complete the charge in minutes
      */
     public float getTimeToCompleteCharge() {
         return timeToCompleteCharge;

@@ -1,9 +1,7 @@
 package com.high_mobility.HMLink.Command.Incoming;
 
-import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Command.Command;
 import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.Command.Identifier;
 
 import java.util.Arrays;
 
@@ -66,7 +64,7 @@ public class Failure extends IncomingCommand {
     /**
      *
      * @param type The command type to compare the failed command's type with.
-     * @return True if the failed command had the argument's type.
+     * @return True if the failed type is the same as the argument.
      */
     public boolean is(Command.Type type) {
         if (Arrays.equals(failedType.getIdentifierAndType(), type.getIdentifierAndType())) {
