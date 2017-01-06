@@ -179,7 +179,7 @@ public class IncomingCommand {
 
     @Test
     public void climate() {
-        byte[] bytes = ByteUtils.bytesFromHex("002401419800004140000041ac000041ac00000100006000000000000000000000071E071F");
+        byte[] bytes = ByteUtils.bytesFromHex("002401419800004140000041ac000041ac000001000041ac00006000000000000000000000071E071F");
 
         com.high_mobility.HMLink.Command.Incoming.IncomingCommand command = null;
 
@@ -198,6 +198,7 @@ public class IncomingCommand {
         assertTrue(((ClimateState)command).isHvacActive() == true);
         assertTrue(((ClimateState)command).isDefoggingActive() == false);
         assertTrue(((ClimateState)command).isDefrostingActive() == false);
+        assertTrue(((ClimateState)command).getDefrostingTemperature() == 21.5f);
 
         assertTrue(((ClimateState)command).isAutoHvacConstant() == false);
         AutoHvacState[] autoHvacStates = ((ClimateState)command).getAutoHvacStates();

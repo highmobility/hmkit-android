@@ -22,13 +22,14 @@ public class ClimateState extends IncomingCommand {
     boolean hvacActive;
     boolean defoggingActive;
     boolean defrostingActive;
+    float defrostingTemperature;
     boolean autoHvacConstant;
     AutoHvacState[] autoHvacStates;
 
     ClimateState(byte[] bytes) throws CommandParseException {
         super(bytes);
 
-        if (bytes.length != 37) throw new CommandParseException();
+        if (bytes.length != 41) throw new CommandParseException();
 
         insideTemperature = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 3, 3 + 4)).getFloat();
         outsideTemperature = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 7, 7 + 4)).getFloat();
@@ -38,16 +39,17 @@ public class ClimateState extends IncomingCommand {
         hvacActive = bytes[19] == 0x00 ? false : true;
         defoggingActive = bytes[20] == 0x00 ? false : true;
         defrostingActive = bytes[21] == 0x00 ? false : true;
+        defrostingTemperature = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 22, 22 + 4)).getFloat();
 
-        int hvacActiveOnDays = bytes[22];
+        int hvacActiveOnDays = bytes[26];
 
         autoHvacConstant = ByteUtils.getBit(hvacActiveOnDays, 7);
         autoHvacStates = new AutoHvacState[7];
 
         for (int i = 0; i < 7; i ++) {
             boolean active = ByteUtils.getBit(hvacActiveOnDays, i);
-            int hour = bytes[23 + i * 2];
-            int minute = bytes[23 + i * 2 + 1];
+            int hour = bytes[27 + i * 2];
+            int minute = bytes[27 + i * 2 + 1];
             autoHvacStates[i] = new AutoHvacState(active, i, hour, minute);
         }
     }
@@ -110,6 +112,14 @@ public class ClimateState extends IncomingCommand {
 
     /**
      *
+     * @return The defrosting temperature
+     */
+    public float getDefrostingTemperature() {
+        return defrostingTemperature;
+    }
+
+    /**
+     *
      * @return Whether autoHVAC is constant(based on the car surroundings)
      */
     public boolean isAutoHvacConstant() {
@@ -124,4 +134,7 @@ public class ClimateState extends IncomingCommand {
         return autoHvacStates;
     }
 
+    public void setDefrostingTemperature(float defrostingTemperature) {
+        this.defrostingTemperature = defrostingTemperature;
+    }
 }

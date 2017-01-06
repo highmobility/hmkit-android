@@ -32,7 +32,7 @@ public class VehicleStatus {
                 "00200101" +
                 "0021020001" +
                 "0023080200FF32bf19999a" +
-                "00240C419800004140000001000060" + // climate
+                "002410419800004140000001000041ac000060" + // climate
                 "0025020135" + // rooftop state
                 "00270102" +
                 "00280101" + // valet mode
@@ -166,6 +166,7 @@ public class VehicleStatus {
         assertTrue(((Climate)state).isHvacActive() == true);
         assertTrue(((Climate)state).isDefoggingActive() == false);
         assertTrue(((Climate)state).isDefrostingActive() == false);
+        assertTrue(((Climate)state).getDefrostingTemperature() == 21.5f);
         assertTrue(((Climate)state).isAutoHvacConstant() == false);
 
         boolean[] autoHvacStates = ((Climate)state).getHvacActiveOnDays();

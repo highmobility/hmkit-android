@@ -21,6 +21,8 @@ public class Climate extends FeatureState {
     boolean isAutoHvacConstant;
     boolean[] hvacActiveOnDays;
 
+    float defrostingTemperature;
+
     Climate(byte[] bytes) {
         super(Identifier.CLIMATE);
 
@@ -31,7 +33,9 @@ public class Climate extends FeatureState {
         defoggingActive = bytes[12] == 0x00 ? false : true;
         defrostingActive = bytes[13] == 0x00 ? false : true;
 
-        int hvacActiveOnDays = bytes[14];
+        defrostingTemperature = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 14, 14 + 4)).getFloat();
+
+        int hvacActiveOnDays = bytes[18];
         if (ByteUtils.getBit(hvacActiveOnDays, 7)) isAutoHvacConstant = true;
 
         this.hvacActiveOnDays = new boolean[7];
@@ -78,6 +82,14 @@ public class Climate extends FeatureState {
      */
     public boolean isDefrostingActive() {
         return defrostingActive;
+    }
+
+    /**
+     *
+     * @return The defrosting temperature
+     */
+    public float getDefrostingTemperature() {
+        return defrostingTemperature;
     }
 
     /**
