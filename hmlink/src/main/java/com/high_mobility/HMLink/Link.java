@@ -7,6 +7,8 @@ import com.high_mobility.btcore.HMDevice;
 
 import java.util.Calendar;
 
+import static com.high_mobility.HMLink.Broadcaster.TAG;
+
 /**
  * Created by ttiganik on 17/08/16.
  */
@@ -63,7 +65,7 @@ public class Link {
         if (this.state != state) {
             final State oldState = this.state;
             if (state == State.AUTHENTICATED && Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
-                Log.d(Broadcaster.TAG, "authenticated in " + (Calendar.getInstance().getTimeInMillis() - connectionTime) + "ms");
+                Log.d(TAG, "authenticated in " + (Calendar.getInstance().getTimeInMillis() - connectionTime) + "ms");
             }
 
             this.state = state;
@@ -105,28 +107,29 @@ public class Link {
      *                       in it or not - defaults to true
      * @param responseCallback  ResponseCallback object that returns the getErrorCode if the command
      *                          failed or 0 if it succeeded.
-     *                          Error codes could be UNAUTHORIZED, COMMAND_IN_PROGRESS, TIME_OUT.
+     *                          Error codes could be UNAUTHORIZED, COMMAND_IN_PROGRESS, TIME_OUT from {@link Link}.
      */
     public void sendCommand(final byte[] bytes, boolean secureResponse, Constants.ResponseCallback responseCallback) {
         if (state != State.AUTHENTICATED) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(Broadcaster.TAG, "cant send command, not authenticated");
+                Log.d(TAG, "cant send command, not authenticated");
             responseCallback.response(Link.UNAUTHORIZED);
             return;
         }
 
         if (sentCommand != null && sentCommand.finished == false) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(Broadcaster.TAG, "cant send command, custom command in progress");
+                Log.d(TAG, "cant send command, custom command in progress");
             responseCallback.response(Link.COMMAND_IN_PROGRESS);
             return;
         }
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(Broadcaster.TAG, "send command " + ByteUtils.hexFromBytes(bytes)
+            Log.d(TAG, "send command " + ByteUtils.hexFromBytes(bytes)
                     + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
         sentCommand = new SentCommand(responseCallback, manager.mainHandler);
+
         manager.workHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -148,11 +151,11 @@ public class Link {
 
     void onCommandReceived(final byte[] bytes) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(Broadcaster.TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
+            Log.d(TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
                     + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
         if (listener == null) {
-            Log.d(Broadcaster.TAG, "can't dispatch notification: no listener set");
+            Log.d(TAG, "can't dispatch notification: no listener set");
             return;
         }
 
@@ -167,13 +170,13 @@ public class Link {
 
     void onCommandResponseReceived(final byte[] data) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(Broadcaster.TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
+            Log.d(TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
                     + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()) + " in " +
                     (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime) + "ms");
 
         if (sentCommand == null) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(Broadcaster.TAG, "can't dispatch command response: sentCommand = null");
+                Log.d(TAG, "can't dispatch command response: sentCommand = null");
             return;
         }
 

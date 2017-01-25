@@ -13,7 +13,7 @@ public class ViewUtils {
         if ( view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup)view;
 
-            for ( int idx = 0 ; idx < group.getChildCount() ; idx++ ) {
+            for (int idx = 0; idx < group.getChildCount(); idx++) {
                 enableView(group.getChildAt(idx), enable);
             }
         }

@@ -224,7 +224,7 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
         final LinkFragment fragment = adapter.getFragment(link);
 
         ViewUtils.enableView(fragment.authView, false);
-        link.sendCommand(Command.DoorLocks.lockDoors(true), true, new Constants.ResponseCallback() {
+        link.sendCommand(Command.DoorLocks.lockDoors(false), true, new Constants.ResponseCallback() {
             @Override
             public void response(int errorCode) {
                 ViewUtils.enableView(fragment.authView, true);
