@@ -220,6 +220,7 @@ public class Broadcaster implements SharedBleListener {
      * @param alivePinging Whether the alive ping mode should be actived or stopped
      */
     public void setIsAlivePinging(boolean alivePinging) {
+        if (alivePinging == isAlivePinging) return;
         isAlivePinging = alivePinging;
         if (isAlivePinging) {
             sendAlivePing();
