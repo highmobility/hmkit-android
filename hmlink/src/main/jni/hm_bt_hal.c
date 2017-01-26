@@ -82,3 +82,7 @@ uint32_t hm_bt_hal_read_info(uint8_t *mac, uint16_t offset){
 uint32_t hm_bt_hal_get_current_date_time(uint8_t day, uint8_t month, uint8_t year, uint8_t minute, uint8_t hour){
   return 0;
 }
+
+uint32_t hm_bt_hal_backend_send_data(uint8_t *serial, uint16_t length, uint8_t *data){
+  return 0;
+}

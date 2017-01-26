@@ -1,11 +1,11 @@
-/Users/ttiganik/workspace/Android/android-sdk/hmlink/src/main/obj/local/armeabi-v7a/objs/hmbtcore/__/__/__/__/__/high-mobility-bt-core/hm_bt_log.o: \
- /Users/ttiganik/workspace/Android/android-sdk/hmlink/src/main/jni/../../../../../high-mobility-bt-core/hm_bt_log.c \
- /Users/ttiganik/workspace/Android/android-sdk/hmlink/src/main/jni/../../../../../high-mobility-bt-core/hm_bt_log.h \
- /Users/ttiganik/workspace/Android/android-sdk/hmlink/src/main/jni/../../../../../high-mobility-bt-core/hm_bt_debug_hal.h \
- /Users/ttiganik/workspace/Android/android-sdk/hmlink/src/main/jni/hm_config.h
+/Users/maiduule/Workspace/android-sdk/hmlink/src/main/obj/local/armeabi-v7a/objs/hmbtcore/__/__/__/__/__/high-mobility-bt-core/hm_bt_log.o: \
+  /Users/maiduule/Workspace/android-sdk/hmlink/src/main/jni/../../../../../high-mobility-bt-core/hm_bt_log.c \
+  ../../../../../high-mobility-bt-core/hm_bt_log.h \
+  ../../../../../high-mobility-bt-core/hm_bt_debug_hal.h \
+  /Users/maiduule/Workspace/android-sdk/hmlink/src/main/jni/hm_config.h
 
-/Users/ttiganik/workspace/Android/android-sdk/hmlink/src/main/jni/../../../../../high-mobility-bt-core/hm_bt_log.h:
+../../../../../high-mobility-bt-core/hm_bt_log.h:
 
-/Users/ttiganik/workspace/Android/android-sdk/hmlink/src/main/jni/../../../../../high-mobility-bt-core/hm_bt_debug_hal.h:
+../../../../../high-mobility-bt-core/hm_bt_debug_hal.h:
 
-/Users/ttiganik/workspace/Android/android-sdk/hmlink/src/main/jni/hm_config.h:
+/Users/maiduule/Workspace/android-sdk/hmlink/src/main/jni/hm_config.h:
