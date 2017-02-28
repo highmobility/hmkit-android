@@ -56,8 +56,6 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                 BluetoothGatt.GATT_SUCCESS,
                 offset,
                 offsetBytes);
-
-        return;
     }
 
     @Override
@@ -84,6 +82,20 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                 }
             });
         }
+    }
+
+    @Override
+    public void onDescriptorReadRequest(BluetoothDevice device, int requestId, int offset, BluetoothGattDescriptor descriptor) {
+        super.onDescriptorReadRequest(device, requestId, offset, descriptor);
+
+        byte[] value = descriptor.getValue();
+        byte[] offsetBytes = value == null ? new byte[] {} : Arrays.copyOfRange(value, offset, value.length);
+
+        broadcaster.GATTServer.sendResponse(device,
+                requestId,
+                BluetoothGatt.GATT_SUCCESS,
+                offset,
+                offsetBytes);
     }
 
     @Override
