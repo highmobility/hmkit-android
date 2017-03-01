@@ -466,7 +466,7 @@ public class Broadcaster implements SharedBleListener {
                     BluetoothGattCharacteristic.PERMISSION_READ);
 
             if (readCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
-                    BluetoothGattDescriptor.PERMISSION_WRITE)) == false) {
+                    BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor.PERMISSION_READ)) == false) {
                 Log.e(TAG, "Cannot add read descriptor"); return false;
             }
             if (aliveCharacteristic.setValue(new byte[]{}) == false) {
@@ -474,7 +474,7 @@ public class Broadcaster implements SharedBleListener {
             }
 
             if (aliveCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
-                    BluetoothGattDescriptor.PERMISSION_WRITE)) == false) {
+                    BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor.PERMISSION_READ)) == false) {
                 Log.e(TAG, "Cannot add alive descriptor"); return false;
             }
 
