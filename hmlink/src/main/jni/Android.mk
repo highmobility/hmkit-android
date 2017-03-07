@@ -16,8 +16,8 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := hmbtcore
 
 LOCAL_LDLIBS := -llog
-LOCAL_C_INCLUDES += ../../../../../high-mobility-bt-core
-LOCAL_C_INCLUDES += ../../../../../crypto-c/Crypto
+LOCAL_C_INCLUDES += ../../../../high-mobility-bt-core
+LOCAL_C_INCLUDES += ../../../../crypto-c/Crypto
 
 LOCAL_SRC_FILES := hmbtcore.c
 
@@ -27,13 +27,13 @@ LOCAL_SRC_FILES += hm_bt_hal.c
 LOCAL_SRC_FILES += hm_bt_persistence_hal.c
 LOCAL_SRC_FILES += hm_api_callback.c
 
-LOCAL_SRC_FILES += ../../../../../crypto-c/Crypto/Crypto.c
+LOCAL_SRC_FILES += ../../../../crypto-c/Crypto/Crypto.c
 
-LOCAL_SRC_FILES += ../../../../../high-mobility-bt-core/hm_bt_core.c
-LOCAL_SRC_FILES += ../../../../../high-mobility-bt-core/hm_bt_log.c
-LOCAL_SRC_FILES += ../../../../../high-mobility-bt-core/hm_cert.c
-LOCAL_SRC_FILES += ../../../../../high-mobility-bt-core/hm_conf_access.c
-LOCAL_SRC_FILES += ../../../../../high-mobility-bt-core/hm_api.c
+LOCAL_SRC_FILES += ../../../../high-mobility-bt-core/hm_bt_core.c
+LOCAL_SRC_FILES += ../../../../high-mobility-bt-core/hm_bt_log.c
+LOCAL_SRC_FILES += ../../../../high-mobility-bt-core/hm_cert.c
+LOCAL_SRC_FILES += ../../../../high-mobility-bt-core/hm_conf_access.c
+LOCAL_SRC_FILES += ../../../../high-mobility-bt-core/hm_api.c
 
 LOCAL_STATIC_LIBRARIES := crypto
 LOCAL_STATIC_LIBRARIES += ssl
