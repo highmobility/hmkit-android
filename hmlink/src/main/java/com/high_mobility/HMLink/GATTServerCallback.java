@@ -78,7 +78,8 @@ class GATTServerCallback extends BluetoothGattServerCallback {
             broadcaster.manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    devicePointer.manager.core.HMBTCorelinkIncomingData(devicePointer.manager.coreInterface, value, value.length, ByteUtils.bytesFromMacString(device.getAddress()));
+                    //TODO add proper character
+                    devicePointer.manager.core.HMBTCorelinkIncomingData(devicePointer.manager.coreInterface, value, value.length, ByteUtils.bytesFromMacString(device.getAddress()),0);
                 }
             });
         }

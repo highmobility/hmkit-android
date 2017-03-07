@@ -257,7 +257,8 @@ class ScannedLink extends Link {
                     scanner.manager.workHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes());
+                            //TODO add proper characteristic
+                            scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes(), 0);
                         }
                     });
                 }
@@ -278,7 +279,8 @@ class ScannedLink extends Link {
                 scanner.manager.workHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        scanner.manager.core.HMBTCoreSensingWriteResponse(scanner.manager.coreInterface, getAddressBytes());
+                        //TODO add proper characteristic
+                        scanner.manager.core.HMBTCoreSensingWriteResponse(scanner.manager.coreInterface, getAddressBytes(),0);
                     }
                 });
             }
@@ -295,7 +297,8 @@ class ScannedLink extends Link {
             scanner.manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes());
+                    //TODO add proper characteristic
+                    scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes(),0);
                 }
             });
         }

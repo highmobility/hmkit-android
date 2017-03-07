@@ -18,12 +18,12 @@ public class HMBTCore {
 
     //CORE SENSING
 
-    public native void HMBTCoreSensingReadNotification(HMBTCoreInterface coreInterface, byte[] mac);
-    public native void HMBTCoreSensingReadResponse(HMBTCoreInterface coreInterface, byte[] data, int size, int offset, byte[] mac);
+    public native void HMBTCoreSensingReadNotification(HMBTCoreInterface coreInterface, byte[] mac, int characteristic);
+    public native void HMBTCoreSensingReadResponse(HMBTCoreInterface coreInterface, byte[] data, int size, int offset, byte[] mac, int characteristic);
 
-    public native void HMBTCoreSensingWriteResponse(HMBTCoreInterface coreInterface, byte[] mac);
+    public native void HMBTCoreSensingWriteResponse(HMBTCoreInterface coreInterface, byte[] mac, int characteristic);
 
-    public native void HMBTCoreSensingPingNotification(HMBTCoreInterface coreInterface, byte[] mac);
+    public native void HMBTCoreSensingPingNotification(HMBTCoreInterface coreInterface, byte[] mac, int characteristic);
 
     public native void HMBTCoreSensingProcessAdvertisement(HMBTCoreInterface coreInterface, byte[] mac, byte[] data, int size);
     public native void HMBTCoreSensingDiscoveryEvent(HMBTCoreInterface coreInterface, byte[] mac);
@@ -43,7 +43,7 @@ public class HMBTCore {
 
     //Forward link incoming data to core
     //TT
-    public native void HMBTCorelinkIncomingData(HMBTCoreInterface coreInterface, byte[] data, int size, byte[] mac);
+    public native void HMBTCorelinkIncomingData(HMBTCoreInterface coreInterface, byte[] data, int size, byte[] mac, int characteristic);
 
     public native void HMBTCoreSendCustomCommand(HMBTCoreInterface coreInterface, byte[] data, int size, byte[] mac);
 

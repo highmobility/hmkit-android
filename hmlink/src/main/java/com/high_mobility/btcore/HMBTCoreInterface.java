@@ -26,9 +26,9 @@ public interface HMBTCoreInterface {
 
     //Write data to peripheral or central
     //TT
-    int HMBTHalWriteData(byte[] mac, int length, byte[] data);
+    int HMBTHalWriteData(byte[] mac, int length, byte[] data, int characteristic);
     //Read data from peripheral
-    int HMBTHalReadData(byte[] mac, int offset);
+    int HMBTHalReadData(byte[] mac, int offset, int characteristic);
 
     //PERSISTENCE HAL
 

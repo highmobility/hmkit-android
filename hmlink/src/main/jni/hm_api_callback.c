@@ -226,6 +226,6 @@ uint32_t hm_api_callback_pairing_requested(hm_device_t *device){
     return ret;
 }
 
-void hm_api_callback_backend_command_incoming(hm_device_t *device, uint16_t length, uint8_t *data){
+void hm_api_callback_telematics_command_incoming(hm_device_t *device, uint8_t id, uint16_t length, uint8_t *data){
 
 }

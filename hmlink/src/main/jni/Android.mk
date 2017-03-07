@@ -23,7 +23,7 @@ LOCAL_SRC_FILES := hmbtcore.c
 
 LOCAL_SRC_FILES += hm_bt_crypto_hal.c
 LOCAL_SRC_FILES += hm_bt_debug_hal.c
-LOCAL_SRC_FILES += hm_bt_hal.c
+LOCAL_SRC_FILES += hm_connectivity_hal.c
 LOCAL_SRC_FILES += hm_bt_persistence_hal.c
 LOCAL_SRC_FILES += hm_api_callback.c
 

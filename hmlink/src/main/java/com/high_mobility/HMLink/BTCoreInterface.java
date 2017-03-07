@@ -69,8 +69,8 @@ class BTCoreInterface implements HMBTCoreInterface {
         return 0;
     }
 
-    @Override
-    public int HMBTHalWriteData(byte[] mac, int length, byte[] data) {
+    @Override //TODO add proper characteristic
+    public int HMBTHalWriteData(byte[] mac, int length, byte[] data, int characteristic) {
         if (manager.getBroadcaster().writeData(mac, data) == false) {
             if (manager.getScanner().writeData(mac, data) == false) {
                 return 1;
@@ -80,8 +80,8 @@ class BTCoreInterface implements HMBTCoreInterface {
         return 0;
     }
 
-    @Override
-    public int HMBTHalReadData(byte[] mac, int offset) {
+    @Override //TODO add proper characteristic
+    public int HMBTHalReadData(byte[] mac, int offset, int characteristic) {
         return manager.getScanner().readValue(mac) == true ? 0 : 1;
     }
 
