@@ -68,9 +68,15 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                                              final byte[] value) {
         super.onCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
 
+        final int characteristicId = getCharacteristicIdForCharacteristic(characteristic);
+        if (characteristicId == -1) {
+            Log.e(TAG, "incoming data from invalid characteristic");
+            return;
+        }
+
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "incoming data " + ByteUtils.hexFromBytes(value) + " from "
-                    + ByteUtils.hexFromBytes(ByteUtils.bytesFromMacString(device.getAddress())));
+                    + ByteUtils.hexFromBytes(ByteUtils.bytesFromMacString(device.getAddress())) + " char " + characteristicId);
 
         if (responseNeeded) {
             broadcaster.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
@@ -78,13 +84,12 @@ class GATTServerCallback extends BluetoothGattServerCallback {
             broadcaster.manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    int characteristicId = getCharacteristicIdForCharacteristic(characteristic);
-                    if (characteristicId == -1) {
-                        Log.e(TAG, "incoming data from invalid characteristic");
-                        return;
-                    }
-
-                    devicePointer.manager.core.HMBTCorelinkIncomingData(devicePointer.manager.coreInterface, value, value.length, ByteUtils.bytesFromMacString(device.getAddress()), characteristicId);
+                    devicePointer.manager.core.HMBTCorelinkIncomingData(
+                            devicePointer.manager.coreInterface,
+                            value,
+                            value.length,
+                            ByteUtils.bytesFromMacString(device.getAddress()),
+                            characteristicId);
                 }
             });
         }

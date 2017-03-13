@@ -460,7 +460,7 @@ public class Broadcaster implements SharedBleListener {
                             BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                             BluetoothGattCharacteristic.PERMISSION_READ);
 
-            sensingReadCharacteristic = new BluetoothGattCharacteristic(Constants.READ_CHAR_UUID,
+            sensingReadCharacteristic = new BluetoothGattCharacteristic(Constants.SENSING_READ_CHAR_UUID,
                     BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                     BluetoothGattCharacteristic.PERMISSION_READ);
 
@@ -470,7 +470,7 @@ public class Broadcaster implements SharedBleListener {
                             BluetoothGattCharacteristic.PROPERTY_WRITE,
                             BluetoothGattCharacteristic.PERMISSION_WRITE);
 
-            sensingWriteCharacteristic = new BluetoothGattCharacteristic(Constants.READ_CHAR_UUID,
+            sensingWriteCharacteristic = new BluetoothGattCharacteristic(Constants.SENSING_WRITE_CHAR_UUID,
                     BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                     BluetoothGattCharacteristic.PERMISSION_READ);
 
