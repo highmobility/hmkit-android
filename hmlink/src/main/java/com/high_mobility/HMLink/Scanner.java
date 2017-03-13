@@ -245,18 +245,19 @@ class Scanner {
         return true;
     }
 
-    boolean writeData(byte[] mac, byte[] value) {
+    boolean writeData(byte[] mac, byte[] value, int characteristic) {
         ScannedLink link = getLinkForMac(mac);
         if (link == null) return false;
-        
+        // TODO: use characteristic from id
         link.writeValue(value);
 
         return true;
     }
 
-    boolean readValue(byte[] mac) {
+    boolean readValue(byte[] mac, int characteristic) {
         ScannedLink link = getLinkForMac(mac);
         if (link == null) return false;
+        // TODO: use the characteristic id
         link.readValue();
         return true;
     }

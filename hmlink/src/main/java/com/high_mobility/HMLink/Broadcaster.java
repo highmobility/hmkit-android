@@ -47,6 +47,8 @@ public class Broadcaster implements SharedBleListener {
     BluetoothGattCharacteristic writeCharacteristic;
     BluetoothGattCharacteristic aliveCharacteristic;
     BluetoothGattCharacteristic infoCharacteristic;
+    BluetoothGattCharacteristic sensingReadCharacteristic;
+    BluetoothGattCharacteristic sensingWriteCharacteristic;
 
     boolean isAlivePinging;
     State state = State.IDLE;
@@ -397,19 +399,25 @@ public class Broadcaster implements SharedBleListener {
         return 1;
     }
 
-    boolean writeData(byte[] mac, byte[] value) {
+    boolean writeData(byte[] mac, byte[] value, int characteristicId) {
         ConnectedLink link = getLinkForMac(mac);
         if (link == null) return false;
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(link.getAddressBytes()));
 
-        if (readCharacteristic.setValue(value) == false) {
+        BluetoothGattCharacteristic characteristic = getCharacteristicForId(characteristicId);
+        if (characteristic == null) {
+            Log.e(TAG, "no characteristic for write");
+            return false;
+        }
+
+        if (characteristic.setValue(value) == false) {
             Log.e(TAG, "can't set read char value");
             return false;
         }
 
-        if (GATTServer.notifyCharacteristicChanged(link.btDevice, readCharacteristic, false) == false) {
+        if (GATTServer.notifyCharacteristicChanged(link.btDevice, characteristic, false) == false) {
             Log.e(TAG, "can't notify characteristic changed");
             return false;
         }
@@ -452,10 +460,20 @@ public class Broadcaster implements SharedBleListener {
                             BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
                             BluetoothGattCharacteristic.PERMISSION_READ);
 
+            sensingReadCharacteristic = new BluetoothGattCharacteristic(Constants.READ_CHAR_UUID,
+                    BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
+                    BluetoothGattCharacteristic.PERMISSION_READ);
+
+
             writeCharacteristic =
                     new BluetoothGattCharacteristic(Constants.WRITE_CHAR_UUID,
                             BluetoothGattCharacteristic.PROPERTY_WRITE,
                             BluetoothGattCharacteristic.PERMISSION_WRITE);
+
+            sensingWriteCharacteristic = new BluetoothGattCharacteristic(Constants.READ_CHAR_UUID,
+                    BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
+                    BluetoothGattCharacteristic.PERMISSION_READ);
+
 
             aliveCharacteristic = new BluetoothGattCharacteristic(Constants.ALIVE_CHAR_UUID,
                     BluetoothGattCharacteristic.PROPERTY_NOTIFY,
@@ -469,6 +487,12 @@ public class Broadcaster implements SharedBleListener {
                     BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor.PERMISSION_READ)) == false) {
                 Log.e(TAG, "Cannot add read descriptor"); return false;
             }
+
+            if (sensingReadCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
+                    BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor.PERMISSION_READ)) == false) {
+                Log.e(TAG, "Cannot add sensing read descriptor"); return false;
+            }
+
             if (aliveCharacteristic.setValue(new byte[]{}) == false) {
                 Log.e(TAG, "Cannot set alive char value"); return false;
             }
@@ -486,8 +510,16 @@ public class Broadcaster implements SharedBleListener {
                 Log.e(TAG, "Cannot add read char"); return false;
             }
 
+            if (service.addCharacteristic(sensingReadCharacteristic) == false) {
+                Log.e(TAG, "Cannot add sensing read char"); return false;
+            }
+
             if (service.addCharacteristic(writeCharacteristic) == false) {
                 Log.e(TAG, "Cannot add write char"); return false;
+            }
+
+            if (service.addCharacteristic(sensingWriteCharacteristic) == false) {
+                Log.e(TAG, "Cannot add sensing write char"); return false;
             }
 
             if (service.addCharacteristic(aliveCharacteristic) == false) {
@@ -576,6 +608,31 @@ public class Broadcaster implements SharedBleListener {
                     }
                 });
             }
+        }
+    }
+
+    BluetoothGattCharacteristic getCharacteristicForId(int id) {
+        switch (id) {
+            case BTCoreInterface.hm_characteristic_alive: {
+                return aliveCharacteristic;
+            }
+            case BTCoreInterface.hm_characteristic_info: {
+                return infoCharacteristic;
+            }
+            case BTCoreInterface.hm_characteristic_link_read: {
+                return readCharacteristic;
+            }
+            case BTCoreInterface.hm_characteristic_link_write: {
+                return writeCharacteristic;
+            }
+            case BTCoreInterface.hm_characteristic_sensing_read: {
+                return sensingReadCharacteristic;
+            }
+            case BTCoreInterface.hm_characteristic_sensing_write: {
+                return sensingWriteCharacteristic;
+            }
+            default:
+                return null;
         }
     }
 }

@@ -61,7 +61,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
     @Override
     public void onCharacteristicWriteRequest(final BluetoothDevice device,
                                              int requestId,
-                                             BluetoothGattCharacteristic characteristic,
+                                             final BluetoothGattCharacteristic characteristic,
                                              boolean preparedWrite,
                                              boolean responseNeeded,
                                              int offset,
@@ -78,8 +78,13 @@ class GATTServerCallback extends BluetoothGattServerCallback {
             broadcaster.manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    //TODO add proper character
-                    devicePointer.manager.core.HMBTCorelinkIncomingData(devicePointer.manager.coreInterface, value, value.length, ByteUtils.bytesFromMacString(device.getAddress()),0);
+                    int characteristicId = getCharacteristicIdForCharacteristic(characteristic);
+                    if (characteristicId == -1) {
+                        Log.e(TAG, "incoming data from invalid characteristic");
+                        return;
+                    }
+
+                    devicePointer.manager.core.HMBTCorelinkIncomingData(devicePointer.manager.coreInterface, value, value.length, ByteUtils.bytesFromMacString(device.getAddress()), characteristicId);
                 }
             });
         }
@@ -123,5 +128,28 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         super.onNotificationSent(device, status);
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "onNotificationSent " + status);
+    }
+
+    int getCharacteristicIdForCharacteristic(BluetoothGattCharacteristic characteristic) {
+        if (characteristic == broadcaster.writeCharacteristic) {
+            return 0x03;
+        }
+        else if (characteristic == broadcaster.sensingWriteCharacteristic) {
+            return 0x07;
+        }
+        else if (characteristic == broadcaster.readCharacteristic) {
+            return 0x02;
+        }
+        else if (characteristic == broadcaster.sensingReadCharacteristic) {
+            return 0x06;
+        }
+        else if (characteristic == broadcaster.aliveCharacteristic) {
+            return 0x04;
+        }
+        else if (characteristic == broadcaster.infoCharacteristic) {
+            return 0x05;
+        }
+
+        return -1;
     }
 }
