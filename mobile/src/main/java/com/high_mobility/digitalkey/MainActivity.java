@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         Manager.getInstance().initialize(
                 "***REMOVED***",
                 "***REMOVED***=",
-                "***REMOVED***==",
+                "***REMOVED***+6pXmtkYxynMQm0rfcBU0XFF5A==",
                 getApplicationContext()
         );
 

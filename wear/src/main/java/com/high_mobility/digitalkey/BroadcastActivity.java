@@ -105,26 +105,15 @@ public class BroadcastActivity extends WearableActivity implements BroadcasterLi
     }
 
     private void initializeDevice() {
-        final byte[] DEVICE_PUBLIC_KEY = ByteUtils.bytesFromHex("***REMOVED***");
-        final byte[] DEVICE_PRIVATE_KEY = ByteUtils.bytesFromHex("***REMOVED***");
-        final byte[] DEVICE_SERIAL = ByteUtils.bytesFromHex("01231910D62CA571F0");
-
-        // Create a demo certificate. In real life situation the certificate should be queried from the server
-        // Reference: http://dc-9141.high-mobility.com/android-tutorial/#setting-device-certificate
-        // Reference: http://dc-9141.high-mobility.com/android-reference-device-certificate/#convenience-init
-        final byte[] APP_IDENTIFIER = ByteUtils.bytesFromHex("***REMOVED***");
-        final byte[] ISSUER = ByteUtils.bytesFromHex("48494D4F");
-
-        DeviceCertificate cert = new DeviceCertificate(ISSUER, APP_IDENTIFIER, DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
-        cert.setSignature(ByteUtils.bytesFromHex("***REMOVED***")); // original
-
-        Manager.getInstance().initialize(cert, DEVICE_PRIVATE_KEY, CA_PUBLIC_KEY, getApplicationContext());
+        Manager.getInstance().initialize(
+                "***REMOVED***",
+                "***REMOVED***=",
+                "***REMOVED***+6pXmtkYxynMQm0rfcBU0XFF5A==",
+                getApplicationContext()
+        );
         broadcaster = Manager.getInstance().getBroadcaster();
         onStateChanged(broadcaster.getState());
         broadcaster.setListener(this);
-
-//        CertUtils certUtils = new CertUtils(getApplicationContext(), DEVICE_SERIAL, DEVICE_PUBLIC_KEY);
-//        certUtils.registerAndStoreAllCertificates(broadcaster);
     }
 
     @Override
