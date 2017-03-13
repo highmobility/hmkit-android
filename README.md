@@ -4,7 +4,12 @@
 
 ### How do I get set up? ###
 
-* Before deploying you have to compile the core. For the ndk-build command you need to install the NDK through Android Manager.
+* git submodule init
+* git submodule update --recursive --remote
+
+
+### Compile core ###
+* If you wish to re compile the bt core, you need to install the NDK through Android SDK Manager(in SDK tools tab).
 ```
 cd {PROJECT_DIR}/hmlink/src/main/jni 
 ndk-build
