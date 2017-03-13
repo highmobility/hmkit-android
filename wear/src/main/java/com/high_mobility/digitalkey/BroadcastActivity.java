@@ -108,7 +108,7 @@ public class BroadcastActivity extends WearableActivity implements BroadcasterLi
         Manager.getInstance().initialize(
                 "***REMOVED***",
                 "***REMOVED***=",
-                "***REMOVED***+6pXmtkYxynMQm0rfcBU0XFF5A==",
+                "***REMOVED***==",
                 getApplicationContext()
         );
         broadcaster = Manager.getInstance().getBroadcaster();
