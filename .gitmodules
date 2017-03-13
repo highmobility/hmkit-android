@@ -1,6 +1,6 @@
 [submodule "high-mobility-bt-core"]
 	path = high-mobility-bt-core
-	url = https://bitbucket.org/highmobility/high-mobility-bt-core.git
+	url = ../high-mobility-bt-core.git
 [submodule "crypto-c"]
 	path = crypto-c
-	url = https://bitbucket.org/highmobility/crypto-c.git
+	url = ../crypto-c.git
