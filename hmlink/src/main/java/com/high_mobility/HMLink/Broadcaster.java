@@ -471,9 +471,8 @@ public class Broadcaster implements SharedBleListener {
                             BluetoothGattCharacteristic.PERMISSION_WRITE);
 
             sensingWriteCharacteristic = new BluetoothGattCharacteristic(Constants.SENSING_WRITE_CHAR_UUID,
-                    BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
-                    BluetoothGattCharacteristic.PERMISSION_READ);
-
+                    BluetoothGattCharacteristic.PROPERTY_WRITE,
+                    BluetoothGattCharacteristic.PERMISSION_WRITE);
 
             aliveCharacteristic = new BluetoothGattCharacteristic(Constants.ALIVE_CHAR_UUID,
                     BluetoothGattCharacteristic.PROPERTY_NOTIFY,
