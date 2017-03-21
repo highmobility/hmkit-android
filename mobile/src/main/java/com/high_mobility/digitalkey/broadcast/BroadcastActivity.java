@@ -1,63 +1,43 @@
 package com.high_mobility.digitalkey.broadcast;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 
-import com.high_mobility.HMLink.Command.Command;
-import com.high_mobility.HMLink.Command.Incoming.ControlMode;
-import com.high_mobility.HMLink.Command.Incoming.IncomingCommand;
-import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.Incoming.LockState;
-import com.high_mobility.HMLink.BroadcasterListener;
 import com.high_mobility.HMLink.ConnectedLink;
-import com.high_mobility.HMLink.ConnectedLinkListener;
 import com.high_mobility.HMLink.Constants;
-import com.high_mobility.HMLink.Broadcaster;
 import com.high_mobility.HMLink.Link;
-import com.high_mobility.HMLink.Manager;
-import com.high_mobility.HMLink.Command.Incoming.RooftopState;
 import com.high_mobility.digitalkey.R;
+import com.highmobility.common.BroadcastingViewController;
+import com.highmobility.common.IBroadcastingView;
+import com.highmobility.common.IBroadcastingViewController;
+
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by ttiganik on 02/06/16.
  */
-public class BroadcastActivity extends AppCompatActivity implements BroadcasterListener, ConnectedLinkListener {
+public class BroadcastActivity extends AppCompatActivity implements IBroadcastingView {
     static final String TAG = "BroadcastActivity";
+    IBroadcastingViewController controller;
 
-    TextView statusTextView;
-    Switch broadcastSwitch;
+    @BindView(R.id.status_textview) TextView statusTextView;
+    @BindView(R.id.pairing_view) LinearLayout pairingView;
+    @BindView(R.id.confirm_pairing_button) Button confirmPairButton;
+    @BindView(R.id.show_button) Button showButton;
 
-    LinearLayout pairingView;
-    Button confirmPairButton;
-
-    ViewPager pager;
-    LinkPagerAdapter adapter;
-
-    Broadcaster device;
     Constants.ApprovedCallback pairApproveCallback;
 
-    void onBroadcastCheckedChanged() {
-        if (broadcastSwitch.isChecked()) {
-            if (device.getState() == Broadcaster.State.BROADCASTING) return;
-            int errorCode = device.startBroadcasting();
-            if (errorCode != 0) Log.e(TAG, "cant start broadcasting " + errorCode);
-        }
-        else {
-            device.stopBroadcasting();
-        }
-    }
-
     void onPairConfirmClick() {
-        pairingView.setVisibility(View.GONE);
-        pairApproveCallback.approve();
+        controller.onPairingApproved(true);
         pairApproveCallback = null;
     }
 
@@ -65,175 +45,44 @@ public class BroadcastActivity extends AppCompatActivity implements BroadcasterL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.broadcast_view);
-
-        device = Manager.getInstance().getBroadcaster();
-
-        // set the device listener
-        device.setListener(this);
-
-        createViews();
-
-        broadcastSwitch.setChecked(true);
-    }
-
-    @Override
-    protected void onDestroy() {
-        for (ConnectedLink link : device.getLinks()) {
-            link.setListener(null);
-        }
-
-        device.setListener(null);
-        device.stopBroadcasting();
-
-        super.onDestroy();
-    }
-
-    // BroadcasterListener
-
-    @Override
-    public void onStateChanged(Broadcaster.State state1) {
-        broadcastSwitch.setEnabled(device.getState() != Broadcaster.State.BLUETOOTH_UNAVAILABLE);
-
-        switch (device.getState()) {
-            case IDLE:
-                if (state1 == Broadcaster.State.BLUETOOTH_UNAVAILABLE && broadcastSwitch.isChecked()) {
-                    int errorCode = device.startBroadcasting();
-                    if (errorCode != 0) Log.e(TAG, "cant start broadcasting " + errorCode);
-                }
-                statusTextView.setText("idle");
-                break;
-            case BLUETOOTH_UNAVAILABLE:
-                statusTextView.setText("N/A");
-                break;
-
-            case BROADCASTING:
-                statusTextView.setText("broadcasting");
-                setTitle(device.getName());
-                break;
-        }
-    }
-
-    @Override
-    public void onLinkReceived(ConnectedLink link) {
-        link.setListener(this);
-        adapter.setLinks(device.getLinks());
-    }
-
-    @Override
-    public void onLinkLost(ConnectedLink link) {
-        link.setListener(null);
-        adapter.setLinks(device.getLinks());
-    }
-
-    // LinkListener
-
-    @Override
-    public void onStateChanged(Link link, Link.State state) {
-        if (link.getState() == ConnectedLink.State.AUTHENTICATED) {
-            link.sendCommand(Command.VehicleStatus.getVehicleStatus(), true, new Constants.ResponseCallback() {
-                @Override
-                public void response(int i) {
-                    if (i != 0) {
-                        Log.d(TAG, "Get vehicle status failed");
-                    }
-                    else {
-                        Log.d(TAG, "Get vehicle status sent");
-                    }
-                }
-            });
-        }
-
-        adapter.setLinks(device.getLinks());
-    }
-
-    @Override
-    public void onCommandReceived(Link link, byte[] bytes) {
-        try {
-            IncomingCommand command = IncomingCommand.create(bytes);
-
-            if (command.is(Command.DoorLocks.LOCK_STATE)) {
-                LockState stateNotification = (LockState) command;
-                Log.i(TAG, "Lock status changed " + stateNotification.getState());
-            }
-            else if (command.is(Command.RemoteControl.CONTROL_MODE)) {
-                ControlMode controlModeNotification = (ControlMode) command;
-                Log.i(TAG, "Control Mode angle " + controlModeNotification.getAngle());
-            }
-            else if (command.is(Command.VehicleStatus.VEHICLE_STATUS)) {
-                Log.d(TAG, "Got vehicle status");
-            }
-        }
-        catch (CommandParseException e) {
-            Log.d(TAG, "IncomingCommand parse exception ", e);
-        }
-    }
-
-    @Override
-    public void onPairingRequested(ConnectedLink link, Constants.ApprovedCallback approvedCallback) {
-        this.pairApproveCallback = approvedCallback;
-        pairingView.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void onPairingRequestTimeout(ConnectedLink link) {
-        pairingView.setVisibility(View.GONE);
-    }
-
-    void createViews() {
-        statusTextView = (TextView) findViewById(R.id.status_textview);
-        broadcastSwitch = (Switch) findViewById(R.id.broadcast_switch);
-        broadcastSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                onBroadcastCheckedChanged();
-            }
-        });
-
-        pairingView = (LinearLayout) findViewById(R.id.pairing_view);
-        confirmPairButton = (Button) findViewById(R.id.confirm_pairing_button);
+        ButterKnife.bind(this);
+        controller = new BroadcastingViewController(this);
         confirmPairButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onPairConfirmClick();
             }
         });
-
-        pager = (ViewPager) findViewById(R.id.pager);
-        adapter = new LinkPagerAdapter(this, getSupportFragmentManager());
-        pager.setAdapter(adapter);
     }
 
-    void onLockClicked(ConnectedLink link) {
-        final LinkFragment fragment = adapter.getFragment(link);
-        ViewUtils.enableView(fragment.authView, false);
-
-        link.sendCommand(Command.DoorLocks.lockDoors(true), true, new Constants.ResponseCallback() {
-            @Override
-            public void response(int errorCode) {
-            ViewUtils.enableView(fragment.authView, true);
-            if (errorCode != 0) {
-                Log.e(TAG, "command send exception " + errorCode);
-                return;
-            }
-            // all went ok
-            }
-        });
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        controller.onDestroy();
     }
 
-    void onUnlockClicked(ConnectedLink link) {
-        final LinkFragment fragment = adapter.getFragment(link);
+    @Override
+    public void setStatusText(String text) {
+        statusTextView.setText(text);
+    }
 
-        ViewUtils.enableView(fragment.authView, false);
-        link.sendCommand(Command.DoorLocks.lockDoors(false), true, new Constants.ResponseCallback() {
-            @Override
-            public void response(int errorCode) {
-                ViewUtils.enableView(fragment.authView, true);
-                if (errorCode != 0) {
-                    Log.e(TAG, "command send exception " + errorCode);
-                    return;
-                }
-                // all went ok
-            }
-        });
+    @Override
+    public void showPairingView(boolean show) {
+        pairingView.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public Class getLinkActivityClass() {
+        return LinkView.class;
+    }
+
+    @Override
+    public void updateLink(ConnectedLink link) {
+        showButton.setVisibility(link.getState() == Link.State.AUTHENTICATED ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public Activity getActivity() {
+        return this;
     }
 }
