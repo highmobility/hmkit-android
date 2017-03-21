@@ -12,7 +12,6 @@ import com.high_mobility.HMLink.Constants;
 import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.Link;
 import com.high_mobility.HMLink.LinkListener;
-import com.high_mobility.HMLink.Shared.ScannedLink;
 import com.high_mobility.HMLink.Manager;
 import com.high_mobility.digitalkey.R;
 
@@ -22,7 +21,7 @@ import butterknife.ButterKnife;
 /**
  * Created by ttiganik on 02/06/16.
  */
-public class ScannedLinkActivity extends AppCompatActivity {
+public class ScannedLinkActivity /*extends AppCompatActivity {
     public final static String TAG = "ScannedLinkActivity";
     public final static String DEVICE_POSITION = "com.high_mobility.DEVICE_POSITION";
     ScannedLink link;
@@ -73,3 +72,4 @@ public class ScannedLinkActivity extends AppCompatActivity {
         }
     };
 }
+*/ {}

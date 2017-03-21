@@ -5,17 +5,14 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
-
-import com.high_mobility.HMLink.Shared.ScannedLink;
 
 import java.util.List;
 
 /**
  * Created by ttiganik on 02/06/16.
  */
-public class ScanListAdapter extends ArrayAdapter<ScannedLink> {
+public class ScanListAdapter /*extends ArrayAdapter<ScannedLink> {
 
     public ScanListAdapter(Context context, int resource, List<ScannedLink> devices) {
         super(context, resource, devices);
@@ -33,3 +30,4 @@ public class ScanListAdapter extends ArrayAdapter<ScannedLink> {
         return convertView;
     }
 }
+*/{}

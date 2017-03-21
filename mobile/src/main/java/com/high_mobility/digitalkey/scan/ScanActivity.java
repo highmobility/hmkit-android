@@ -15,9 +15,7 @@ import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.high_mobility.HMLink.Shared.ScannedLink;
-import com.high_mobility.HMLink.Shared.Scanner;
-import com.high_mobility.HMLink.Shared.ScannerListener;
+
 import com.high_mobility.HMLink.Manager;
 import com.high_mobility.digitalkey.R;
 
@@ -27,27 +25,18 @@ import butterknife.ButterKnife;
 /**
  * Created by ttiganik on 02/06/16.
  */
-public class ScanActivity extends AppCompatActivity implements ScannerListener {
+public class ScanActivity extends AppCompatActivity /*implements ScannerListener */{
+    /*
     private static final String TAG = "Scan";
 
     @BindView(R.id.scan_list_view) ListView listView;
     @BindView(R.id.scan_switch) Switch scanSwitch;
     @BindView(R.id.status_textview) TextView statusTextView;
 
-    Scanner scanner;
     ScanListAdapter adapter;
 
     void onScanCheckedChanged() {
-        if (scanSwitch.isChecked() && scanner.getState() != Scanner.State.SCANNING) {
-            try {
-                scanner.startScanning();
-            } catch (Link.e) {
-                e.printStackTrace();
-            }
-        }
-        else {
-            scanner.stopScanning();
-        }
+
     }
 
     @Override
@@ -71,7 +60,6 @@ public class ScanActivity extends AppCompatActivity implements ScannerListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        scanner.stopScanning();
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -97,11 +85,8 @@ public class ScanActivity extends AppCompatActivity implements ScannerListener {
     }
 
     private void didReceiveBlePermission() {
-        scanner = Manager.getInstance().getScanner();
-        scanner.setListener(this);
-        onStateChanged(scanner.getState());
 
-        adapter = new ScanListAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, scanner.getLinks());
+        //adapter = new ScanListAdapter(getApplicationContext(), android.R.layout.simple_list_item_1, scanner.getLinks());
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -145,4 +130,5 @@ public class ScanActivity extends AppCompatActivity implements ScannerListener {
     public void onDeviceExitedProximity(ScannedLink device) {
         adapter.notifyDataSetChanged();
     }
+    */
 }
