@@ -26,6 +26,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="LinkView"
+            android:parentActivityName="BroadcastActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.high_mobility.digitalkey.BroadcastActivity" />
+        </activity>
+
 
         <uses-library android:name="com.google.android.wearable" android:required="true" />
     </application>

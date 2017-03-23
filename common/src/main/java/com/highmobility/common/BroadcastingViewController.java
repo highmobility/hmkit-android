@@ -57,7 +57,12 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     }
 
     @Override
-    public void onLinkClicked(ConnectedLink link) {
+    public void onLinkClicked() {
+        if (link == null) {
+            Log.d(TAG, "link is null");
+            return;
+        }
+
         Intent intent = new Intent(view.getActivity(), view.getLinkActivityClass());
         intent.putExtra(LinkViewController.LINK_IDENTIFIER_MESSAGE, link.getSerial());
         view.getActivity().startActivity(intent);
@@ -128,7 +133,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
         if (link == this.link ) {
             if (link.getState() == Link.State.AUTHENTICATED) {
                 view.updateLink((ConnectedLink) link);
-                onLinkClicked((ConnectedLink) link);
+                onLinkClicked();
                 view.setStatusText("authenticated");
             }
             else if (link.getState() == Link.State.CONNECTED) {

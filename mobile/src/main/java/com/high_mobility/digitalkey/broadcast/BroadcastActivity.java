@@ -53,6 +53,12 @@ public class BroadcastActivity extends AppCompatActivity implements IBroadcastin
                 onPairConfirmClick();
             }
         });
+        showButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                controller.onLinkClicked();
+            }
+        });
     }
 
     @Override

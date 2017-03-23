@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.high_mobility.digitalkey.R;
 import com.highmobility.common.ILinkView;
@@ -23,6 +24,7 @@ public class LinkView extends AppCompatActivity implements ILinkView {
     private ILinkViewController controller;
     @BindView (R.id.lock_button) Button lockButton;
     @BindView (R.id.progress_bar) ProgressBar progressBar;
+    @BindView (R.id.link_status_text) TextView statusText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +50,7 @@ public class LinkView extends AppCompatActivity implements ILinkView {
         else {
             progressBar.setVisibility(View.GONE);
             lockButton.setVisibility(View.VISIBLE);
+            statusText.setText(null);
         }
     }
 
@@ -57,7 +60,7 @@ public class LinkView extends AppCompatActivity implements ILinkView {
             lockButton.setText("unlock");
         }
         else {
-            lockButton.setText("lcok");
+            lockButton.setText("lock");
         }
     }
 
