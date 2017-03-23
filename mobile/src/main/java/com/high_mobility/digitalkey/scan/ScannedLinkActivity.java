@@ -21,7 +21,7 @@ import butterknife.ButterKnife;
 /**
  * Created by ttiganik on 02/06/16.
  */
-public class ScannedLinkActivity /*extends AppCompatActivity {
+public class ScannedLinkActivity extends AppCompatActivity /*{
     public final static String TAG = "ScannedLinkActivity";
     public final static String DEVICE_POSITION = "com.high_mobility.DEVICE_POSITION";
     ScannedLink link;
