@@ -443,6 +443,9 @@ public class Broadcaster implements SharedBleListener {
             gattServerCallback = new GATTServerCallback(this);
             GATTServer = manager.ble.getManager().openGattServer(manager.ctx, gattServerCallback);
 
+            if (GATTServer == null) {
+                Log.e(TAG, "Cannot create gatt server"); return false;
+            }
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "createGATTServer");
 
             /// bluez hack service
