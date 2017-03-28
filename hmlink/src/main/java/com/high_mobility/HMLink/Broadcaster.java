@@ -118,7 +118,8 @@ public class Broadcaster implements SharedBleListener {
                         createAccessCertificateResponseCount++;
                         if (createAccessCertificateResponseCount == accessTokens.length) {
                             if (createAccessCertificateResponseStatusCode == 0) {
-                                // TODO: parse and store the certificates
+                                // TODO: put multiple request logic in cloud and return the access certificates from there
+                                // TODO: parse and store the certificates.
 
                             }
                             // dispatch the result. If previous requests have failed the code was

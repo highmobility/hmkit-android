@@ -1,5 +1,7 @@
 package com.high_mobility.HMLink.Crypto;
 
+import android.util.Base64;
+
 import com.high_mobility.HMLink.ByteUtils;
 
 import java.util.Date;
@@ -179,24 +181,35 @@ public class AccessCertificate extends Certificate {
     }
 
     /**
-     * Initialise the access certificate with raw bytes.
+     * Initialize the access certificate with raw bytes.
      *
-     * This method requires at least 93 bytes to succeed, but is not recommended
-     * for manual initialisation (instead use the alternative AccessCertificate()).
+     * This method requires at least 93 bytes to succeed.
+     * For manual initialization see the alternative constructors.
      *
      * @param bytes The bytes making up the certificate (at least 93 bytes are expected).
      * @throws IllegalArgumentException When bytes length is not correct.
      */
     public AccessCertificate(byte[] bytes) throws IllegalArgumentException {
         super(bytes);
-
-        if (bytes.length < 93) {
-            throw new IllegalArgumentException();
-        }
+        validateBytes();
     }
 
     /**
-     * Initialise the access certificate with all its attributes except Certificate Authority signature.
+     * Initialize the access certificate with raw bytes encoded in Base64.
+     *
+     * For manual initialization see the alternative constructors.
+     *
+     * @param base64Bytes The Base64 encoded bytes making up the certificate.
+     * @throws IllegalArgumentException When byte count is not correct.
+     */
+    public AccessCertificate(String base64Bytes) throws IllegalAccessException {
+        super();
+        this.bytes = Base64.decode(base64Bytes, Base64.DEFAULT);
+        validateBytes();
+    }
+
+    /**
+     * Initialize the access certificate with all its attributes except Certificate Authority signature.
      *
      * @param gainerSerial      9-byte serial number of the device that's gaining access.
      * @param gainingPublicKey  64-byte public key of the device gaining access.
@@ -230,16 +243,13 @@ public class AccessCertificate extends Certificate {
             bytes = ByteUtils.concatBytes(bytes, new byte[] {0x00});
         }
 
-        if (bytes.length < 93) {
-            throw new IllegalArgumentException();
-        }
-
         this.bytes = bytes;
+        validateBytes();
     }
 
 
     /**
-     * Initialise the access certificate with all its attributes except Certificate Authority signature.
+     * Initialize the access certificate with all its attributes except Certificate Authority signature.
      *
      * @param gainerSerial      9-byte serial number of the device that's gaining access.
      * @param gainingPublicKey  64-byte public key of the device gaining access.
@@ -256,5 +266,11 @@ public class AccessCertificate extends Certificate {
                              Date endDate,
                              byte[] permissions) throws IllegalArgumentException {
         this(gainerSerial, gainingPublicKey, providingSerial, bytesFromDate(startDate), bytesFromDate(endDate), permissions);
+    }
+
+    private void validateBytes() throws IllegalArgumentException {
+        if (bytes.length < 93) {
+            throw new IllegalArgumentException();
+        }
     }
 }
