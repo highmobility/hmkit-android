@@ -1,66 +1,74 @@
 package com.high_mobility.HMLink;
 
 import android.content.Context;
+import android.util.Base64;
+import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.high_mobility.HMLink.Crypto.Crypto;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * Created by ttiganik on 24/03/2017.
  */
-
-/*
-// create access token
-$ curl  -H "Content-Type: application/json"
-        -H "Authorization: Bearer ***REMOVED***"
-        -X POST
-        -d '{"serial_number": "C178323BE047EA9581"}'
-        https://api.high-mobility.com/hm_cloud/api/v1/38e3a98e-0c99-41ca-bbef-185822a3b431/access_certificates
-{
-    "data": {
-        "vehicle_access_certificate":"***REMOVED***",
-        "device_access_certificate":"***REMOVED***"
-    }
-}
-*/
-
 class Cloud {
+    private static final String TAG = "Cloud";
+
     private static final String telematicsServiceIdentifier = "38e3a98e-0c99-41ca-bbef-185822a3b431";
     private static final String baseUrl = "https://api.high-mobility.com";
     private static final String apiUrl = "hm_cloud/api/v1";
 
-    private static final Map<String, String> headers;
+    private static final Map<String, String> jwtHeaders;
     static {
-        headers = new HashMap<>(2);
-        headers.put("Content-Type", "application/json");
-        // TODO: get correct token
-        headers.put("Authorization", "Bearer ***REMOVED***");
+        jwtHeaders = new HashMap<>(1);
+        jwtHeaders.put("alg", "ES256");
     }
 
     RequestQueue queue;
 
-//    private static var kJWTPayloadDict: (String) -> [String : String]   = { ["access_token" : $0] }
-
     Cloud(Context context) {
+        ignoreSslErrors(); // TODO: delete at some point
         queue = Volley.newRequestQueue(context);
     }
 
-    void requestAccessCertificate(String accessToken, String telematicsServiceIdentifier, Response.Listener<JSONObject> response, Response.ErrorListener error) throws IllegalArgumentException {
+    void requestAccessCertificate(String accessToken, byte[] privateKey, byte[] serialNumber, Response.Listener<JSONObject> response, Response.ErrorListener error) throws IllegalArgumentException {
         String url = baseUrl + "/" + apiUrl + "/" + telematicsServiceIdentifier + "/access_certificates";
 
+        // headers
+        final Map<String, String> headers = new HashMap<>(2);
+        headers.put("Content-Type", "application/json");
+        try {
+            headers.put("Authorization", "Bearer " + getJwtField(accessToken, privateKey));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            error.onErrorResponse(new VolleyError("cannot create jwt"));
+        }
+
+        // payload
         JSONObject payload = new JSONObject();
         try {
-            payload.put("access_token", accessToken);
+            payload.put("serial_number", ByteUtils.hexFromBytes(serialNumber));
         } catch (JSONException e) {
             throw new IllegalArgumentException();
         }
@@ -72,6 +80,66 @@ class Cloud {
             }
         };
 
+        printRequest(request);
         queue.add(request);
+    }
+
+    private String getJwtField(String accessToken, byte[] privateKey) throws UnsupportedEncodingException {
+        String jwt = "";
+
+        // add default headers
+        JSONObject headers = new JSONObject(jwtHeaders);
+        jwt += Base64.encodeToString(headers.toString().getBytes("utf-8"), Base64.NO_WRAP | Base64.NO_PADDING);
+
+        // add payload
+        String payLoad = "{\"access_token\":\"" + accessToken + "\"}";
+        String payLoadEncoded = Base64.encodeToString(payLoad.getBytes("utf-8"), Base64.NO_WRAP | Base64.NO_PADDING);
+        jwt += "." + payLoadEncoded;
+
+        // add signature
+        byte[] signedBytes = payLoadEncoded.getBytes("utf-8");
+        byte[] signature = Crypto.sign(signedBytes, privateKey);
+        String signatureString = Base64.encodeToString(signature, Base64.NO_WRAP | Base64.NO_PADDING);
+        jwt += "." + signatureString;
+
+        return jwt;
+    }
+
+    private static void ignoreSslErrors() {
+        try {
+            TrustManager[] trustAllCerts = new TrustManager[] {
+                    new X509TrustManager() {
+                        public X509Certificate[] getAcceptedIssuers() {
+                            X509Certificate[] myTrustedAnchors = new X509Certificate[0];
+                            return myTrustedAnchors;
+                        }
+
+                        @Override
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+
+                        @Override
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+                    }
+            };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String arg0, SSLSession arg1) {
+                    return true;
+                }
+            });
+        } catch (Exception e) {
+        }
+    }
+
+    private static void printRequest(JsonObjectRequest request) {
+        try {
+            Log.d(TAG, request.getUrl().toString() + "\n" + request.getHeaders().toString() + "\n" + new String(request.getBody()));
+        } catch (AuthFailureError authFailureError) {
+            authFailureError.printStackTrace();
+        }
     }
 }

@@ -4,12 +4,12 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.support.v7.appcompat.BuildConfig;
 import android.util.Base64;
 import android.util.Log;
 
 import com.high_mobility.HMLink.Crypto.DeviceCertificate;
 import com.high_mobility.btcore.HMBTCore;
-import com.highmobility.hmlink.BuildConfig;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -48,6 +48,7 @@ public class Manager {
 
     private Scanner scanner;
     private Broadcaster broadcaster;
+    Cloud cloud;
 
     Handler mainHandler;
     Handler workHandler = null;
@@ -96,6 +97,7 @@ public class Manager {
 
         broadcaster = new Broadcaster(this);
         scanner = new Scanner(this);
+        cloud = new Cloud(applicationContext);
 
         coreInterface = new BTCoreInterface(this);
         core.HMBTCoreInit(coreInterface);

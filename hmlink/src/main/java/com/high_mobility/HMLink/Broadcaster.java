@@ -12,8 +12,12 @@ import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.high_mobility.HMLink.Crypto.AccessCertificate;
 import com.high_mobility.btcore.HMDevice;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +60,9 @@ public class Broadcaster implements SharedBleListener {
     byte[] issuer; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
     byte[] appId;
 
+    private int createAccessCertificateResponseCount = 0;
+    private int createAccessCertificateResponseStatusCode = 0;
+    private Constants.ResponseCallback createAccessCertificatesResponseCallback;
     /**
      * Sets the advertise mode for the Bluetooth's AdvertiseSettings. Default is ADVERTISE_MODE_BALANCED.
      *
@@ -88,6 +95,55 @@ public class Broadcaster implements SharedBleListener {
      */
     public State getState() {
         return state;
+    }
+
+    /**
+     * Download and store the device and vehicle access certificates for all of the given access tokens.
+     *
+     * @param accessTokens The tokens that are used to download access certificates
+     * @param callback Invoked with 0 if everything is successful, otherwise with a
+     *                 http error code or -1 if there is a connection issue.
+     */
+    public void createAccessCertificates(final String[] accessTokens, Constants.ResponseCallback callback) {
+        createAccessCertificateResponseCount = 0;
+        createAccessCertificatesResponseCallback = callback;
+
+        for (int i = 0; i < accessTokens.length; i++) {
+            String accessToken = accessTokens[i];
+
+            manager.cloud.requestAccessCertificate(accessToken, manager.privateKey, manager.certificate.getSerial(),
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        createAccessCertificateResponseCount++;
+                        if (createAccessCertificateResponseCount == accessTokens.length) {
+                            if (createAccessCertificateResponseStatusCode == 0) {
+                                // TODO: parse and store the certificates
+
+                            }
+                            // dispatch the result. If previous requests have failed the code was
+                            // stored in createAccessCertificateResponseStatusCode
+                            createAccessCertificatesResponseCallback.response(createAccessCertificateResponseStatusCode);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        createAccessCertificateResponseCount++;
+                        if (error.networkResponse != null) {
+                            createAccessCertificateResponseStatusCode = error.networkResponse.statusCode;
+                        }
+                        else {
+                            createAccessCertificateResponseStatusCode = -1;
+                        }
+
+                        if (createAccessCertificateResponseCount == accessTokens.length) {
+                            createAccessCertificatesResponseCallback.response(createAccessCertificateResponseStatusCode);
+                        }
+                    }
+                });
+        }
     }
 
     /**
