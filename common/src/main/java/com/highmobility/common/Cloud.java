@@ -1,7 +1,6 @@
-package com.high_mobility.HMLink;
+package com.highmobility.common;
 
 import android.content.Context;
-import android.util.Base64;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
@@ -11,12 +10,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.high_mobility.HMLink.Crypto.Crypto;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -30,50 +27,65 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 /**
- * Created by ttiganik on 24/03/2017.
+ * Created by ttiganik on 28/03/2017.
  */
-class Cloud {
-    private static final String TAG = "Cloud";
 
-    private static final String baseUrl = "https://console.h-m.space";
-    private static final String apiUrl = "/api/v1";
-    private static final String telematicsServiceIdentifier = "38e3a98e-0c99-41ca-bbef-185822a3b431";
-
-    private static final Map<String, String> jwtHeaders;
-    static {
-        jwtHeaders = new HashMap<>(1);
-        jwtHeaders.put("alg", "ES256");
+public class Cloud {
+    public interface Response {
+        void error(int status, String message);
+        void success(JSONObject jsonObject);
     }
+
+    private static final String TAG = "Cloud";
+//    private static final String baseUrl = "https://console.h-m.space"; // prod
+    private static final String baseUrl = "https://console.h-m.space"; // stage
+    private static final String apiUrl = "api/v1";
+    private static String url;
 
     RequestQueue queue;
 
     Cloud(Context context) {
         ignoreSslErrors(); // TODO: delete at some point
         queue = Volley.newRequestQueue(context);
+        url = baseUrl + "/" + apiUrl;
     }
 
-    void requestAccessCertificate(String accessToken, byte[] privateKey, byte[] serialNumber, Response.Listener<JSONObject> response, Response.ErrorListener error) throws IllegalArgumentException {
-        String url = baseUrl + "/" + apiUrl + "/" + telematicsServiceIdentifier + "/access_certificates";
+    public void login(String email, String password, final Response response) {
+        String url = this.url + "/login";
 
         // headers
         final Map<String, String> headers = new HashMap<>(2);
         headers.put("Content-Type", "application/json");
-        try {
-            headers.put("Authorization", "Bearer " + getJwtField(accessToken, privateKey));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            error.onErrorResponse(new VolleyError("cannot create jwt"));
-        }
 
         // payload
         JSONObject payload = new JSONObject();
         try {
-            payload.put("serial_number", ByteUtils.hexFromBytes(serialNumber));
+            payload.put("email", email);
+            payload.put("password", password);
         } catch (JSONException e) {
-            throw new IllegalArgumentException();
+            response.error(-1, "invalid arguments");
         }
 
-        JsonObjectRequest request = new JsonObjectRequest (Request.Method.POST, url, payload, response, error) {
+        com.android.volley.Response.Listener responseListener = new com.android.volley.Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                response.success(jsonObject);
+            }
+        };
+
+        com.android.volley.Response.ErrorListener errorListener = new com.android.volley.Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (error.networkResponse != null) {
+                    response.error(error.networkResponse.statusCode, "");
+                }
+                else {
+                    response.error(-1, "connection error");
+                }
+            }
+        };
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, responseListener, errorListener) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 return headers;
@@ -82,27 +94,6 @@ class Cloud {
 
         printRequest(request);
         queue.add(request);
-    }
-
-    private String getJwtField(String accessToken, byte[] privateKey) throws UnsupportedEncodingException {
-        String jwt = "";
-
-        // add default headers
-        JSONObject headers = new JSONObject(jwtHeaders);
-        jwt += Base64.encodeToString(headers.toString().getBytes("utf-8"), Base64.NO_WRAP | Base64.NO_PADDING);
-
-        // add payload
-        String payLoad = "{\"access_token\":\"" + accessToken + "\"}";
-        String payLoadEncoded = Base64.encodeToString(payLoad.getBytes("utf-8"), Base64.NO_WRAP | Base64.NO_PADDING);
-        jwt += "." + payLoadEncoded;
-
-        // add signature
-        byte[] signedBytes = payLoadEncoded.getBytes("utf-8");
-        byte[] signature = Crypto.sign(signedBytes, privateKey);
-        String signatureString = Base64.encodeToString(signature, Base64.NO_WRAP | Base64.NO_PADDING);
-        jwt += "." + signatureString;
-
-        return jwt;
     }
 
     private static void ignoreSslErrors() {

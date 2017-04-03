@@ -6,11 +6,15 @@ import android.view.View;
 
 import com.high_mobility.HMLink.Broadcaster;
 import com.high_mobility.HMLink.BroadcasterListener;
+import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.ConnectedLink;
 import com.high_mobility.HMLink.ConnectedLinkListener;
 import com.high_mobility.HMLink.Constants;
+import com.high_mobility.HMLink.Crypto.AccessCertificate;
 import com.high_mobility.HMLink.Link;
 import com.high_mobility.HMLink.Manager;
+
+import org.json.JSONObject;
 
 import static com.high_mobility.HMLink.Broadcaster.*;
 
@@ -21,15 +25,28 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     Constants.ApprovedCallback pairApproveCallback;
     Broadcaster broadcaster;
     ConnectedLink link;
+    Cloud cloud;
 
     public BroadcastingViewController(IBroadcastingView view) {
         this.view = view;
-
+        cloud = new Cloud(view.getActivity());
         initializeManager();
         broadcaster = Manager.getInstance().getBroadcaster();
         // set the broadcaster listener
         broadcaster.setListener(this);
         startBroadcasting();
+
+        cloud.login("admin@high-mobility.com", "satrap.expanse.posse", new Cloud.Response() {
+            @Override
+            public void error(int status, String message) {
+                Log.d(TAG, "error: " + status);
+            }
+
+            @Override
+            public void success(JSONObject jsonObject) {
+                Log.d(TAG, "success: " + jsonObject.toString());
+            }
+        });
     }
 
     @Override

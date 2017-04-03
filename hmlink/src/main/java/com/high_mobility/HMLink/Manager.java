@@ -4,12 +4,12 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.support.v7.appcompat.BuildConfig;
 import android.util.Base64;
 import android.util.Log;
 
 import com.high_mobility.HMLink.Crypto.DeviceCertificate;
 import com.high_mobility.btcore.HMBTCore;
+import com.highmobility.hmlink.BuildConfig;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -104,7 +104,6 @@ public class Manager {
         startClock();
         Log.i(TAG, "Initialized High-Mobility " + getInfoString() + certificate.toString());
     }
-
 
     /**
      * Initialize the SDK with the necessary properties. This needs to be done before using any
