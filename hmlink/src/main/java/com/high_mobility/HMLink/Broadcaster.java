@@ -60,9 +60,6 @@ public class Broadcaster implements SharedBleListener {
     byte[] issuer; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
     byte[] appId;
 
-    private int createAccessCertificateResponseCount = 0;
-    private int createAccessCertificateResponseStatusCode = 0;
-    private Constants.ResponseCallback createAccessCertificatesResponseCallback;
     /**
      * Sets the advertise mode for the Bluetooth's AdvertiseSettings. Default is ADVERTISE_MODE_BALANCED.
      *
@@ -98,54 +95,48 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Download and store the device and vehicle access certificates for all of the given access tokens.
+     * Download and store the device and vehicle access certificates for the given access token.
      *
-     * @param accessTokens The tokens that are used to download access certificates
-     * @param callback Invoked with 0 if everything is successful, otherwise with a
-     *                 http error code or -1 if there is a connection issue.
+     * @param accessToken The token that is used to download the certificates
+     * @param callback Invoked with 0 if everything is successful, otherwise with either a
+     *                 http error code, 1 if for a connection issue, 2 for invalid data received.
      */
-    public void createAccessCertificates(final String[] accessTokens, Constants.ResponseCallback callback) {
-        createAccessCertificateResponseCount = 0;
-        createAccessCertificatesResponseCallback = callback;
+    public void downloadAccessCertificate(String accessToken,
+                                          String telematicsServiceIdentifier,
+                                          final Constants.ResponseCallback callback) {
+        manager.cloud.requestAccessCertificate(accessToken,
+                telematicsServiceIdentifier,
+                manager.privateKey,
+                manager.certificate.getSerial(),
+        new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+            try {
+                storage.onCertificatesDownloaded(Manager.getInstance().certificate.getSerial(), response);
+                callback.response(0);
+            } catch (Exception e) {
+                Log.e(TAG, "Can't store the certificate, invalid data");
+                callback.response(2);
+            }
+            }
+        },
+        new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                int errorCode;
 
-        for (int i = 0; i < accessTokens.length; i++) {
-            String accessToken = accessTokens[i];
+                if (error.networkResponse != null) {
+                    errorCode = error.networkResponse.statusCode;
+                }
+                else {
+                    errorCode = -1;
+                }
 
-            manager.cloud.requestAccessCertificate(accessToken, manager.privateKey, manager.certificate.getSerial(),
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        createAccessCertificateResponseCount++;
-                        if (createAccessCertificateResponseCount == accessTokens.length) {
-                            if (createAccessCertificateResponseStatusCode == 0) {
-                                // TODO: put multiple request logic in cloud and return the access certificates from there
-                                // TODO: parse and store the certificates.
-
-                            }
-                            // dispatch the result. If previous requests have failed the code was
-                            // stored in createAccessCertificateResponseStatusCode
-                            createAccessCertificatesResponseCallback.response(createAccessCertificateResponseStatusCode);
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        createAccessCertificateResponseCount++;
-                        if (error.networkResponse != null) {
-                            createAccessCertificateResponseStatusCode = error.networkResponse.statusCode;
-                        }
-                        else {
-                            createAccessCertificateResponseStatusCode = -1;
-                        }
-
-                        if (createAccessCertificateResponseCount == accessTokens.length) {
-                            createAccessCertificatesResponseCallback.response(createAccessCertificateResponseStatusCode);
-                        }
-                    }
-                });
-        }
+                callback.response(errorCode);
+            }
+                      });
     }
+
 
     /**
      *

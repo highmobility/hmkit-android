@@ -10,6 +10,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 import com.high_mobility.HMLink.Crypto.Crypto;
 
@@ -37,7 +38,6 @@ class Cloud {
 
     private static final String baseUrl = "https://console.h-m.space";
     private static final String apiUrl = "/api/v1";
-    private static final String telematicsServiceIdentifier = "38e3a98e-0c99-41ca-bbef-185822a3b431";
 
     private static final Map<String, String> jwtHeaders;
     static {
@@ -52,7 +52,12 @@ class Cloud {
         queue = Volley.newRequestQueue(context);
     }
 
-    void requestAccessCertificate(String accessToken, byte[] privateKey, byte[] serialNumber, Response.Listener<JSONObject> response, Response.ErrorListener error) throws IllegalArgumentException {
+    void requestAccessCertificate(String accessToken,
+                                  String telematicsServiceIdentifier,
+                                  byte[] privateKey,
+                                  byte[] serialNumber,
+                                  final Response.Listener<JSONObject> response,
+                                  Response.ErrorListener error) throws IllegalArgumentException {
         String url = baseUrl + "/" + apiUrl + "/" + telematicsServiceIdentifier + "/access_certificates";
 
         // headers
@@ -73,7 +78,19 @@ class Cloud {
             throw new IllegalArgumentException();
         }
 
-        JsonObjectRequest request = new JsonObjectRequest (Request.Method.POST, url, payload, response, error) {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
+                    try {
+                        Log.d(TAG, "response " + jsonObject.toString(2));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                response.onResponse(jsonObject);
+            }
+        }, error) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 return headers;
@@ -135,9 +152,18 @@ class Cloud {
         }
     }
 
-    private static void printRequest(JsonObjectRequest request) {
+    private static void printRequest(JsonRequest request) {
+        if (Manager.loggingLevel.getValue() < Manager.LoggingLevel.DEBUG.getValue()) return;
         try {
-            Log.d(TAG, request.getUrl().toString() + "\n" + request.getHeaders().toString() + "\n" + new String(request.getBody()));
+            byte[] body = request.getBody();
+            String bodyString = body != null ? "\n" + new String(request.getBody()): "";
+            JSONObject headers = new JSONObject(request.getHeaders());
+
+            try {
+                Log.d(TAG, request.getUrl().toString() + "\n" + headers.toString(2) + bodyString);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         } catch (AuthFailureError authFailureError) {
             authFailureError.printStackTrace();
         }

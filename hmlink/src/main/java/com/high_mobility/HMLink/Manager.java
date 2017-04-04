@@ -159,7 +159,11 @@ public class Manager {
         return certificate;
     }
 
-    String getInfoString() {
+    /**
+     *
+     * @return A description about the SDK version name and type(mobile or wear).
+     */
+    public String getInfoString() {
         String infoString = "Android ";
         infoString += BuildConfig.VERSION_NAME;
 
