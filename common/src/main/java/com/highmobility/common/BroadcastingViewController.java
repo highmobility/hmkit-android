@@ -35,18 +35,6 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
         // set the broadcaster listener
         broadcaster.setListener(this);
         startBroadcasting();
-
-        cloud.login("admin@high-mobility.com", "satrap.expanse.posse", new Cloud.Response() {
-            @Override
-            public void error(int status, String message) {
-                Log.d(TAG, "error: " + status);
-            }
-
-            @Override
-            public void success(JSONObject jsonObject) {
-                Log.d(TAG, "success: " + jsonObject.toString());
-            }
-        });
     }
 
     @Override
