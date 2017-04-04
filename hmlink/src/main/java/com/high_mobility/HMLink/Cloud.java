@@ -40,6 +40,8 @@ class Cloud {
     private static final String apiUrl = "/api/v1";
 
     private static final Map<String, String> jwtHeaders;
+    public static String telematicsServiceIdentifier = "38e3a98e-0c99-41ca-bbef-185822a3b431";
+
     static {
         jwtHeaders = new HashMap<>(1);
         jwtHeaders.put("alg", "ES256");
