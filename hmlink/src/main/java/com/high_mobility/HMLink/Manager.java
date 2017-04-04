@@ -48,6 +48,7 @@ public class Manager {
 
     private Scanner scanner;
     private Broadcaster broadcaster;
+    Cloud cloud;
 
     Handler mainHandler;
     Handler workHandler = null;
@@ -96,13 +97,13 @@ public class Manager {
 
         broadcaster = new Broadcaster(this);
         scanner = new Scanner(this);
+        cloud = new Cloud(applicationContext);
 
         coreInterface = new BTCoreInterface(this);
         core.HMBTCoreInit(coreInterface);
         startClock();
         Log.i(TAG, "Initialized High-Mobility " + getInfoString() + certificate.toString());
     }
-
 
     /**
      * Initialize the SDK with the necessary properties. This needs to be done before using any
@@ -158,7 +159,11 @@ public class Manager {
         return certificate;
     }
 
-    String getInfoString() {
+    /**
+     *
+     * @return A description about the SDK version name and type(mobile or wear).
+     */
+    public String getInfoString() {
         String infoString = "Android ";
         infoString += BuildConfig.VERSION_NAME;
 

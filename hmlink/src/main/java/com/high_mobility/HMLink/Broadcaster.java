@@ -12,8 +12,12 @@ import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.high_mobility.HMLink.Crypto.AccessCertificate;
 import com.high_mobility.btcore.HMDevice;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,6 +95,50 @@ public class Broadcaster implements SharedBleListener {
     public State getState() {
         return state;
     }
+
+    /**
+     * Download and store the device and vehicle access certificates for the given access token.
+     *
+     * @param accessToken The token that is used to download the certificates
+     * @param callback Invoked with 0 if everything is successful, otherwise with either a
+     *                 http error code, 1 if for a connection issue, 2 for invalid data received.
+     */
+    public void downloadAccessCertificate(String accessToken,
+                                          String telematicsServiceIdentifier,
+                                          final Constants.ResponseCallback callback) {
+        manager.cloud.requestAccessCertificate(accessToken,
+                telematicsServiceIdentifier,
+                manager.privateKey,
+                manager.certificate.getSerial(),
+        new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+            try {
+                storage.onCertificatesDownloaded(Manager.getInstance().certificate.getSerial(), response);
+                callback.response(0);
+            } catch (Exception e) {
+                Log.e(TAG, "Can't store the certificate, invalid data");
+                callback.response(2);
+            }
+            }
+        },
+        new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                int errorCode;
+
+                if (error.networkResponse != null) {
+                    errorCode = error.networkResponse.statusCode;
+                }
+                else {
+                    errorCode = -1;
+                }
+
+                callback.response(errorCode);
+            }
+                      });
+    }
+
 
     /**
      *

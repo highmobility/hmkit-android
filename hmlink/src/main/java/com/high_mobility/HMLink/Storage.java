@@ -7,6 +7,9 @@ import android.util.Log;
 import com.high_mobility.HMLink.Crypto.AccessCertificate;
 import com.high_mobility.HMLink.Crypto.Certificate;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -29,6 +32,24 @@ class Storage {
         settings = ctx.getSharedPreferences("com.hm.wearable.UserPrefs",
                 Context.MODE_PRIVATE);
         editor = settings.edit();
+    }
+
+    void onCertificatesDownloaded(byte[] deviceSerial, JSONObject response) throws Exception {
+        JSONObject data = response.getJSONObject("data");
+        String vehicleAccessCertificateBase64 = data.getString("vehicle_access_certificate");
+        String deviceAccessCertificateBase64 = data.getString("device_access_certificate");
+        AccessCertificate vehicleAccessCertificate = new AccessCertificate(vehicleAccessCertificateBase64);
+        AccessCertificate deviceAccessCertificate = new AccessCertificate(deviceAccessCertificateBase64);
+        if (Arrays.equals(deviceSerial, deviceAccessCertificate.getProviderSerial()) == false) {
+            throw new Exception();
+        }
+        if (storeCertificate(vehicleAccessCertificate) != 0) {
+            throw new Exception();
+        }
+        if (storeCertificate(deviceAccessCertificate) != 0) {
+            deleteCertificate(vehicleAccessCertificate);
+            throw new Exception();
+        }
     }
 
     AccessCertificate[] getCertificates() {
@@ -220,6 +241,7 @@ class Storage {
 
         if (certs.length >= Constants.certificateStorageCount) return Link.STORAGE_FULL;
 
+        // delete existing cert with same serials
         for (int i = 0; i < certs.length; i++) {
             AccessCertificate cert = certs[i];
             if (Arrays.equals(cert.getGainerSerial(), certificate.getGainerSerial())
