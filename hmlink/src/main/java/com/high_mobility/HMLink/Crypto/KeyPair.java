@@ -1,5 +1,7 @@
 package com.high_mobility.HMLink.Crypto;
 
+import android.util.Base64;
+
 /**
  * Created by ttiganik on 26/05/16.
  */
@@ -16,7 +18,15 @@ public class KeyPair {
         return publicKey;
     }
 
+    public String getPublicKeyBase64() {
+        return new String(Base64.encode(publicKey, Base64.DEFAULT));
+    }
+
     public byte[] getPrivateKey() {
         return privateKey;
+    }
+
+    public String getPrivateKeyBase64() {
+        return new String(Base64.encode(privateKey, Base64.DEFAULT));
     }
 }
