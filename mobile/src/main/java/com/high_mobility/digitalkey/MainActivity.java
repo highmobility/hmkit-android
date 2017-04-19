@@ -22,16 +22,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // this activity will be used if scanning is possible with the sdk as well.
+        // atm broadcasting activity is just launched
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-        Manager.getInstance().initialize(
-                "***REMOVED***",
-                "***REMOVED***=",
-                "***REMOVED***==",
-                getApplicationContext()
-        );
 
         Intent intent = new Intent(this, BroadcastActivity.class);
         startActivity(intent);
