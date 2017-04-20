@@ -20,7 +20,8 @@
   /Users/maiduule/Workspace/android-sdk/hmlink/src/main/jni/openssl/evp.h \
   /Users/maiduule/Workspace/android-sdk/hmlink/src/main/jni/openssl/objects.h \
   /Users/maiduule/Workspace/android-sdk/hmlink/src/main/jni/openssl/obj_mac.h \
-  /Users/maiduule/Workspace/android-sdk/hmlink/src/main/jni/openssl/sha.h
+  /Users/maiduule/Workspace/android-sdk/hmlink/src/main/jni/openssl/sha.h \
+  /Users/maiduule/Workspace/android-sdk/hmlink/src/main/jni/openssl/rand.h
 
 ../../../../crypto-c/Crypto/Crypto.h:
 
@@ -63,3 +64,5 @@
 /Users/maiduule/Workspace/android-sdk/hmlink/src/main/jni/openssl/obj_mac.h:
 
 /Users/maiduule/Workspace/android-sdk/hmlink/src/main/jni/openssl/sha.h:
+
+/Users/maiduule/Workspace/android-sdk/hmlink/src/main/jni/openssl/rand.h:

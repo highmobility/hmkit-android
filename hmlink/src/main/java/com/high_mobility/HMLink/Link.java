@@ -158,8 +158,12 @@ public class Link {
             Log.d(TAG, "can't dispatch notification: no listener set");
             return;
         }
-
-        listener.onCommandReceived(Link.this, bytes);
+        manager.mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                listener.onCommandReceived(Link.this, bytes);
+            }
+        });
     }
 
     void onCommandResponseReceived(final byte[] data) {
