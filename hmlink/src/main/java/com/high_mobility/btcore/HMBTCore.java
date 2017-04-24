@@ -45,6 +45,8 @@ public class HMBTCore {
     //TT
     public native void HMBTCorelinkIncomingData(HMBTCoreInterface coreInterface, byte[] data, int size, byte[] mac, int characteristic);
 
+    public native void HMBTCorelinkWriteResponse(HMBTCoreInterface coreInterface, byte[] mac, int characteristic);
+
     public native void HMBTCoreSendCustomCommand(HMBTCoreInterface coreInterface, byte[] data, int size, byte[] mac);
 
     public native void HMBTCoreSendReadDeviceCertificate(HMBTCoreInterface coreInterface, byte[] mac, byte[] nonce, byte[] caSignature);

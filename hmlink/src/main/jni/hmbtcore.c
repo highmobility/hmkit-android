@@ -211,6 +211,17 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCorelinkIncomingData(JNIEnv *env, jo
 }
 
 JNIEXPORT void JNICALL
+Java_com_high_1mobility_btcore_HMBTCore_HMBTCorelinkWriteResponse(JNIEnv *env, jobject instance,jobject coreInterface,
+                                                                 jbyteArray mac_,jint characteriistic_) {
+    prepareCallbackFunctions(env,instance,coreInterface);
+    jbyte *mac = (*env)->GetByteArrayElements(env, mac_, NULL);
+
+    hm_bt_core_link_write_response(mac,characteriistic_);
+
+    (*env)->ReleaseByteArrayElements(env, mac_, mac, 0);
+}
+
+JNIEXPORT void JNICALL
 Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSendCustomCommand(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                   jbyteArray data_, jint size,
                                                                   jbyteArray mac_) {
