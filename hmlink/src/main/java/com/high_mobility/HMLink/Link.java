@@ -75,13 +75,11 @@ public class Link {
                 Runnable callback = new Runnable() {
                     @Override
                     public void run() {
-                        linkPointer.listener.onStateChanged(linkPointer, oldState);
+                    linkPointer.listener.onStateChanged(linkPointer, oldState);
                     }
                 };
-
-                int delay = 100;
-                Log.d(TAG, "setState: postDelayed " + delay);
-                manager.mainHandler.postDelayed(callback, delay);
+                
+                manager.mainHandler.post(callback);
             }
         }
     }
