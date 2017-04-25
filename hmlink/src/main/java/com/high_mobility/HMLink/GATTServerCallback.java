@@ -50,12 +50,17 @@ class GATTServerCallback extends BluetoothGattServerCallback {
 
         byte[] value = characteristic.getValue();
         byte[] offsetBytes = Arrays.copyOfRange(value, offset, value.length);
+        int characteristicId = getCharacteristicIdForCharacteristic(characteristic);
 
         broadcaster.GATTServer.sendResponse(device,
                 requestId,
                 BluetoothGatt.GATT_SUCCESS,
                 offset,
                 offsetBytes);
+
+        broadcaster.manager.core.HMBTCorelinkWriteResponse(broadcaster.manager.coreInterface,
+                ByteUtils.bytesFromMacString(device.getAddress()),
+                characteristicId);
     }
 
     @Override
