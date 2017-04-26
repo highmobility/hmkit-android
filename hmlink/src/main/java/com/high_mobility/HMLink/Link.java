@@ -72,13 +72,14 @@ public class Link {
 
             if (listener != null) {
                 final Link linkPointer = this;
-
-                manager.mainHandler.post(new Runnable() {
+                Runnable callback = new Runnable() {
                     @Override
                     public void run() {
-                        linkPointer.listener.onStateChanged(linkPointer, oldState);
+                    linkPointer.listener.onStateChanged(linkPointer, oldState);
                     }
-                });
+                };
+                
+                manager.mainHandler.post(callback);
             }
         }
     }

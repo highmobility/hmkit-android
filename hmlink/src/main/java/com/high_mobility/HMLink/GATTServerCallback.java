@@ -42,7 +42,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
     }
 
     @Override
-    public void onCharacteristicReadRequest(BluetoothDevice device,
+    public void onCharacteristicReadRequest(final BluetoothDevice device,
                                             int requestId,
                                             int offset,
                                             BluetoothGattCharacteristic characteristic) {
@@ -50,12 +50,22 @@ class GATTServerCallback extends BluetoothGattServerCallback {
 
         byte[] value = characteristic.getValue();
         byte[] offsetBytes = Arrays.copyOfRange(value, offset, value.length);
+        final int characteristicId = getCharacteristicIdForCharacteristic(characteristic);
 
         broadcaster.GATTServer.sendResponse(device,
                 requestId,
                 BluetoothGatt.GATT_SUCCESS,
                 offset,
                 offsetBytes);
+        broadcaster.manager.workHandler.post(
+                new Runnable() {
+                     @Override
+                     public void run() {
+                         broadcaster.manager.core.HMBTCorelinkWriteResponse(broadcaster.manager.coreInterface,
+                                 ByteUtils.bytesFromMacString(device.getAddress()),
+                                 characteristicId);
+                     }
+                 });
     }
 
     @Override
