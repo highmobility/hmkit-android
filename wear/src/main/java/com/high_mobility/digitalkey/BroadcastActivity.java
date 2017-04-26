@@ -2,8 +2,6 @@ package com.high_mobility.digitalkey;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.wearable.activity.WearableActivity;
 import android.view.View;
 import android.view.WindowManager;
