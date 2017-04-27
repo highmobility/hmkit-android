@@ -20,6 +20,7 @@ jmethodID *interfaceMethodHMBTHalDisconnect;
 jmethodID *interfaceMethodHMBTHalServiceDiscovery;
 jmethodID *interfaceMethodHMBTHalWriteData;
 jmethodID *interfaceMethodHMBTHalReadData;
+jmethodID *interfaceMethodHMBTHalTelematicsSendData;
 
 jmethodID *interfaceMethodHMPersistenceHalgetSerial;
 jmethodID *interfaceMethodHMPersistenceHalgetLocalPublicKey;
@@ -42,5 +43,6 @@ jmethodID *interfaceMethodHMApiCallbackCustomCommandIncoming;
 jmethodID *interfaceMethodHMApiCallbackCustomCommandResponse;
 jmethodID *interfaceMethodHMApiCallbackGetDeviceCertificateFailed;
 jmethodID *interfaceMethodHMApiCallbackPairingRequested;
+jmethodID *interfaceMethodHMApiCallbackTelematicsIncomingCommand;
 
 #endif //ANDROID_WEAR_DIGITAL_KEY_HMBTCORE_H
