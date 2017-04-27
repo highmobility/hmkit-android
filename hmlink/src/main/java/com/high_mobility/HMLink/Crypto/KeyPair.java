@@ -19,7 +19,7 @@ public class KeyPair {
     }
 
     public String getPublicKeyBase64() {
-        return new String(Base64.encode(publicKey, Base64.DEFAULT));
+        return new String(Base64.encode(publicKey, Base64.NO_WRAP));
     }
 
     public byte[] getPrivateKey() {
@@ -27,6 +27,6 @@ public class KeyPair {
     }
 
     public String getPrivateKeyBase64() {
-        return new String(Base64.encode(privateKey, Base64.DEFAULT));
+        return new String(Base64.encode(privateKey, Base64.NO_WRAP));
     }
 }
