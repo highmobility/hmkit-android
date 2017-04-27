@@ -5,6 +5,7 @@
 #include "Crypto.h"
 #include "hm_bt_debug_hal.h"
 #include "hm_cert.h"
+#include "hm_api.h"
 
 void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterface){
 
@@ -20,6 +21,7 @@ void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterfa
     interfaceMethodHMBTHalServiceDiscovery = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalServiceDiscovery","([B)I");
     interfaceMethodHMBTHalWriteData = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalWriteData","([BI[BI)I");
     interfaceMethodHMBTHalReadData = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalReadData","([BII)I");
+    interfaceMethodHMBTHalTelematicsSendData = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalTelematicsSendData","([BI[B)I");
 
     interfaceMethodHMPersistenceHalgetSerial = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetSerial","([B)I");
     interfaceMethodHMPersistenceHalgetLocalPublicKey = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetLocalPublicKey","([B)I");
@@ -42,6 +44,7 @@ void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterfa
     interfaceMethodHMApiCallbackCustomCommandResponse = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackCustomCommandResponse","(Lcom/high_mobility/btcore/HMDevice;[BI)V");
     interfaceMethodHMApiCallbackGetDeviceCertificateFailed = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackGetDeviceCertificateFailed","(Lcom/high_mobility/btcore/HMDevice;[B)I");
     interfaceMethodHMApiCallbackPairingRequested = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackPairingRequested","(Lcom/high_mobility/btcore/HMDevice;)I");
+    interfaceMethodHMApiCallbackTelematicsIncomingCommand = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackTelematicsIncomingCommand","(Lcom/high_mobility/btcore/HMDevice;II[B)V");
 
     envRef = env;
     coreInterfaceRef = coreInterface;
@@ -291,4 +294,28 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreCryptoAddSignature(JNIEnv *env, 
     (*env)->ReleaseByteArrayElements(env, data_, data, 0);
     (*env)->ReleaseByteArrayElements(env, privateKey_, private, 0);
     (*env)->ReleaseByteArrayElements(env, signature_, signature, 0);
+}
+
+JNIEXPORT void JNICALL
+Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreTelematicsReceiveData(JNIEnv *env, jobject instance,
+                                                                      jint length, jbyteArray data_) {
+
+    jbyte *data = (*env)->GetByteArrayElements(env, data_, NULL);
+
+    hm_bt_core_telematics_receive_data(length, data);
+
+    (*env)->ReleaseByteArrayElements(env, data_, data, 0);
+}
+
+JNIEXPORT void JNICALL
+Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSendTelematicsCommand(JNIEnv *env, jobject instance,
+                                                                      jbyteArray serial_, jint length, jbyteArray data_) {
+
+    jbyte *serial = (*env)->GetByteArrayElements(env, serial_, NULL);
+    jbyte *data = (*env)->GetByteArrayElements(env, data_, NULL);
+
+    hm_api_send_telematics_command(serial, length, data);
+
+    (*env)->ReleaseByteArrayElements(env, data_, data, 0);
+    (*env)->ReleaseByteArrayElements(env, serial_, serial, 0);
 }

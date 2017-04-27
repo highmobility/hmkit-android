@@ -38,6 +38,8 @@ public interface HMBTCoreInterface {
     //Read data from peripheral
     int HMBTHalReadData(byte[] mac, int offset, int characteristic);
 
+    int HMBTHalTelematicsSendData(byte[] serial, int length, byte[] data);
+
     //PERSISTENCE HAL
 
     //Get current device serial number
@@ -93,4 +95,6 @@ public interface HMBTCoreInterface {
     void HMApiCallbackCustomCommandResponse(HMDevice device, byte[] data, int length);
     int HMApiCallbackGetDeviceCertificateFailed(HMDevice device, byte[] nonce); //ret false on, et ei jätka
     int HMApiCallbackPairingRequested(HMDevice device); //ret false on, et ei jätka
+
+    void HMApiCallbackTelematicsCommandIncoming(HMDevice device, int id, int length, byte[] data);
 }

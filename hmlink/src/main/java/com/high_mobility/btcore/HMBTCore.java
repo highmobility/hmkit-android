@@ -56,4 +56,8 @@ public class HMBTCore {
     public native void HMBTCoreCryptoCreateKeys(byte[] privateKey, byte[] publicKey);
 
     public native void HMBTCoreCryptoAddSignature(byte[] data, int size, byte[] privateKey, byte[] signature);
+
+    //Telematics
+    public native void HMBTCoreTelematicsReceiveData(int length, byte[] data);
+    public native void HMBTCoreSendTelematicsCommand(byte[] serial, int length, byte[] data);
 }
