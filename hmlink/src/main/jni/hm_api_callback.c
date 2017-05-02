@@ -253,5 +253,5 @@ void hm_api_callback_telematics_command_incoming(hm_device_t *device, uint8_t id
     jbyteArray data_ = (*envRef)->NewByteArray(envRef,length);
     (*envRef)->SetByteArrayRegion(envRef, data_, 0, length, (const jbyte*) data );
 
-    (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackTelematicsIncomingCommand, obj, id, length, data_);
+    (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackTelematicsCommandIncoming, obj, id, length, data_);
 }

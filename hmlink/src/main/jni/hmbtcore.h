@@ -43,6 +43,6 @@ jmethodID *interfaceMethodHMApiCallbackCustomCommandIncoming;
 jmethodID *interfaceMethodHMApiCallbackCustomCommandResponse;
 jmethodID *interfaceMethodHMApiCallbackGetDeviceCertificateFailed;
 jmethodID *interfaceMethodHMApiCallbackPairingRequested;
-jmethodID *interfaceMethodHMApiCallbackTelematicsIncomingCommand;
+jmethodID *interfaceMethodHMApiCallbackTelematicsCommandIncoming;
 
 #endif //ANDROID_WEAR_DIGITAL_KEY_HMBTCORE_H
