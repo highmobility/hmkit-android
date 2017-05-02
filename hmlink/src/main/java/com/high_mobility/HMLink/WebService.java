@@ -12,6 +12,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
+import com.high_mobility.HMLink.Crypto.AccessCertificate;
 import com.high_mobility.HMLink.Crypto.Crypto;
 
 import org.json.JSONException;
@@ -33,10 +34,10 @@ import javax.net.ssl.X509TrustManager;
 /**
  * Created by ttiganik on 24/03/2017.
  */
-class Cloud {
+class WebService {
     static String telematicsServiceIdentifier = "38e3a98e-0c99-41ca-bbef-185822a3b431";
 
-    private static final String TAG = "Cloud";
+    private static final String TAG = "WebService";
 
     private static final String baseUrl = "https://console.h-m.space";
     private static final String apiUrl = "/api/v1";
@@ -50,7 +51,7 @@ class Cloud {
 
     RequestQueue queue;
 
-    Cloud(Context context) {
+    WebService(Context context) {
         ignoreSslErrors(); // TODO: delete at some point
         queue = Volley.newRequestQueue(context);
     }
@@ -102,6 +103,11 @@ class Cloud {
 
         printRequest(request);
         queue.add(request);
+    }
+
+    void sendTelematicsCommand(byte[] command, byte[] serial, byte[] issuer, Constants.TelematicsResponseCallback callback) {
+        // TODO:
+
     }
 
     private String getJwtField(String accessToken, byte[] privateKey) throws UnsupportedEncodingException {

@@ -8,7 +8,6 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.high_mobility.HMLink.Crypto.DeviceCertificate;
-import com.high_mobility.HMLink.Telematics.Telematics;
 import com.high_mobility.btcore.HMBTCore;
 import com.highmobility.hmlink.BuildConfig;
 
@@ -49,8 +48,7 @@ public class Manager {
 
     private Scanner scanner;
     private Broadcaster broadcaster;
-    private Telematics telematics;
-    Cloud cloud;
+    WebService webService;
 
     Handler mainHandler;
     Handler workHandler = null;
@@ -99,7 +97,7 @@ public class Manager {
 
         broadcaster = new Broadcaster(this);
         scanner = new Scanner(this);
-        cloud = new Cloud(applicationContext);
+        webService = new WebService(applicationContext);
 
         coreInterface = new BTCoreInterface(this);
         core.HMBTCoreInit(coreInterface);
@@ -141,10 +139,6 @@ public class Manager {
      */
     public Broadcaster getBroadcaster() {
         return broadcaster;
-    }
-
-    public Telematics getTelematics() {
-        return telematics;
     }
 
     /**
