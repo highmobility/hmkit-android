@@ -1,4 +1,4 @@
-package com.high_mobility.HMLink;
+package com.high_mobility.HMLink.Telematics;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
