@@ -227,5 +227,31 @@ uint32_t hm_api_callback_pairing_requested(hm_device_t *device){
 }
 
 void hm_api_callback_telematics_command_incoming(hm_device_t *device, uint8_t id, uint16_t length, uint8_t *data){
+    jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
+    jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
+    jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
+    jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
+    jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
+    jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setAppId", "([B)V");
 
+    jobject obj = (*envRef)->NewObject(envRef,cls, constructor);
+
+    jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
+    (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jint*) device->mac );
+
+    jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
+    (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jint*) device->serial_number );
+
+    jbyteArray appid_ = (*envRef)->NewByteArray(envRef,12);
+    (*envRef)->SetByteArrayRegion(envRef, appid_, 0, 12, (const jint*) device->app_id );
+
+    (*envRef)->CallVoidMethod(envRef, obj, setMac, mac_);
+    (*envRef)->CallVoidMethod(envRef, obj, setSerial, serial_);
+    (*envRef)->CallVoidMethod(envRef, obj, setIsAuthenticated, device->is_authorised);
+    (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
+
+    jbyteArray data_ = (*envRef)->NewByteArray(envRef,length);
+    (*envRef)->SetByteArrayRegion(envRef, data_, 0, length, (const jbyte*) data );
+
+    (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackTelematicsCommandIncoming, obj, id, length, data_);
 }

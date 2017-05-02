@@ -86,6 +86,13 @@ class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
+    public int HMBTHalTelematicsSendData(byte[] serial, int length, byte[] data) {
+        //TODO TELEMATICS
+        //Siin edasta kogu data edasi serverile. Data osa on krüptitud juba.
+        return 0;
+    }
+
+    @Override
     public int HMPersistenceHalgetSerial(byte[] serial) {
         copyBytesToJNI(manager.getCertificate().getSerial(), serial);
         return 0;
@@ -321,6 +328,15 @@ class BTCoreInterface implements HMBTCoreInterface {
     @Override
     public int HMApiCallbackPairingRequested(HMDevice device) {
         return manager.getBroadcaster().didReceivePairingRequest(device);
+    }
+
+    @Override
+    public void HMApiCallbackTelematicsCommandIncoming(HMDevice device, int id, int length, byte[] data) {
+        //TODO TELEMATICS
+        //Siia tuleb sisse callback kus on data lahti krüptitud
+        //device omab serial numbrit kust data tuli
+        //id on sissetuleva commandi id. Hetkel on kas crypto container 0x36 või siis error 0x02
+        //Data on sissetulev data. Kui error siis error pakett
     }
 
     void copyBytesToJNI(byte[] from, byte[] to) {
