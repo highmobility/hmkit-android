@@ -41,6 +41,7 @@ class WebService {
 
     private static final String baseUrl = "https://console.h-m.space";
     private static final String apiUrl = "/api/v1";
+    private static final String telematicsUrl = baseUrl + "/hm_cloud" + apiUrl;
 
     private static final Map<String, String> jwtHeaders;
 
@@ -105,9 +106,83 @@ class WebService {
         queue.add(request);
     }
 
-    void sendTelematicsCommand(byte[] command, byte[] serial, byte[] issuer, Constants.TelematicsResponseCallback callback) {
-        // TODO:
+    void sendTelematicsCommand(byte[] command, byte[] serial, byte[] issuer, final Response.Listener<JSONObject> response, Response.ErrorListener error) {
+        String url = telematicsUrl + "/telematics_commands";
+        // headers
+        final Map<String, String> headers = new HashMap<>(2);
+        headers.put("Content-Type", "application/json");
 
+        // payload
+        JSONObject payload = new JSONObject();
+        try {
+            payload.put("serial_number", Base64.encode(serial, Base64.NO_WRAP));
+            payload.put("issuer", Base64.encode(issuer, Base64.NO_WRAP));
+            payload.put("data", Base64.encode(command, Base64.NO_WRAP));
+        } catch (JSONException e) {
+            throw new IllegalArgumentException();
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
+                    try {
+                        Log.d(TAG, "response " + jsonObject.toString(2));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                response.onResponse(jsonObject);
+            }
+        }, error) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                return headers;
+            }
+        };
+
+        printRequest(request);
+        queue.add(request);
+    }
+
+    void getNonce(byte[] serial, final Response.Listener<JSONObject> response, Response.ErrorListener error) {
+        String url = telematicsUrl + "/nonces";
+
+        // headers
+        final Map<String, String> headers = new HashMap<>(2);
+        headers.put("Content-Type", "application/json");
+
+        // payload
+        JSONObject payload = new JSONObject();
+        try {
+            payload.put("serial_number", Base64.encode(serial, Base64.NO_WRAP));
+        } catch (JSONException e) {
+            throw new IllegalArgumentException();
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, telematicsUrl, payload, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
+                    try {
+                        Log.d(TAG, "response " + jsonObject.toString(2));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                response.onResponse(jsonObject);
+            }
+        }, error) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                return headers;
+            }
+        };
+
+        printRequest(request);
+        queue.add(request);
     }
 
     private String getJwtField(String accessToken, byte[] privateKey) throws UnsupportedEncodingException {

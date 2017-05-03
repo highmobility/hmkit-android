@@ -1,5 +1,10 @@
 package com.high_mobility.HMLink;
 
+import android.util.Base64;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.UUID;
 
 public class Constants {
@@ -29,19 +34,5 @@ public class Constants {
 
     public interface ResponseCallback {
         void response(int errorCode);
-    }
-
-    // Telematics command
-
-    public interface TelematicsResponseCallback {
-        void response(TelematicsResponse response);
-    }
-
-    public enum TelematicsResponseStatus { OK, TIMEOUT, ERROR }
-
-    public class TelematicsResponse {
-        public TelematicsResponseStatus status;
-        public String message;
-        public byte[] data;
     }
 }

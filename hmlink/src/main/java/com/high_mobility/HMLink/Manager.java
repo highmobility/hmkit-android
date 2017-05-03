@@ -49,6 +49,7 @@ public class Manager {
     private Scanner scanner;
     private Broadcaster broadcaster;
     WebService webService;
+    Telematics telematics;
 
     Handler mainHandler;
     Handler workHandler = null;
@@ -98,6 +99,7 @@ public class Manager {
         broadcaster = new Broadcaster(this);
         scanner = new Scanner(this);
         webService = new WebService(applicationContext);
+        telematics = new Telematics(this);
 
         coreInterface = new BTCoreInterface(this);
         core.HMBTCoreInit(coreInterface);
@@ -139,6 +141,10 @@ public class Manager {
      */
     public Broadcaster getBroadcaster() {
         return broadcaster;
+    }
+
+    public Telematics getTelematics() {
+        return telematics;
     }
 
     /**

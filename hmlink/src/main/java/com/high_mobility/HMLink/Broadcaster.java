@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.high_mobility.HMLink.Crypto.AccessCertificate;
 import com.high_mobility.btcore.HMDevice;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -339,15 +340,11 @@ public class Broadcaster implements SharedBleListener {
      *
      * @param accessToken The token that is used to download the certificates
      * @param callback Invoked with 0 if everything is successful, otherwise with either a
-     *                 http error code, 1 if for a connection issue, 2 for invalid data received.
+     *                 http error code, 1 for a connection issue, 2 for invalid data received.
      */
     public void downloadAccessCertificate(String accessToken,
                                           final Constants.ResponseCallback callback) {
         downloadAccessCertificate(accessToken, WebService.telematicsServiceIdentifier, callback);
-    }
-
-    public void sendTelematicsCommand(byte[] command, AccessCertificate certificate, Constants.TelematicsResponseCallback callback) {
-        manager.webService.sendTelematicsCommand(command, certificate.getProviderSerial(), certificate.getIssuer(), callback);
     }
 
     /**
