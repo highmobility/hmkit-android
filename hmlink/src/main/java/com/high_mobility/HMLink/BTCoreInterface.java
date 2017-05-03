@@ -7,6 +7,7 @@ import com.high_mobility.HMLink.Crypto.Crypto;
 import com.high_mobility.btcore.HMBTCoreInterface;
 import com.high_mobility.btcore.HMDevice;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 /**
@@ -337,6 +338,12 @@ class BTCoreInterface implements HMBTCoreInterface {
         //device omab serial numbrit kust data tuli
         //id on sissetuleva commandi id. Hetkel on kas crypto container 0x36 või siis error 0x02
         //Data on sissetulev data. Kui error siis error pakett
+    }
+
+    @Override
+    public void HMCryptoHalGenerateNonce(byte[] nonce) {
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(nonce);
     }
 
     void copyBytesToJNI(byte[] from, byte[] to) {

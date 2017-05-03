@@ -97,4 +97,7 @@ public interface HMBTCoreInterface {
     int HMApiCallbackPairingRequested(HMDevice device); //ret false on, et ei jätka
 
     void HMApiCallbackTelematicsCommandIncoming(HMDevice device, int id, int length, byte[] data);
+
+    //Crypto
+    void HMCryptoHalGenerateNonce(byte[] nonce);
 }

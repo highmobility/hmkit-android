@@ -46,6 +46,8 @@ void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterfa
     interfaceMethodHMApiCallbackPairingRequested = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackPairingRequested","(Lcom/high_mobility/btcore/HMDevice;)I");
     interfaceMethodHMApiCallbackTelematicsCommandIncoming = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackTelematicsCommandIncoming","(Lcom/high_mobility/btcore/HMDevice;II[B)V");
 
+    interfaceMethodHMCryptoHalGenerateNonce  = (*env)->GetMethodID(env,interfaceClassRef, "HMCryptoHalGenerateNonce","([B)V");
+
     envRef = env;
     coreInterfaceRef = coreInterface;
 }
