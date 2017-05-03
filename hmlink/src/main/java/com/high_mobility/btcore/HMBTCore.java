@@ -59,5 +59,5 @@ public class HMBTCore {
 
     //Telematics
     public native void HMBTCoreTelematicsReceiveData(int length, byte[] data);
-    public native void HMBTCoreSendTelematicsCommand(byte[] serial, int length, byte[] data);
+    public native void HMBTCoreSendTelematicsCommand(byte[] serial, byte[] nonce, int length, byte[] data);
 }

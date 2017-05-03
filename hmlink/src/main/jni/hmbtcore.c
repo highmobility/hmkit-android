@@ -311,13 +311,15 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreTelematicsReceiveData(JNIEnv *en
 
 JNIEXPORT void JNICALL
 Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSendTelematicsCommand(JNIEnv *env, jobject instance,
-                                                                      jbyteArray serial_, jint length, jbyteArray data_) {
+                                                                      jbyteArray serial_, jbyteArray nonce_, jint length, jbyteArray data_) {
 
     jbyte *serial = (*env)->GetByteArrayElements(env, serial_, NULL);
+    jbyte *nonce = (*env)->GetByteArrayElements(env, nonce_, NULL);
     jbyte *data = (*env)->GetByteArrayElements(env, data_, NULL);
 
-    hm_api_send_telematics_command(serial, length, data);
+    hm_api_send_telematics_command(serial, nonce, length, data);
 
     (*env)->ReleaseByteArrayElements(env, data_, data, 0);
+    (*env)->ReleaseByteArrayElements(env, nonce_, nonce, 0);
     (*env)->ReleaseByteArrayElements(env, serial_, serial, 0);
 }
