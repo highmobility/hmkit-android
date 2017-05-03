@@ -87,7 +87,7 @@ class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public int HMBTHalTelematicsSendData(byte[] serial, int length, byte[] data) {
+    public int HMBTHalTelematicsSendData(byte[] issuer, byte[] serial, int length, byte[] data) {
         //TODO TELEMATICS
         //Siin edasta kogu data edasi serverile. Data osa on krüptitud juba.
         return 0;

@@ -38,7 +38,7 @@ public interface HMBTCoreInterface {
     //Read data from peripheral
     int HMBTHalReadData(byte[] mac, int offset, int characteristic);
 
-    int HMBTHalTelematicsSendData(byte[] serial, int length, byte[] data);
+    int HMBTHalTelematicsSendData(byte[] issuer, byte[] serial, int length, byte[] data);
 
     //PERSISTENCE HAL
 

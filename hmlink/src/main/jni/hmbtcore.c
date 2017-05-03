@@ -21,7 +21,7 @@ void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterfa
     interfaceMethodHMBTHalServiceDiscovery = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalServiceDiscovery","([B)I");
     interfaceMethodHMBTHalWriteData = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalWriteData","([BI[BI)I");
     interfaceMethodHMBTHalReadData = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalReadData","([BII)I");
-    interfaceMethodHMBTHalTelematicsSendData = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalTelematicsSendData","([BI[B)I");
+    interfaceMethodHMBTHalTelematicsSendData = (*env)->GetMethodID(env,interfaceClassRef, "HMBTHalTelematicsSendData","([B[BI[B)I");
 
     interfaceMethodHMPersistenceHalgetSerial = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetSerial","([B)I");
     interfaceMethodHMPersistenceHalgetLocalPublicKey = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetLocalPublicKey","([B)I");
