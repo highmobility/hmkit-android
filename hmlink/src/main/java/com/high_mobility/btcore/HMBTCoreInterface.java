@@ -38,7 +38,7 @@ public interface HMBTCoreInterface {
     //Read data from peripheral
     int HMBTHalReadData(byte[] mac, int offset, int characteristic);
 
-    int HMBTHalTelematicsSendData(byte[] serial, int length, byte[] data);
+    int HMBTHalTelematicsSendData(byte[] issuer, byte[] serial, int length, byte[] data);
 
     //PERSISTENCE HAL
 
@@ -97,4 +97,7 @@ public interface HMBTCoreInterface {
     int HMApiCallbackPairingRequested(HMDevice device); //ret false on, et ei jätka
 
     void HMApiCallbackTelematicsCommandIncoming(HMDevice device, int id, int length, byte[] data);
+
+    //Crypto
+    void HMCryptoHalGenerateNonce(byte[] nonce);
 }

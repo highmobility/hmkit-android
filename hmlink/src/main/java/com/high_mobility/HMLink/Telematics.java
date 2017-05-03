@@ -36,7 +36,7 @@ public class Telematics {
      * @param certificate
      * @param callback
      */
-    public void sendTelematicsCommand(byte[] command, AccessCertificate certificate, final TelematicsResponseCallback callback) {
+    public void sendTelematicsCommand(final byte[] command, final AccessCertificate certificate, final TelematicsResponseCallback callback) {
         if (this.certificate != null) {
             TelematicsResponse response = new TelematicsResponse();
             response.status = TelematicsResponseStatus.ERROR;
@@ -45,10 +45,30 @@ public class Telematics {
             return;
         }
 
-        this.certificate = certificate;
-        this.callback = callback;
-        manager.core.HMBTCoreSendTelematicsCommand(certificate.getProviderSerial(), command.length, command);
-    }
+        manager.webService.getNonce(certificate.getProviderSerial(), new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonResponse) {
+                try {
+                    byte[] nonce = Base64.decode(jsonResponse.getString("nonce"), Base64.DEFAULT);
+                    Telematics.this.certificate = certificate;
+                    Telematics.this.callback = callback;
+                    manager.core.HMBTCoreSendTelematicsCommand(certificate.getProviderSerial(), nonce, command.length, command);
+                } catch (JSONException e) {
+                    dispatchError("Invalid nonce response from server.", callback);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                if (error.networkResponse != null) {
+                    dispatchError("HTTP error " + error.networkResponse.statusCode, callback);
+                }
+                else {
+                    dispatchError("Cannot connect to the web service. Check your internet connection", callback);
+                }
+            }
+        });
+}
 
     void onTelematicsCommandEncrypted(byte[] serial, byte[] command) {
         manager.webService.sendTelematicsCommand(command, serial, certificate.getIssuer(),
@@ -59,27 +79,19 @@ public class Telematics {
                             TelematicsResponse response = TelematicsResponse.fromResponse(jsonObject);
                             manager.core.HMBTCoreTelematicsReceiveData(response.data.length, response.data);
                         } catch (JSONException e) {
-                            TelematicsResponse response = new TelematicsResponse();
-                            response.status = TelematicsResponseStatus.ERROR;
-                            response.message = "Invalid response from server.";
-                            callback.response(response);
+                            dispatchError("Invalid response from server.", callback);
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        TelematicsResponse response = new TelematicsResponse();
-                        response.status = TelematicsResponseStatus.ERROR;
-
                         if (error.networkResponse != null) {
-                            response.message = "HTTP error " + error.networkResponse.statusCode;
+                            dispatchError("HTTP error " + error.networkResponse.statusCode, callback);
                         }
                         else {
-                            response.message = "Cannot connect to the web service. Check your internet connection";
+                            dispatchError("Cannot connect to the web service. Check your internet connection", callback);
                         }
-
-                        callback.response(response);
                     }
                 });
     }
@@ -103,6 +115,14 @@ public class Telematics {
             response.data = data;
         }
 
+        this.certificate = null;
+        callback.response(response);
+    }
+
+    void dispatchError(String message, TelematicsResponseCallback callback) {
+        TelematicsResponse response = new TelematicsResponse();
+        response.status = TelematicsResponseStatus.ERROR;
+        response.message = message;
         this.certificate = null;
         callback.response(response);
     }

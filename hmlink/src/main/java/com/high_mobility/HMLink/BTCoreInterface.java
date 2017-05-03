@@ -7,6 +7,7 @@ import com.high_mobility.HMLink.Crypto.Crypto;
 import com.high_mobility.btcore.HMBTCoreInterface;
 import com.high_mobility.btcore.HMDevice;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 /**
@@ -86,7 +87,7 @@ class BTCoreInterface implements HMBTCoreInterface {
     }
 
     @Override
-    public int HMBTHalTelematicsSendData(byte[] serial, int length, byte[] data) {
+    public int HMBTHalTelematicsSendData(byte[] issuer, byte[] serial, int length, byte[] data) {
         manager.telematics.onTelematicsCommandEncrypted(serial, data);
         return 0;
     }
@@ -332,6 +333,12 @@ class BTCoreInterface implements HMBTCoreInterface {
     @Override
     public void HMApiCallbackTelematicsCommandIncoming(HMDevice device, int id, int length, byte[] data) {
         manager.telematics.onTelematicsResponseDecrypted(device.getSerial(), (byte)id, trimmedBytes(data, length));
+    }
+
+    @Override
+    public void HMCryptoHalGenerateNonce(byte[] nonce) {
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(nonce);
     }
 
     void copyBytesToJNI(byte[] from, byte[] to) {

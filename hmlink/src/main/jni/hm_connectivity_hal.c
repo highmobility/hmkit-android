@@ -83,12 +83,15 @@ uint32_t hm_bt_hal_get_current_date_time(uint8_t day, uint8_t month, uint8_t yea
   return 0;
 }
 
-uint32_t hm_bt_hal_telematics_send_data(uint8_t *serial, uint16_t length, uint8_t *data){
+uint32_t hm_bt_hal_telematics_send_data(uint8_t *issuer, uint8_t *serial, uint16_t length, uint8_t *data){
+
+  jbyteArray issuer_ = (*envRef)->NewByteArray(envRef,4);
+  (*envRef)->SetByteArrayRegion(envRef, issuer_, 0, 4, (const jbyte*) issuer );
   jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
   (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jbyte*) serial );
 
   jbyteArray data_ = (*envRef)->NewByteArray(envRef,length);
   (*envRef)->SetByteArrayRegion(envRef, data_, 0, length, (const jbyte*) data );
 
-  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalTelematicsSendData, serial_, length, data_);
+  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalTelematicsSendData, issuer_, serial_, length, data_);
 }
