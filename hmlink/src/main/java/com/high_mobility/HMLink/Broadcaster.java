@@ -40,7 +40,7 @@ public class Broadcaster implements SharedBleListener {
     static int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
     static int txPowerLevel = AdvertiseSettings.ADVERTISE_TX_POWER_HIGH;
 
-    Storage storage;
+
     BroadcasterListener listener;
 
     Manager manager;
@@ -118,14 +118,14 @@ public class Broadcaster implements SharedBleListener {
      * @return The certificates that are registered on the Broadcaster.
      */
     public AccessCertificate[] getRegisteredCertificates() {
-        return storage.getCertificatesWithProvidingSerial(manager.certificate.getSerial());
+        return manager.storage.getCertificatesWithProvidingSerial(manager.certificate.getSerial());
     }
 
     /**
      * @return The certificates that are stored in the broadcaster's database for other devices.
      */
     public AccessCertificate[] getStoredCertificates() {
-        return storage.getCertificatesWithoutProvidingSerial(manager.certificate.getSerial());
+        return manager.storage.getCertificatesWithoutProvidingSerial(manager.certificate.getSerial());
     }
 
     /**
@@ -254,7 +254,7 @@ public class Broadcaster implements SharedBleListener {
             return Link.INTERNAL_ERROR;
         }
 
-        return storage.storeCertificate(certificate);
+        return manager.storage.storeCertificate(certificate);
     }
 
     /**
@@ -266,7 +266,7 @@ public class Broadcaster implements SharedBleListener {
      * {@link Link#INTERNAL_ERROR} if certificate is null.
      */
     public int storeCertificate(AccessCertificate certificate) {
-        return storage.storeCertificate(certificate);
+        return manager.storage.storeCertificate(certificate);
     }
 
     /**
@@ -278,87 +278,21 @@ public class Broadcaster implements SharedBleListener {
      *  {@link Link#INTERNAL_ERROR} if there are no matching certificate pairs for this serial.
      */
     public int revokeCertificate(byte[] serial) {
-        if (storage.certWithGainingSerial(serial) == null
-                || storage.certWithProvidingSerial(serial) == null) {
+        if (manager.storage.certWithGainingSerial(serial) == null
+                || manager.storage.certWithProvidingSerial(serial) == null) {
             return Link.INTERNAL_ERROR;
         }
 
-        boolean deleteFailed = false;
-        if (storage.deleteCertificateWithGainingSerial(serial) == false) deleteFailed = true;
-        if (storage.deleteCertificateWithProvidingSerial(serial) == false) deleteFailed = true;
-        if (deleteFailed) return Link.INTERNAL_ERROR;
+
+        if (manager.storage.deleteCertificateWithGainingSerial(serial) == false) return Link.INTERNAL_ERROR;
+        if (manager.storage.deleteCertificateWithProvidingSerial(serial) == false) return Link.INTERNAL_ERROR;
 
         return 0;
-    }
-
-    /**
-     * Download and store the device and vehicle access certificates for the given access token.
-     *
-     * @param accessToken The token that is used to download the certificates
-     * @param telematicsServiceIdentifier The telematics service identifier
-     * @param callback Invoked with 0 if everything is successful, otherwise with either a
-     *                 http error code, 1 if for a connection issue, 2 for invalid data received.
-     */
-    public void downloadAccessCertificate(String accessToken,
-                                          String telematicsServiceIdentifier,
-                                          final Constants.ResponseCallback callback) {
-        manager.webService.requestAccessCertificate(accessToken,
-                telematicsServiceIdentifier,
-                manager.privateKey,
-                manager.certificate.getSerial(),
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            storage.onCertificatesDownloaded(Manager.getInstance().certificate.getSerial(), response);
-                            callback.response(0);
-                        } catch (Exception e) {
-                            Log.e(TAG, "Can't store the certificate, invalid data");
-                            callback.response(2);
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        int errorCode;
-
-                        if (error.networkResponse != null) {
-                            errorCode = error.networkResponse.statusCode;
-                        }
-                        else {
-                            errorCode = -1;
-                        }
-
-                        callback.response(errorCode);
-                    }
-                });
-    }
-
-    /**
-     * Download and store the device and vehicle access certificates for the given access token.
-     *
-     * @param accessToken The token that is used to download the certificates
-     * @param callback Invoked with 0 if everything is successful, otherwise with either a
-     *                 http error code, 1 for a connection issue, 2 for invalid data received.
-     */
-    public void downloadAccessCertificate(String accessToken,
-                                          final Constants.ResponseCallback callback) {
-        downloadAccessCertificate(accessToken, WebService.telematicsServiceIdentifier, callback);
-    }
-
-    /**
-     * Deletes the saved certificates, resets the Bluetooth connection and stops broadcasting.
-     */
-    public void reset() {
-        storage.resetStorage();
-        stopBroadcasting();
     }
 
     Broadcaster(Manager manager) {
         this.manager = manager;
         manager.ble.addListener(this);
-        storage = new Storage(manager.ctx);
     }
 
     @Override

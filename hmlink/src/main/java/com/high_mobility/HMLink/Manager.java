@@ -7,10 +7,17 @@ import android.os.HandlerThread;
 import android.util.Base64;
 import android.util.Log;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.high_mobility.HMLink.Crypto.AccessCertificate;
 import com.high_mobility.HMLink.Crypto.DeviceCertificate;
 import com.high_mobility.btcore.HMBTCore;
 import com.highmobility.hmlink.BuildConfig;
 
+import org.json.JSONObject;
+
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -39,6 +46,7 @@ public class Manager {
     HMBTCore core = new HMBTCore();
     BTCoreInterface coreInterface;
     SharedBle ble;
+    Storage storage;
     Context ctx;
 
     private static Manager instance;
@@ -69,17 +77,28 @@ public class Manager {
     }
 
     /**
-     * Initialize the SDK with the necessary properties before using any other functionality.
+     * Set the application context before using any other functionality.
+     * After this, access certificate download and storage is available.
+     *
+     * @param context the application context
+     */
+    public void setContext(Context context) {
+        ctx = context;
+        storage = new Storage(ctx);
+        webService = new WebService(ctx);
+    }
+
+    /**
+     * Initialize the SDK with the necessary properties. This enables ble and telematics communication.
      *
      * @param certificate The broadcaster certificate.
      * @param privateKey 32 byte private key with elliptic curve Prime 256v1.
      * @param caPublicKey 64 byte public key of the Certificate Authority.
-     * @param applicationContext The application context
      *
      * @throws IllegalArgumentException if the parameters are invalid.
      */
-    public void initialize(DeviceCertificate certificate, byte[] privateKey, byte[] caPublicKey, Context applicationContext) throws IllegalArgumentException {
-        if (privateKey.length != 32 || caPublicKey.length != 64 || certificate == null || applicationContext == null) {
+    public void initialize(DeviceCertificate certificate, byte[] privateKey, byte[] caPublicKey) throws IllegalArgumentException {
+        if (privateKey.length != 32 || caPublicKey.length != 64 || certificate == null) {
             throw new IllegalArgumentException();
         }
 
@@ -87,7 +106,6 @@ public class Manager {
         this.certificate = certificate;
         this.privateKey = privateKey;
 
-        ctx = applicationContext;
         mainHandler = new Handler(ctx.getMainLooper());
 
         if (workThread.getState() == Thread.State.NEW)
@@ -98,7 +116,6 @@ public class Manager {
 
         broadcaster = new Broadcaster(this);
         scanner = new Scanner(this);
-        webService = new WebService(applicationContext);
         telematics = new Telematics(this);
 
         coreInterface = new BTCoreInterface(this);
@@ -114,16 +131,14 @@ public class Manager {
      * @param certificate The broadcaster certificate, in Base64.
      * @param privateKey 32 byte private key with elliptic curve Prime 256v1 in Base64.
      * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64.
-     * @param applicationContext The application context
      * @throws IllegalArgumentException
      */
-    public void initialize(String certificate, String privateKey, String issuerPublicKey,
-                           Context applicationContext) throws IllegalArgumentException {
+    public void initialize(String certificate, String privateKey, String issuerPublicKey) throws IllegalArgumentException {
         DeviceCertificate decodedCert = new DeviceCertificate(Base64.decode(certificate, Base64.DEFAULT));
 
         byte[] decodedPrivateKey = Base64.decode(privateKey, Base64.DEFAULT);
         byte[] decodedIssuer= Base64.decode(issuerPublicKey, Base64.DEFAULT);
-        initialize(decodedCert, decodedPrivateKey, decodedIssuer, applicationContext);
+        initialize(decodedCert, decodedPrivateKey, decodedIssuer);
     }
 
     /**
@@ -181,6 +196,98 @@ public class Manager {
         }
 
         return infoString;
+    }
+
+    /**
+     * Returns the certificate with the given arguments
+     * @param gainingSerial the gaining serial for the access certificate
+     * @param providingSerial the providing serial for the access certificate
+     * @return the access certificate or null if it does not exist
+     */
+    public AccessCertificate getCertificate(byte[] gainingSerial, byte[] providingSerial) {
+        AccessCertificate[] certs = storage.getCertificates();
+
+        for (int i = 0; i < certs.length; i++) {
+            AccessCertificate cert = certs[i];
+
+            if (Arrays.equals(cert.getGainerSerial(), gainingSerial)
+            && Arrays.equals(cert.getProviderSerial(), providingSerial)) {
+                return cert;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Download and store the device and vehicle access certificates for the given access token.
+     *
+     * @param accessToken The token that is used to download the certificates
+     * @param telematicsServiceIdentifier The telematics service identifier
+     * @param privateKey the private key of the device that the access cert is downloaded for
+     * @param serial the serial number of the device that the access cert is downloaded for
+     * @param callback Invoked with 0 if everything is successful, otherwise with either a
+     *                 http error code, 1 for a connection issue, 2 for invalid data received.
+     */
+    public void downloadAccessCertificate(String accessToken,
+                                          String telematicsServiceIdentifier,
+                                          byte[] privateKey,
+                                          byte[] serial,
+                                          final Constants.ResponseCallback callback) {
+        webService.requestAccessCertificate(accessToken,
+                telematicsServiceIdentifier,
+                privateKey,
+                serial,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            storage.storeDownloadedCertificates(response);
+                            callback.response(0);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Can't store the certificate, invalid data");
+                            callback.response(2);
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        int errorCode;
+
+                        if (error.networkResponse != null) {
+                            errorCode = error.networkResponse.statusCode;
+                        }
+                        else {
+                            errorCode = -1;
+                        }
+
+                        callback.response(errorCode);
+                    }
+                });
+    }
+
+    /**
+     * Download and store the device and vehicle access certificates for the given access token.
+     *
+     * @param accessToken The token that is used to download the certificates
+     * @param privateKey the private key of the device that the access cert is downloaded for
+     * @param serial the serial number of the device that the access cert is downloaded for
+     * @param callback Invoked with 0 if everything is successful, otherwise with either a
+     *                 http error code, 1 for a connection issue, 2 for invalid data received.
+     */
+    public void downloadAccessCertificate(String accessToken,
+                                          byte[] privateKey,
+                                          byte[] serial,
+                                          final Constants.ResponseCallback callback) {
+        downloadAccessCertificate(accessToken, WebService.telematicsServiceIdentifier, privateKey, serial, callback);
+    }
+
+    /**
+     * Deletes all the stored certificates.
+     */
+    public void resetStorage() {
+        storage.resetStorage();
     }
 
     private void startClock() {

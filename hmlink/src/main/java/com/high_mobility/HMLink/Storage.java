@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.high_mobility.HMLink.Broadcaster.TAG;
+
 /**
  * Created by ttiganik on 14/04/16.
  *
@@ -34,22 +36,32 @@ class Storage {
         editor = settings.edit();
     }
 
-    void onCertificatesDownloaded(byte[] deviceSerial, JSONObject response) throws Exception {
-        JSONObject data = response.getJSONObject("data");
-        String vehicleAccessCertificateBase64 = data.getString("vehicle_access_certificate");
-        String deviceAccessCertificateBase64 = data.getString("device_access_certificate");
-        AccessCertificate vehicleAccessCertificate = new AccessCertificate(vehicleAccessCertificateBase64);
-        AccessCertificate deviceAccessCertificate = new AccessCertificate(deviceAccessCertificateBase64);
-        if (Arrays.equals(deviceSerial, deviceAccessCertificate.getProviderSerial()) == false) {
-            throw new Exception();
-        }
-        if (storeCertificate(vehicleAccessCertificate) != 0) {
-            throw new Exception();
-        }
+    void storeDownloadedCertificates(JSONObject response) throws Exception {
+        if (response.has("device_access_certificate") == false) throw new Exception();
+
+        String vehicleAccessCertificateBase64, deviceAccessCertificateBase64;
+        AccessCertificate vehicleAccessCertificate, deviceAccessCertificate;
+
+        // providing device, gaining vehicle
+        deviceAccessCertificateBase64 = response.getString("device_access_certificate");
+        deviceAccessCertificate = new AccessCertificate(deviceAccessCertificateBase64);
+        Log.d(TAG, "storeDownloadedCertificates: device" + deviceAccessCertificate.toString());
         if (storeCertificate(deviceAccessCertificate) != 0) {
-            deleteCertificate(vehicleAccessCertificate);
             throw new Exception();
         }
+
+        if (response.has("vehicle_access_certificate") == true) {
+            // stored cert. this does not has to exist in the response
+            vehicleAccessCertificateBase64 = response.getString("vehicle_access_certificate");
+            vehicleAccessCertificate = new AccessCertificate(vehicleAccessCertificateBase64);
+            Log.d(TAG, "storeDownloadedCertificates: vehicle" + vehicleAccessCertificate.toString());
+            if (storeCertificate(vehicleAccessCertificate) != 0) {
+                Log.d(TAG, "storeDownloadedCertificates: " + "cannot store vehicle access cert");
+                throw new Exception();
+            }
+        }
+
+
     }
 
     AccessCertificate[] getCertificates() {
@@ -249,7 +261,7 @@ class Storage {
                 && Arrays.equals(cert.getGainerPublicKey(), certificate.getGainerPublicKey())) {
 
                 if (!deleteCertificateWithGainingSerial(certificate.getGainerSerial())) {
-                    Log.e(Broadcaster.TAG, "failed to delete existing cert");
+                    Log.e(TAG, "failed to delete existing cert");
                 }
             }
         }

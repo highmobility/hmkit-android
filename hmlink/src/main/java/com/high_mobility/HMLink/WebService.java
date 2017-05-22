@@ -39,7 +39,8 @@ class WebService {
 
     private static final String TAG = "WebService";
 
-    private static final String baseUrl = "https://console.h-m.space";
+    private static final String baseUrl = "https://od-console.h-m.space:4443";
+//    private static final String baseUrl = "https://console.h-m.space";
     private static final String apiUrl = "/api/v1";
     private static final String telematicsUrl = baseUrl + "/hm_cloud" + apiUrl;
 
@@ -63,23 +64,21 @@ class WebService {
                                   byte[] serialNumber,
                                   final Response.Listener<JSONObject> response,
                                   Response.ErrorListener error) throws IllegalArgumentException {
-        String url = baseUrl + "/" + apiUrl + "/" + telematicsServiceIdentifier + "/access_certificates";
+        String url = telematicsUrl + "/telematics_services/" + telematicsServiceIdentifier + "/access_certificate";
 
         // headers
-        final Map<String, String> headers = new HashMap<>(2);
+        final Map<String, String> headers = new HashMap<>(1);
         headers.put("Content-Type", "application/json");
-        try {
-            headers.put("Authorization", "Bearer " + getJwtField(accessToken, privateKey));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            error.onErrorResponse(new VolleyError("cannot create jwt"));
-        }
 
         // payload
         JSONObject payload = new JSONObject();
         try {
+            byte[] accessTokenBytes = accessToken.getBytes("UTF-8");
             payload.put("serial_number", ByteUtils.hexFromBytes(serialNumber));
-        } catch (JSONException e) {
+            payload.put("access_token", accessToken);
+            payload.put("signature", new String(Base64.encode(Crypto.sign(accessTokenBytes, privateKey), Base64.NO_WRAP)));
+        }
+        catch (Exception e) {
             throw new IllegalArgumentException();
         }
 
@@ -109,7 +108,7 @@ class WebService {
     void sendTelematicsCommand(byte[] command, byte[] serial, byte[] issuer, final Response.Listener<JSONObject> response, Response.ErrorListener error) {
         String url = telematicsUrl + "/telematics_commands";
         // headers
-        final Map<String, String> headers = new HashMap<>(2);
+        final Map<String, String> headers = new HashMap<>(1);
         headers.put("Content-Type", "application/json");
 
         // payload
@@ -150,7 +149,7 @@ class WebService {
         String url = telematicsUrl + "/nonces";
 
         // headers
-        final Map<String, String> headers = new HashMap<>(2);
+        final Map<String, String> headers = new HashMap<>(1);
         headers.put("Content-Type", "application/json");
 
         // payload
@@ -161,7 +160,7 @@ class WebService {
             throw new IllegalArgumentException();
         }
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, telematicsUrl, payload, new Response.Listener<JSONObject>() {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
@@ -183,27 +182,6 @@ class WebService {
 
         printRequest(request);
         queue.add(request);
-    }
-
-    private String getJwtField(String accessToken, byte[] privateKey) throws UnsupportedEncodingException {
-        String jwt = "";
-
-        // add default headers
-        JSONObject headers = new JSONObject(jwtHeaders);
-        jwt += Base64.encodeToString(headers.toString().getBytes("utf-8"), Base64.NO_WRAP | Base64.NO_PADDING);
-
-        // add payload
-        String payLoad = "{\"access_token\":\"" + accessToken + "\"}";
-        String payLoadEncoded = Base64.encodeToString(payLoad.getBytes("utf-8"), Base64.NO_WRAP | Base64.NO_PADDING);
-        jwt += "." + payLoadEncoded;
-
-        // add signature
-        byte[] signedBytes = payLoadEncoded.getBytes("utf-8");
-        byte[] signature = Crypto.sign(signedBytes, privateKey);
-        String signatureString = Base64.encodeToString(signature, Base64.NO_WRAP | Base64.NO_PADDING);
-        jwt += "." + signatureString;
-
-        return jwt;
     }
 
     private static void ignoreSslErrors() {

@@ -136,7 +136,7 @@ class BTCoreInterface implements HMBTCoreInterface {
             Log.d(TAG, "HMPersistenceHaladdPublicKey: " + ByteUtils.hexFromBytes(serial));
 
 
-            int errorCode = manager.getBroadcaster().storage.storeCertificate(cert);
+            int errorCode = manager.storage.storeCertificate(cert);
             if (errorCode != 0) {
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(TAG, "Cant register certificate: " + errorCode);
@@ -147,7 +147,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command) {
-        AccessCertificate certificate = manager.getBroadcaster().storage.certWithGainingSerial(serial);
+        AccessCertificate certificate = manager.storage.certWithGainingSerial(serial);
 
         if (certificate == null) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
@@ -167,7 +167,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetPublicKeyByIndex(int index, byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command) {
-        AccessCertificate[] certificates = manager.getBroadcaster().storage.getCertificatesWithProvidingSerial(manager.getCertificate().getSerial());
+        AccessCertificate[] certificates = manager.storage.getCertificatesWithProvidingSerial(manager.getCertificate().getSerial());
 
         if (certificates.length >= index) {
             AccessCertificate certificate = certificates[index];
@@ -189,7 +189,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetPublicKeyCount(int[] count) {
-        int certCount = manager.getBroadcaster().storage.getCertificatesWithProvidingSerial(manager.getCertificate().getSerial()).length;
+        int certCount = manager.storage.getCertificatesWithProvidingSerial(manager.getCertificate().getSerial()).length;
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "HMPersistenceHalgetPublicKeyCount " + certCount);
         count[0] = certCount;
@@ -198,7 +198,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalremovePublicKey(byte[] serial) {
-        if (manager.getBroadcaster().storage.deleteCertificateWithGainingSerial(serial)){
+        if (manager.storage.deleteCertificateWithGainingSerial(serial)){
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "HMPersistenceHalremovePublicKey success");
 
@@ -216,7 +216,7 @@ class BTCoreInterface implements HMBTCoreInterface {
     public int HMPersistenceHaladdStoredCertificate(byte[] cert, int size) {
         AccessCertificate certificate = new AccessCertificate(cert);
 
-        int errorCode = manager.getBroadcaster().storage.storeCertificate(certificate);
+        int errorCode = manager.storage.storeCertificate(certificate);
         if (errorCode != 0) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(TAG, "Cant store certificate: " + errorCode);
@@ -231,7 +231,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetStoredCertificate(byte[] serial, byte[] cert, int[] size) {
-        AccessCertificate[] storedCerts = manager.getBroadcaster().storage.getCertificatesWithoutProvidingSerial(manager.getCertificate().getSerial());
+        AccessCertificate[] storedCerts = manager.storage.getCertificatesWithoutProvidingSerial(manager.getCertificate().getSerial());
 
         for (AccessCertificate storedCert : storedCerts) {
             if (Arrays.equals(storedCert.getProviderSerial(), serial)) {
@@ -251,11 +251,11 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHaleraseStoredCertificate(byte[] serial) {
-        AccessCertificate[] storedCerts = manager.getBroadcaster().storage.getCertificatesWithoutProvidingSerial(manager.getCertificate().getSerial());
+        AccessCertificate[] storedCerts = manager.storage.getCertificatesWithoutProvidingSerial(manager.getCertificate().getSerial());
 
         for (AccessCertificate cert : storedCerts) {
             if (Arrays.equals(cert.getProviderSerial(), serial)) {
-                if (manager.getBroadcaster().storage.deleteCertificate(cert)) {
+                if (manager.storage.deleteCertificate(cert)) {
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                         Log.d(Broadcaster.TAG, "Erased stored cert for serial " + ByteUtils.hexFromBytes(serial));
 

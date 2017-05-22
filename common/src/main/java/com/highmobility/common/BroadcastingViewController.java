@@ -2,19 +2,14 @@ package com.highmobility.common;
 
 import android.content.Intent;
 import android.util.Log;
-import android.view.View;
 
 import com.high_mobility.HMLink.Broadcaster;
 import com.high_mobility.HMLink.BroadcasterListener;
-import com.high_mobility.HMLink.ByteUtils;
 import com.high_mobility.HMLink.ConnectedLink;
 import com.high_mobility.HMLink.ConnectedLinkListener;
 import com.high_mobility.HMLink.Constants;
-import com.high_mobility.HMLink.Crypto.AccessCertificate;
 import com.high_mobility.HMLink.Link;
 import com.high_mobility.HMLink.Manager;
-
-import org.json.JSONObject;
 
 import static com.high_mobility.HMLink.Broadcaster.*;
 
@@ -165,11 +160,11 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     }
 
     void initializeManager() {
+        Manager.getInstance().setContext(view.getActivity());
         Manager.getInstance().initialize(
                 "***REMOVED***",
                 "***REMOVED***=",
-                "***REMOVED***==",
-                view.getActivity()
+                "***REMOVED***=="
         );
     }
 }

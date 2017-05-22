@@ -38,7 +38,7 @@ public class Cloud {
 
     private static final String TAG = "Cloud";
 //    private static final String baseUrl = "https://console.h-m.space"; // prod
-    private static final String baseUrl = "https://console.h-m.space"; // stage
+    private static final String baseUrl = "https://od-console.h-m.space:4443"; // stage
     private static final String apiUrl = "api/v1";
     private static String url;
 

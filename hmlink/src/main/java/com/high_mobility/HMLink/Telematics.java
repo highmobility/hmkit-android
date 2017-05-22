@@ -68,7 +68,7 @@ public class Telematics {
                 }
             }
         });
-}
+    }
 
     void onTelematicsCommandEncrypted(byte[] serial, byte[] command) {
         manager.webService.sendTelematicsCommand(command, serial, certificate.getIssuer(),
