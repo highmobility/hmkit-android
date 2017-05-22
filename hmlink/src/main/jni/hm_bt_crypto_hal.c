@@ -100,7 +100,7 @@ uint32_t hm_bt_crypto_hal_hmac(uint8_t *key, uint8_t *data, uint8_t *hmac){
 uint32_t hm_bt_crypto_hal_generate_nonce(uint8_t *nonce){
   jbyteArray nonce_ = (*envRef)->NewByteArray(envRef,9);
   (*envRef)->SetByteArrayRegion(envRef, nonce_, 0, 9, (const jbyte*) nonce );
-  (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMCryptoHalGenerateNonce, nonce_);
+  (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMCryptoHalGenerateNonce, nonce_);
   jbyte* content_array = (*envRef)->GetByteArrayElements(envRef, nonce_, NULL);
   memcpy(nonce,content_array,9);
   return 0;
