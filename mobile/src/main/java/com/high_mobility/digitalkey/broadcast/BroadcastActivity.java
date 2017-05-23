@@ -1,6 +1,7 @@
 package com.high_mobility.digitalkey.broadcast;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -59,6 +60,13 @@ public class BroadcastActivity extends AppCompatActivity implements IBroadcastin
                 controller.onLinkClicked();
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == BroadcastingViewController.LINK_ACTIVITY_RESULT) {
+            controller.onLinkViewResult(requestCode);
+        }
     }
 
     @Override

@@ -16,6 +16,7 @@ import static com.high_mobility.HMLink.Broadcaster.*;
 
 public class BroadcastingViewController implements IBroadcastingViewController, BroadcasterListener, ConnectedLinkListener {
     private static final String TAG = "BroadcastingVC";
+    public static final int LINK_ACTIVITY_RESULT = 1;
     IBroadcastingView view;
 
     Constants.ApprovedCallback pairApproveCallback;
@@ -65,9 +66,14 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
 
         Intent intent = new Intent(view.getActivity(), view.getLinkActivityClass());
         intent.putExtra(LinkViewController.LINK_IDENTIFIER_MESSAGE, link.getSerial());
-        view.getActivity().startActivity(intent);
+        view.getActivity().startActivityForResult(intent, LINK_ACTIVITY_RESULT);
     }
 
+    @Override
+    public void onLinkViewResult(int result) {
+        link.setListener(this);
+        onStateChanged(link, link.getState());
+    }
     // Broadcasterlistener
 
     @Override
@@ -131,8 +137,9 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     public void onStateChanged(Link link, Link.State state) {
         Log.d(TAG, "link state changed " + link.getState());
         if (link == this.link ) {
+            view.updateLink((ConnectedLink) link);
+
             if (link.getState() == Link.State.AUTHENTICATED) {
-                view.updateLink((ConnectedLink) link);
                 onLinkClicked();
                 view.setStatusText("authenticated");
             }
