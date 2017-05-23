@@ -146,8 +146,15 @@ public class Manager {
      * This clears the Bluetooth service and unregisters all BroadcastReceivers.
      */
     public void terminate() {
+        broadcaster.stopBroadcasting();
+        broadcaster.setListener(null);
+        for (ConnectedLink link : broadcaster.getLinks()) {
+            link.setListener(null);
+        }
+
         ble.terminate();
         broadcaster.terminate();
+        coreClockTimer.cancel();
     }
 
     /**
@@ -200,6 +207,7 @@ public class Manager {
 
     /**
      * Returns the certificate with the given arguments
+     *
      * @param gainingSerial the gaining serial for the access certificate
      * @param providingSerial the providing serial for the access certificate
      * @return the access certificate or null if it does not exist
@@ -217,6 +225,17 @@ public class Manager {
         }
 
         return null;
+    }
+
+    /**
+     * Delete an access certificate.
+     *
+     * @param gainingSerial the gaining serial for the access certificate
+     * @param providingSerial the providing serial for the access certificate
+     * @return true if certificate was deleted successfully
+     */
+    public boolean deleteCertificate(byte[] gainingSerial, byte[] providingSerial) {
+        return storage.deleteCertificate(gainingSerial, providingSerial);
     }
 
     /**

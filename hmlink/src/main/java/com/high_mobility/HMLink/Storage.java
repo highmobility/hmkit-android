@@ -151,6 +151,29 @@ class Storage {
         editor.commit();
     }
 
+    boolean deleteCertificate(byte[] gainingSerial, byte[] providingSerial) {
+        AccessCertificate[] certs = getCertificates();
+
+        int removedIndex = -1;
+        for (int i = 0; i < certs.length; i++) {
+            AccessCertificate cert = certs[i];
+            if (Arrays.equals(cert.getGainerSerial(), gainingSerial) &&
+                Arrays.equals(cert.getProviderSerial(), providingSerial)) {
+                removedIndex = i;
+                break;
+            }
+        }
+
+        if (removedIndex != -1) {
+            AccessCertificate[] newCerts = removeAtIndex(removedIndex, certs);
+            setCertificates(newCerts);
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     boolean deleteCertificate(AccessCertificate certificateToDelete) {
         AccessCertificate[] certs = getCertificates();
 

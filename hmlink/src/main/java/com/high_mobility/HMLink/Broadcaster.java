@@ -9,6 +9,7 @@ import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
+import android.os.Looper;
 import android.os.ParcelUuid;
 import android.util.Log;
 
@@ -311,6 +312,8 @@ public class Broadcaster implements SharedBleListener {
             GATTServer.close();
             GATTServer = null;
         }
+
+        manager.ble.removeListener(this);
     }
 
     boolean didResolveDevice(HMDevice device) {
@@ -598,13 +601,20 @@ public class Broadcaster implements SharedBleListener {
             final State oldState = this.state;
             this.state = state;
 
-            if (listener != null) {
-                manager.mainHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
+            Runnable broadcastStateChange = new Runnable() {
+                @Override
+                public void run() {
+                    if (listener != null) {
                         listener.onStateChanged(oldState);
                     }
-                });
+                }
+            };
+
+            if (Looper.myLooper() != manager.mainHandler.getLooper()) {
+                manager.mainHandler.post(broadcastStateChange);
+            }
+            else {
+                broadcastStateChange.run();
             }
         }
     }
