@@ -299,8 +299,9 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreCryptoAddSignature(JNIEnv *env, 
 }
 
 JNIEXPORT void JNICALL
-Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreTelematicsReceiveData(JNIEnv *env, jobject instance,
+Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreTelematicsReceiveData(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                       jint length, jbyteArray data_) {
+    prepareCallbackFunctions(env,instance,coreInterface);
 
     jbyte *data = (*env)->GetByteArrayElements(env, data_, NULL);
 
@@ -310,8 +311,9 @@ Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreTelematicsReceiveData(JNIEnv *en
 }
 
 JNIEXPORT void JNICALL
-Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSendTelematicsCommand(JNIEnv *env, jobject instance,
+Java_com_high_1mobility_btcore_HMBTCore_HMBTCoreSendTelematicsCommand(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                       jbyteArray serial_, jbyteArray nonce_, jint length, jbyteArray data_) {
+    prepareCallbackFunctions(env,instance,coreInterface);
 
     jbyte *serial = (*env)->GetByteArrayElements(env, serial_, NULL);
     jbyte *nonce = (*env)->GetByteArrayElements(env, nonce_, NULL);
