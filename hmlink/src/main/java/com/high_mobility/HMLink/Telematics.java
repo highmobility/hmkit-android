@@ -45,7 +45,7 @@ public class Telematics {
             return;
         }
 
-        manager.webService.getNonce(certificate.getProviderSerial(), new Response.Listener<JSONObject>() {
+        manager.webService.getNonce(certificate.getGainerSerial(), new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonResponse) {
                 try {

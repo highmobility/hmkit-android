@@ -155,7 +155,7 @@ class WebService {
         // payload
         JSONObject payload = new JSONObject();
         try {
-            payload.put("serial_number", Base64.encode(serial, Base64.NO_WRAP));
+            payload.put("serial_number", ByteUtils.hexFromBytes(serial));
         } catch (JSONException e) {
             throw new IllegalArgumentException();
         }
