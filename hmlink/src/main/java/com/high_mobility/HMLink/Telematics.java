@@ -52,7 +52,7 @@ public class Telematics {
                     byte[] nonce = Base64.decode(jsonResponse.getString("nonce"), Base64.DEFAULT);
                     Telematics.this.certificate = certificate;
                     Telematics.this.callback = callback;
-                    manager.core.HMBTCoreSendTelematicsCommand(certificate.getProviderSerial(), nonce, command.length, command);
+                    manager.core.HMBTCoreSendTelematicsCommand(manager.coreInterface, certificate.getGainerSerial(), nonce, command.length, command);
                 } catch (JSONException e) {
                     dispatchError("Invalid nonce response from server.", callback);
                 }
@@ -77,7 +77,7 @@ public class Telematics {
                     public void onResponse(JSONObject jsonObject) {
                         try {
                             TelematicsResponse response = TelematicsResponse.fromResponse(jsonObject);
-                            manager.core.HMBTCoreTelematicsReceiveData(response.data.length, response.data);
+                            manager.core.HMBTCoreTelematicsReceiveData(manager.coreInterface, response.data.length, response.data);
                         } catch (JSONException e) {
                             dispatchError("Invalid response from server.", callback);
                         }
@@ -87,7 +87,7 @@ public class Telematics {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         if (error.networkResponse != null) {
-                            dispatchError("HTTP error " + error.networkResponse.statusCode, callback);
+                            dispatchError("HTTP error " + new String(error.networkResponse.data), callback);
                         }
                         else {
                             dispatchError("Cannot connect to the web service. Check your internet connection", callback);
