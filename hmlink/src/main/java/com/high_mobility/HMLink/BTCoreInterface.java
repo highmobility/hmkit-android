@@ -88,7 +88,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMBTHalTelematicsSendData(byte[] issuer, byte[] serial, int length, byte[] data) {
-        manager.telematics.onTelematicsCommandEncrypted(serial, data);
+        manager.telematics.onTelematicsCommandEncrypted(serial, issuer, data);
         return 0;
     }
 

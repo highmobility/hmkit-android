@@ -52,7 +52,7 @@ public class Telematics {
                     byte[] nonce = Base64.decode(jsonResponse.getString("nonce"), Base64.DEFAULT);
                     Telematics.this.certificate = certificate;
                     Telematics.this.callback = callback;
-                    manager.core.HMBTCoreSendTelematicsCommand(manager.coreInterface, certificate.getGainerSerial(), nonce, command.length, command);
+                    manager.core.HMBTCoreSendTelematicsCommand(manager.coreInterface, certificate.getProviderSerial(), nonce, command.length, command);
                 } catch (JSONException e) {
                     dispatchError("Invalid nonce response from server.", callback);
                 }
@@ -70,8 +70,8 @@ public class Telematics {
         });
     }
 
-    void onTelematicsCommandEncrypted(byte[] serial, byte[] command) {
-        manager.webService.sendTelematicsCommand(command, serial, certificate.getIssuer(),
+    void onTelematicsCommandEncrypted(byte[] serial, byte[] issuer, byte[] command) {
+        manager.webService.sendTelematicsCommand(command, serial, issuer,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {

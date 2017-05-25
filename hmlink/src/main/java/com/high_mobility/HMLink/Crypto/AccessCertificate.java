@@ -34,7 +34,7 @@ public class AccessCertificate extends Certificate {
 //        System.arraycopy(this.bytes, 0, bytes, 0, 4);
 //        return bytes;
         // TODO: this should not be hard coded
-        return new byte[] { 0x74, 0x63, 0x6D, 0x73 };
+        return new byte[] { 0x74, 0x6D, 0x63, 0x73 };
     }
     /**
      * @return The serial number of the device that's gaining access.
