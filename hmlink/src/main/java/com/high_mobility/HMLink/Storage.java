@@ -45,7 +45,7 @@ class Storage {
         // providing device, gaining vehicle
         deviceAccessCertificateBase64 = response.getString("device_access_certificate");
         deviceAccessCertificate = new AccessCertificate(deviceAccessCertificateBase64);
-        Log.d(TAG, "storeDownloadedCertificates: device" + deviceAccessCertificate.toString());
+
         if (storeCertificate(deviceAccessCertificate) != 0) {
             throw new Exception();
         }
@@ -54,7 +54,7 @@ class Storage {
             // stored cert. this does not has to exist in the response
             vehicleAccessCertificateBase64 = response.getString("vehicle_access_certificate");
             vehicleAccessCertificate = new AccessCertificate(vehicleAccessCertificateBase64);
-            Log.d(TAG, "storeDownloadedCertificates: vehicle" + vehicleAccessCertificate.toString());
+
             if (storeCertificate(vehicleAccessCertificate) != 0) {
                 Log.d(TAG, "storeDownloadedCertificates: " + "cannot store vehicle access cert");
                 throw new Exception();
