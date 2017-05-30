@@ -41,7 +41,6 @@ public class Broadcaster implements SharedBleListener {
     static int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
     static int txPowerLevel = AdvertiseSettings.ADVERTISE_TX_POWER_HIGH;
 
-
     BroadcasterListener listener;
 
     Manager manager;

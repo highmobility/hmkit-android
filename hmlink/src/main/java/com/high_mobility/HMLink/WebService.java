@@ -39,17 +39,10 @@ class WebService {
 
     private static final String TAG = "WebService";
 
-    private static final String baseUrl = "https://od-console.h-m.space:4443";
-//    private static final String baseUrl = "https://console.h-m.space";
+//    private static final String baseUrl = "https://od-console.h-m.space:4443";
+    private static final String baseUrl = "https://developers.h-m.space";
     private static final String apiUrl = "/api/v1";
     private static final String telematicsUrl = baseUrl + "/hm_cloud" + apiUrl;
-
-    private static final Map<String, String> jwtHeaders;
-
-    static {
-        jwtHeaders = new HashMap<>(1);
-        jwtHeaders.put("alg", "ES256");
-    }
 
     RequestQueue queue;
 

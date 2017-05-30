@@ -71,7 +71,7 @@ public class IncomingCommand {
         type = bytes[2];
     }
 
-    Command.Identifier getFeature() {
+    public Command.Identifier getIdentifier() {
         return feature;
     }
 
