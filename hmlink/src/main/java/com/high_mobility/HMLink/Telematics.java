@@ -61,7 +61,7 @@ public class Telematics {
             @Override
             public void onErrorResponse(VolleyError error) {
                 if (error.networkResponse != null) {
-                    dispatchError("HTTP error " + error.networkResponse.statusCode, callback);
+                    dispatchError("HTTP error " + new String(error.networkResponse.data), callback);
                 }
                 else {
                     dispatchError("Cannot connect to the web service. Check your internet connection", callback);
@@ -76,7 +76,7 @@ public class Telematics {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
                         try {
-                            TelematicsResponse response = TelematicsResponse.fromResponse(jsonObject);
+                            response = TelematicsResponse.fromResponse(jsonObject);
                             manager.core.HMBTCoreTelematicsReceiveData(manager.coreInterface, response.data.length, response.data);
                         } catch (JSONException e) {
                             dispatchError("Invalid response from server.", callback);
@@ -106,6 +106,7 @@ public class Telematics {
         //id on sissetuleva commandi id. Hetkel on kas crypto container 0x36 või siis error 0x02
         //Data on sissetulev data. Kui error siis error pakett
          */
+
         if (id == 0x02) {
             response.status = TelematicsResponseStatus.ERROR;
             response.message = "Failed to decrypt web service response.";
@@ -135,18 +136,20 @@ public class Telematics {
         static TelematicsResponse fromResponse(JSONObject jsonObject) throws JSONException {
             TelematicsResponse response = new TelematicsResponse();
             String status = jsonObject.getString("status");
-            if (status == "ok") {
+
+            if (status.equals("ok")) {
                 response.status = TelematicsResponseStatus.OK;
             }
-            else if (status == "timeout") {
+            else if (status.equals("timeout")) {
                 response.status = TelematicsResponseStatus.TIMEOUT;
             }
-            else if (status == "error") {
+            else if (status.equals("error")) {
                 response.status = TelematicsResponseStatus.ERROR;
             }
 
             response.message = jsonObject.getString("message");
-            response.data = Base64.decode(jsonObject.getString("response-data"), Base64.DEFAULT);
+            response.data = Base64.decode(jsonObject.getString("response_data"), Base64.NO_WRAP);
+
             return response;
         }
     }
