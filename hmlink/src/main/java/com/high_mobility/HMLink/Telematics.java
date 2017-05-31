@@ -22,22 +22,22 @@ public class Telematics {
 
     Manager manager;
     TelematicsResponseCallback callback;
-    AccessCertificate certificate; // TODO: delete if not necessary
     TelematicsResponse response;
+    boolean sendingCommand;
 
     Telematics(Manager manager) {
         this.manager = manager;
     }
 
-    // TODO: comment
     /**
-     * response
-     * @param command
-     * @param certificate
-     * @param callback
+     * Send a command to a device.
+     *
+     * @param command the bytes to send to the device.
+     * @param certificate the certificate that authorizes the connection with the SDK and the device.
+     * @param callback callback that is invoked with the command result
      */
     public void sendTelematicsCommand(final byte[] command, final AccessCertificate certificate, final TelematicsResponseCallback callback) {
-        if (this.certificate != null) {
+        if (sendingCommand == true) {
             TelematicsResponse response = new TelematicsResponse();
             response.status = TelematicsResponseStatus.ERROR;
             response.message = "Already sending a command";
@@ -45,12 +45,13 @@ public class Telematics {
             return;
         }
 
+        sendingCommand = true;
+
         manager.webService.getNonce(certificate.getGainerSerial(), new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonResponse) {
                 try {
                     byte[] nonce = Base64.decode(jsonResponse.getString("nonce"), Base64.DEFAULT);
-                    Telematics.this.certificate = certificate;
                     Telematics.this.callback = callback;
                     manager.core.HMBTCoreSendTelematicsCommand(manager.coreInterface, certificate.getProviderSerial(), nonce, command.length, command);
                 } catch (JSONException e) {
@@ -97,16 +98,6 @@ public class Telematics {
     }
 
     void onTelematicsResponseDecrypted(byte[] serial, byte id, byte[] data) {
-        /*
-        @Override
-    public void HMApiCallbackTelematicsCommandIncoming(HMDevice device, int id, int length, byte[] data) {
-        // TODO TELEMATICS
-        //Siia tuleb sisse callback kus on data lahti krüptitud
-        //device omab serial numbrit kust data tuli
-        //id on sissetuleva commandi id. Hetkel on kas crypto container 0x36 või siis error 0x02
-        //Data on sissetulev data. Kui error siis error pakett
-         */
-
         if (id == 0x02) {
             response.status = TelematicsResponseStatus.ERROR;
             response.message = "Failed to decrypt web service response.";
@@ -116,7 +107,7 @@ public class Telematics {
             response.data = data;
         }
 
-        this.certificate = null;
+        sendingCommand = false;
         callback.response(response);
     }
 
@@ -124,7 +115,7 @@ public class Telematics {
         TelematicsResponse response = new TelematicsResponse();
         response.status = TelematicsResponseStatus.ERROR;
         response.message = message;
-        this.certificate = null;
+        sendingCommand = false;
         callback.response(response);
     }
 
