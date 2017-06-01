@@ -60,8 +60,6 @@ class Storage {
                 throw new Exception();
             }
         }
-
-
     }
 
     AccessCertificate[] getCertificates() {

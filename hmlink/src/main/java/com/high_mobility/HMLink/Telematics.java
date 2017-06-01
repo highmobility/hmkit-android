@@ -1,6 +1,7 @@
 package com.high_mobility.HMLink;
 
 import android.util.Base64;
+import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -14,6 +15,8 @@ import org.json.JSONObject;
  */
 
 public class Telematics {
+    static final String TAG = "Telematics";
+
     public interface TelematicsResponseCallback {
         void response(TelematicsResponse response);
     }
@@ -45,15 +48,18 @@ public class Telematics {
             return;
         }
 
+        if (manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+            Log.d(TAG, "sendTelematicsCommand: " + ByteUtils.hexFromBytes(command));
+
         sendingCommand = true;
 
-        manager.webService.getNonce(certificate.getGainerSerial(), new Response.Listener<JSONObject>() {
+        manager.webService.getNonce(certificate.getProviderSerial(), new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonResponse) {
                 try {
                     byte[] nonce = Base64.decode(jsonResponse.getString("nonce"), Base64.DEFAULT);
                     Telematics.this.callback = callback;
-                    manager.core.HMBTCoreSendTelematicsCommand(manager.coreInterface, certificate.getProviderSerial(), nonce, command.length, command);
+                    manager.core.HMBTCoreSendTelematicsCommand(manager.coreInterface, certificate.getGainerSerial(), nonce, command.length, command);
                 } catch (JSONException e) {
                     dispatchError("Invalid nonce response from server.", callback);
                 }
@@ -106,6 +112,9 @@ public class Telematics {
             response.status = TelematicsResponseStatus.OK;
             response.data = data;
         }
+
+        if (manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+            Log.d(TAG, "onTelematicsResponseDecrypted: " + ByteUtils.hexFromBytes(data));
 
         sendingCommand = false;
         callback.response(response);
