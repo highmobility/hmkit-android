@@ -7,10 +7,10 @@ import com.high_mobility.HMLink.Command.CommandParseException;
  * Created by ttiganik on 14/10/2016.
  */
 public class FeatureCapability {
-    Identifier feature;
+    Identifier identifier;
 
-    FeatureCapability(Identifier feature) {
-        this.feature = feature;
+    FeatureCapability(Identifier identifier) {
+        this.identifier = identifier;
     }
 
     public static FeatureCapability fromBytes(byte[] capabilityBytes) throws CommandParseException {
@@ -48,7 +48,7 @@ public class FeatureCapability {
         return featureCapability;
     }
 
-    public Identifier getFeature() {
-        return feature;
+    public Identifier getIdentifier() {
+        return identifier;
     }
 }
