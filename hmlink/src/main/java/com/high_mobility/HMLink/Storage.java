@@ -49,6 +49,8 @@ class Storage {
         if (storeCertificate(deviceAccessCertificate) != 0) {
             throw new Exception();
         }
+        if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+            Log.d(TAG, "storeDownloadedCertificates: deviceCert " + deviceAccessCertificate.toString());
 
         if (response.has("vehicle_access_certificate") == true) {
             // stored cert. this does not has to exist in the response
@@ -59,6 +61,9 @@ class Storage {
                 Log.d(TAG, "storeDownloadedCertificates: " + "cannot store vehicle access cert");
                 throw new Exception();
             }
+
+            if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+                Log.d(TAG, "storeDownloadedCertificates: vehicleCert " + vehicleAccessCertificate.toString());
         }
     }
 
@@ -158,30 +163,11 @@ class Storage {
             if (Arrays.equals(cert.getGainerSerial(), gainingSerial) &&
                 Arrays.equals(cert.getProviderSerial(), providingSerial)) {
                 removedIndex = i;
-                break;
-            }
-        }
 
-        if (removedIndex != -1) {
-            AccessCertificate[] newCerts = removeAtIndex(removedIndex, certs);
-            setCertificates(newCerts);
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
+                if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
+                    Log.d(TAG, "deleteCertificate: " + cert.toString());
+                }
 
-    boolean deleteCertificate(AccessCertificate certificateToDelete) {
-        AccessCertificate[] certs = getCertificates();
-
-        int removedIndex = -1;
-        for (int i=0; i<certs.length; i++) {
-            AccessCertificate cert = certs[i];
-            if (Arrays.equals(cert.getGainerSerial(), certificateToDelete.getGainerSerial()) &&
-                Arrays.equals(cert.getGainerPublicKey(), certificateToDelete.getGainerPublicKey()) &&
-                Arrays.equals(cert.getProviderSerial(), certificateToDelete.getProviderSerial())) {
-                removedIndex = i;
                 break;
             }
         }
@@ -204,6 +190,9 @@ class Storage {
             AccessCertificate cert = certs[i];
             if (Arrays.equals(cert.getGainerSerial(), serial)) {
                 removedIndex = i;
+                if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
+                    Log.d(TAG, "deleteCertificateWithGainingSerial: " + cert.toString());
+                }
                 break;
             }
         }
@@ -226,6 +215,9 @@ class Storage {
             AccessCertificate cert = certs[i];
             if (Arrays.equals(cert.getProviderSerial(), serial)) {
                 removedIndex = i;
+                if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
+                    Log.d(TAG, "deleteCertificateWithProvidingSerial: " + cert.toString());
+                }
                 break;
             }
         }

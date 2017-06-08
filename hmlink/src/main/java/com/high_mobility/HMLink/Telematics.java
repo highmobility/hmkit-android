@@ -94,7 +94,18 @@ public class Telematics {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         if (error.networkResponse != null) {
-                            dispatchError("HTTP error " + new String(error.networkResponse.data), callback);
+                            String message = "HTTP error " + error.networkResponse.statusCode + ": ";
+                            try {
+                                JSONObject json = new JSONObject(new String(error.networkResponse.data));
+                                if (json.has("message")) {
+                                    dispatchError(message + json.getString("message"), callback);
+                                }
+                                else {
+                                    dispatchError(message + new String(error.networkResponse.data), callback);
+                                }
+                            } catch (JSONException e) {
+                                dispatchError(message + new String(error.networkResponse.data), callback);
+                            }
                         }
                         else {
                             dispatchError("Cannot connect to the web service. Check your internet connection", callback);

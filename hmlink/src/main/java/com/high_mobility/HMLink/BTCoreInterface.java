@@ -255,7 +255,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
         for (AccessCertificate cert : storedCerts) {
             if (Arrays.equals(cert.getProviderSerial(), serial)) {
-                if (manager.storage.deleteCertificate(cert)) {
+                if (manager.storage.deleteCertificate(cert.getGainerSerial(), cert.getProviderSerial())) {
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                         Log.d(Broadcaster.TAG, "Erased stored cert for serial " + ByteUtils.hexFromBytes(serial));
 
