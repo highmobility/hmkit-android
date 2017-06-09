@@ -94,13 +94,13 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetSerial(byte[] serial) {
-        copyBytesToJNI(manager.getCertificate().getSerial(), serial);
+        copyBytesToJNI(manager.getDeviceCertificate().getSerial(), serial);
         return 0;
     }
 
     @Override
     public int HMPersistenceHalgetLocalPublicKey(byte[] publicKey) {
-        copyBytesToJNI(manager.getCertificate().getPublicKey(), publicKey);
+        copyBytesToJNI(manager.getDeviceCertificate().getPublicKey(), publicKey);
         return 0;
     }
 
@@ -112,7 +112,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetDeviceCertificate(byte[] cert) {
-        copyBytesToJNI(manager.getCertificate().getBytes(), cert);
+        copyBytesToJNI(manager.getDeviceCertificate().getBytes(), cert);
         return 0;
     }
 
@@ -130,7 +130,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHaladdPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int commandSize, byte[] command) {
-        AccessCertificate cert = new AccessCertificate(serial, publicKey, manager.getCertificate().getSerial(), startDate, endDate, command);
+        AccessCertificate cert = new AccessCertificate(serial, publicKey, manager.getDeviceCertificate().getSerial(), startDate, endDate, command);
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "HMPersistenceHaladdPublicKey: " + ByteUtils.hexFromBytes(serial));
@@ -167,7 +167,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetPublicKeyByIndex(int index, byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command) {
-        AccessCertificate[] certificates = manager.storage.getCertificatesWithProvidingSerial(manager.getCertificate().getSerial());
+        AccessCertificate[] certificates = manager.storage.getCertificatesWithProvidingSerial(manager.getDeviceCertificate().getSerial());
 
         if (certificates.length >= index) {
             AccessCertificate certificate = certificates[index];
@@ -189,7 +189,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetPublicKeyCount(int[] count) {
-        int certCount = manager.storage.getCertificatesWithProvidingSerial(manager.getCertificate().getSerial()).length;
+        int certCount = manager.storage.getCertificatesWithProvidingSerial(manager.getDeviceCertificate().getSerial()).length;
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "HMPersistenceHalgetPublicKeyCount " + certCount);
         count[0] = certCount;
@@ -231,7 +231,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetStoredCertificate(byte[] serial, byte[] cert, int[] size) {
-        AccessCertificate[] storedCerts = manager.storage.getCertificatesWithoutProvidingSerial(manager.getCertificate().getSerial());
+        AccessCertificate[] storedCerts = manager.storage.getCertificatesWithoutProvidingSerial(manager.getDeviceCertificate().getSerial());
 
         for (AccessCertificate storedCert : storedCerts) {
             if (Arrays.equals(storedCert.getProviderSerial(), serial)) {
@@ -251,7 +251,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHaleraseStoredCertificate(byte[] serial) {
-        AccessCertificate[] storedCerts = manager.storage.getCertificatesWithoutProvidingSerial(manager.getCertificate().getSerial());
+        AccessCertificate[] storedCerts = manager.storage.getCertificatesWithoutProvidingSerial(manager.getDeviceCertificate().getSerial());
 
         for (AccessCertificate cert : storedCerts) {
             if (Arrays.equals(cert.getProviderSerial(), serial)) {

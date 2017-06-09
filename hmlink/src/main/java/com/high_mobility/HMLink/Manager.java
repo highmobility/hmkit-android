@@ -78,7 +78,7 @@ public class Manager {
 
     /**
      * Set the application context before using any other functionality.
-     * After this, access certificate download and storage is available.
+     * After this, access certificate download and certificate storage is available.
      *
      * @param context the application context
      */
@@ -165,6 +165,10 @@ public class Manager {
         return broadcaster;
     }
 
+    /**
+     *
+     * @return The Telematics instance
+     */
     public Telematics getTelematics() {
         return telematics;
     }
@@ -180,10 +184,9 @@ public class Manager {
 
     /**
      *
-     * @return The device certificate that is used by the broadcaster and scanner
-     * to identify themselves.
+     * @return The device certificate that is used by the SDK to identify itself.
      */
-    public DeviceCertificate getCertificate() {
+    public DeviceCertificate getDeviceCertificate() {
         return certificate;
     }
 
@@ -206,7 +209,7 @@ public class Manager {
     }
 
     /**
-     * Returns the certificate with the given arguments
+     * Get an access certificate
      *
      * @param gainingSerial the gaining serial for the access certificate
      * @param providingSerial the providing serial for the access certificate
@@ -232,7 +235,7 @@ public class Manager {
      *
      * @param gainingSerial the gaining serial for the access certificate
      * @param providingSerial the providing serial for the access certificate
-     * @return true if certificate was deleted successfully
+     * @return true if the certificate existed and was deleted successfully
      */
     public boolean deleteCertificate(byte[] gainingSerial, byte[] providingSerial) {
         return storage.deleteCertificate(gainingSerial, providingSerial);
@@ -242,19 +245,16 @@ public class Manager {
      * Download and store the device and vehicle access certificates for the given access token.
      *
      * @param accessToken The token that is used to download the certificates
-     * @param telematicsServiceIdentifier The telematics service identifier
      * @param privateKey the private key of the device that the access cert is downloaded for
      * @param serial the serial number of the device that the access cert is downloaded for
      * @param callback Invoked with 0 if everything is successful, otherwise with either a
      *                 http error code, 1 for a connection issue, 2 for invalid data received.
      */
     public void downloadAccessCertificate(String accessToken,
-                                          String telematicsServiceIdentifier,
                                           byte[] privateKey,
                                           byte[] serial,
                                           final Constants.ResponseCallback callback) {
         webService.requestAccessCertificate(accessToken,
-                telematicsServiceIdentifier,
                 privateKey,
                 serial,
                 new Response.Listener<JSONObject>() {
@@ -284,22 +284,6 @@ public class Manager {
                         callback.response(errorCode);
                     }
                 });
-    }
-
-    /**
-     * Download and store the device and vehicle access certificates for the given access token.
-     *
-     * @param accessToken The token that is used to download the certificates
-     * @param privateKey the private key of the device that the access cert is downloaded for
-     * @param serial the serial number of the device that the access cert is downloaded for
-     * @param callback Invoked with 0 if everything is successful, otherwise with either a
-     *                 http error code, 1 for a connection issue, 2 for invalid data received.
-     */
-    public void downloadAccessCertificate(String accessToken,
-                                          byte[] privateKey,
-                                          byte[] serial,
-                                          final Constants.ResponseCallback callback) {
-        downloadAccessCertificate(accessToken, WebService.telematicsServiceIdentifier, privateKey, serial, callback);
     }
 
     /**

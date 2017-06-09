@@ -35,8 +35,6 @@ import javax.net.ssl.X509TrustManager;
  * Created by ttiganik on 24/03/2017.
  */
 class WebService {
-    static String telematicsServiceIdentifier = "38e3a98e-0c99-41ca-bbef-185822a3b431";
-
     private static final String TAG = "WebService";
 
 //    private static final String baseUrl = "https://od-console.h-m.space:4443";
@@ -52,12 +50,11 @@ class WebService {
     }
 
     void requestAccessCertificate(String accessToken,
-                                  String telematicsServiceIdentifier,
                                   byte[] privateKey,
                                   byte[] serialNumber,
                                   final Response.Listener<JSONObject> response,
                                   Response.ErrorListener error) throws IllegalArgumentException {
-        String url = telematicsUrl + "/telematics_services/" + telematicsServiceIdentifier + "/access_certificate";
+        String url = telematicsUrl + "/access_certificates";
 
         // headers
         final Map<String, String> headers = new HashMap<>(1);

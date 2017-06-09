@@ -11,7 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Created by root on 03/05/2017.
+ * Created by ttiganik on 03/05/2017.
  */
 
 public class Telematics {
@@ -33,7 +33,7 @@ public class Telematics {
     }
 
     /**
-     * Send a command to a device.
+     * Send a command to a device via telematics.
      *
      * @param command the bytes to send to the device.
      * @param certificate the certificate that authorizes the connection with the SDK and the device.
