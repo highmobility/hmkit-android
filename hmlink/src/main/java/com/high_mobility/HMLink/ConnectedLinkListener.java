@@ -11,7 +11,7 @@ public interface ConnectedLinkListener extends LinkListener {
      * @param callback The function that must be called after the pairing has been approved
      *                         or decline
      */
-    void onPairingRequested(ConnectedLink link, Constants.ApprovedCallback callback);
+    void onAuthorizationRequested(ConnectedLink link, Constants.ApprovedCallback callback);
 
     /**
      * Callback for when a pairing request has timed out.
@@ -21,5 +21,5 @@ public interface ConnectedLinkListener extends LinkListener {
      *
      * @param link The link that received the pairing request.
      */
-    void onPairingRequestTimeout(ConnectedLink link);
+    void onAuthorizationTimeout(ConnectedLink link);
 }

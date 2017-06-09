@@ -60,12 +60,12 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     }
 
     @Override
-    public void onPairingRequested(ConnectedLink link, Constants.ApprovedCallback approvedCallback) {
+    public void onAuthorizationRequested(ConnectedLink link, Constants.ApprovedCallback approvedCallback) {
 
     }
 
     @Override
-    public void onPairingRequestTimeout(ConnectedLink link) {
+    public void onAuthorizationTimeout(ConnectedLink link) {
 
     }
 

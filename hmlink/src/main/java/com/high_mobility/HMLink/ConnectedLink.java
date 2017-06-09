@@ -42,7 +42,7 @@ public class ConnectedLink extends Link {
         broadcaster.manager.mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                ((ConnectedLinkListener) listener).onPairingRequested(reference, new Constants.ApprovedCallback() {
+                ((ConnectedLinkListener) listener).onAuthorizationRequested(reference, new Constants.ApprovedCallback() {
                     @Override
                     public void approve() {
                         pairingResponse = 0;
@@ -66,7 +66,7 @@ public class ConnectedLink extends Link {
                     broadcaster.manager.mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            ((ConnectedLinkListener) listener).onPairingRequestTimeout(reference);
+                            ((ConnectedLinkListener) listener).onAuthorizationTimeout(reference);
                         }
                     });
 
