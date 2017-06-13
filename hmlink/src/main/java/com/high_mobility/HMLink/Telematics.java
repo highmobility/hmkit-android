@@ -57,9 +57,14 @@ public class Telematics {
             @Override
             public void onResponse(JSONObject jsonResponse) {
                 try {
-                    byte[] nonce = Base64.decode(jsonResponse.getString("nonce"), Base64.DEFAULT);
+                    final byte[] nonce = Base64.decode(jsonResponse.getString("nonce"), Base64.DEFAULT);
                     Telematics.this.callback = callback;
-                    manager.core.HMBTCoreSendTelematicsCommand(manager.coreInterface, certificate.getGainerSerial(), nonce, command.length, command);
+                    manager.workHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            manager.core.HMBTCoreSendTelematicsCommand(manager.coreInterface, certificate.getGainerSerial(), nonce, command.length, command);
+                        }
+                    });
                 } catch (JSONException e) {
                     dispatchError("Invalid nonce response from server.", callback);
                 }
@@ -84,7 +89,12 @@ public class Telematics {
                     public void onResponse(JSONObject jsonObject) {
                         try {
                             response = TelematicsResponse.fromResponse(jsonObject);
-                            manager.core.HMBTCoreTelematicsReceiveData(manager.coreInterface, response.data.length, response.data);
+                            manager.workHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    manager.core.HMBTCoreTelematicsReceiveData(manager.coreInterface, response.data.length, response.data);
+                                }
+                            });
                         } catch (JSONException e) {
                             dispatchError("Invalid response from server.", callback);
                         }
@@ -128,15 +138,25 @@ public class Telematics {
             Log.d(TAG, "onTelematicsResponseDecrypted: " + ByteUtils.hexFromBytes(data));
 
         sendingCommand = false;
-        callback.response(response);
+        manager.mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                callback.response(response);
+            }
+        });
     }
 
-    void dispatchError(String message, TelematicsResponseCallback callback) {
-        TelematicsResponse response = new TelematicsResponse();
+    void dispatchError(String message, final TelematicsResponseCallback callback) {
+        final TelematicsResponse response = new TelematicsResponse();
         response.status = TelematicsResponseStatus.ERROR;
         response.message = message;
         sendingCommand = false;
-        callback.response(response);
+        manager.mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                callback.response(response);
+            }
+        });
     }
 
     public static class TelematicsResponse {
