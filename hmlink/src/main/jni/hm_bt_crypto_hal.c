@@ -5,6 +5,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include "hmbtcore.h"
+#include "hm_bt_log.h"
 
 uint32_t hm_bt_crypto_hal_aes_ecb_block_encrypt(uint8_t *key, uint8_t *cleartext, uint8_t *cipertext){
   return hm_crypto_openssl_aes_iv(key, cleartext, cipertext);
@@ -22,12 +23,18 @@ uint32_t hm_bt_crypto_hal_ecc_get_ecdh(uint8_t *serial, uint8_t *ecdh){
     return 1;
   }
 
+  hm_bt_log_data(NULL,NULL,HM_BT_LOG_INFO,usepublic,64,"[HMCrypto] PUB");
+
   uint8_t private[32];
   if(hm_bt_persistence_hal_get_local_private_key(private) == 1){
     return 1;
   }
 
-  return hm_crypto_openssl_dh(private, usepublic, ecdh);
+  uint32_t retcode = hm_crypto_openssl_dh(private, usepublic, ecdh);
+
+  hm_bt_log_data(NULL,NULL,HM_BT_LOG_INFO,ecdh,32,"[HMCrypto] ECDH");
+
+  return retcode;
 }
 
 uint32_t hm_bt_crypto_hal_ecc_add_signature(uint8_t *data, uint8_t size, uint8_t *signature){
