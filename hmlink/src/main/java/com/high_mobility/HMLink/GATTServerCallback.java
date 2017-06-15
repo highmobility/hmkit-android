@@ -86,7 +86,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "incoming data " + ByteUtils.hexFromBytes(value) + " from "
-                    + ByteUtils.hexFromBytes(ByteUtils.bytesFromMacString(device.getAddress())) + " char " + characteristicId);
+                    + ByteUtils.hexFromBytes(ByteUtils.bytesFromMacString(device.getAddress())));
 
         if (responseNeeded) {
             broadcaster.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);

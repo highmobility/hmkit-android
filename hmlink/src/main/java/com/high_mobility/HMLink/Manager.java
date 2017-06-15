@@ -77,30 +77,23 @@ public class Manager {
     }
 
     /**
-     * Set the application context before using any other functionality.
-     * After this, access certificate download and certificate storage is available.
+     * Initialize the SDK with the necessary properties. Call this before using any other functionality.
      *
      * @param context the application context
-     */
-    public void setContext(Context context) {
-        ctx = context;
-        storage = new Storage(ctx);
-        webService = new WebService(ctx);
-    }
-
-    /**
-     * Initialize the SDK with the necessary properties. This enables ble and telematics communication.
-     *
      * @param certificate The broadcaster certificate.
      * @param privateKey 32 byte private key with elliptic curve Prime 256v1.
      * @param caPublicKey 64 byte public key of the Certificate Authority.
      *
      * @throws IllegalArgumentException if the parameters are invalid.
      */
-    public void initialize(DeviceCertificate certificate, byte[] privateKey, byte[] caPublicKey) throws IllegalArgumentException {
+    public void initialize(Context context, DeviceCertificate certificate, byte[] privateKey, byte[] caPublicKey) throws IllegalArgumentException {
         if (privateKey.length != 32 || caPublicKey.length != 64 || certificate == null) {
             throw new IllegalArgumentException();
         }
+
+        ctx = context;
+        storage = new Storage(ctx);
+        webService = new WebService(ctx);
 
         this.caPublicKey = caPublicKey;
         this.certificate = certificate;
@@ -125,25 +118,28 @@ public class Manager {
     }
 
     /**
-     * Initialize the SDK with the necessary properties. This needs to be done before using any
-     * other functionality.
+     * Initialize the SDK with the necessary properties. Call this before using any other functionality.
      *
+     * @param context the application context
      * @param certificate The broadcaster certificate, in Base64.
      * @param privateKey 32 byte private key with elliptic curve Prime 256v1 in Base64.
      * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64.
-     * @throws IllegalArgumentException
+     *
+     * @throws IllegalArgumentException if the parameters are invalid.
      */
-    public void initialize(String certificate, String privateKey, String issuerPublicKey) throws IllegalArgumentException {
+    public void initialize(Context context, String certificate, String privateKey, String issuerPublicKey) throws IllegalArgumentException {
         DeviceCertificate decodedCert = new DeviceCertificate(Base64.decode(certificate, Base64.DEFAULT));
 
         byte[] decodedPrivateKey = Base64.decode(privateKey, Base64.DEFAULT);
         byte[] decodedIssuer= Base64.decode(issuerPublicKey, Base64.DEFAULT);
-        initialize(decodedCert, decodedPrivateKey, decodedIssuer);
+        initialize(context, decodedCert, decodedPrivateKey, decodedIssuer);
     }
 
     /**
      * Call this function when the SDK is not used anymore - for instance when killing the app.
      * This clears the Bluetooth service and unregisters all BroadcastReceivers.
+     *
+     * Certificate storage is not affected.
      */
     public void terminate() {
         broadcaster.stopBroadcasting();
@@ -155,6 +151,7 @@ public class Manager {
         ble.terminate();
         broadcaster.terminate();
         coreClockTimer.cancel();
+        coreClockTimer = null;
     }
 
     /**
@@ -222,7 +219,7 @@ public class Manager {
             AccessCertificate cert = certs[i];
 
             if (Arrays.equals(cert.getGainerSerial(), gainingSerial)
-            && Arrays.equals(cert.getProviderSerial(), providingSerial)) {
+                    && Arrays.equals(cert.getProviderSerial(), providingSerial)) {
                 return cert;
             }
         }
@@ -245,18 +242,14 @@ public class Manager {
      * Download and store the device and vehicle access certificates for the given access token.
      *
      * @param accessToken The token that is used to download the certificates
-     * @param privateKey the private key of the device that the access cert is downloaded for
-     * @param serial the serial number of the device that the access cert is downloaded for
      * @param callback Invoked with 0 if everything is successful, otherwise with either a
      *                 http error code, 1 for a connection issue, 2 for invalid data received.
      */
     public void downloadAccessCertificate(String accessToken,
-                                          byte[] privateKey,
-                                          byte[] serial,
                                           final Constants.ResponseCallback callback) {
         webService.requestAccessCertificate(accessToken,
                 privateKey,
-                serial,
+                getDeviceCertificate().getSerial(),
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {

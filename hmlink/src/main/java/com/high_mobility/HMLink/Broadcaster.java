@@ -209,14 +209,12 @@ public class Broadcaster implements SharedBleListener {
      * Stops the advertisements and disconnects all the links.
      */
     public void stopBroadcasting() {
-        if (getState() != State.BROADCASTING) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(TAG, "already not broadcasting");
-        }
+        if (getState() != State.BROADCASTING) return; // we are not broadcasting
 
         // stopAdvertising cancels all the BT connections as well.
         if (mBluetoothLeAdvertiser != null) {
             mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
+            advertiseCallback = null;
         }
 
         setState(State.IDLE);
@@ -306,13 +304,19 @@ public class Broadcaster implements SharedBleListener {
     }
 
     void terminate() {
+        manager.workHandler.removeCallbacks(clockRunnable);
+        setIsAlivePinging(false);
+
+        manager.ble.removeListener(this);
+        stopBroadcasting();
+
         if (GATTServer != null) {
             GATTServer.clearServices();
             GATTServer.close();
             GATTServer = null;
         }
 
-        manager.ble.removeListener(this);
+        gattServerCallback = null;
     }
 
     boolean didResolveDevice(HMDevice device) {
@@ -551,16 +555,18 @@ public class Broadcaster implements SharedBleListener {
         }
 
         if (isAlivePinging) {
-            manager.workHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    sendAlivePing();
-                }
-            }, 55);
+            manager.workHandler.postDelayed(clockRunnable, 55);
         }
     }
 
-    private final AdvertiseCallback advertiseCallback = new AdvertiseCallback() {
+    Runnable clockRunnable = new Runnable() {
+        @Override
+        public void run() {
+            sendAlivePing();
+        }
+    };
+
+    private AdvertiseCallback advertiseCallback = new AdvertiseCallback() {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())

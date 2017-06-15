@@ -161,8 +161,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     }
 
     void initializeManager() {
-        Manager.getInstance().setContext(view.getActivity());
-        Manager.getInstance().initialize(
+        Manager.getInstance().initialize(view.getActivity(),
                 "***REMOVED***",
                 "***REMOVED***=",
                 "***REMOVED***=="
