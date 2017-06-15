@@ -3,15 +3,15 @@ package com.highmobility.common;
 import android.content.Intent;
 import android.util.Log;
 
-import com.high_mobility.HMLink.Broadcaster;
-import com.high_mobility.HMLink.BroadcasterListener;
-import com.high_mobility.HMLink.ConnectedLink;
-import com.high_mobility.HMLink.ConnectedLinkListener;
-import com.high_mobility.HMLink.Constants;
-import com.high_mobility.HMLink.Link;
-import com.high_mobility.HMLink.Manager;
+import com.high_mobility.hmkit.Broadcaster;
+import com.high_mobility.hmkit.BroadcasterListener;
+import com.high_mobility.hmkit.ConnectedLink;
+import com.high_mobility.hmkit.ConnectedLinkListener;
+import com.high_mobility.hmkit.Constants;
+import com.high_mobility.hmkit.Link;
+import com.high_mobility.hmkit.Manager;
 
-import static com.high_mobility.HMLink.Broadcaster.*;
+import static com.high_mobility.hmkit.Broadcaster.*;
 
 public class BroadcastingViewController implements IBroadcastingViewController, BroadcasterListener, ConnectedLinkListener {
     private static final String TAG = "BroadcastingVC";
@@ -65,9 +65,16 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
 
     @Override
     public void onLinkViewResult(int result) {
-        link.setListener(this);
-        onStateChanged(link, link.getState());
+        Manager.getInstance().terminate();
+        broadcaster = null;
+        initializeManager();
+        broadcaster = Manager.getInstance().getBroadcaster();
+        // set the broadcaster listener
+        broadcaster.setListener(this);
+        startBroadcasting();
+
     }
+
     // Broadcasterlistener
 
     @Override
@@ -161,10 +168,11 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     }
 
     void initializeManager() {
-        Manager.getInstance().initialize(view.getActivity(),
+        Manager.getInstance().initialize(
                 "***REMOVED***",
                 "***REMOVED***=",
-                "***REMOVED***=="
+                "***REMOVED***==",
+                view.getActivity()
         );
     }
 }

@@ -1,8 +1,6 @@
 package com.highmobility.common;
 
-import com.high_mobility.HMLink.ConnectedLink;
-
-import java.util.List;
+import com.high_mobility.hmkit.ConnectedLink;
 
 public interface IBroadcastingView extends IView {
     void setStatusText(String text);

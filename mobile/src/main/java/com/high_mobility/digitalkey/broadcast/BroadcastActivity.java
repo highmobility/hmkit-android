@@ -3,22 +3,19 @@ package com.high_mobility.digitalkey.broadcast;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.high_mobility.HMLink.ConnectedLink;
-import com.high_mobility.HMLink.Constants;
-import com.high_mobility.HMLink.Link;
+import com.high_mobility.hmkit.ConnectedLink;
+import com.high_mobility.hmkit.Constants;
+import com.high_mobility.hmkit.Link;
 import com.high_mobility.digitalkey.R;
 import com.highmobility.common.BroadcastingViewController;
 import com.highmobility.common.IBroadcastingView;
 import com.highmobility.common.IBroadcastingViewController;
-
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

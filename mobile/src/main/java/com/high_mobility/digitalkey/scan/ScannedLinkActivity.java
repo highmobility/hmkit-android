@@ -1,22 +1,6 @@
 package com.high_mobility.digitalkey.scan;
 
-import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-
-import com.high_mobility.HMLink.Constants;
-import com.high_mobility.HMLink.ByteUtils;
-import com.high_mobility.HMLink.Link;
-import com.high_mobility.HMLink.LinkListener;
-import com.high_mobility.HMLink.Manager;
-import com.high_mobility.digitalkey.R;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by ttiganik on 02/06/16.

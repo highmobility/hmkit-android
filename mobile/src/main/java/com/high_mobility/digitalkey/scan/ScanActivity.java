@@ -1,26 +1,6 @@
 package com.high_mobility.digitalkey.scan;
 
-import android.Manifest;
-import android.annotation.TargetApi;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.CompoundButton;
-import android.widget.ListView;
-import android.widget.Switch;
-import android.widget.TextView;
-
-
-import com.high_mobility.HMLink.Manager;
-import com.high_mobility.digitalkey.R;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Created by ttiganik on 02/06/16.

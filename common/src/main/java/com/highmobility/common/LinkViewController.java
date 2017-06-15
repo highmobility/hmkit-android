@@ -5,26 +5,26 @@ import android.os.CountDownTimer;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.high_mobility.HMLink.Command.Command;
-import com.high_mobility.HMLink.Command.CommandParseException;
-import com.high_mobility.HMLink.Command.Incoming.Failure;
-import com.high_mobility.HMLink.Command.Incoming.IncomingCommand;
-import com.high_mobility.HMLink.Command.Incoming.LockState;
-import com.high_mobility.HMLink.Command.Incoming.TrunkState;
-import com.high_mobility.HMLink.Command.Incoming.VehicleStatus;
-import com.high_mobility.HMLink.Command.VehicleStatus.DoorLocks;
-import com.high_mobility.HMLink.Command.VehicleStatus.FeatureState;
-import com.high_mobility.HMLink.Command.VehicleStatus.TrunkAccess;
-import com.high_mobility.HMLink.ConnectedLink;
-import com.high_mobility.HMLink.ConnectedLinkListener;
-import com.high_mobility.HMLink.Constants;
-import com.high_mobility.HMLink.Link;
-import com.high_mobility.HMLink.Manager;
+import com.high_mobility.hmkit.Command.Command;
+import com.high_mobility.hmkit.Command.CommandParseException;
+import com.high_mobility.hmkit.Command.Incoming.Failure;
+import com.high_mobility.hmkit.Command.Incoming.IncomingCommand;
+import com.high_mobility.hmkit.Command.Incoming.LockState;
+import com.high_mobility.hmkit.Command.Incoming.TrunkState;
+import com.high_mobility.hmkit.Command.Incoming.VehicleStatus;
+import com.high_mobility.hmkit.Command.VehicleStatus.DoorLocks;
+import com.high_mobility.hmkit.Command.VehicleStatus.FeatureState;
+import com.high_mobility.hmkit.Command.VehicleStatus.TrunkAccess;
+import com.high_mobility.hmkit.ConnectedLink;
+import com.high_mobility.hmkit.ConnectedLinkListener;
+import com.high_mobility.hmkit.Constants;
+import com.high_mobility.hmkit.Link;
+import com.high_mobility.hmkit.Manager;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static com.high_mobility.HMLink.Command.Constants.LockState.LOCKED;
+import static com.high_mobility.hmkit.Command.Constants.LockState.LOCKED;
 
 public class LinkViewController implements ILinkViewController, ConnectedLinkListener {
     static final String LINK_IDENTIFIER_MESSAGE = "com.highmobility.digitalkeydemo.LINKIDENTIFIER";
@@ -34,8 +34,8 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
     ConnectedLink link;
 
-    com.high_mobility.HMLink.Command.Constants.LockState doorLockState;
-    com.high_mobility.HMLink.Command.Constants.TrunkLockState trunkLockState;
+    com.high_mobility.hmkit.Command.Constants.LockState doorLockState;
+    com.high_mobility.hmkit.Command.Constants.TrunkLockState trunkLockState;
 
     CountDownTimer timeoutTimer;
 
@@ -132,13 +132,13 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     public void onLockTrunkClicked() {
         view.showLoadingView(true);
 
-        boolean trunkLocked = trunkLockState == com.high_mobility.HMLink.Command.Constants.TrunkLockState.LOCKED;
+        boolean trunkLocked = trunkLockState == com.high_mobility.hmkit.Command.Constants.TrunkLockState.LOCKED;
 
         byte[] command =
                 Command.TrunkAccess.setTrunkState(trunkLocked ?
-                        com.high_mobility.HMLink.Command.Constants.TrunkLockState.UNLOCKED :
-                        com.high_mobility.HMLink.Command.Constants.TrunkLockState.LOCKED,
-                        com.high_mobility.HMLink.Command.Constants.TrunkPosition.OPEN);
+                        com.high_mobility.hmkit.Command.Constants.TrunkLockState.UNLOCKED :
+                        com.high_mobility.hmkit.Command.Constants.TrunkLockState.LOCKED,
+                        com.high_mobility.hmkit.Command.Constants.TrunkPosition.OPEN);
 
         link.sendCommand(command, true, new Constants.ResponseCallback() {
                     @Override
@@ -169,7 +169,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
         });
     }
 
-    void onLockStateUpdate(com.high_mobility.HMLink.Command.Constants.LockState lockState) {
+    void onLockStateUpdate(com.high_mobility.hmkit.Command.Constants.LockState lockState) {
         doorLockState = lockState;
         Log.i(TAG, "Lock status changed " + lockState);
 
@@ -183,11 +183,11 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
         onCommandFinished(null);
     }
 
-    void onTrunkStateUpdate(com.high_mobility.HMLink.Command.Constants.TrunkLockState lockState) {
+    void onTrunkStateUpdate(com.high_mobility.hmkit.Command.Constants.TrunkLockState lockState) {
         this.trunkLockState = lockState;
         Log.i(TAG, "trunk status changed " + trunkLockState);
 
-        if (trunkLockState == com.high_mobility.HMLink.Command.Constants.TrunkLockState.LOCKED) {
+        if (trunkLockState == com.high_mobility.hmkit.Command.Constants.TrunkLockState.LOCKED) {
             view.onTrunkLocked(true);
 
         }
