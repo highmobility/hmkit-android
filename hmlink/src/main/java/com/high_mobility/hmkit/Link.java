@@ -33,7 +33,7 @@ public class Link {
     public static final int UNAUTHORIZED = 9;
     /// Bluetooth Low Energy is unavailable for this device
     public static final int UNSUPPORTED = 10;
-
+    
     BluetoothDevice btDevice;
     HMDevice hmDevice;
 

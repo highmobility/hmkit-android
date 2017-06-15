@@ -39,6 +39,7 @@ public class Broadcaster implements SharedBleListener {
     BroadcasterListener listener;
     Manager manager;
 
+    Constants.ResponseCallback startBroadcastingCallback;
     BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     BluetoothGattServer GATTServer;
     GATTServerCallback gattServerCallback;
@@ -141,27 +142,28 @@ public class Broadcaster implements SharedBleListener {
     /**
      * Start broadcasting the Broadcaster via BLE advertising.
      *
-     * @return Status code 0 on success or
-     * {@link Link#UNSUPPORTED },
-     * {@link Link#BLUETOOTH_OFF},
-     * {@link Link#BLUETOOTH_FAILURE}
+     * @param callback is invoked with 0 if started broadcasting, otherwise
+     * {@link Link#UNSUPPORTED } if ble is not supported for this device.
+     * {@link Link#BLUETOOTH_OFF} if ble is turned off.
+     * {@link Link#BLUETOOTH_FAILURE} if broadcasting failed to start.
      */
-    public int startBroadcasting() {
+    public void startBroadcasting(Constants.ResponseCallback callback) {
         if (state == State.BROADCASTING) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "will not start broadcasting: already broadcasting");
-
-            return 0;
+            callback.response(0);
         }
 
         if (!manager.ble.isBluetoothSupported()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
-            return Link.UNSUPPORTED;
+            callback.response(Link.UNSUPPORTED);
+            return;
         }
 
         if (!manager.ble.isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
-            return Link.BLUETOOTH_OFF;
+            callback.response(Link.BLUETOOTH_OFF);
+            return;
         }
 
         // start advertising
@@ -170,13 +172,15 @@ public class Broadcaster implements SharedBleListener {
             if (mBluetoothLeAdvertiser == null) {
                 // for unsupported devices the system does not return an advertiser
                 setState(State.BLUETOOTH_UNAVAILABLE);
-                return Link.UNSUPPORTED;
+                callback.response(Link.UNSUPPORTED);
+                return;
             }
         }
 
         if (createGATTServer() == false) {
             setState(State.BLUETOOTH_UNAVAILABLE);
-            return Link.BLUETOOTH_FAILURE;
+            callback.response(Link.BLUETOOTH_FAILURE);
+            return;
         }
 
         final AdvertiseSettings settings = new AdvertiseSettings.Builder()
@@ -195,8 +199,8 @@ public class Broadcaster implements SharedBleListener {
                 .addServiceUuid(new ParcelUuid(advertiseUUID))
                 .build();
 
+        startBroadcastingCallback = callback;
         mBluetoothLeAdvertiser.startAdvertising(settings, data, advertiseCallback);
-        return 0;
     }
 
     /**
@@ -320,6 +324,7 @@ public class Broadcaster implements SharedBleListener {
         gattServerCallback = null;
         advertiseCallback = null;
         clockRunnable = null;
+        startBroadcastingCallback = null;
     }
 
     boolean didResolveDevice(HMDevice device) {
@@ -589,6 +594,9 @@ public class Broadcaster implements SharedBleListener {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "Start advertise " + Manager.getInstance().ble.getAdapter().getName());
             broadcaster.get().setState(State.BROADCASTING);
+            if (broadcaster.get().startBroadcastingCallback != null) {
+                broadcaster.get().startBroadcastingCallback.response(0);
+            }
         }
 
         @Override
@@ -614,6 +622,10 @@ public class Broadcaster implements SharedBleListener {
                 broadcaster.get().setState(State.BROADCASTING);
             } else {
                 broadcaster.get().setState(State.IDLE);
+
+                if (broadcaster.get().startBroadcastingCallback != null) {
+                    broadcaster.get().startBroadcastingCallback.response(Link.BLUETOOTH_FAILURE);
+                }
             }
         }
     }

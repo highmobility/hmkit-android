@@ -160,11 +160,16 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     }
 
     void startBroadcasting() {
-        int statusCode = broadcaster.startBroadcasting();
-        if (statusCode != 0) {
-            Log.e(TAG, "cant start broadcasting " + statusCode);
-            view.setStatusText("Status " + statusCode);
-        }
+        broadcaster.startBroadcasting(new Constants.ResponseCallback() {
+            @Override
+            public void response(int i) {
+                if (i != 0) {
+                    Log.e(TAG, "cant start broadcasting " + i);
+                    view.setStatusText("Start broadcasting error " + i);
+                }
+            }
+        });
+
     }
 
     void initializeManager() {
