@@ -451,7 +451,7 @@ public class Broadcaster implements SharedBleListener {
     private boolean createGATTServer() {
         if (GATTServer == null) {
             gattServerCallback = new GATTServerCallback(this);
-            GATTServer = manager.ble.getManager().openGattServer(manager.ctx, gattServerCallback);
+            GATTServer = manager.ble.getManager().openGattServer(manager.context, gattServerCallback);
 
             if (GATTServer == null) {
                 Log.e(TAG, "Cannot create gatt server"); return false;

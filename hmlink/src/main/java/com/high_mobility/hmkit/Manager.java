@@ -46,7 +46,7 @@ public class Manager {
     BTCoreInterface coreInterface;
     SharedBle ble;
     Storage storage;
-    Context ctx;
+    Context context;
 
     private static Manager instance;
     DeviceCertificate certificate;
@@ -90,21 +90,21 @@ public class Manager {
             throw new IllegalArgumentException();
         }
 
-        ctx = context;
-        storage = new Storage(ctx);
-        webService = new WebService(ctx);
+        this.context = context;
+        storage = new Storage(this.context);
+        webService = new WebService(this.context);
 
         this.caPublicKey = caPublicKey;
         this.certificate = certificate;
         this.privateKey = privateKey;
 
-        mainHandler = new Handler(ctx.getMainLooper());
+        mainHandler = new Handler(this.context.getMainLooper());
 
         if (workThread.getState() == Thread.State.NEW)
             workThread.start();
         workHandler = new Handler(workThread.getLooper());
 
-        ble = new SharedBle(ctx);
+        ble = new SharedBle(this.context);
 
         broadcaster = new Broadcaster(this);
         scanner = new Scanner(this);
@@ -138,57 +138,74 @@ public class Manager {
      * Call this function when the SDK is not used anymore - for instance when killing the app.
      * This clears the Bluetooth service and unregisters all BroadcastReceivers.
      *
-     * Certificate storage is not affected.
+     * Stored certificates are not deleted.
      */
     public void terminate() {
+        if (context == null) return;
+
         broadcaster.terminate();
+        broadcaster = null;
         coreClockTimer.cancel();
         coreClockTimer = null;
         ble.terminate();
+        ble = null;
+        telematics = null;
+        context = null;
     }
 
     /**
      *
      * @return The Broadcaster instance
+     * @throws IllegalStateException when SDK is not initialized
      */
-    public Broadcaster getBroadcaster() {
+    public Broadcaster getBroadcaster() throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
         return broadcaster;
     }
 
     /**
      *
      * @return The Telematics instance
+     * @throws IllegalStateException when SDK is not initialized
      */
-    public Telematics getTelematics() {
+    public Telematics getTelematics() throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
         return telematics;
     }
 
     /**
      *
      * @return The Scanner Instance
+     * @throws IllegalStateException when SDK is not initialized
      */
 
-    Scanner getScanner() {
+    Scanner getScanner() throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
         return scanner;
     }
 
     /**
      *
      * @return The device certificate that is used by the SDK to identify itself.
+     * @throws IllegalStateException when SDK is not initialized
      */
-    public DeviceCertificate getDeviceCertificate() {
+    public DeviceCertificate getDeviceCertificate() throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
         return certificate;
     }
 
     /**
      *
      * @return A description about the SDK version name and type(mobile or wear).
+     * @throws IllegalStateException when SDK is not initialized
      */
-    public String getInfoString() {
+    public String getInfoString() throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
+
         String infoString = "Android ";
         infoString += BuildConfig.VERSION_NAME;
 
-        if (ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
             infoString += " w";
         }
         else {
@@ -204,8 +221,11 @@ public class Manager {
      * @param gainingSerial the gaining serial for the access certificate
      * @param providingSerial the providing serial for the access certificate
      * @return the access certificate or null if it does not exist
+     * @throws IllegalStateException when SDK is not initialized
      */
-    public AccessCertificate getCertificate(byte[] gainingSerial, byte[] providingSerial) {
+    public AccessCertificate getCertificate(byte[] gainingSerial, byte[] providingSerial) throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
+
         AccessCertificate[] certs = storage.getCertificates();
 
         for (int i = 0; i < certs.length; i++) {
@@ -226,8 +246,10 @@ public class Manager {
      * @param gainingSerial the gaining serial for the access certificate
      * @param providingSerial the providing serial for the access certificate
      * @return true if the certificate existed and was deleted successfully
+     * @throws IllegalStateException when SDK is not initialized
      */
-    public boolean deleteCertificate(byte[] gainingSerial, byte[] providingSerial) {
+    public boolean deleteCertificate(byte[] gainingSerial, byte[] providingSerial) throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
         return storage.deleteCertificate(gainingSerial, providingSerial);
     }
 
@@ -237,9 +259,11 @@ public class Manager {
      * @param accessToken The token that is used to download the certificates
      * @param callback Invoked with 0 if everything is successful, otherwise with either a
      *                 http error code, 1 for a connection issue, 2 for invalid data received.
+     * @throws IllegalStateException when SDK is not initialized
      */
     public void downloadAccessCertificate(String accessToken,
-                                          final Constants.ResponseCallback callback) {
+                                          final Constants.ResponseCallback callback) throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
         webService.requestAccessCertificate(accessToken,
                 privateKey,
                 getDeviceCertificate().getSerial(),
@@ -274,8 +298,10 @@ public class Manager {
 
     /**
      * Deletes all the stored certificates.
+     * @throws IllegalStateException when SDK is not initialized
      */
-    public void resetStorage() {
+    public void resetStorage() throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
         storage.resetStorage();
     }
 
