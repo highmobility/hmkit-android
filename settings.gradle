@@ -1,1 +1,1 @@
-include ':mobile', ':wear', ':hmlink', ':common'
+include ':mobile', ':wear', ':hmkit', ':common'
