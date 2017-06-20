@@ -1,20 +1,19 @@
 package com.highmobility.hmkit;
 
-import com.high_mobility.hmkit.Command.AutoHvacState;
-import com.high_mobility.hmkit.Command.Command;
-import com.high_mobility.hmkit.Command.CommandParseException;
-import com.high_mobility.hmkit.Command.Constants;
-import com.high_mobility.hmkit.Command.Incoming.ChargeState;
-import com.high_mobility.hmkit.Command.Incoming.ClimateState;
-import com.high_mobility.hmkit.Command.Incoming.ControlMode;
-import com.high_mobility.hmkit.Command.Incoming.DeliveredParcels;
-import com.high_mobility.hmkit.Command.Incoming.Failure;
-import com.high_mobility.hmkit.Command.Incoming.LockState;
-import com.high_mobility.hmkit.Command.Incoming.RooftopState;
-import com.high_mobility.hmkit.Command.Incoming.TrunkState;
-import com.high_mobility.hmkit.ByteUtils;
-import com.high_mobility.hmkit.Command.Incoming.ValetMode;
-import com.high_mobility.hmkit.Command.Incoming.VehicleLocation;
+import com.highmobility.hmkit.Command.AutoHvacState;
+import com.highmobility.hmkit.Command.Command;
+import com.highmobility.hmkit.Command.CommandParseException;
+import com.highmobility.hmkit.Command.Constants;
+import com.highmobility.hmkit.Command.Incoming.ChargeState;
+import com.highmobility.hmkit.Command.Incoming.ClimateState;
+import com.highmobility.hmkit.Command.Incoming.ControlMode;
+import com.highmobility.hmkit.Command.Incoming.DeliveredParcels;
+import com.highmobility.hmkit.Command.Incoming.Failure;
+import com.highmobility.hmkit.Command.Incoming.LockState;
+import com.highmobility.hmkit.Command.Incoming.RooftopState;
+import com.highmobility.hmkit.Command.Incoming.TrunkState;
+import com.highmobility.hmkit.Command.Incoming.ValetMode;
+import com.highmobility.hmkit.Command.Incoming.VehicleLocation;
 
 import org.junit.Test;
 
@@ -35,10 +34,10 @@ public class IncomingCommand {
          */
         byte[] bytes = ByteUtils.bytesFromHex("003201024B87EFA8B4A6EC084B87EFA8B4A6EC09");
 
-        com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = null;
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
         try {
-            command = com.high_mobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
         } catch (CommandParseException e) {
             fail("init failed");
         }
@@ -53,10 +52,10 @@ public class IncomingCommand {
     public void failure_wakeup() {
         byte[] bytes = ByteUtils.bytesFromHex("00020100210001");
 
-        com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = null;
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
         try {
-            command = com.high_mobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
         } catch (CommandParseException e) {
             fail("init failed");
         }
@@ -70,10 +69,10 @@ public class IncomingCommand {
     public void controlMode_init() {
         byte[] bytes = ByteUtils.bytesFromHex("002701020032");
 
-        com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = null;
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
         try {
-            command = com.high_mobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
         } catch (CommandParseException e) {
             fail("init failed");
         }
@@ -87,10 +86,10 @@ public class IncomingCommand {
     public void lockstate_init() {
         byte[] bytes = ByteUtils.bytesFromHex("00200100");
 
-        com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = null;
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
         try {
-            command = com.high_mobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
         } catch (CommandParseException e) {
             fail("init failed");
         }
@@ -103,10 +102,10 @@ public class IncomingCommand {
     public void rooftopState_init_random() {
         byte[] bytes = ByteUtils.bytesFromHex("0025010135");
 
-        com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = null;
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
         try {
-            command = com.high_mobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
         } catch (CommandParseException e) {
             fail("init failed");
         }
@@ -120,10 +119,10 @@ public class IncomingCommand {
     public void rooftopState_init_opaque() {
         byte[] bytes = ByteUtils.bytesFromHex("0025016400");
 
-        com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = null;
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
         try {
-            command = com.high_mobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
         } catch (CommandParseException e) {
             fail("init failed");
         }
@@ -137,10 +136,10 @@ public class IncomingCommand {
     public void trunkState_init() {
         byte[] bytes = ByteUtils.bytesFromHex("0021010001");
 
-        com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = null;
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
         try {
-            command = com.high_mobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
         } catch (CommandParseException e) {
             fail("init failed");
         }
@@ -155,10 +154,10 @@ public class IncomingCommand {
     public void charging_init() {
         byte[] bytes = ByteUtils.bytesFromHex("0023010200FF32BF19999A01905A003C3F5EB85201");
 
-        com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = null;
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
         try {
-            command = com.high_mobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
         } catch (CommandParseException e) {
             fail("init failed");
         }
@@ -179,10 +178,10 @@ public class IncomingCommand {
     public void climate() {
         byte[] bytes = ByteUtils.bytesFromHex("002401419800004140000041ac000041ac000001000041ac00006000000000000000000000071E071F");
 
-        com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = null;
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
         try {
-            command = com.high_mobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
         } catch (CommandParseException e) {
             fail("init failed");
         }
@@ -220,10 +219,10 @@ public class IncomingCommand {
     public void valetMode() {
         byte[] bytes = ByteUtils.bytesFromHex("00280101");
 
-        com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = null;
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
         try {
-            command = com.high_mobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
         } catch (CommandParseException e) {
             fail("init failed");
         }
@@ -235,10 +234,10 @@ public class IncomingCommand {
     @Test
     public void location() {
         byte[] bytes = ByteUtils.bytesFromHex("0030014252147d41567ab1");
-        com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = null;
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
         try {
-            command = com.high_mobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
         } catch (CommandParseException e) {
             fail("init failed");
         }

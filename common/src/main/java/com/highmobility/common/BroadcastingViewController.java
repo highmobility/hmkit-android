@@ -3,15 +3,13 @@ package com.highmobility.common;
 import android.content.Intent;
 import android.util.Log;
 
-import com.high_mobility.hmkit.Broadcaster;
-import com.high_mobility.hmkit.BroadcasterListener;
-import com.high_mobility.hmkit.ConnectedLink;
-import com.high_mobility.hmkit.ConnectedLinkListener;
-import com.high_mobility.hmkit.Constants;
-import com.high_mobility.hmkit.Link;
-import com.high_mobility.hmkit.Manager;
-
-import static com.high_mobility.hmkit.Broadcaster.*;
+import com.highmobility.hmkit.Broadcaster;
+import com.highmobility.hmkit.BroadcasterListener;
+import com.highmobility.hmkit.ConnectedLink;
+import com.highmobility.hmkit.ConnectedLinkListener;
+import com.highmobility.hmkit.Constants;
+import com.highmobility.hmkit.Link;
+import com.highmobility.hmkit.Manager;
 
 public class BroadcastingViewController implements IBroadcastingViewController, BroadcasterListener, ConnectedLinkListener {
     private static final String TAG = "BroadcastingVC";
@@ -78,12 +76,12 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     // Broadcasterlistener
 
     @Override
-    public void onStateChanged(State state) {
+    public void onStateChanged(Broadcaster.State state) {
         switch (broadcaster.getState()) {
             case IDLE:
                 view.setStatusText("Idle");
 
-                if (state == State.BLUETOOTH_UNAVAILABLE) {
+                if (state == Broadcaster.State.BLUETOOTH_UNAVAILABLE) {
                     startBroadcasting();
                 }
                 break;
@@ -117,7 +115,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
             this.link = null;
             view.updateLink(link);
 
-            if (broadcaster.getState() == State.BROADCASTING)
+            if (broadcaster.getState() == Broadcaster.State.BROADCASTING)
                 view.setStatusText("Looking for links...");
         }
     }

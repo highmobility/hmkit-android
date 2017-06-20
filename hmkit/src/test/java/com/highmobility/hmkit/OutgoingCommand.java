@@ -1,10 +1,9 @@
 package com.highmobility.hmkit;
 
-import com.high_mobility.hmkit.Command.AutoHvacState;
-import com.high_mobility.hmkit.Command.Command;
-import com.high_mobility.hmkit.Command.Constants;
-import com.high_mobility.hmkit.ByteUtils;
-import com.high_mobility.hmkit.Command.Command.Identifier;
+import com.highmobility.hmkit.Command.AutoHvacState;
+import com.highmobility.hmkit.Command.Command;
+import com.highmobility.hmkit.Command.Constants;
+import com.highmobility.hmkit.Command.Command.Identifier;
 
 import org.junit.Test;
 
