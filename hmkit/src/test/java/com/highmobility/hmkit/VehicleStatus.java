@@ -26,9 +26,21 @@ import static org.junit.Assert.fail;
 
 public class VehicleStatus {
     com.high_mobility.hmkit.Command.Incoming.VehicleStatus vehicleStatus;
+
     @Before
     public void setup() {
-        String vehicleStatusHexString = "00110108" +
+        String vehicleStatusHexString =
+                "0011" + // MSB, LSB Message Identifier for Vehicle Status
+                "01"       + // Message Type for Vehicle Status
+                "4a46325348424443374348343531383639" + // VIN
+                "01"           + // All-electric powertrain
+                "06"           + // Model name is 6 bytes
+                "547970652058" + // "Type X"
+                "06"           + // Car name is 6 bytes
+                "4d7920436172" + // "My Car"
+                "06"           + // License plate is 6 bytes
+                "414243313233" + // "ABC123"
+                "08" +              // 8 feature states
                 "00200101" +
                 "0021020001" +
                 "0023080200FF32bf19999a" +
@@ -36,7 +48,7 @@ public class VehicleStatus {
                 "0025020135" + // rooftop state
                 "00270102" +
                 "00280101" + // valet mode
-                "00300842561eb941567ab1"; // location 53.530003 13.404954
+                "00300842561eb941567ab1"; // location 53.530003 13.404954;      // Remote Control Started
 
         byte[] bytes = ByteUtils.bytesFromHex(vehicleStatusHexString);
 
@@ -56,8 +68,33 @@ public class VehicleStatus {
     }
 
     @Test
+    public void vin() {
+        assertTrue(vehicleStatus.getVin().equals("JF2SHBDC7CH451869"));
+    }
+
+    @Test
+    public void power_train() {
+        assertTrue(vehicleStatus.getPowerTrain() == com.high_mobility.hmkit.Command.Incoming.VehicleStatus.PowerTrain.ALLELECTRIC);
+    }
+
+    @Test
+    public void model_name() {
+        assertTrue(vehicleStatus.getModelName().equals("Type X"));
+    }
+
+    @Test
+    public void car_name() {
+        assertTrue(vehicleStatus.getName().equals("My Car"));
+    }
+
+    @Test
+    public void license_plate() {
+        assertTrue(vehicleStatus.getLicensePlate().equals("ABC123"));
+    }
+
+    @Test
     public void unknown_state() {
-        byte[] bytes = ByteUtils.bytesFromHex("0011010300590101002102000100270102");
+        byte[] bytes = ByteUtils.bytesFromHex("0011014a463253484244433743483435313836390106547970652058064d7920436172064142433132330300590101002102000100270102");
         try {
             vehicleStatus = new com.high_mobility.hmkit.Command.Incoming.VehicleStatus(bytes);
         } catch (CommandParseException e) {
