@@ -5,6 +5,7 @@ import com.high_mobility.hmkit.Command.Command.Identifier;
 
 import static com.high_mobility.hmkit.Command.Command.Identifier.CHARGING;
 import static com.high_mobility.hmkit.Command.Command.Identifier.CLIMATE;
+import static com.high_mobility.hmkit.Command.Command.Identifier.DIAGNOSTICS;
 import static com.high_mobility.hmkit.Command.Command.Identifier.DOOR_LOCKS;
 import static com.high_mobility.hmkit.Command.Command.Identifier.REMOTE_CONTROL;
 import static com.high_mobility.hmkit.Command.Command.Identifier.ROOFTOP;
@@ -35,6 +36,7 @@ public class FeatureState {
         if (feature == VEHICLE_LOCATION) return new VehicleLocation(bytes);
         if (feature == VALET_MODE) return new ValetMode(bytes);
         if (feature == ROOFTOP) return new RooftopState(bytes);
+        if (feature == DIAGNOSTICS) return new Diagnostics(bytes);
 
         return null;
     }

@@ -4,6 +4,7 @@ import com.high_mobility.hmkit.ByteUtils;
 import com.high_mobility.hmkit.Command.CommandParseException;
 import com.high_mobility.hmkit.Command.Constants;
 import com.high_mobility.hmkit.Command.Command.Identifier;
+import com.high_mobility.hmkit.Command.Incoming.LockState;
 import com.high_mobility.hmkit.Command.VehicleStatus.Charging;
 import com.high_mobility.hmkit.Command.VehicleStatus.Climate;
 import com.high_mobility.hmkit.Command.VehicleStatus.DoorLocks;
@@ -40,16 +41,17 @@ public class VehicleStatus {
                 "4d7920436172" + // "My Car"
                 "06"           + // License plate is 6 bytes
                 "414243313233" + // "ABC123"
-                "08" +              // 8 feature states
-                "00200101" +
+                "09" +              // 8 feature states
+                "00200D04000100010000020001030001" + // door locks
                 "0021020001" +
                 "0023080200FF32bf19999a" +
                 "002410419800004140000001000041ac000060" + // climate
                 "0025020135" + // rooftop state
                 "00270102" +
                 "00280101" + // valet mode
-                "00300842561eb941567ab1"; // location 53.530003 13.404954;      // Remote Control Started
-
+                "00300842561eb941567ab1" + // location 53.530003 13.404954; // 8 feature states
+                "00330101" + // TODO: implement/test diagnostics
+                "";
         byte[] bytes = ByteUtils.bytesFromHex(vehicleStatusHexString);
 
         try {
@@ -64,7 +66,7 @@ public class VehicleStatus {
 
     @Test
     public void states_size() {
-        assertTrue(vehicleStatus.getFeatureStates().length == 8);
+        assertTrue(vehicleStatus.getFeatureStates().length == 9);
     }
 
     @Test
@@ -123,9 +125,22 @@ public class VehicleStatus {
         assertTrue(state != null);
         assertTrue(state.getClass() == DoorLocks.class);
 
-        if (state.getClass() == DoorLocks.class) {
-            assertTrue(((DoorLocks)state).getState() == Constants.LockState.LOCKED);
-        }
+        assertTrue(((DoorLocks)state).getFrontLeft() != null);
+        assertTrue(((DoorLocks)state).getFrontRight() != null);
+        assertTrue(((DoorLocks)state).getRearLeft() != null);
+        assertTrue(((DoorLocks)state).getRearRight() != null);
+
+        assertTrue(((DoorLocks)state).getFrontLeft().getPosition() == Constants.DoorPosition.OPEN);
+        assertTrue(((DoorLocks)state).getFrontLeft().getLockState() == Constants.LockState.UNLOCKED);
+
+        assertTrue(((DoorLocks)state).getFrontRight().getPosition() == Constants.DoorPosition.CLOSED);
+        assertTrue(((DoorLocks)state).getFrontRight().getLockState() == Constants.LockState.UNLOCKED);
+
+        assertTrue(((DoorLocks)state).getRearLeft().getPosition() == Constants.DoorPosition.CLOSED);
+        assertTrue(((DoorLocks)state).getRearLeft().getLockState() == Constants.LockState.LOCKED);
+
+        assertTrue(((DoorLocks)state).getRearRight().getPosition() == Constants.DoorPosition.CLOSED);
+        assertTrue(((DoorLocks)state).getRearRight().getLockState() == Constants.LockState.LOCKED);
     }
 
     @Test

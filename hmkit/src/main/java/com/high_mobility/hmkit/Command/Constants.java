@@ -22,6 +22,22 @@ public class Constants {
     }
 
     /**
+     * The possible positions of a car door
+     */
+    public enum DoorPosition {
+        OPEN, CLOSED;
+
+        public static DoorPosition fromByte(byte value) throws CommandParseException {
+            switch (value) {
+                case 0x00: return CLOSED;
+                case 0x01: return OPEN;
+            }
+
+            throw new CommandParseException();
+        }
+    }
+
+    /**
      * The possible trunk lock states
      */
     public enum TrunkLockState {

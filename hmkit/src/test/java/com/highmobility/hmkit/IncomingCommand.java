@@ -85,7 +85,7 @@ public class IncomingCommand {
 
     @Test
     public void lockstate_init() {
-        byte[] bytes = ByteUtils.bytesFromHex("00200100");
+        byte[] bytes = ByteUtils.bytesFromHex("00200104000100010000020001030001");
 
         com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
@@ -96,7 +96,49 @@ public class IncomingCommand {
         }
 
         assertTrue(command.getClass() == LockState.class);
-        assertTrue(((LockState)command).getState() == Constants.LockState.UNLOCKED);
+
+        assertTrue(((LockState)command).getFrontLeft() != null);
+        assertTrue(((LockState)command).getFrontRight() != null);
+        assertTrue(((LockState)command).getRearLeft() != null);
+        assertTrue(((LockState)command).getRearRight() != null);
+
+        assertTrue(((LockState)command).getFrontLeft().getPosition() == Constants.DoorPosition.OPEN);
+        assertTrue(((LockState)command).getFrontLeft().getLockState() == Constants.LockState.UNLOCKED);
+
+        assertTrue(((LockState)command).getFrontRight().getPosition() == Constants.DoorPosition.CLOSED);
+        assertTrue(((LockState)command).getFrontRight().getLockState() == Constants.LockState.UNLOCKED);
+
+        assertTrue(((LockState)command).getRearLeft().getPosition() == Constants.DoorPosition.CLOSED);
+        assertTrue(((LockState)command).getRearLeft().getLockState() == Constants.LockState.LOCKED);
+
+        assertTrue(((LockState)command).getRearRight().getPosition() == Constants.DoorPosition.CLOSED);
+        assertTrue(((LockState)command).getRearRight().getLockState() == Constants.LockState.LOCKED);
+    }
+
+    @Test
+    public void lockstate_two_front_doors() {
+        byte[] bytes = ByteUtils.bytesFromHex("00200102000100010000");
+
+        com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.high_mobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == LockState.class);
+
+        assertTrue(((LockState)command).getFrontLeft() != null);
+        assertTrue(((LockState)command).getFrontRight() != null);
+        assertTrue(((LockState)command).getRearLeft() == null);
+        assertTrue(((LockState)command).getRearRight() == null);
+
+        assertTrue(((LockState)command).getFrontLeft().getPosition() == Constants.DoorPosition.OPEN);
+        assertTrue(((LockState)command).getFrontLeft().getLockState() == Constants.LockState.UNLOCKED);
+
+        assertTrue(((LockState)command).getFrontRight().getPosition() == Constants.DoorPosition.CLOSED);
+        assertTrue(((LockState)command).getFrontRight().getLockState() == Constants.LockState.UNLOCKED);
     }
 
     @Test
