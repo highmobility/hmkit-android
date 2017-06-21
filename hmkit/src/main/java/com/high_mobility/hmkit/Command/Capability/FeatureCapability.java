@@ -19,9 +19,10 @@ public class FeatureCapability {
         FeatureCapability featureCapability = null;
         Identifier feature = Identifier.fromIdentifier(capabilityBytes[0], capabilityBytes[1]);
 
-        if (feature == Identifier.DOOR_LOCKS ||
-                feature == Identifier.CHARGING ||
-                feature == Identifier.VALET_MODE) {
+        if (feature == Identifier.DOOR_LOCKS
+                || feature == Identifier.CHARGING
+                || feature == Identifier.VALET_MODE
+                || feature == Identifier.ENGINE) {
             featureCapability = new AvailableGetStateCapability(feature, capabilityBytes);
         }
         else if (feature == Identifier.TRUNK_ACCESS) {
@@ -32,7 +33,13 @@ public class FeatureCapability {
                 || feature == Identifier.HEART_RATE
                 || feature == Identifier.VEHICLE_LOCATION
                 || feature == Identifier.NAVI_DESTINATION
-                || feature == Identifier.DELIVERED_PARCELS) {
+                || feature == Identifier.DELIVERED_PARCELS
+                || feature == Identifier.DIAGNOSTICS
+                || feature == Identifier.MAINTENANCE
+                || feature == Identifier.DRIVER_FATIGUE
+                || feature == Identifier.VIDEO_HANDOVER
+                || feature == Identifier.TEXT_INPUT
+                || feature == Identifier.WINDOWS) {
             featureCapability =  new AvailableCapability(feature, capabilityBytes);
         }
         else if (feature == Identifier.CLIMATE) {
@@ -43,6 +50,21 @@ public class FeatureCapability {
         }
         else if (feature == Identifier.HONK_FLASH) {
             featureCapability = new HonkFlashCapability(capabilityBytes);
+        }
+        else if (feature == Identifier.LIGHTS) {
+            featureCapability = new LightsCapability(capabilityBytes);
+        }
+        else if (feature == Identifier.MESSAGING) {
+            featureCapability = new MessagingCapability(capabilityBytes);
+        }
+        else if (feature == Identifier.NOTIFICATIONS) {
+            featureCapability = new NotificationsCapability(capabilityBytes);
+        }
+        else if (feature == Identifier.FUELING) {
+            featureCapability = new FuelingCapability(capabilityBytes);
+        }
+        else if (feature == Identifier.WINDSCREEN) {
+            featureCapability = new WindscreenCapability(capabilityBytes);
         }
 
         return featureCapability;

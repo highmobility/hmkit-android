@@ -1,10 +1,16 @@
 package com.high_mobility.hmkit.Command;
 
+import android.provider.MediaStore;
+
 import com.high_mobility.hmkit.ByteUtils;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.sql.Driver;
 
+import static com.high_mobility.hmkit.Command.Command.Identifier.CAPABILITIES;
 import static com.high_mobility.hmkit.Command.Command.Identifier.FAILURE;
+import static com.high_mobility.hmkit.Command.Command.Identifier.MAINTENANCE;
+import static com.high_mobility.hmkit.Command.Command.Identifier.ROOFTOP;
 
 /**
  * Created by ttiganik on 25/05/16.
@@ -26,7 +32,19 @@ public class Command {
         HEART_RATE(new byte[] { 0x00, (byte)0x29 }),
         VEHICLE_LOCATION(new byte[] { 0x00, (byte)0x30 }),
         NAVI_DESTINATION(new byte[] { 0x00, (byte)0x31 }),
-        DELIVERED_PARCELS(new byte[] { 0x00, (byte)0x32 });
+        DELIVERED_PARCELS(new byte[] { 0x00, (byte)0x32 }),
+        DIAGNOSTICS(new byte[] { 0x00, (byte)0x33 }),
+        MAINTENANCE(new byte[] { 0x00, (byte)0x34 }),
+        ENGINE(new byte[] { 0x00, (byte)0x35 }),
+        LIGHTS(new byte[] { 0x00, (byte)0x36 }),
+        MESSAGING(new byte[] { 0x00, (byte)0x37 }),
+        NOTIFICATIONS(new byte[] { 0x00, (byte)0x38 }),
+        WINDOWS(new byte[] { 0x00, (byte)0x45 }),
+        WINDSCREEN(new byte[] { 0x00, (byte)0x42 }),
+        VIDEO_HANDOVER(new byte[] { 0x00, (byte)0x43 }),
+        TEXT_INPUT(new byte[] { 0x00, (byte)0x44 }),
+        FUELING(new byte[] { 0x00, (byte)0x40 }),
+        DRIVER_FATIGUE(new byte[] { 0x00, (byte)0x41 });
 
         public static Identifier fromIdentifier(byte[] bytes) {
             return fromIdentifier(bytes[0], bytes[1]);
@@ -81,6 +99,42 @@ public class Command {
             else if (is(DELIVERED_PARCELS, firstByte, secondByte)) {
                 return DELIVERED_PARCELS;
             }
+            else if (is(DIAGNOSTICS, firstByte, secondByte)) {
+                return DIAGNOSTICS;
+            }
+            else if (is(MAINTENANCE, firstByte, secondByte)) {
+                return MAINTENANCE;
+            }
+            else if (is(ENGINE, firstByte, secondByte)) {
+                return ENGINE;
+            }
+            else if (is(LIGHTS, firstByte, secondByte)) {
+                return LIGHTS;
+            }
+            else if (is(MESSAGING, firstByte, secondByte)) {
+                return MESSAGING;
+            }
+            else if (is(NOTIFICATIONS, firstByte, secondByte)) {
+                return NOTIFICATIONS;
+            }
+            else if (is(WINDOWS, firstByte, secondByte)) {
+                return WINDOWS;
+            }
+            else if (is(WINDSCREEN, firstByte, secondByte)) {
+                return WINDSCREEN;
+            }
+            else if (is(VIDEO_HANDOVER, firstByte, secondByte)) {
+                return VIDEO_HANDOVER;
+            }
+            else if (is(TEXT_INPUT, firstByte, secondByte)) {
+                return TEXT_INPUT;
+            }
+            else if (is(FUELING, firstByte, secondByte)) {
+                return FUELING;
+            }
+            else if (is(DRIVER_FATIGUE, firstByte, secondByte)) {
+                return DRIVER_FATIGUE;
+            }
             else {
                 return null;
             }
@@ -106,140 +160,59 @@ public class Command {
     }
 
     public static Type typeFromBytes(byte identifierByteOne, byte identifierByteTwo, byte type) throws CommandParseException {
-        Identifier identifier = Identifier.fromIdentifier(identifierByteOne, identifierByteTwo);
-        switch (identifier) {
-            case FAILURE: {
-                if (type == FailureMessage.FAILURE_MESSAGE.getType())
-                    return FailureMessage.FAILURE_MESSAGE;
-                break;
-            }
-            case CAPABILITIES: {
-                if (type == Capabilities.GET_CAPABILITIES.getType())
-                    return Capabilities.GET_CAPABILITIES;
-                else if (type == Capabilities.CAPABILITIES.getType())
-                    return Capabilities.CAPABILITIES;
-                else if (type == Capabilities.GET_CAPABILITY.getType())
-                    return Capabilities.GET_CAPABILITY;
-                else if (type == Capabilities.CAPABILITY.getType())
-                    return Capabilities.CAPABILITY;
-                break;
-            }
-            case VEHICLE_STATUS: {
-                if (type == VehicleStatus.GET_VEHICLE_STATUS.getType())
-                    return VehicleStatus.GET_VEHICLE_STATUS;
-                else if (type == VehicleStatus.VEHICLE_STATUS.getType())
-                    return VehicleStatus.VEHICLE_STATUS;
-                break;
-            }
-            case DOOR_LOCKS: {
-                if (type == DoorLocks.GET_LOCK_STATE.getType())
-                    return DoorLocks.GET_LOCK_STATE;
-                else if (type == DoorLocks.LOCK_STATE.getType())
-                    return DoorLocks.LOCK_STATE;
-                else if (type == DoorLocks.LOCK_UNLOCK.getType())
-                    return DoorLocks.LOCK_UNLOCK;
-                break;
-            }
-            case TRUNK_ACCESS: {
-                if (type == TrunkAccess.GET_TRUNK_STATE.getType())
-                    return TrunkAccess.GET_TRUNK_STATE;
-                else if (type == TrunkAccess.TRUNK_STATE.getType())
-                    return TrunkAccess.TRUNK_STATE;
-                else if (type == TrunkAccess.OPEN_CLOSE.getType())
-                    return TrunkAccess.OPEN_CLOSE;
-                break;
-            }
-            case WAKE_UP: {
-                if (type == WakeUp.WAKE_UP.getType())
-                    return WakeUp.WAKE_UP;
-                break;
-            }
-            case CHARGING: {
-                if (type == Charging.GET_CHARGE_STATE.getType())
-                    return Charging.GET_CHARGE_STATE;
-                else if (type == Charging.CHARGE_STATE.getType())
-                    return Charging.CHARGE_STATE;
-                else if (type == Charging.START_STOP_CHARGING.getType())
-                    return Charging.START_STOP_CHARGING;
-                else if (type == Charging.SET_CHARGE_LIMIT.getType())
-                    return Charging.SET_CHARGE_LIMIT;
-                break;
-            }
-            case CLIMATE: {
-                if (type == Climate.GET_CLIMATE_STATE.getType())
-                    return Climate.GET_CLIMATE_STATE;
-                else if (type == Climate.CLIMATE_STATE.getType())
-                    return Climate.CLIMATE_STATE;
-                else if (type == Climate.SET_CLIMATE_PROFILE.getType())
-                    return Climate.SET_CLIMATE_PROFILE;
-                else if (type == Climate.START_STOP_HVAC.getType())
-                    return Climate.START_STOP_HVAC;
-                else if (type == Climate.START_STOP_DEFOGGING.getType())
-                    return Climate.START_STOP_DEFOGGING;
-                else if (type == Climate.START_STOP_DEFROSTING.getType())
-                    return Climate.START_STOP_DEFROSTING;
-                break;
-            }
-            case ROOFTOP: {
-                if (type == RooftopControl.GET_ROOFTOP_STATE.getType())
-                    return RooftopControl.GET_ROOFTOP_STATE;
-                else if (type == RooftopControl.ROOFTOP_STATE.getType())
-                    return RooftopControl.ROOFTOP_STATE;
-                else if (type == RooftopControl.CONTROL_ROOFTOP.getType())
-                    return RooftopControl.CONTROL_ROOFTOP;
-                break;
-            }
-            case HONK_FLASH: {
-                if (type == HonkFlash.HONK_FLASH.getType())
-                    return HonkFlash.HONK_FLASH;
-                break;
-            }
-            case REMOTE_CONTROL: {
-                if (type == RemoteControl.GET_CONTROL_MODE.getType())
-                    return RemoteControl.GET_CONTROL_MODE;
-                else if (type == RemoteControl.CONTROL_MODE.getType())
-                    return RemoteControl.CONTROL_MODE;
-                else if (type == RemoteControl.START_CONTROL_MODE.getType())
-                    return RemoteControl.START_CONTROL_MODE;
-                else if (type == RemoteControl.STOP_CONTROL_MODE.getType())
-                    return RemoteControl.STOP_CONTROL_MODE;
-                else if (type == RemoteControl.CONTROL_COMMAND.getType())
-                    return RemoteControl.CONTROL_COMMAND;
-                break;
-            }
-            case VALET_MODE: {
-                if (type == ValetMode.GET_VALET_MODE.getType())
-                    return ValetMode.GET_VALET_MODE;
-                else if (type == ValetMode.VALET_MODE.getType())
-                    return ValetMode.VALET_MODE;
-                break;
-            }
-            case HEART_RATE: {
-                if (type == HeartRate.SEND_HEART_RATE.getType())
-                    return HeartRate.SEND_HEART_RATE;
-                break;
-            }
-            case VEHICLE_LOCATION: {
-                if (type == VehicleLocation.GET_VEHICLE_LOCATION.getType())
-                    return VehicleLocation.GET_VEHICLE_LOCATION;
-                else if (type == VehicleLocation.VEHICLE_LOCATION.getType())
-                    return VehicleLocation.VEHICLE_LOCATION;
-                break;
-            }
-            case NAVI_DESTINATION: {
-                if (type == NaviDestination.SET_DESTINATION.getType()) {
-                    return NaviDestination.SET_DESTINATION;
-                }
-                break;
-            }
-            case DELIVERED_PARCELS: {
-                if (type == DeliveredParcels.GET_DELIVERED_PARCELS.getType())
-                    return DeliveredParcels.GET_DELIVERED_PARCELS;
-                else if (type == DeliveredParcels.DELIVERED_PARCELS.getType())
-                    return DeliveredParcels.DELIVERED_PARCELS;
-                break;
-            }
-        }
+        Type parsedType;
+
+        parsedType = FailureMessage.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = Capabilities.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = VehicleStatus.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = DoorLocks.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = TrunkAccess.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = WakeUp.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = Charging.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = Climate.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = RooftopControl.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = HonkFlash.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = RemoteControl.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = ValetMode.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = HeartRate.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = VehicleLocation.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = NaviDestination.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = DeliveredParcels.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = Diagnostics.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
 
         throw new CommandParseException();
     }
@@ -254,6 +227,27 @@ public class Command {
      */
     public enum FailureMessage implements Type {
         FAILURE_MESSAGE((byte)0x01);
+
+        static FailureMessage fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.FAILURE.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            FailureMessage[] allValues = FailureMessage.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                FailureMessage command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
 
         FailureMessage(byte messageType) {
             this.messageType = messageType;
@@ -306,6 +300,27 @@ public class Command {
             return ByteUtils.concatBytes(GET_CAPABILITY.getIdentifierAndType(), identifier.getIdentifier());
         }
 
+        static Capabilities fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.CAPABILITIES.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            Capabilities[] allValues = Capabilities.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Capabilities command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
         Capabilities(byte messageType) {
             this.messageType = messageType;
         }
@@ -339,6 +354,27 @@ public class Command {
          */
         public static byte[] getVehicleStatus() {
             return GET_VEHICLE_STATUS.getIdentifierAndType();
+        }
+
+        static VehicleStatus fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.VEHICLE_STATUS.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            VehicleStatus[] allValues = VehicleStatus.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                VehicleStatus command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
         }
 
         VehicleStatus(byte messageType) {
@@ -387,6 +423,27 @@ public class Command {
          */
         public static byte[] lockDoors(boolean lock) {
             return ByteUtils.concatBytes(LOCK_UNLOCK.getIdentifierAndType(), booleanByte(lock));
+        }
+
+        static DoorLocks fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.DOOR_LOCKS.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            DoorLocks[] allValues = DoorLocks.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                DoorLocks command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
         }
 
         DoorLocks(byte messageType) {
@@ -444,6 +501,27 @@ public class Command {
             return bytes;
         }
 
+        static TrunkAccess fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.TRUNK_ACCESS.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            TrunkAccess[] allValues = TrunkAccess.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                TrunkAccess command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
         TrunkAccess(byte messageType) {
             this.messageType = messageType;
         }
@@ -479,6 +557,27 @@ public class Command {
          */
         public static byte[] wakeUp() {
             return WAKE_UP.getIdentifierAndType();
+        }
+
+        static WakeUp fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.WAKE_UP.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            WakeUp[] allValues = WakeUp.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                WakeUp command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
         }
 
         WakeUp(byte messageType) {
@@ -542,6 +641,27 @@ public class Command {
             return ByteUtils.concatBytes(SET_CHARGE_LIMIT.getIdentifierAndType(), limitByte);
         }
 
+        static Charging fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.CHARGING.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            Charging[] allValues = Charging.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Charging command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
         Charging(byte messageType) {
             this.messageType = messageType;
         }
@@ -571,24 +691,6 @@ public class Command {
         START_STOP_HVAC((byte)0x03),
         START_STOP_DEFOGGING((byte)0x04),
         START_STOP_DEFROSTING((byte)0x05);
-
-        Climate(byte messageType) {
-            this.messageType = messageType;
-        }
-        private byte messageType;
-        public byte getType() {
-            return messageType;
-        }
-
-        @Override
-        public Identifier getIdentifier() {
-            return Identifier.CLIMATE;
-        }
-
-        @Override
-        public byte[] getIdentifierAndType() {
-            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
-        }
 
         /**
          * Get the climate state. The car will respond with the Climate State message.
@@ -673,6 +775,45 @@ public class Command {
         public static byte[] startDefrost(boolean start) {
             return ByteUtils.concatBytes(START_STOP_DEFROSTING.getIdentifierAndType(), booleanByte(start));
         }
+
+        static Climate fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.CLIMATE.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            Climate[] allValues = Climate.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Climate command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        Climate(byte messageType) {
+            this.messageType = messageType;
+        }
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.CLIMATE;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
     }
 
     /**
@@ -711,6 +852,27 @@ public class Command {
             message[3] = (byte)(int)(dimPercentage * 100);
             message[4] = (byte)(int)(openPercentage * 100);
             return message;
+        }
+
+        static RooftopControl fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.ROOFTOP.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            RooftopControl[] allValues = RooftopControl.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                RooftopControl command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
         }
 
         RooftopControl(byte messageType) {
@@ -770,6 +932,27 @@ public class Command {
          */
         public static byte[] startEmergencyFlasher(boolean start) {
             return ByteUtils.concatBytes(EMERGENCY_FLASHER.getIdentifierAndType(), booleanByte(start));
+        }
+
+        static HonkFlash fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.HONK_FLASH.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            HonkFlash[] allValues = HonkFlash.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                HonkFlash command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
         }
 
         HonkFlash(byte messageType) {
@@ -847,6 +1030,27 @@ public class Command {
             return ByteUtils.concatBytes(CONTROL_COMMAND.getIdentifierAndType(), new byte[] {(byte)speed, msb, lsb});
         }
 
+        static RemoteControl fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.REMOTE_CONTROL.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            RemoteControl[] allValues = RemoteControl.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                RemoteControl command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
         RemoteControl(byte messageType) {
             this.messageType = messageType;
         }
@@ -896,6 +1100,27 @@ public class Command {
                     booleanByte(activate));
         }
 
+        static ValetMode fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.VALET_MODE.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            ValetMode[] allValues = ValetMode.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                ValetMode command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
         ValetMode(byte messageType) {
             this.messageType = messageType;
         }
@@ -926,6 +1151,27 @@ public class Command {
          */
         public static byte[] sendHeartRate(int heartRate) {
             return ByteUtils.concatBytes(SEND_HEART_RATE.getIdentifierAndType(), (byte)heartRate);
+        }
+
+        static HeartRate fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.HEART_RATE.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            HeartRate[] allValues = HeartRate.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                HeartRate command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
         }
 
         HeartRate(byte messageType) {
@@ -962,6 +1208,27 @@ public class Command {
          */
         public static byte[] getLocation() {
             return GET_VEHICLE_LOCATION.getIdentifierAndType();
+        }
+
+        static VehicleLocation fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.VEHICLE_LOCATION.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            VehicleLocation[] allValues = VehicleLocation.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                VehicleLocation command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
         }
 
         VehicleLocation(byte messageType) {
@@ -1012,6 +1279,27 @@ public class Command {
             return destinationBytes;
         }
 
+        static NaviDestination fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.NAVI_DESTINATION.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            NaviDestination[] allValues = NaviDestination.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                NaviDestination command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
         NaviDestination(byte messageType) {
             this.messageType = messageType;
         }
@@ -1048,6 +1336,27 @@ public class Command {
             return GET_DELIVERED_PARCELS.getIdentifierAndType();
         }
 
+        static DeliveredParcels fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.DELIVERED_PARCELS.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            DeliveredParcels[] allValues = DeliveredParcels.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                DeliveredParcels command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
         DeliveredParcels(byte messageType) {
             this.messageType = messageType;
         }
@@ -1059,6 +1368,573 @@ public class Command {
         @Override
         public Identifier getIdentifier() {
             return Identifier.DELIVERED_PARCELS;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    // TODO: add comments, implement
+    /**
+     * Commands for the Diagnostics category of the Auto API.
+     */
+    public enum Diagnostics implements Type {
+        GET_DIAGNOSTICS_STATE((byte)0x00),
+        DIAGNOSTICS_STATE((byte)0x01);
+
+        static Diagnostics fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.DIAGNOSTICS.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            Diagnostics[] allValues = Diagnostics.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Diagnostics command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        Diagnostics(byte messageType) {
+            this.messageType = messageType;
+        }
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.DIAGNOSTICS;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Maintenance category of the Auto API.
+     */
+    public enum Maintenance implements Type {
+        GET_MAINTENANCE_STATE((byte)0x00),
+        MAINTENANCE_STATE((byte)0x01);
+
+        static Maintenance fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.MAINTENANCE.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            Maintenance[] allValues = Maintenance.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Maintenance command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        Maintenance(byte messageType) {
+            this.messageType = messageType;
+        }
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.MAINTENANCE;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Engine category of the Auto API.
+     */
+    public enum Engine implements Type {
+        GET_IGNITION_STATE((byte)0x00),
+        IGNITION_STATE((byte)0x01),
+        TURN_ENGINE_ON_OFF((byte)0x02);
+
+        static Engine fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.ENGINE.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            Engine[] allValues = Engine.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Engine command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        Engine(byte messageType) {
+            this.messageType = messageType;
+        }
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.ENGINE;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Lights category of the Auto API.
+     */
+    public enum Lights implements Type {
+        GET_LIGHTS_STATE((byte)0x00),
+        LIGHTS_STATE((byte)0x01),
+        CONTROL_LIGHTS((byte)0x02);
+
+        static Lights fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.LIGHTS.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            Lights[] allValues = Lights.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Lights command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        Lights(byte messageType) {
+            this.messageType = messageType;
+        }
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.LIGHTS;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Windows category of the Auto API.
+     */
+    public enum Windows implements Type {
+        OPEN_CLOSE_WINDOWS((byte)0x02);
+
+        static Windows fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.WINDOWS.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            Windows[] allValues = Windows.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Windows command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        Windows(byte messageType) {
+            this.messageType = messageType;
+        }
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.WINDOWS;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Windscreen category of the Auto API.
+     */
+    public enum Windscreen implements Type {
+        GET_WINDSCREEN_STATE((byte)0x00),
+        WINDSCREEN_STATE((byte)0x01),
+        SET_WINDSCREEN_DAMAGE((byte)0x02);
+
+        static Windscreen fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.WINDSCREEN.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            Windscreen[] allValues = Windscreen.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Windscreen command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        Windscreen(byte messageType) {
+            this.messageType = messageType;
+        }
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.WINDSCREEN;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Notifications category of the Auto API.
+     */
+    public enum Notifications implements Type {
+        NOTIFICATION((byte)0x00),
+        NOTIFICATION_ACTION((byte)0x01);
+
+        static Notifications fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.NOTIFICATIONS.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            Notifications[] allValues = Notifications.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Notifications command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        Notifications(byte messageType) {
+            this.messageType = messageType;
+        }
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.NOTIFICATIONS;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Messaging category of the Auto API.
+     */
+    public enum Messaging implements Type {
+        MESSAGE_RECEIVED((byte)0x00),
+        SEND_MESSAGE((byte)0x01);
+
+        static Messaging fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.MESSAGING.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            Messaging[] allValues = Messaging.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Messaging command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        Messaging(byte messageType) {
+            this.messageType = messageType;
+        }
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.MESSAGING;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Video Handover category of the Auto API.
+     */
+    public enum VideoHandover implements Type {
+        VIDEO_HANDOVER((byte)0x00);
+
+        static VideoHandover fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.VIDEO_HANDOVER.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            VideoHandover[] allValues = VideoHandover.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                VideoHandover command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        VideoHandover(byte messageType) {
+            this.messageType = messageType;
+        }
+
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.VIDEO_HANDOVER;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Text Input category of the Auto API.
+     */
+    public enum TextInput implements Type {
+        TEXT_INPUT((byte)0x00);
+
+        static TextInput fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.TEXT_INPUT.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            TextInput[] allValues = TextInput.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                TextInput command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        TextInput(byte messageType) {
+            this.messageType = messageType;
+        }
+
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.TEXT_INPUT;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Fueling category of the Auto API.
+     */
+    public enum Fueling implements Type {
+        OPEN_GAS_FLAP((byte)0x02);
+
+        static Fueling fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.FUELING.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            Fueling[] allValues = Fueling.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Fueling command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        Fueling(byte messageType) {
+            this.messageType = messageType;
+        }
+
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.FUELING;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Driver Fatigue category of the Auto API.
+     */
+    public enum DriverFatigue implements Type {
+        DRIVER_FATIGUE_DETECTED((byte)0x01);
+
+        static DriverFatigue fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.DRIVER_FATIGUE.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            DriverFatigue[] allValues = DriverFatigue.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                DriverFatigue command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        DriverFatigue(byte messageType) {
+            this.messageType = messageType;
+        }
+
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.DRIVER_FATIGUE;
         }
 
         @Override
