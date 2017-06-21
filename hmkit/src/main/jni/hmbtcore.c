@@ -38,13 +38,13 @@ void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterfa
     interfaceMethodHMPersistenceHalgetStoredCertificate = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetStoredCertificate","([B[B[I)I");
     interfaceMethodHMPersistenceHaleraseStoredCertificate = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHaleraseStoredCertificate","([B)I");
 
-    interfaceMethodHMApiCallbackEnteredProximity = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackEnteredProximity","(Lcom/high_mobility/btcore/HMDevice;)V");
-    interfaceMethodHMApiCallbackExitedProximity = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackExitedProximity","(Lcom/high_mobility/btcore/HMDevice;)V");
-    interfaceMethodHMApiCallbackCustomCommandIncoming = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackCustomCommandIncoming","(Lcom/high_mobility/btcore/HMDevice;[BI)V");
-    interfaceMethodHMApiCallbackCustomCommandResponse = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackCustomCommandResponse","(Lcom/high_mobility/btcore/HMDevice;[BI)V");
-    interfaceMethodHMApiCallbackGetDeviceCertificateFailed = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackGetDeviceCertificateFailed","(Lcom/high_mobility/btcore/HMDevice;[B)I");
-    interfaceMethodHMApiCallbackPairingRequested = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackPairingRequested","(Lcom/high_mobility/btcore/HMDevice;)I");
-    interfaceMethodHMApiCallbackTelematicsCommandIncoming = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackTelematicsCommandIncoming","(Lcom/high_mobility/btcore/HMDevice;II[B)V");
+    interfaceMethodHMApiCallbackEnteredProximity = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackEnteredProximity","(Lcom/highmobility/btcore/HMDevice;)V");
+    interfaceMethodHMApiCallbackExitedProximity = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackExitedProximity","(Lcom/highmobility/btcore/HMDevice;)V");
+    interfaceMethodHMApiCallbackCustomCommandIncoming = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackCustomCommandIncoming","(Lcom/highmobility/btcore/HMDevice;[BI)V");
+    interfaceMethodHMApiCallbackCustomCommandResponse = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackCustomCommandResponse","(Lcom/highmobility/btcore/HMDevice;[BI)V");
+    interfaceMethodHMApiCallbackGetDeviceCertificateFailed = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackGetDeviceCertificateFailed","(Lcom/highmobility/btcore/HMDevice;[B)I");
+    interfaceMethodHMApiCallbackPairingRequested = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackPairingRequested","(Lcom/highmobility/btcore/HMDevice;)I");
+    interfaceMethodHMApiCallbackTelematicsCommandIncoming = (*env)->GetMethodID(env,interfaceClassRef, "HMApiCallbackTelematicsCommandIncoming","(Lcom/highmobility/btcore/HMDevice;II[B)V");
 
     interfaceMethodHMCryptoHalGenerateNonce  = (*env)->GetMethodID(env,interfaceClassRef, "HMCryptoHalGenerateNonce","([B)V");
 

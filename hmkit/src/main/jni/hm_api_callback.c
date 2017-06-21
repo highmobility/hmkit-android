@@ -33,7 +33,7 @@ void hm_api_callback_authorised_device_updated(hm_device_t *device, uint8_t erro
 
 void hm_api_callback_entered_proximity(hm_device_t *device)
 {
-    jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
+    jclass cls = (*envRef)->FindClass(envRef, "com/highmobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
@@ -67,7 +67,7 @@ void hm_api_callback_proximity_measured(hm_device_t *device, uint8_t receiver_co
 
 void hm_api_callback_exited_proximity(hm_device_t *device)
 {
-    jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
+    jclass cls = (*envRef)->FindClass(envRef, "com/highmobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
@@ -95,7 +95,7 @@ void hm_api_callback_exited_proximity(hm_device_t *device)
 
 void hm_api_callback_command_incoming(hm_device_t *device, uint8_t *data, uint16_t length)
 {
-    jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
+    jclass cls = (*envRef)->FindClass(envRef, "com/highmobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
@@ -126,7 +126,7 @@ void hm_api_callback_command_incoming(hm_device_t *device, uint8_t *data, uint16
 
 void hm_api_callback_command_response(hm_device_t *device, uint8_t *data, uint16_t length)
 {
-    jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
+    jclass cls = (*envRef)->FindClass(envRef, "com/highmobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
@@ -157,7 +157,7 @@ void hm_api_callback_command_response(hm_device_t *device, uint8_t *data, uint16
 
 uint32_t hm_api_callback_get_device_certificate_failed(hm_device_t *device, uint8_t *nonce)
 {
-    jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
+    jclass cls = (*envRef)->FindClass(envRef, "com/highmobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
@@ -198,7 +198,7 @@ void hm_api_callback_access_certificate_registered(hm_device_t *device, uint8_t 
 
 uint32_t hm_api_callback_pairing_requested(hm_device_t *device){
 
-    jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
+    jclass cls = (*envRef)->FindClass(envRef, "com/highmobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
@@ -227,7 +227,7 @@ uint32_t hm_api_callback_pairing_requested(hm_device_t *device){
 }
 
 void hm_api_callback_telematics_command_incoming(hm_device_t *device, uint8_t id, uint16_t length, uint8_t *data){
-    jclass cls = (*envRef)->FindClass(envRef, "com/high_mobility/btcore/HMDevice");
+    jclass cls = (*envRef)->FindClass(envRef, "com/highmobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
     jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
