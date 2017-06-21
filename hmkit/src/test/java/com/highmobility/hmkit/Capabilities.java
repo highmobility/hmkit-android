@@ -1,20 +1,17 @@
 package com.highmobility.hmkit;
 
-import com.high_mobility.hmkit.ByteUtils;
-import com.high_mobility.hmkit.Command.Capability.AvailableCapability;
-import com.high_mobility.hmkit.Command.Capability.AvailableGetStateCapability;
-import com.high_mobility.hmkit.Command.Capability.FeatureCapability;
-import com.high_mobility.hmkit.Command.Capability.ClimateCapability;
-import com.high_mobility.hmkit.Command.Capability.FuelingCapability;
-import com.high_mobility.hmkit.Command.Capability.HonkFlashCapability;
-import com.high_mobility.hmkit.Command.Capability.LightsCapability;
-import com.high_mobility.hmkit.Command.Capability.MessagingCapability;
-import com.high_mobility.hmkit.Command.Capability.NotificationsCapability;
-import com.high_mobility.hmkit.Command.Capability.RooftopCapability;
-import com.high_mobility.hmkit.Command.Capability.TrunkAccessCapability;
-import com.high_mobility.hmkit.Command.Command;
-import com.high_mobility.hmkit.Command.CommandParseException;
-import com.high_mobility.hmkit.Command.Command.Identifier;
+
+import com.highmobility.hmkit.Command.Capability.AvailableCapability;
+import com.highmobility.hmkit.Command.Capability.AvailableGetStateCapability;
+import com.highmobility.hmkit.Command.Capability.FeatureCapability;
+import com.highmobility.hmkit.Command.Capability.ClimateCapability;
+import com.highmobility.hmkit.Command.Capability.HonkFlashCapability;
+import com.highmobility.hmkit.Command.Capability.RooftopCapability;
+import com.highmobility.hmkit.Command.Capability.TrunkAccessCapability;
+import com.highmobility.hmkit.Command.CommandParseException;
+import com.highmobility.hmkit.Command.Command.Identifier;
+import com.highmobility.hmkit.Command.Incoming.*;
+import com.highmobility.hmkit.Command.Incoming.IncomingCommand;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,14 +39,14 @@ public class Capabilities {
             "00440100" + // 24(0x18)
             "00450101" +
             "00350102");
-    com.high_mobility.hmkit.Command.Incoming.Capabilities capabilites = null;
-
+    
+    com.highmobility.hmkit.Command.Incoming.Capabilities capabilites = null;
     @Before
     public void setUp() {
         try {
-            com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = com.high_mobility.hmkit.Command.Incoming.IncomingCommand.create(knownCapabilitiesBytes);
-            assertTrue(command.getClass() == com.high_mobility.hmkit.Command.Incoming.Capabilities.class);
-            capabilites = (com.high_mobility.hmkit.Command.Incoming.Capabilities)command;
+            com.highmobility.hmkit.Command.Incoming.IncomingCommand command = IncomingCommand.create(knownCapabilitiesBytes);
+            assertTrue(command.getClass() == com.highmobility.hmkit.Command.Incoming.Capabilities.class);
+            capabilites = (com.highmobility.hmkit.Command.Incoming.Capabilities)command;
         } catch (CommandParseException e) {
             fail("capabilities init failed");
         }
@@ -65,10 +62,10 @@ public class Capabilities {
     public void unknownCapabilities_init() {
         // 00 59 unknown
         byte[] unknownCapabilitiesBytes = ByteUtils.bytesFromHex("0010010D005901010021020300002201000023010000240201030025020101002603010101002701010028010100290100003001010031010100320101");
-        com.high_mobility.hmkit.Command.Incoming.Capabilities unknownCapabilities= null;
+        com.highmobility.hmkit.Command.Incoming.Capabilities unknownCapabilities= null;
 
         try {
-            unknownCapabilities = new com.high_mobility.hmkit.Command.Incoming.Capabilities(unknownCapabilitiesBytes);
+            unknownCapabilities = new com.highmobility.hmkit.Command.Incoming.Capabilities(unknownCapabilitiesBytes);
         } catch (CommandParseException e) {
             fail("unknowncapabilities init failed");
         }
@@ -524,9 +521,9 @@ public class Capabilities {
     @Test
     public void capability_init_climate() {
         byte[] message = ByteUtils.bytesFromHex("00130024020002");
-        com.high_mobility.hmkit.Command.Incoming.Capability capability = null;
+        Capability capability = null;
         try {
-            capability = new com.high_mobility.hmkit.Command.Incoming.Capability(message);
+            capability = new Capability(message);
         } catch (CommandParseException e) {
             fail("climate capability init failed");
             e.printStackTrace();
@@ -545,9 +542,9 @@ public class Capabilities {
     @Test
     public void capability_init_heartrate() {
         byte[] message = ByteUtils.bytesFromHex("001300290101");
-        com.high_mobility.hmkit.Command.Incoming.Capability capability = null;
+        Capability capability = null;
         try {
-            capability = new com.high_mobility.hmkit.Command.Incoming.Capability(message);
+            capability = new Capability(message);
         } catch (CommandParseException e) {
             fail("climate capability init failed");
             e.printStackTrace();

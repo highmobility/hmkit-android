@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.high_mobility.digitalkey">
+    package="com.highmobility.digitalkey">
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -26,7 +26,7 @@
             android:parentActivityName=".broadcast.BroadcastActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.high_mobility.digitalkey.broadcast.BroadcastActivity" />
+                android:value="com.highmobility.digitalkey.broadcast.BroadcastActivity" />
         </activity>
 
         <activity android:name=".broadcast.BroadcastActivity"> </activity>

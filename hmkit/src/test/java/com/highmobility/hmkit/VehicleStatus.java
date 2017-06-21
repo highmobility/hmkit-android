@@ -1,19 +1,18 @@
 package com.highmobility.hmkit;
 
-import com.high_mobility.hmkit.ByteUtils;
-import com.high_mobility.hmkit.Command.CommandParseException;
-import com.high_mobility.hmkit.Command.Constants;
-import com.high_mobility.hmkit.Command.Command.Identifier;
-import com.high_mobility.hmkit.Command.Incoming.LockState;
-import com.high_mobility.hmkit.Command.VehicleStatus.Charging;
-import com.high_mobility.hmkit.Command.VehicleStatus.Climate;
-import com.high_mobility.hmkit.Command.VehicleStatus.DoorLocks;
-import com.high_mobility.hmkit.Command.VehicleStatus.FeatureState;
-import com.high_mobility.hmkit.Command.VehicleStatus.RemoteControl;
-import com.high_mobility.hmkit.Command.VehicleStatus.RooftopState;
-import com.high_mobility.hmkit.Command.VehicleStatus.TrunkAccess;
-import com.high_mobility.hmkit.Command.VehicleStatus.ValetMode;
-import com.high_mobility.hmkit.Command.VehicleStatus.VehicleLocation;
+import com.highmobility.hmkit.Command.CommandParseException;
+import com.highmobility.hmkit.Command.Constants;
+import com.highmobility.hmkit.Command.Command.Identifier;
+import com.highmobility.hmkit.Command.Incoming.IncomingCommand;
+import com.highmobility.hmkit.Command.VehicleStatus.Charging;
+import com.highmobility.hmkit.Command.VehicleStatus.Climate;
+
+import com.highmobility.hmkit.Command.VehicleStatus.FeatureState;
+import com.highmobility.hmkit.Command.VehicleStatus.RemoteControl;
+import com.highmobility.hmkit.Command.VehicleStatus.RooftopState;
+import com.highmobility.hmkit.Command.VehicleStatus.TrunkAccess;
+import com.highmobility.hmkit.Command.VehicleStatus.ValetMode;
+import com.highmobility.hmkit.Command.VehicleStatus.VehicleLocation;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +25,7 @@ import static org.junit.Assert.fail;
  */
 
 public class VehicleStatus {
-    com.high_mobility.hmkit.Command.Incoming.VehicleStatus vehicleStatus;
+    com.highmobility.hmkit.Command.Incoming.VehicleStatus vehicleStatus;
 
     @Before
     public void setup() {
@@ -55,9 +54,9 @@ public class VehicleStatus {
         byte[] bytes = ByteUtils.bytesFromHex(vehicleStatusHexString);
 
         try {
-            com.high_mobility.hmkit.Command.Incoming.IncomingCommand command = com.high_mobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
-            assertTrue(command.getClass() == com.high_mobility.hmkit.Command.Incoming.VehicleStatus.class);
-            vehicleStatus = (com.high_mobility.hmkit.Command.Incoming.VehicleStatus)command;
+            com.highmobility.hmkit.Command.Incoming.IncomingCommand command = IncomingCommand.create(bytes);
+            assertTrue(command.getClass() == com.highmobility.hmkit.Command.Incoming.VehicleStatus.class);
+            vehicleStatus = (com.highmobility.hmkit.Command.Incoming.VehicleStatus)command;
         } catch (CommandParseException e) {
             e.printStackTrace();
             fail("init failed");
@@ -76,7 +75,7 @@ public class VehicleStatus {
 
     @Test
     public void power_train() {
-        assertTrue(vehicleStatus.getPowerTrain() == com.high_mobility.hmkit.Command.Incoming.VehicleStatus.PowerTrain.ALLELECTRIC);
+        assertTrue(vehicleStatus.getPowerTrain() == com.highmobility.hmkit.Command.Incoming.VehicleStatus.PowerTrain.ALLELECTRIC);
     }
 
     @Test
@@ -98,7 +97,7 @@ public class VehicleStatus {
     public void unknown_state() {
         byte[] bytes = ByteUtils.bytesFromHex("0011014a463253484244433743483435313836390106547970652058064d7920436172064142433132330300590101002102000100270102");
         try {
-            vehicleStatus = new com.high_mobility.hmkit.Command.Incoming.VehicleStatus(bytes);
+            vehicleStatus = new com.highmobility.hmkit.Command.Incoming.VehicleStatus(bytes);
         } catch (CommandParseException e) {
             e.printStackTrace();
             fail("init failed");
