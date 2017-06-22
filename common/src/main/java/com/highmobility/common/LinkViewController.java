@@ -61,7 +61,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     }
 
     @Override
-    public void onAuthorizationRequested(ConnectedLink link, com.highmobility.hmkit.Constants.ApprovedCallback approvedCallback) {
+    public void onAuthorizationRequested(ConnectedLink link, ConnectedLink.AuthorizationCallback approvedCallback) {
 
     }
 

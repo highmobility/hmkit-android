@@ -14,6 +14,11 @@ import java.util.Calendar;
  * Created by ttiganik on 13/04/16.
  */
 public class ConnectedLink extends Link {
+    public interface AuthorizationCallback {
+        void approve();
+        void decline();
+    }
+
     Broadcaster broadcaster;
 
     ConnectedLink(BluetoothDevice btDevice, Broadcaster broadcaster) {
@@ -42,7 +47,7 @@ public class ConnectedLink extends Link {
         broadcaster.manager.mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                ((ConnectedLinkListener) listener).onAuthorizationRequested(reference, new Constants.ApprovedCallback() {
+                ((ConnectedLinkListener) listener).onAuthorizationRequested(reference, new AuthorizationCallback() {
                     @Override
                     public void approve() {
                         pairingResponse = 0;

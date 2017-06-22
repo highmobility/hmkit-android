@@ -7,6 +7,7 @@ import com.highmobility.hmkit.Command.Incoming.IncomingCommand;
 import com.highmobility.hmkit.Command.VehicleStatus.Charging;
 import com.highmobility.hmkit.Command.VehicleStatus.Climate;
 
+import com.highmobility.hmkit.Command.VehicleStatus.DoorLocks;
 import com.highmobility.hmkit.Command.VehicleStatus.FeatureState;
 import com.highmobility.hmkit.Command.VehicleStatus.RemoteControl;
 import com.highmobility.hmkit.Command.VehicleStatus.RooftopState;

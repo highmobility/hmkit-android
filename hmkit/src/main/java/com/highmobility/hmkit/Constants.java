@@ -18,11 +18,6 @@ public class Constants {
     public static final float commandTimeout            = 10.0f;
     public static final int certificateStorageCount     = 30;
 
-    public interface ApprovedCallback {
-        void approve();
-        void decline();
-    }
-
     public interface DataResponseCallback {
         void response(byte[] bytes, int errorCode);
     }

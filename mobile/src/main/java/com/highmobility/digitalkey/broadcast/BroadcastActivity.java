@@ -33,7 +33,7 @@ public class BroadcastActivity extends AppCompatActivity implements IBroadcastin
     @BindView(R.id.confirm_pairing_button) Button confirmPairButton;
     @BindView(R.id.show_button) Button showButton;
 
-    Constants.ApprovedCallback pairApproveCallback;
+    ConnectedLink.AuthorizationCallback pairApproveCallback;
 
     void onPairConfirmClick() {
         controller.onPairingApproved(true);

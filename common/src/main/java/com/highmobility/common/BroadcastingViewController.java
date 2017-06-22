@@ -16,7 +16,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     public static final int LINK_ACTIVITY_RESULT = 1;
     IBroadcastingView view;
 
-    Constants.ApprovedCallback pairApproveCallback;
+    ConnectedLink.AuthorizationCallback authorizationCallback;
     Broadcaster broadcaster;
     ConnectedLink link;
     Cloud cloud;
@@ -39,11 +39,11 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     @Override
     public void onPairingApproved(boolean approved) {
         if (approved) {
-            pairApproveCallback.approve();
+            authorizationCallback.approve();
             view.showPairingView(false);
         }
         else {
-            pairApproveCallback.decline();
+            authorizationCallback.decline();
             link.setListener(null);
             view.getActivity().finish();
         }
@@ -121,8 +121,8 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     }
 
     @Override
-    public void onAuthorizationRequested(ConnectedLink connectedLink, Constants.ApprovedCallback approvedCallback) {
-        this.pairApproveCallback = approvedCallback;
+    public void onAuthorizationRequested(ConnectedLink connectedLink, ConnectedLink.AuthorizationCallback approvedCallback) {
+        this.authorizationCallback = approvedCallback;
         view.showPairingView(true);
         Log.d(TAG, "show pairing view " + true);
     }
