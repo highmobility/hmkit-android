@@ -67,7 +67,7 @@ public class Storage {
         if (response.has("vehicle_access_certificate") == true) {
             // stored cert. this does not has to exist in the response
             vehicleAccessCertificateBase64 = response.getString("vehicle_access_certificate");
-            if (vehicleAccessCertificateBase64 != null) {
+            if (vehicleAccessCertificateBase64 != null && vehicleAccessCertificateBase64.equals("null") == false) {
                 vehicleAccessCertificate = new AccessCertificate(vehicleAccessCertificateBase64);
 
                 if (storeCertificate(vehicleAccessCertificate) != Result.SUCCESS) {
