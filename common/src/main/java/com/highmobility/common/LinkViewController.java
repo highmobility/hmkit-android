@@ -114,7 +114,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
         boolean doorsLocked = doorLockState == LOCKED;
 
-        link.sendCommand(Command.DoorLocks.lockDoors(doorsLocked ? false : true), true, new com.highmobility.hmkit.Constants.ResponseCallback() {
+        link.sendCommand(Command.DoorLocks.lockDoors(doorsLocked ? false : true), new com.highmobility.hmkit.Constants.ResponseCallback() {
                 @Override
                 public void response(int i) {
                     if (i != 0) {
@@ -141,7 +141,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
                         Constants.TrunkLockState.LOCKED,
                         Constants.TrunkPosition.OPEN);
 
-        link.sendCommand(command, true, new com.highmobility.hmkit.Constants.ResponseCallback() {
+        link.sendCommand(command, new com.highmobility.hmkit.Constants.ResponseCallback() {
                     @Override
                     public void response(int i) {
                 if (i != 0) {
@@ -160,7 +160,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
         view.showLoadingView(true);
         startInitializeTimer();
 
-        link.sendCommand(Command.VehicleStatus.getVehicleStatus(), true, new com.highmobility.hmkit.Constants.ResponseCallback() {
+        link.sendCommand(Command.VehicleStatus.getVehicleStatus(), new com.highmobility.hmkit.Constants.ResponseCallback() {
             @Override
             public void response(int i) {
                 if (i != 0) {

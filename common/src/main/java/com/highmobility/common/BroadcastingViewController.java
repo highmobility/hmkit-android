@@ -121,8 +121,8 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     }
 
     @Override
-    public void onAuthorizationRequested(ConnectedLink connectedLink, ConnectedLink.AuthorizationCallback approvedCallback) {
-        this.authorizationCallback = approvedCallback;
+    public void onAuthorizationRequested(ConnectedLink connectedLink, ConnectedLink.AuthorizationCallback authorizationCallback) {
+        this.authorizationCallback = authorizationCallback;
         view.showPairingView(true);
         Log.d(TAG, "show pairing view " + true);
     }

@@ -102,13 +102,11 @@ public class Link {
      * Send command to the ConnectedLink inside a secure container.
      *
      * @param bytes             The bytes that will be sent inside the secure container.
-     * @param secureResponse    Optional boolean defining if the response has a secure HMAC element
-     *                       in it or not - defaults to true
      * @param responseCallback  ResponseCallback object that returns the getErrorCode if the command
      *                          failed or 0 if it succeeded.
      *                          Error codes could be UNAUTHORIZED, COMMAND_IN_PROGRESS, TIME_OUT from {@link Link}.
      */
-    public void sendCommand(final byte[] bytes, boolean secureResponse, Constants.ResponseCallback responseCallback) {
+    public void sendCommand(final byte[] bytes, Constants.ResponseCallback responseCallback) {
         if (state != State.AUTHENTICATED) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(Broadcaster.TAG, "cant send command, not authenticated");
@@ -137,7 +135,7 @@ public class Link {
         });
     }
 
-    void setHmDevice(final HMDevice hmDevice) {
+    void setHmDevice(HMDevice hmDevice) {
         this.hmDevice = hmDevice;
 
         if (hmDevice.getIsAuthenticated() == 0) {
