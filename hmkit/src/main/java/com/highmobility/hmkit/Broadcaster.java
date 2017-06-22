@@ -58,6 +58,7 @@ public class Broadcaster implements SharedBleListener {
 
     byte[] issuer; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
     byte[] appId;
+    byte[] advertisedSerial;
 
     /**
      * Sets the advertise mode for the Bluetooth's AdvertiseSettings. Default is ADVERTISE_MODE_BALANCED.
@@ -190,9 +191,17 @@ public class Broadcaster implements SharedBleListener {
                 .setTxPowerLevel(txPowerLevel)
                 .build();
 
-        byte[] uuidBytes = ByteUtils.concatBytes(issuer, appId);
-        ByteUtils.reverse(uuidBytes);
-        final UUID advertiseUUID = ByteUtils.UUIDFromByteArray(uuidBytes);
+        UUID advertiseUUID;
+        if (advertisedSerial == null) {
+            byte[] uuidBytes = ByteUtils.concatBytes(issuer, appId);
+            ByteUtils.reverse(uuidBytes);
+            advertiseUUID = ByteUtils.UUIDFromByteArray(uuidBytes);
+        }
+        else {
+            byte[] uuidBytes = ByteUtils.concatBytes(new byte[] {0x00, 0x00, 0x00, 0x00}, advertisedSerial);
+            uuidBytes = ByteUtils.concatBytes(uuidBytes, new byte[] {0x00, 0x00, 0x00});
+            advertiseUUID = ByteUtils.UUIDFromByteArray(uuidBytes);
+        }
 
         final AdvertiseData data = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
@@ -216,6 +225,18 @@ public class Broadcaster implements SharedBleListener {
         }
 
         setState(State.IDLE);
+    }
+
+    /**
+     * Sets the given serial number in the broadcast info, so other devices know before connecting
+     * if they're interested in this device or not.
+     *
+     * Set this before calling startBroadcasting. Set this to null to use regular broadcast info.
+     *
+     * @param serial the serial set in the broadcast info
+     */
+    public void setBroadcastingFilter(byte[] serial) {
+        advertisedSerial = serial;
     }
 
     /**
@@ -432,7 +453,6 @@ public class Broadcaster implements SharedBleListener {
             return false;
         }
 
-
         return true;
     }
 
@@ -449,102 +469,102 @@ public class Broadcaster implements SharedBleListener {
     }
 
     private boolean createGATTServer() {
+        if (GATTServer != null) return true;
+
+        gattServerCallback = new GATTServerCallback(this);
+        GATTServer = manager.ble.getManager().openGattServer(manager.context, gattServerCallback);
+
         if (GATTServer == null) {
-            gattServerCallback = new GATTServerCallback(this);
-            GATTServer = manager.ble.getManager().openGattServer(manager.context, gattServerCallback);
+            Log.e(TAG, "Cannot create gatt server"); return false;
+        }
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "createGATTServer");
 
-            if (GATTServer == null) {
-                Log.e(TAG, "Cannot create gatt server"); return false;
-            }
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "createGATTServer");
+        /// bluez hack service
+        /*UUID BLUEZ_HACK_SERVICE_UUID = UUID.fromString("48494D4F-BB81-49AB-BE90-6F25D716E8DE");
+        BluetoothGattService bluezHackService = new BluetoothGattService(BLUEZ_HACK_SERVICE_UUID,
+                BluetoothGattService.SERVICE_TYPE_PRIMARY);
+        GATTServer.addService(bluezHackService);*/
+        ///
 
-            /// bluez hack service
-            /*UUID BLUEZ_HACK_SERVICE_UUID = UUID.fromString("48494D4F-BB81-49AB-BE90-6F25D716E8DE");
-            BluetoothGattService bluezHackService = new BluetoothGattService(BLUEZ_HACK_SERVICE_UUID,
-                    BluetoothGattService.SERVICE_TYPE_PRIMARY);
-            GATTServer.addService(bluezHackService);*/
-            ///
+        // create the service
+        BluetoothGattService service = new BluetoothGattService(Constants.SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
 
-            // create the service
-            BluetoothGattService service = new BluetoothGattService(Constants.SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);
+        // add characteristics to the service
+        readCharacteristic = new BluetoothGattCharacteristic(Constants.READ_CHAR_UUID,
+                BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
+                BluetoothGattCharacteristic.PERMISSION_READ);
 
-            // add characteristics to the service
-            readCharacteristic = new BluetoothGattCharacteristic(Constants.READ_CHAR_UUID,
-                    BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
-                    BluetoothGattCharacteristic.PERMISSION_READ);
-
-            sensingReadCharacteristic = new BluetoothGattCharacteristic(Constants.SENSING_READ_CHAR_UUID,
-                    BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
-                    BluetoothGattCharacteristic.PERMISSION_READ);
+        sensingReadCharacteristic = new BluetoothGattCharacteristic(Constants.SENSING_READ_CHAR_UUID,
+                BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic.PROPERTY_NOTIFY,
+                BluetoothGattCharacteristic.PERMISSION_READ);
 
 
-            writeCharacteristic =
-                    new BluetoothGattCharacteristic(Constants.WRITE_CHAR_UUID,
-                            BluetoothGattCharacteristic.PROPERTY_WRITE,
-                            BluetoothGattCharacteristic.PERMISSION_WRITE);
+        writeCharacteristic =
+                new BluetoothGattCharacteristic(Constants.WRITE_CHAR_UUID,
+                        BluetoothGattCharacteristic.PROPERTY_WRITE,
+                        BluetoothGattCharacteristic.PERMISSION_WRITE);
 
-            sensingWriteCharacteristic = new BluetoothGattCharacteristic(Constants.SENSING_WRITE_CHAR_UUID,
-                    BluetoothGattCharacteristic.PROPERTY_WRITE,
-                    BluetoothGattCharacteristic.PERMISSION_WRITE);
+        sensingWriteCharacteristic = new BluetoothGattCharacteristic(Constants.SENSING_WRITE_CHAR_UUID,
+                BluetoothGattCharacteristic.PROPERTY_WRITE,
+                BluetoothGattCharacteristic.PERMISSION_WRITE);
 
-            aliveCharacteristic = new BluetoothGattCharacteristic(Constants.ALIVE_CHAR_UUID,
-                    BluetoothGattCharacteristic.PROPERTY_NOTIFY,
-                    BluetoothGattCharacteristic.PERMISSION_READ);
+        aliveCharacteristic = new BluetoothGattCharacteristic(Constants.ALIVE_CHAR_UUID,
+                BluetoothGattCharacteristic.PROPERTY_NOTIFY,
+                BluetoothGattCharacteristic.PERMISSION_READ);
 
-            infoCharacteristic = new BluetoothGattCharacteristic(Constants.INFO_CHAR_UUID,
-                    BluetoothGattCharacteristic.PROPERTY_READ,
-                    BluetoothGattCharacteristic.PERMISSION_READ);
+        infoCharacteristic = new BluetoothGattCharacteristic(Constants.INFO_CHAR_UUID,
+                BluetoothGattCharacteristic.PROPERTY_READ,
+                BluetoothGattCharacteristic.PERMISSION_READ);
 
-            if (readCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
-                    BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor.PERMISSION_READ)) == false) {
-                Log.e(TAG, "Cannot add read descriptor"); return false;
-            }
+        if (readCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
+                BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor.PERMISSION_READ)) == false) {
+            Log.e(TAG, "Cannot add read descriptor"); return false;
+        }
 
-            if (sensingReadCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
-                    BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor.PERMISSION_READ)) == false) {
-                Log.e(TAG, "Cannot add sensing read descriptor"); return false;
-            }
+        if (sensingReadCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
+                BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor.PERMISSION_READ)) == false) {
+            Log.e(TAG, "Cannot add sensing read descriptor"); return false;
+        }
 
-            if (aliveCharacteristic.setValue(new byte[]{}) == false) {
-                Log.e(TAG, "Cannot set alive char value"); return false;
-            }
+        if (aliveCharacteristic.setValue(new byte[]{}) == false) {
+            Log.e(TAG, "Cannot set alive char value"); return false;
+        }
 
-            if (aliveCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
-                    BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor.PERMISSION_READ)) == false) {
-                Log.e(TAG, "Cannot add alive descriptor"); return false;
-            }
+        if (aliveCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
+                BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor.PERMISSION_READ)) == false) {
+            Log.e(TAG, "Cannot add alive descriptor"); return false;
+        }
 
-            if (infoCharacteristic.setValue(manager.getInfoString()) == false) {
-                Log.e(TAG, "Cannot set info char value"); return false;
-            }
+        if (infoCharacteristic.setValue(manager.getInfoString()) == false) {
+            Log.e(TAG, "Cannot set info char value"); return false;
+        }
 
-            if (service.addCharacteristic(readCharacteristic) == false) {
-                Log.e(TAG, "Cannot add read char"); return false;
-            }
+        if (service.addCharacteristic(readCharacteristic) == false) {
+            Log.e(TAG, "Cannot add read char"); return false;
+        }
 
-            if (service.addCharacteristic(sensingReadCharacteristic) == false) {
-                Log.e(TAG, "Cannot add sensing read char"); return false;
-            }
+        if (service.addCharacteristic(sensingReadCharacteristic) == false) {
+            Log.e(TAG, "Cannot add sensing read char"); return false;
+        }
 
-            if (service.addCharacteristic(writeCharacteristic) == false) {
-                Log.e(TAG, "Cannot add write char"); return false;
-            }
+        if (service.addCharacteristic(writeCharacteristic) == false) {
+            Log.e(TAG, "Cannot add write char"); return false;
+        }
 
-            if (service.addCharacteristic(sensingWriteCharacteristic) == false) {
-                Log.e(TAG, "Cannot add sensing write char"); return false;
-            }
+        if (service.addCharacteristic(sensingWriteCharacteristic) == false) {
+            Log.e(TAG, "Cannot add sensing write char"); return false;
+        }
 
-            if (service.addCharacteristic(aliveCharacteristic) == false) {
-                Log.e(TAG, "Cannot add alive char"); return false;
-            }
+        if (service.addCharacteristic(aliveCharacteristic) == false) {
+            Log.e(TAG, "Cannot add alive char"); return false;
+        }
 
-            if (service.addCharacteristic(infoCharacteristic) == false) {
-                Log.e(TAG, "Cannot add info char"); return false;
-            }
+        if (service.addCharacteristic(infoCharacteristic) == false) {
+            Log.e(TAG, "Cannot add info char"); return false;
+        }
 
-            if (GATTServer.addService(service) == false) {
-                Log.e(TAG, "Cannot add service to GATT server"); return false;
-            }
+        if (GATTServer.addService(service) == false) {
+            Log.e(TAG, "Cannot add service to GATT server"); return false;
         }
 
         return true;
