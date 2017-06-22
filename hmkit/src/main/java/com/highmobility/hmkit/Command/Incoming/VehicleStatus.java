@@ -45,7 +45,6 @@ public class VehicleStatus extends IncomingCommand {
         super(bytes);
         if (bytes.length < 4) throw new CommandParseException();
 
-
         int lengthPosition = 21;
         int length = bytes[lengthPosition];
         int position = 22;

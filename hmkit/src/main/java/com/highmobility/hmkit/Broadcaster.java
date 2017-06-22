@@ -229,13 +229,13 @@ public class Broadcaster implements SharedBleListener {
 
     /**
      * Sets the given serial number in the broadcast info, so other devices know before connecting
-     * if they're interested in this device or not.
+     * if this device is interesting to them or not.
      *
      * Set this before calling startBroadcasting. Set this to null to use regular broadcast info.
      *
      * @param serial the serial set in the broadcast info
      */
-    public void setBroadcastingFilter(byte[] serial) {
+    public void setBroadcastingTarget(byte[] serial) {
         advertisedSerial = serial;
     }
 

@@ -17,15 +17,13 @@ import org.json.JSONObject;
 public class Telematics {
     static final String TAG = "Telematics";
 
-    public interface TelematicsResponseCallback {
-        void response(TelematicsResponse response);
+    public interface CommandCallback {
+        void onCommandResponse(byte[] bytes);
+        void onCommandFailed(TelematicsError error);
     }
 
-    public enum TelematicsResponseStatus { OK, TIMEOUT, ERROR }
-
     Manager manager;
-    TelematicsResponseCallback callback;
-    TelematicsResponse response;
+    CommandCallback callback;
     boolean sendingCommand;
 
     Telematics(Manager manager) {
@@ -39,12 +37,10 @@ public class Telematics {
      * @param certificate the certificate that authorizes the connection with the SDK and the device.
      * @param callback callback that is invoked with the command result
      */
-    public void sendTelematicsCommand(final byte[] command, final AccessCertificate certificate, final TelematicsResponseCallback callback) {
+    public void sendTelematicsCommand(final byte[] command, final AccessCertificate certificate, final CommandCallback callback) {
         if (sendingCommand == true) {
-            TelematicsResponse response = new TelematicsResponse();
-            response.status = TelematicsResponseStatus.ERROR;
-            response.message = "Already sending a command";
-            callback.response(response);
+            TelematicsError error = new TelematicsError(TelematicsError.Type.ERROR, "Already sending a command");
+            callback.onCommandFailed(error);
             return;
         }
 
@@ -66,17 +62,17 @@ public class Telematics {
                         }
                     });
                 } catch (JSONException e) {
-                    dispatchError("Invalid nonce response from server.", callback);
+                    dispatchError(TelematicsError.Type.ERROR, "Invalid nonce response from server.");
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 if (error.networkResponse != null) {
-                    dispatchError("HTTP error " + new String(error.networkResponse.data), callback);
+                    dispatchError(TelematicsError.Type.ERROR, "HTTP error " + new String(error.networkResponse.data));
                 }
                 else {
-                    dispatchError("Cannot connect to the web service. Check your internet connection", callback);
+                    dispatchError(TelematicsError.Type.ERROR, "Cannot connect to the web service. Check your internet connection");
                 }
             }
         });
@@ -88,15 +84,27 @@ public class Telematics {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
                         try {
-                            response = TelematicsResponse.fromResponse(jsonObject);
-                            manager.workHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    manager.core.HMBTCoreTelematicsReceiveData(manager.coreInterface, response.data.length, response.data);
-                                }
-                            });
+                            String status = jsonObject.getString("status");
+
+                            if (status.equals("ok")) {
+                                // decrypt the data
+                                final byte[] data = Base64.decode(jsonObject.getString("response_data"), Base64.NO_WRAP);
+
+                                manager.workHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        manager.core.HMBTCoreTelematicsReceiveData(manager.coreInterface, data.length, data);
+                                    }
+                                });
+                            }
+                            else if (status.equals("timeout")) {
+                                dispatchError(TelematicsError.Type.TIMEOUT, jsonObject.getString("message"));
+                            }
+                            else if (status.equals("error")) {
+                                dispatchError(TelematicsError.Type.ERROR, jsonObject.getString("message"));
+                            }
                         } catch (JSONException e) {
-                            dispatchError("Invalid response from server.", callback);
+                            dispatchError(TelematicsError.Type.ERROR, "Invalid response from server.");
                         }
                     }
                 },
@@ -108,80 +116,67 @@ public class Telematics {
                             try {
                                 JSONObject json = new JSONObject(new String(error.networkResponse.data));
                                 if (json.has("message")) {
-                                    dispatchError(message + json.getString("message"), callback);
+                                    dispatchError(TelematicsError.Type.ERROR, message + json.getString("message"));
                                 }
                                 else {
-                                    dispatchError(message + new String(error.networkResponse.data), callback);
+                                    dispatchError(TelematicsError.Type.ERROR, message + new String(error.networkResponse.data));
                                 }
                             } catch (JSONException e) {
-                                dispatchError(message + new String(error.networkResponse.data), callback);
+                                dispatchError(TelematicsError.Type.ERROR, "Error parse exception");
                             }
                         }
                         else {
-                            dispatchError("Cannot connect to the web service. Check your internet connection", callback);
+                            dispatchError(TelematicsError.Type.ERROR, "Cannot connect to the web service. Check your internet connection");
                         }
                     }
                 });
     }
 
-    void onTelematicsResponseDecrypted(byte[] serial, byte id, byte[] data) {
+    void onTelematicsResponseDecrypted(byte[] serial, byte id, final byte[] data) {
         if (id == 0x02) {
-            response.status = TelematicsResponseStatus.ERROR;
-            response.message = "Failed to decrypt web service response.";
+            dispatchError(TelematicsError.Type.ERROR, "Failed to decrypt web service response.");
         }
         else {
-            response.status = TelematicsResponseStatus.OK;
-            response.data = data;
+            if (manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+                Log.d(TAG, "onTelematicsResponseDecrypted: " + ByteUtils.hexFromBytes(data));
+
+            sendingCommand = false;
+            manager.mainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onCommandResponse(data);
+                }
+            });
+        }
+    }
+
+    void dispatchError(final TelematicsError.Type type, final String message) {
+        manager.mainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final TelematicsError error = new TelematicsError(type, message);
+                sendingCommand = false;
+                callback.onCommandFailed(error);
+            }
+        });
+    }
+
+    public static class TelematicsError {
+        public enum Type { TIMEOUT, ERROR }
+        Type type;
+        String message;
+
+        TelematicsError(Type type, String message) {
+            this.type = type;
+            this.message = message;
         }
 
-        if (manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "onTelematicsResponseDecrypted: " + ByteUtils.hexFromBytes(data));
+        public Type getType() {
+            return type;
+        }
 
-        sendingCommand = false;
-        manager.mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                callback.response(response);
-            }
-        });
-    }
-
-    void dispatchError(String message, final TelematicsResponseCallback callback) {
-        final TelematicsResponse response = new TelematicsResponse();
-        response.status = TelematicsResponseStatus.ERROR;
-        response.message = message;
-        sendingCommand = false;
-        manager.mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                callback.response(response);
-            }
-        });
-    }
-
-    public static class TelematicsResponse {
-        public TelematicsResponseStatus status;
-        public String message;
-        public byte[] data;
-
-        static TelematicsResponse fromResponse(JSONObject jsonObject) throws JSONException {
-            TelematicsResponse response = new TelematicsResponse();
-            String status = jsonObject.getString("status");
-
-            if (status.equals("ok")) {
-                response.status = TelematicsResponseStatus.OK;
-            }
-            else if (status.equals("timeout")) {
-                response.status = TelematicsResponseStatus.TIMEOUT;
-            }
-            else if (status.equals("error")) {
-                response.status = TelematicsResponseStatus.ERROR;
-            }
-
-            response.message = jsonObject.getString("message");
-            response.data = Base64.decode(jsonObject.getString("response_data"), Base64.NO_WRAP);
-
-            return response;
+        public String getMessage() {
+            return message;
         }
     }
 }

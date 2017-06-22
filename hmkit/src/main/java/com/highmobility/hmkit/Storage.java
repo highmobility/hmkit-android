@@ -54,15 +54,17 @@ class Storage {
         if (response.has("vehicle_access_certificate") == true) {
             // stored cert. this does not has to exist in the response
             vehicleAccessCertificateBase64 = response.getString("vehicle_access_certificate");
-            vehicleAccessCertificate = new AccessCertificate(vehicleAccessCertificateBase64);
+            if (vehicleAccessCertificateBase64 != null) {
+                vehicleAccessCertificate = new AccessCertificate(vehicleAccessCertificateBase64);
 
-            if (storeCertificate(vehicleAccessCertificate) != 0) {
-                Log.d(TAG, "storeDownloadedCertificates: " + "cannot store vehicle access cert");
-                throw new Exception();
+                if (storeCertificate(vehicleAccessCertificate) != 0) {
+                    Log.d(TAG, "storeDownloadedCertificates: " + "cannot store vehicle access cert");
+                    throw new Exception();
+                }
+
+                if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+                    Log.d(TAG, "storeDownloadedCertificates: vehicleCert " + vehicleAccessCertificate.toString());
             }
-
-            if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "storeDownloadedCertificates: vehicleCert " + vehicleAccessCertificate.toString());
         }
     }
 
