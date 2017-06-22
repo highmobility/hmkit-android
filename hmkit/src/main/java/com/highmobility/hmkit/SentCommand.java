@@ -4,6 +4,8 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 
+import com.highmobility.hmkit.Error.LinkError;
+
 import java.util.Calendar;
 
 
@@ -12,12 +14,12 @@ import java.util.Calendar;
  */
 class SentCommand {
     boolean finished;
-    Constants.ResponseCallback commandCallback;
+    Link.CommandCallback commandCallback;
     CountDownTimer timeoutTimer;
     Long commandStartTime;
     Handler dispatchThread;
 
-    SentCommand(Constants.ResponseCallback callback, Handler dispatchThread) {
+    SentCommand(Link.CommandCallback callback, Handler dispatchThread) {
         this.dispatchThread = dispatchThread;
         this.commandCallback = callback;
         startTimeoutTimer();
@@ -25,11 +27,21 @@ class SentCommand {
     }
 
     void dispatchResult(byte[] response) {
-        final int errorCode = getErrorCode(response);
-        dispatchResult(errorCode);
+        final LinkError.Type errorCode = getErrorCode(response);
+        if (errorCode == LinkError.Type.NONE) {
+            dispatchThread.post(new Runnable() {
+                @Override
+                public void run() {
+                    commandCallback.onCommandSent();
+                }
+            });
+        }
+        else {
+            dispatchError(errorCode, 0, "");
+        }
     }
 
-    void dispatchResult(final int errorCode) {
+    void dispatchError(final LinkError.Type type, final int errorCode, final String message) {
         if (timeoutTimer != null) timeoutTimer.cancel();
         finished = true;
         if (commandCallback == null) {
@@ -40,7 +52,7 @@ class SentCommand {
         dispatchThread.post(new Runnable() {
             @Override
             public void run() {
-                commandCallback.response(errorCode);
+                commandCallback.onCommandFailed(new LinkError(type, errorCode, message));
             }
         });
     }
@@ -51,30 +63,30 @@ class SentCommand {
             }
 
             public void onFinish() {
-                dispatchResult(Link.TIME_OUT);
+                dispatchError(LinkError.Type.TIME_OUT, 0, "command timeout");
             }
         }.start();
     }
 
-    static int getErrorCode(byte[] bytes) {
-        if (bytes == null || bytes.length < 2) return 0;
-        if (bytes[0] != 0x02) return 0;
+    static LinkError.Type getErrorCode(byte[] bytes) {
+        if (bytes == null || bytes.length < 2) return LinkError.Type.NONE;
+        if (bytes[0] != 0x02) return LinkError.Type.NONE;
         return errorCodeForByte(bytes[1]);
     }
 
-    static int errorCodeForByte(byte errorByte) {
+    static LinkError.Type errorCodeForByte(byte errorByte) {
         switch (errorByte) {
             case 0x05:
-                return Link.STORAGE_FULL;
+                return LinkError.Type.STORAGE_FULL;
             case 0x09:
-                return Link.TIME_OUT;
+                return LinkError.Type.TIME_OUT;
             case 0x07:
-                return Link.UNAUTHORIZED;
+                return LinkError.Type.UNAUTHORIZED;
             case 0x06:
             case 0x08:
-                return Link.UNAUTHORIZED;
+                return LinkError.Type.UNAUTHORIZED;
             default:
-                return Link.INTERNAL_ERROR;
+                return LinkError.Type.INTERNAL_ERROR;
         }
     }
 }

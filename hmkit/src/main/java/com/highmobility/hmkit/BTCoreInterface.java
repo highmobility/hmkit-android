@@ -136,7 +136,7 @@ class BTCoreInterface implements HMBTCoreInterface {
             Log.d(TAG, "HMPersistenceHaladdPublicKey: " + ByteUtils.hexFromBytes(serial));
 
 
-            int errorCode = manager.storage.storeCertificate(cert);
+            int errorCode = manager.storage.storeCertificate(cert).getValue();
             if (errorCode != 0) {
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(TAG, "Cant register certificate: " + errorCode);
@@ -216,7 +216,7 @@ class BTCoreInterface implements HMBTCoreInterface {
     public int HMPersistenceHaladdStoredCertificate(byte[] cert, int size) {
         AccessCertificate certificate = new AccessCertificate(cert);
 
-        int errorCode = manager.storage.storeCertificate(certificate);
+        int errorCode = manager.storage.storeCertificate(certificate).getValue();
         if (errorCode != 0) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(TAG, "Cant store certificate: " + errorCode);

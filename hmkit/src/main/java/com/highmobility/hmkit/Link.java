@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
 import com.highmobility.btcore.HMDevice;
+import com.highmobility.hmkit.Error.LinkError;
 
 import java.util.Calendar;
 
@@ -11,32 +12,16 @@ import java.util.Calendar;
  * Created by ttiganik on 17/08/16.
  */
 public class Link {
-    /// Bluetooth is off
-    public static final int BLUETOOTH_OFF = 1;
-    /// A custom command has not yet received a response
-    public static final int COMMAND_IN_PROGRESS = 2;
-    /// Framework encountered an internal error (commonly releated to invalid data received)
-    public static final int INTERNAL_ERROR = 3;
-    /// Bluetooth failed to act as expected
-    public static final int BLUETOOTH_FAILURE = 4;
-    /// The signature for the command was invalid
-    public static final int INVALID_SIGNATURE = 5;
-    /// The Certificates storage database is full
-    public static final int STORAGE_FULL = 6;
-    /// Command timed out
-    public static final int TIME_OUT = 7;
-    /// The Link is not connected
-    public static final int NOT_CONNECTED = 8;
-    /// The app is not authorised with the connected link to perform the action
-    public static final int UNAUTHORIZED = 9;
-    /// Bluetooth Low Energy is unavailable for this device
-    public static final int UNSUPPORTED = 10;
-    
     BluetoothDevice btDevice;
     HMDevice hmDevice;
 
     public enum State {
         DISCONNECTED, CONNECTED, AUTHENTICATED
+    }
+
+    public interface CommandCallback {
+        void onCommandSent();
+        void onCommandFailed(LinkError error);
     }
 
     State state = State.CONNECTED;
@@ -101,23 +86,24 @@ public class Link {
     /**
      * Send command to the ConnectedLink inside a secure container.
      *
-     * @param bytes             The bytes that will be sent inside the secure container.
-     * @param responseCallback  ResponseCallback object that returns the getErrorCode if the command
-     *                          failed or 0 if it succeeded.
-     *                          Error codes could be UNAUTHORIZED, COMMAND_IN_PROGRESS, TIME_OUT from {@link Link}.
+     * @param bytes       The bytes that will be sent inside the secure container.
+     * @param callback    callback that is invoked with the command result
+     *                    onCommandSent is invoked if command was sent successfully
+     *                    onCommandFailed is invoked if something went wrong.
      */
-    public void sendCommand(final byte[] bytes, Constants.ResponseCallback responseCallback) {
+    public void sendCommand(final byte[] bytes, CommandCallback callback) {
         if (state != State.AUTHENTICATED) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(Broadcaster.TAG, "cant send command, not authenticated");
-            responseCallback.response(Link.UNAUTHORIZED);
+                Log.d(Broadcaster.TAG, "not authenticated");
+            callback.onCommandFailed(new LinkError(LinkError.Type.UNAUTHORIZED, 0, "not authenticated"));
             return;
         }
 
         if (sentCommand != null && sentCommand.finished == false) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(Broadcaster.TAG, "cant send command, custom command in progress");
-            responseCallback.response(Link.COMMAND_IN_PROGRESS);
+                Log.d(Broadcaster.TAG, "custom command in progress");
+
+            callback.onCommandFailed(new LinkError(LinkError.Type.COMMAND_IN_PROGRESS, 0, "not authenticated"));
             return;
         }
 
@@ -125,7 +111,7 @@ public class Link {
             Log.d(Broadcaster.TAG, "send command " + ByteUtils.hexFromBytes(bytes)
                     + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
-        sentCommand = new SentCommand(responseCallback, manager.mainHandler);
+        sentCommand = new SentCommand(callback, manager.mainHandler);
 
         manager.workHandler.post(new Runnable() {
             @Override

@@ -12,7 +12,10 @@ import com.android.volley.VolleyError;
 import com.highmobility.hmkit.Crypto.AccessCertificate;
 import com.highmobility.hmkit.Crypto.DeviceCertificate;
 import com.highmobility.btcore.HMBTCore;
+import com.highmobility.hmkit.Error.DownloadAccessCertificateError;
+import com.highmobility.hmkit.Error.TelematicsError;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
@@ -37,6 +40,11 @@ public class Manager {
         public int getValue() {
             return level;
         }
+    }
+
+    public interface DownloadCallback {
+        void onDownloaded(byte[] vehicleSerial);
+        void onDownloadFailed(DownloadAccessCertificateError error);
     }
 
     public static LoggingLevel loggingLevel = LoggingLevel.ALL;
@@ -253,15 +261,17 @@ public class Manager {
     }
 
     /**
-     * Download and store the device and vehicle access certificates for the given access token.
+     * Download and store the device access certificate for the given access token.
      *
      * @param accessToken The token that is used to download the certificates
-     * @param callback Invoked with 0 if everything is successful, otherwise with either a
-     *                 http error code, 1 for a connection issue, 2 for invalid data received.
+     * @param callback onDownloaded is invoked with the certificate's gainer serial if the certificate
+     *                 download was successful.
+     *                 onDownloadFailed is invoked when there was an error.
+     *
      * @throws IllegalStateException when SDK is not initialized
      */
     public void downloadAccessCertificate(String accessToken,
-                                          final Constants.ResponseCallback callback) throws IllegalStateException {
+                                          final Manager.DownloadCallback callback) throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
         webService.requestAccessCertificate(accessToken,
                 privateKey,
@@ -270,27 +280,50 @@ public class Manager {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            storage.storeDownloadedCertificates(response);
-                            callback.response(0);
+                            AccessCertificate certificate = storage.storeDownloadedCertificates(response);
+                            callback.onDownloaded(certificate.getGainerSerial());
                         } catch (Exception e) {
-                            Log.e(TAG, "Can't store the certificate, invalid data");
-                            callback.response(2);
+                            DownloadAccessCertificateError error = new DownloadAccessCertificateError(
+                                    DownloadAccessCertificateError.Type.INVALID_SERVER_RESPONSE, 0, "Invalid certificate data");
+                            callback.onDownloadFailed(error);
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        int errorCode;
+                        DownloadAccessCertificateError dispatchedError = null;
 
                         if (error.networkResponse != null) {
-                            errorCode = error.networkResponse.statusCode;
+                            try {
+                                JSONObject json = new JSONObject(new String(error.networkResponse.data));
+                                if (json.has("message")) {
+                                    dispatchedError = new DownloadAccessCertificateError(
+                                            DownloadAccessCertificateError.Type.HTTP_ERROR,
+                                            error.networkResponse.statusCode,
+                                            json.getString("message"));
+                                }
+                                else {
+                                    dispatchedError = new DownloadAccessCertificateError(
+                                            DownloadAccessCertificateError.Type.HTTP_ERROR,
+                                            error.networkResponse.statusCode,
+                                            new String(error.networkResponse.data));
+                                }
+                            } catch (JSONException e) {
+                                dispatchedError = new DownloadAccessCertificateError(
+                                        DownloadAccessCertificateError.Type.HTTP_ERROR,
+                                        error.networkResponse.statusCode,
+                                        "");
+                            }
                         }
                         else {
-                            errorCode = -1;
+                            dispatchedError = new DownloadAccessCertificateError(
+                                    DownloadAccessCertificateError.Type.NO_CONNECTION,
+                                    error.networkResponse.statusCode,
+                                    "Cannot connect to the web service. Check your internet connection");
                         }
 
-                        callback.response(errorCode);
+                        callback.onDownloadFailed(dispatchedError);
                     }
                 });
     }

@@ -15,6 +15,7 @@ import android.util.Log;
 
 import com.highmobility.hmkit.Crypto.AccessCertificate;
 import com.highmobility.btcore.HMDevice;
+import com.highmobility.hmkit.Error.BroadcastError;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -33,13 +34,18 @@ public class Broadcaster implements SharedBleListener {
 
     public enum State { BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING }
 
+    public interface StartCallback {
+        void onBroadcastingStarted();
+        void onBroadcastingFailed(BroadcastError error);
+    }
+
     static int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
     static int txPowerLevel = AdvertiseSettings.ADVERTISE_TX_POWER_HIGH;
 
     BroadcasterListener listener;
     Manager manager;
 
-    Constants.ResponseCallback startBroadcastingCallback;
+    StartCallback startCallback;
     BluetoothLeAdvertiser mBluetoothLeAdvertiser;
     BluetoothGattServer GATTServer;
     GATTServerCallback gattServerCallback;
@@ -143,27 +149,29 @@ public class Broadcaster implements SharedBleListener {
     /**
      * Start broadcasting the Broadcaster via BLE advertising.
      *
-     * @param callback is invoked with 0 if started broadcasting, otherwise
-     * {@link Link#UNSUPPORTED } if ble is not supported for this device.
-     * {@link Link#BLUETOOTH_OFF} if ble is turned off.
-     * {@link Link#BLUETOOTH_FAILURE} if broadcasting failed to start.
+     * @param callback is invoked with the start broadcasting result
+     *                 onBroadcastingStarted is invoked if the broadcasting started
+     *                 onBroadcastingFailed is invoked if something went wrong.
      */
-    public void startBroadcasting(Constants.ResponseCallback callback) {
+    public void startBroadcasting(StartCallback callback) {
         if (state == State.BROADCASTING) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "will not start broadcasting: already broadcasting");
-            callback.response(0);
+
+            callback.onBroadcastingStarted();
         }
 
         if (!manager.ble.isBluetoothSupported()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
-            callback.response(Link.UNSUPPORTED);
+            callback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.UNSUPPORTED
+            , 0, "Bluetooth is no supported"));
             return;
         }
 
         if (!manager.ble.isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
-            callback.response(Link.BLUETOOTH_OFF);
+            callback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.BLUETOOTH_OFF
+                    , 0, "Bluetooth is turned off"));
             return;
         }
 
@@ -173,14 +181,16 @@ public class Broadcaster implements SharedBleListener {
             if (mBluetoothLeAdvertiser == null) {
                 // for unsupported devices the system does not return an advertiser
                 setState(State.BLUETOOTH_UNAVAILABLE);
-                callback.response(Link.UNSUPPORTED);
+                callback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.UNSUPPORTED
+                        , 0, "Bluetooth is no supported"));
                 return;
             }
         }
 
         if (createGATTServer() == false) {
             setState(State.BLUETOOTH_UNAVAILABLE);
-            callback.response(Link.BLUETOOTH_FAILURE);
+            callback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.BLUETOOTH_FAILURE
+                    , 0, "Bluetooth failed to start"));
             return;
         }
 
@@ -208,7 +218,7 @@ public class Broadcaster implements SharedBleListener {
                 .addServiceUuid(new ParcelUuid(advertiseUUID))
                 .build();
 
-        startBroadcastingCallback = callback;
+        startCallback = callback;
         mBluetoothLeAdvertiser.startAdvertising(settings, data, advertiseCallback);
     }
 
@@ -257,18 +267,18 @@ public class Broadcaster implements SharedBleListener {
      * connection to another broadcaster.
      *
      * @param certificate The certificate that can be used by the Device to authorised Links
-     * @return Status code 0 on success or
-     *         {@link Link#INTERNAL_ERROR} if the given certificates providing serial doesn't match with
+     * @return Result code 0 on success or
+     *         {@link Storage.Result#INTERNAL_ERROR} if the given certificates providing serial doesn't match with
      *                      broadcaster's serial or the certificate is null.
-     *         {@link Link#STORAGE_FULL} if the storage is full.
+     *         {@link Storage.Result#STORAGE_FULL} if the storage is full.
      */
-    public int registerCertificate(AccessCertificate certificate)  {
+    public Storage.Result registerCertificate(AccessCertificate certificate)  {
         if (manager.certificate == null) {
-            return Link.INTERNAL_ERROR;
+            return Storage.Result.INTERNAL_ERROR;
         }
 
         if (Arrays.equals(manager.certificate.getSerial(), certificate.getProviderSerial()) == false) {
-            return Link.INTERNAL_ERROR;
+            return Storage.Result.INTERNAL_ERROR;
         }
 
         return manager.storage.storeCertificate(certificate);
@@ -278,11 +288,11 @@ public class Broadcaster implements SharedBleListener {
      * Stores a Certificate to Device's storage. This certificate is usually read by other Devices.
      *
      * @param certificate The certificate that will be saved to the database
-     * @return Status code 0 on success or
-     * {@link Link#STORAGE_FULL} if the storage is full
-     * {@link Link#INTERNAL_ERROR} if certificate is null.
+     * @return Result code 0 on success or
+     * {@link Storage.Result#STORAGE_FULL} if the storage is full
+     * {@link Storage.Result#INTERNAL_ERROR} if certificate is null.
      */
-    public int storeCertificate(AccessCertificate certificate) {
+    public Storage.Result storeCertificate(AccessCertificate certificate) {
         return manager.storage.storeCertificate(certificate);
     }
 
@@ -291,20 +301,20 @@ public class Broadcaster implements SharedBleListener {
      * accompanying registered certificate are deleted from the storage.
      *
      * @param serial The 9-byte serial number of the access providing broadcaster
-     *  @return Status code 0 on success or
-     *  {@link Link#INTERNAL_ERROR} if there are no matching certificate pairs for this serial.
+     *  @return {@link Storage.Result#SUCCESS }
+     *  {@link Storage.Result#INTERNAL_ERROR } if there are no matching certificate pairs for this serial.
      */
-    public int revokeCertificate(byte[] serial) {
+    public Storage.Result revokeCertificate(byte[] serial) {
         if (manager.storage.certWithGainingSerial(serial) == null
                 || manager.storage.certWithProvidingSerial(serial) == null) {
-            return Link.INTERNAL_ERROR;
+            return Storage.Result.INTERNAL_ERROR;
         }
 
 
-        if (manager.storage.deleteCertificateWithGainingSerial(serial) == false) return Link.INTERNAL_ERROR;
-        if (manager.storage.deleteCertificateWithProvidingSerial(serial) == false) return Link.INTERNAL_ERROR;
+        if (manager.storage.deleteCertificateWithGainingSerial(serial) == false) return Storage.Result.INTERNAL_ERROR;
+        if (manager.storage.deleteCertificateWithProvidingSerial(serial) == false) return Storage.Result.INTERNAL_ERROR;
 
-        return 0;
+        return Storage.Result.SUCCESS;
     }
 
     Broadcaster(Manager manager) {
@@ -345,7 +355,7 @@ public class Broadcaster implements SharedBleListener {
         gattServerCallback = null;
         advertiseCallback = null;
         clockRunnable = null;
-        startBroadcastingCallback = null;
+        startCallback = null;
     }
 
     boolean didResolveDevice(HMDevice device) {
@@ -614,8 +624,8 @@ public class Broadcaster implements SharedBleListener {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "Start advertise " + Manager.getInstance().ble.getAdapter().getName());
             broadcaster.get().setState(State.BROADCASTING);
-            if (broadcaster.get().startBroadcastingCallback != null) {
-                broadcaster.get().startBroadcastingCallback.response(0);
+            if (broadcaster.get().startCallback != null) {
+                broadcaster.get().startCallback.onBroadcastingStarted();
             }
         }
 
@@ -643,8 +653,10 @@ public class Broadcaster implements SharedBleListener {
             } else {
                 broadcaster.get().setState(State.IDLE);
 
-                if (broadcaster.get().startBroadcastingCallback != null) {
-                    broadcaster.get().startBroadcastingCallback.response(Link.BLUETOOTH_FAILURE);
+                if (broadcaster.get().startCallback != null) {
+
+                    broadcaster.get().startCallback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.BLUETOOTH_FAILURE
+                            , 0, "Failed to start BLE advertisements"));
                 }
             }
         }

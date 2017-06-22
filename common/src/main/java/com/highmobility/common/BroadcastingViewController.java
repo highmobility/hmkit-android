@@ -8,6 +8,7 @@ import com.highmobility.hmkit.BroadcasterListener;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
 import com.highmobility.hmkit.Constants;
+import com.highmobility.hmkit.Error.BroadcastError;
 import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
 
@@ -158,16 +159,18 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     }
 
     void startBroadcasting() {
-        broadcaster.startBroadcasting(new Constants.ResponseCallback() {
+        broadcaster.startBroadcasting(new Broadcaster.StartCallback() {
             @Override
-            public void response(int i) {
-                if (i != 0) {
-                    Log.e(TAG, "cant start broadcasting " + i);
-                    view.setStatusText("Start broadcasting error " + i);
-                }
+            public void onBroadcastingStarted() {
+
+            }
+
+            @Override
+            public void onBroadcastingFailed(BroadcastError error) {
+                Log.e(TAG, "cant start broadcasting " + error.getType());
+                view.setStatusText("Start broadcasting error " + error.getType());
             }
         });
-
     }
 
     void initializeManager() {

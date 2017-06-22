@@ -85,7 +85,7 @@ class ScannedLink extends Link {
         // TODO:
     }
 
-    void getAccessCertificate(AccessCertificate certificate, Constants.DataResponseCallback callback) {
+    void getAccessCertificate(AccessCertificate certificate, Constants.ResponseCallback callback) {
         // TODO:
     }
 
@@ -330,7 +330,7 @@ class ScannedLink extends Link {
             else {
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                     Log.d(TAG, "read rssi failure " + status);
-                if (rssiCallback != null) rssiCallback.response(BLUETOOTH_FAILURE);
+                if (rssiCallback != null) rssiCallback.response(1); // TODO: use correct error code
             }
         }
     };

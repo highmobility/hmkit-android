@@ -23,8 +23,21 @@ import static com.highmobility.hmkit.Broadcaster.TAG;
  *
  * Uses Android SharedPreferences.
  */
-class Storage {
+public class Storage {
     private static final String ACCESS_CERTIFICATE_STORAGE_KEY = "ACCESS_CERTIFICATE_STORAGE_KEY";
+
+    public enum Result {
+        SUCCESS(0), STORAGE_FULL(1), INTERNAL_ERROR(2);
+
+        private final int value;
+        Result(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
 
     private SharedPreferences settings;
     private SharedPreferences.Editor editor;
@@ -35,7 +48,7 @@ class Storage {
         editor = settings.edit();
     }
 
-    void storeDownloadedCertificates(JSONObject response) throws Exception {
+    AccessCertificate storeDownloadedCertificates(JSONObject response) throws Exception {
         if (response.has("device_access_certificate") == false) throw new Exception();
 
         String vehicleAccessCertificateBase64, deviceAccessCertificateBase64;
@@ -45,7 +58,7 @@ class Storage {
         deviceAccessCertificateBase64 = response.getString("device_access_certificate");
         deviceAccessCertificate = new AccessCertificate(deviceAccessCertificateBase64);
 
-        if (storeCertificate(deviceAccessCertificate) != 0) {
+        if (storeCertificate(deviceAccessCertificate) != Result.SUCCESS) {
             throw new Exception();
         }
         if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
@@ -57,7 +70,7 @@ class Storage {
             if (vehicleAccessCertificateBase64 != null) {
                 vehicleAccessCertificate = new AccessCertificate(vehicleAccessCertificateBase64);
 
-                if (storeCertificate(vehicleAccessCertificate) != 0) {
+                if (storeCertificate(vehicleAccessCertificate) != Result.SUCCESS) {
                     Log.d(TAG, "storeDownloadedCertificates: " + "cannot store vehicle access cert");
                     throw new Exception();
                 }
@@ -66,6 +79,8 @@ class Storage {
                     Log.d(TAG, "storeDownloadedCertificates: vehicleCert " + vehicleAccessCertificate.toString());
             }
         }
+
+        return deviceAccessCertificate;
     }
 
     AccessCertificate[] getCertificates() {
@@ -260,12 +275,12 @@ class Storage {
         return null;
     }
 
-    int storeCertificate(AccessCertificate certificate) {
-        if (certificate == null) return Link.INTERNAL_ERROR;
+    Result storeCertificate(AccessCertificate certificate) {
+        if (certificate == null) return Result.INTERNAL_ERROR;
 
         AccessCertificate[] certs = getCertificates();
 
-        if (certs.length >= Constants.certificateStorageCount) return Link.STORAGE_FULL;
+        if (certs.length >= Constants.certificateStorageCount) return Result.STORAGE_FULL;
 
         // delete existing cert with same serials
         for (int i = 0; i < certs.length; i++) {
@@ -291,7 +306,7 @@ class Storage {
 
         setCertificates(newCerts);
 
-        return 0;
+        return Result.SUCCESS;
     }
 
     private AccessCertificate[] removeAtIndex(int removedIndex, AccessCertificate[] certs) {

@@ -89,12 +89,14 @@ class Scanner {
 
         if (!manager.ble.isBluetoothSupported()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
-            return Link.UNSUPPORTED;
+//            return Link.UNSUPPORTED;
+            return 1; // use some descriptive error method
         }
 
         if (!manager.ble.isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
-            return Link.BLUETOOTH_OFF;
+//            return Link.BLUETOOTH_OFF;
+            return 2; // use some descriptive error method
         }
 
         if (bleScanner == null) bleScanner = manager.ble.getAdapter().getBluetoothLeScanner();

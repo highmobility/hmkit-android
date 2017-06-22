@@ -37,7 +37,7 @@ public class Telematics {
      * @param command the bytes to send to the device.
      * @param certificate the certificate that authorizes the connection with the SDK and the device.
      * @param callback callback that is invoked with the command result
-     *                 onCommandResponse is invoked with the response if thecommand was sent successfully.
+     *                 onCommandResponse is invoked with the response if the command was sent successfully.
      *                 onCommandFailed is invoked if something went wrong.
      */
     public void sendTelematicsCommand(final byte[] command, final AccessCertificate certificate, final CommandCallback callback) {

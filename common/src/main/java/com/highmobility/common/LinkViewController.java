@@ -19,6 +19,7 @@ import com.highmobility.hmkit.Command.VehicleStatus.FeatureState;
 import com.highmobility.hmkit.Command.VehicleStatus.TrunkAccess;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
+import com.highmobility.hmkit.Error.LinkError;
 import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
 
@@ -114,19 +115,18 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
         boolean doorsLocked = doorLockState == LOCKED;
 
-        link.sendCommand(Command.DoorLocks.lockDoors(doorsLocked ? false : true), new com.highmobility.hmkit.Constants.ResponseCallback() {
-                @Override
-                public void response(int i) {
-                    if (i != 0) {
-                        onCommandFinished("lock command send exception " + i);
-                    }
-                    else {
-                        // else wait for command
-                        startCommandTimeout();
-                    }
-                }
+        link.sendCommand(Command.DoorLocks.lockDoors(doorsLocked ? false : true), new Link.CommandCallback() {
+            @Override
+            public void onCommandSent() {
+                // else wait for command
+                startCommandTimeout();
             }
-        );
+
+            @Override
+            public void onCommandFailed(LinkError error) {
+                onCommandFinished("lock command send exception " + error.getType());
+            }
+        });
     }
 
     @Override
@@ -141,31 +141,32 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
                         Constants.TrunkLockState.LOCKED,
                         Constants.TrunkPosition.OPEN);
 
-        link.sendCommand(command, new com.highmobility.hmkit.Constants.ResponseCallback() {
-                    @Override
-                    public void response(int i) {
-                if (i != 0) {
-                    onCommandFinished("trunk command send exception " + i);
-                }
-                else {
-                    // else wait for command
-                    startCommandTimeout();
-                }
-                }
+        link.sendCommand(command, new Link.CommandCallback() {
+            @Override
+            public void onCommandSent() {
+                startCommandTimeout();
             }
-        );
+
+            @Override
+            public void onCommandFailed(LinkError error) {
+                onCommandFinished("trunk command send exception " + error.getType());
+            }
+        });
     }
 
     void requestInitialState() {
         view.showLoadingView(true);
         startInitializeTimer();
 
-        link.sendCommand(Command.VehicleStatus.getVehicleStatus(), new com.highmobility.hmkit.Constants.ResponseCallback() {
+        link.sendCommand(Command.VehicleStatus.getVehicleStatus(), new Link.CommandCallback() {
             @Override
-            public void response(int i) {
-                if (i != 0) {
-                    onInitializeFinished(i, "Get vehicle status failed");
-                }
+            public void onCommandSent() {
+
+            }
+
+            @Override
+            public void onCommandFailed(LinkError error) {
+                onInitializeFinished(error.getCode(), "Get vehicle status failed");
             }
         });
     }
