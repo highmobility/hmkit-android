@@ -34,16 +34,24 @@ public class Telematics {
     /**
      * Send a command to a device via telematics.
      *
-     * @param command the bytes to send to the device.
-     * @param certificate the certificate that authorizes the connection with the SDK and the device.
+     * @param command the bytes to send to the device
+     * @param serial serial of the command's target
      * @param callback callback that is invoked with the command result
      *                 onCommandResponse is invoked with the response if the command was sent successfully.
      *                 onCommandFailed is invoked if something went wrong.
      */
-    public void sendTelematicsCommand(final byte[] command, final AccessCertificate certificate, final CommandCallback callback) {
-        // TODO: dont use cert but vehicleSerial
+    public void sendTelematicsCommand(final byte[] command, final byte[] serial, final CommandCallback callback) {
         if (sendingCommand == true) {
             TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_IN_PROGRESS, 0, "Already sending a command");
+            callback.onCommandFailed(error);
+            return;
+        }
+
+        final AccessCertificate certificate = manager.getCertificate(serial, manager.getDeviceCertificate().getSerial());
+
+        if (certificate == null) {
+            TelematicsError error = new TelematicsError(TelematicsError.Type.INVALID_SERIAL, 0,
+                    "Access certificate with this serial does not exist");
             callback.onCommandFailed(error);
             return;
         }

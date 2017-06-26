@@ -9,6 +9,8 @@ public class TelematicsError {
     public enum Type {
         /// Trying to send a command when one is already in progress
         COMMAND_IN_PROGRESS,
+        /// Access certificate with this serial does not exist
+        INVALID_SERIAL,
         /// Internal error
         INTERNAL_ERROR,
         /// HTTP ERROR occured. Status code is included in field code

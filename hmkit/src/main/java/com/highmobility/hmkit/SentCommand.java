@@ -61,7 +61,6 @@ class SentCommand {
         dispatchThread.post(new Runnable() {
             @Override
             public void run() {
-                Log.d(TAG, "dispatchError: " + "set to finished true " + SentCommand.this + " " + Thread.currentThread());
                 commandCallback.onCommandFailed(new LinkError(type, errorCode, message));
             }
         });
