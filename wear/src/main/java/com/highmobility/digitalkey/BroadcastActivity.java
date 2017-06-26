@@ -31,11 +31,8 @@ public class BroadcastActivity extends WearableActivity implements IBroadcasting
     @BindView(R.id.confirm_pairing_button) Button confirmPairButton;
     @BindView(R.id.show_button) Button showButton;
 
-    Constants.ApprovedCallback pairApproveCallback;
-
     void onPairConfirmClick() {
         controller.onPairingApproved(true);
-        pairApproveCallback = null;
     }
 
     @Override
