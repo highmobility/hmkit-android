@@ -300,7 +300,7 @@ public class Broadcaster implements SharedBleListener {
      * Revokes a stored certificate from Device's storage. The stored certificate and its
      * accompanying registered certificate are deleted from the storage.
      *
-     * @param serial The 9-byte serial number of the access providing broadcaster
+     *  @param serial The 9-byte serial number of the access providing broadcaster
      *  @return {@link Storage.Result#SUCCESS }
      *  {@link Storage.Result#INTERNAL_ERROR } if there are no matching certificate pairs for this serial.
      */
@@ -309,7 +309,6 @@ public class Broadcaster implements SharedBleListener {
                 || manager.storage.certWithProvidingSerial(serial) == null) {
             return Storage.Result.INTERNAL_ERROR;
         }
-
 
         if (manager.storage.deleteCertificateWithGainingSerial(serial) == false) return Storage.Result.INTERNAL_ERROR;
         if (manager.storage.deleteCertificateWithProvidingSerial(serial) == false) return Storage.Result.INTERNAL_ERROR;

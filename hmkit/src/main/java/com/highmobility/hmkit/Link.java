@@ -8,6 +8,8 @@ import com.highmobility.hmkit.Error.LinkError;
 
 import java.util.Calendar;
 
+import static com.highmobility.hmkit.Broadcaster.TAG;
+
 /**
  * Created by ttiganik on 17/08/16.
  */
@@ -48,7 +50,7 @@ public class Link {
         if (this.state != state) {
             final State oldState = this.state;
             if (state == State.AUTHENTICATED && Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
-                Log.d(Broadcaster.TAG, "authenticated in " + (Calendar.getInstance().getTimeInMillis() - connectionTime) + "ms");
+                Log.d(TAG, "authenticated in " + (Calendar.getInstance().getTimeInMillis() - connectionTime) + "ms");
             }
 
             this.state = state;
@@ -94,21 +96,21 @@ public class Link {
     public void sendCommand(final byte[] bytes, CommandCallback callback) {
         if (state != State.AUTHENTICATED) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(Broadcaster.TAG, "not authenticated");
+                Log.d(TAG, "not authenticated");
             callback.onCommandFailed(new LinkError(LinkError.Type.UNAUTHORIZED, 0, "not authenticated"));
             return;
         }
 
         if (sentCommand != null && sentCommand.finished == false) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(Broadcaster.TAG, "custom command in progress");
+                Log.d(TAG, "custom command in progress");
 
-            callback.onCommandFailed(new LinkError(LinkError.Type.COMMAND_IN_PROGRESS, 0, "not authenticated"));
+            callback.onCommandFailed(new LinkError(LinkError.Type.COMMAND_IN_PROGRESS, 0, "custom command in progress"));
             return;
         }
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(Broadcaster.TAG, "send command " + ByteUtils.hexFromBytes(bytes)
+            Log.d(TAG, "send command " + ByteUtils.hexFromBytes(bytes)
                     + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
         sentCommand = new SentCommand(callback, manager.mainHandler);
@@ -134,11 +136,11 @@ public class Link {
 
     void onCommandReceived(final byte[] bytes) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(Broadcaster.TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
+            Log.d(TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
                     + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
         if (listener == null) {
-            Log.d(Broadcaster.TAG, "can't dispatch notification: no listener set");
+            Log.d(TAG, "can't dispatch notification: no listener set");
             return;
         }
         manager.mainHandler.post(new Runnable() {
@@ -151,13 +153,13 @@ public class Link {
 
     void onCommandResponseReceived(final byte[] data) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(Broadcaster.TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
+            Log.d(TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
                     + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()) + " in " +
                     (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime) + "ms");
 
         if (sentCommand == null) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(Broadcaster.TAG, "can't dispatch command response: sentCommand = null");
+                Log.d(TAG, "can't dispatch command response: sentCommand = null");
             return;
         }
 

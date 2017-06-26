@@ -7,6 +7,10 @@ import android.util.Log;
 import com.highmobility.hmkit.Error.LinkError;
 
 import java.util.Calendar;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static com.highmobility.hmkit.Broadcaster.TAG;
 
 
 /**
@@ -15,11 +19,13 @@ import java.util.Calendar;
 class SentCommand {
     boolean finished;
     Link.CommandCallback commandCallback;
-    CountDownTimer timeoutTimer;
+    Timer timeoutTimer;
+
     Long commandStartTime;
     Handler dispatchThread;
 
     SentCommand(Link.CommandCallback callback, Handler dispatchThread) {
+        finished = false;
         this.dispatchThread = dispatchThread;
         this.commandCallback = callback;
         startTimeoutTimer();
@@ -29,6 +35,8 @@ class SentCommand {
     void dispatchResult(byte[] response) {
         final LinkError.Type errorCode = getErrorCode(response);
         if (errorCode == LinkError.Type.NONE) {
+            cancelTimeoutTimer();
+            finished = true;
             dispatchThread.post(new Runnable() {
                 @Override
                 public void run() {
@@ -42,30 +50,38 @@ class SentCommand {
     }
 
     void dispatchError(final LinkError.Type type, final int errorCode, final String message) {
-        if (timeoutTimer != null) timeoutTimer.cancel();
+        cancelTimeoutTimer();
         finished = true;
+
         if (commandCallback == null) {
-            Log.d(Broadcaster.TAG, "cannot dispatch the result: no callback reference");
+            Log.d(TAG, "cannot dispatch the result: no callback reference");
             return;
         }
 
         dispatchThread.post(new Runnable() {
             @Override
             public void run() {
+                Log.d(TAG, "dispatchError: " + "set to finished true " + SentCommand.this + " " + Thread.currentThread());
                 commandCallback.onCommandFailed(new LinkError(type, errorCode, message));
             }
         });
     }
 
     void startTimeoutTimer() {
-        timeoutTimer = new CountDownTimer((long)(Constants.commandTimeout * 1000), 15000) {
-            public void onTick(long millisUntilFinished) {
-            }
-
-            public void onFinish() {
+        timeoutTimer = new Timer();
+        timeoutTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
                 dispatchError(LinkError.Type.TIME_OUT, 0, "command timeout");
             }
-        }.start();
+        }, (long)(Constants.commandTimeout * 1000));
+    }
+
+    void cancelTimeoutTimer() {
+        if (timeoutTimer != null) {
+            timeoutTimer.cancel();
+            timeoutTimer = null;
+        }
     }
 
     static LinkError.Type getErrorCode(byte[] bytes) {
