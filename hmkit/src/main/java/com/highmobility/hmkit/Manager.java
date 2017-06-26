@@ -223,25 +223,28 @@ public class Manager {
     }
 
     /**
-     * Get an access certificate
      *
-     * @param gainingSerial the gaining serial for the access certificate
-     * @param providingSerial the providing serial for the access certificate
-     * @return the access certificate or null if it does not exist
+     * @return All Access Certificates where device serial is providing access
      * @throws IllegalStateException when SDK is not initialized
      */
-    public AccessCertificate getCertificate(byte[] gainingSerial, byte[] providingSerial) throws IllegalStateException {
+    public AccessCertificate[] getCertificates() throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
+        return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial());
+    }
 
-        AccessCertificate[] certs = storage.getCertificates();
+    /**
+     * Find an Access Certificate.
+     *
+     * @param serial The serial of the device that is gaining access
+     * @return An Access Certificate if one exists for the given serial, otherwise null.
+     * @throws IllegalStateException when SDK is not initialized
+     */
+    public AccessCertificate getCertificate(byte[] serial) throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
+        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial);
 
-        for (int i = 0; i < certs.length; i++) {
-            AccessCertificate cert = certs[i];
-
-            if (Arrays.equals(cert.getGainerSerial(), gainingSerial)
-                    && Arrays.equals(cert.getProviderSerial(), providingSerial)) {
-                return cert;
-            }
+        if (certificates != null && certificates.length > 0) {
+            return certificates[0];
         }
 
         return null;
@@ -250,14 +253,13 @@ public class Manager {
     /**
      * Delete an access certificate.
      *
-     * @param gainingSerial the gaining serial for the access certificate
-     * @param providingSerial the providing serial for the access certificate
-     * @return true if the certificate existed and was deleted successfully
+     * @param serial The serial of the device that is gaining access.
+     * @return true if the certificate existed and was deleted successfully, otherwise false
      * @throws IllegalStateException when SDK is not initialized
      */
-    public boolean deleteCertificate(byte[] gainingSerial, byte[] providingSerial) throws IllegalStateException {
+    public boolean deleteCertificate(byte[] serial) throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
-        return storage.deleteCertificate(gainingSerial, providingSerial);
+        return storage.deleteCertificateWithGainingSerial(serial);
     }
 
     /**

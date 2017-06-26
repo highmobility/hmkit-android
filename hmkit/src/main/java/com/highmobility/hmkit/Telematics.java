@@ -47,7 +47,7 @@ public class Telematics {
             return;
         }
 
-        final AccessCertificate certificate = manager.getCertificate(serial, manager.getDeviceCertificate().getSerial());
+        final AccessCertificate certificate = manager.getCertificate(serial);
 
         if (certificate == null) {
             TelematicsError error = new TelematicsError(TelematicsError.Type.INVALID_SERIAL, 0,
