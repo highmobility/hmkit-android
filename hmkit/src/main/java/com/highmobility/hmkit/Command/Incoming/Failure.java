@@ -60,17 +60,4 @@ public class Failure extends IncomingCommand {
     public Reason getFailureReason() {
         return failureReason;
     }
-
-    /**
-     *
-     * @param type The command type to compare the failed command's type with.
-     * @return True if the failed type is the same as the argument.
-     */
-    public boolean is(Command.Type type) {
-        if (Arrays.equals(failedType.getIdentifierAndType(), type.getIdentifierAndType())) {
-            return true;
-        }
-
-        return false;
-    }
 }

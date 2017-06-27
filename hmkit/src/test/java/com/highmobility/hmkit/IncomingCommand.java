@@ -65,6 +65,25 @@ public class IncomingCommand {
         assertTrue(((Failure)command).getFailureReason() == Failure.Reason.UNAUTHORIZED);
     }
 
+
+    @Test
+    public void failure_vs() {
+        byte[] bytes = ByteUtils.bytesFromHex("00020100100101");
+
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == Failure.class);
+        assertTrue(command.is(Command.FailureMessage.FAILURE_MESSAGE));
+        assertTrue(((Failure)command).getFailedType() == Command.Capabilities.CAPABILITIES);
+        assertTrue(((Failure)command).getFailureReason() == Failure.Reason.UNAUTHORIZED);
+    }
+
     @Test
     public void controlMode_init() {
         byte[] bytes = ByteUtils.bytesFromHex("002701020032");
