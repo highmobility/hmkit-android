@@ -178,6 +178,7 @@ public class Broadcaster implements SharedBleListener {
         // start advertising
         if (mBluetoothLeAdvertiser == null) {
             mBluetoothLeAdvertiser = manager.ble.getAdapter().getBluetoothLeAdvertiser();
+
             if (mBluetoothLeAdvertiser == null) {
                 // for unsupported devices the system does not return an advertiser
                 setState(State.BLUETOOTH_UNAVAILABLE);
@@ -444,7 +445,7 @@ public class Broadcaster implements SharedBleListener {
         if (link == null) return false;
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(link.getAddressBytes()));
+            Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(link.getAddressBytes()) + " char " + characteristicId);
 
         BluetoothGattCharacteristic characteristic = getCharacteristicForId(characteristicId);
         if (characteristic == null) {

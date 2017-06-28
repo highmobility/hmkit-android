@@ -53,27 +53,19 @@ public class LockState extends IncomingCommand {
      * @return true if all doors are closed and locked, otherwise false
      */
     public boolean isLocked() {
-        if (getFrontLeft() != null
-                && (getFrontLeft().getPosition() != Constants.DoorPosition.CLOSED
-                || getFrontLeft().getLockState() != Constants.LockState.LOCKED)) {
+        if (getFrontLeft() != null && getFrontLeft().getLockState() != Constants.LockState.LOCKED) {
             return false;
         }
 
-        if (getFrontRight() != null
-                && (getFrontRight().getPosition() != Constants.DoorPosition.CLOSED
-                || getFrontRight().getLockState() != Constants.LockState.LOCKED)) {
+        if (getFrontRight() != null && getFrontRight().getLockState() != Constants.LockState.LOCKED) {
             return false;
         }
 
-        if (getRearLeft() != null
-                && (getRearLeft().getPosition() != Constants.DoorPosition.CLOSED
-                || getRearLeft().getLockState() != Constants.LockState.LOCKED)) {
+        if (getRearLeft() != null && getRearLeft().getLockState() != Constants.LockState.LOCKED) {
             return false;
         }
 
-        if (getRearRight() != null
-                && (getRearRight().getPosition() != Constants.DoorPosition.CLOSED
-                || getRearRight().getLockState() != Constants.LockState.LOCKED)) {
+        if (getRearRight() != null && getRearRight().getLockState() != Constants.LockState.LOCKED) {
             return false;
         }
 
