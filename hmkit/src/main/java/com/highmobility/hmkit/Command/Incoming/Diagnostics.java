@@ -22,43 +22,6 @@ public class Diagnostics extends IncomingCommand {
     Float rearRightTirePressure;
     Float rearLeftTirePressure;
 
-    public Diagnostics(byte[] bytes) throws CommandParseException {
-        super(bytes);
-
-        if (bytes.length < 13) throw new CommandParseException();
-
-        mileage = ByteUtils.getInt(Arrays.copyOfRange(bytes, 3, 3 + 3));
-        oilTemperature = ByteUtils.getInt(Arrays.copyOfRange(bytes, 6, 6 + 2));
-        speed = ByteUtils.getInt(Arrays.copyOfRange(bytes, 8, 8 + 2));
-        rpm = ByteUtils.getInt(Arrays.copyOfRange(bytes, 10, 10 + 2));
-        fuelLevel = (int)bytes[12] / 100f;
-        if (bytes[13] == 0x00) washerFluidLevel = Constants.WasherFluidLevel.LOW;
-        else washerFluidLevel = Constants.WasherFluidLevel.FULL;
-
-        int numberOfTires = bytes[14];
-        int position = 15;
-
-        for (int i = 0; i < numberOfTires; i++) {
-            byte location = bytes[position];
-            Float pressure = ByteUtils.getFloat(Arrays.copyOfRange(bytes, position + 1, position + 1 + 4));
-
-            if (location == 0x00) {
-                frontLeftTirePressure = pressure;
-            }
-            else if (location == 0x01) {
-                frontRightTirePressure = pressure;
-            }
-            else if (location == 0x02) {
-                rearRightTirePressure = pressure;
-            }
-            else if (location == 0x03) {
-                rearLeftTirePressure = pressure;
-            }
-
-            position += 5;
-        }
-    }
-
     /**
      *
      * @return The car mileage (odometer) in km
@@ -141,5 +104,42 @@ public class Diagnostics extends IncomingCommand {
      */
     public Float getRearLeftTirePressure() {
         return rearLeftTirePressure;
+    }
+
+    public Diagnostics(byte[] bytes) throws CommandParseException {
+        super(bytes);
+
+        if (bytes.length < 13) throw new CommandParseException();
+
+        mileage = ByteUtils.getInt(Arrays.copyOfRange(bytes, 3, 3 + 3));
+        oilTemperature = ByteUtils.getInt(Arrays.copyOfRange(bytes, 6, 6 + 2));
+        speed = ByteUtils.getInt(Arrays.copyOfRange(bytes, 8, 8 + 2));
+        rpm = ByteUtils.getInt(Arrays.copyOfRange(bytes, 10, 10 + 2));
+        fuelLevel = (int)bytes[12] / 100f;
+        if (bytes[13] == 0x00) washerFluidLevel = Constants.WasherFluidLevel.LOW;
+        else washerFluidLevel = Constants.WasherFluidLevel.FULL;
+
+        int numberOfTires = bytes[14];
+        int position = 15;
+
+        for (int i = 0; i < numberOfTires; i++) {
+            byte location = bytes[position];
+            Float pressure = ByteUtils.getFloat(Arrays.copyOfRange(bytes, position + 1, position + 1 + 4));
+
+            if (location == 0x00) {
+                frontLeftTirePressure = pressure;
+            }
+            else if (location == 0x01) {
+                frontRightTirePressure = pressure;
+            }
+            else if (location == 0x02) {
+                rearRightTirePressure = pressure;
+            }
+            else if (location == 0x03) {
+                rearLeftTirePressure = pressure;
+            }
+
+            position += 5;
+        }
     }
 }

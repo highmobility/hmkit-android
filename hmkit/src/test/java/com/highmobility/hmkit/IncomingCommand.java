@@ -12,10 +12,12 @@ import com.highmobility.hmkit.Command.Incoming.DeliveredParcels;
 import com.highmobility.hmkit.Command.Incoming.Diagnostics;
 import com.highmobility.hmkit.Command.Incoming.Failure;
 import com.highmobility.hmkit.Command.Incoming.LockState;
+import com.highmobility.hmkit.Command.Incoming.Maintenance;
 import com.highmobility.hmkit.Command.Incoming.RooftopState;
 import com.highmobility.hmkit.Command.Incoming.TrunkState;
 import com.highmobility.hmkit.Command.Incoming.ValetMode;
 import com.highmobility.hmkit.Command.Incoming.VehicleLocation;
+
 
 import org.junit.Test;
 
@@ -333,5 +335,22 @@ public class IncomingCommand {
         assertTrue(((Diagnostics)command).getFrontRightTirePressure() == 2.31f);
         assertTrue(((Diagnostics)command).getRearLeftTirePressure() == 2.35f);
         assertTrue(((Diagnostics)command).getRearRightTirePressure() == 2.35f);
+    }
+
+    @Test
+    public void maintenance() {
+        byte[] bytes = ByteUtils.bytesFromHex("00340101F5000E61");
+
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == Maintenance.class);
+        assertTrue(((Maintenance)command).getDaysToNextService() == 501);
+        assertTrue(((Maintenance)command).getKilometersToNextService() == 3681);
     }
 }

@@ -1361,6 +1361,15 @@ public class Command {
         GET_MAINTENANCE_STATE((byte)0x00),
         MAINTENANCE_STATE((byte)0x01);
 
+        /**
+         * Get the maintenance state, which may include trouble codes. The car will respond with the Maintenance State message.
+         *
+         * @return the command bytes
+         */
+        public static byte[] getMaintenanceState() {
+            return GET_MAINTENANCE_STATE.getIdentifierAndType();
+        }
+
         static Maintenance fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
             byte[] identiferBytes = Identifier.MAINTENANCE.getIdentifier();
             if (firstIdentifierByte != identiferBytes[0]

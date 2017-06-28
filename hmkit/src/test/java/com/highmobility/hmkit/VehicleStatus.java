@@ -12,6 +12,7 @@ import com.highmobility.hmkit.Command.VehicleStatus.Climate;
 import com.highmobility.hmkit.Command.VehicleStatus.Diagnostics;
 import com.highmobility.hmkit.Command.VehicleStatus.DoorLocks;
 import com.highmobility.hmkit.Command.VehicleStatus.FeatureState;
+import com.highmobility.hmkit.Command.VehicleStatus.Maintenance;
 import com.highmobility.hmkit.Command.VehicleStatus.RemoteControl;
 import com.highmobility.hmkit.Command.VehicleStatus.RooftopState;
 import com.highmobility.hmkit.Command.VehicleStatus.TrunkAccess;
@@ -44,7 +45,7 @@ public class VehicleStatus {
                 "4d7920436172" + // "My Car"
                 "06"           + // License plate is 6 bytes
                 "414243313233" + // "ABC123"
-                "09" +              // 8 feature states
+                "0A" +
                 "00200D04000100010000020001030001" + // door locks
                 "0021020001" +
                 "0023080200FF32bf19999a" +
@@ -54,6 +55,7 @@ public class VehicleStatus {
                 "00280101" + // valet mode
                 "00300842561eb941567ab1" + // location 53.530003 13.404954; // 8 feature states
                 "00330B0249F00063003C09C45A01" +
+                "00340501F5000E61" +
                 "";
         byte[] bytes = ByteUtils.bytesFromHex(vehicleStatusHexString);
 
@@ -69,7 +71,7 @@ public class VehicleStatus {
 
     @Test
     public void states_size() {
-        assertTrue(vehicleStatus.getFeatureStates().length == 9);
+        assertTrue(vehicleStatus.getFeatureStates().length == 10);
     }
 
     @Test
@@ -285,37 +287,6 @@ public class VehicleStatus {
 
     @Test
     public void diagnostics() {
-        /*
-          0x00, 0x33, # MSB, LSB Message Identifier for Diagnostics
-  0x01, # Message Type for Diagnostics State
-
-  0x0249F0,   # Odometer is 150'000 km
-
-  0x0063,     # Engine oil teperature is 99C
-
-  0x003C,     # Car speed is 60km/h
-
-  0x09C4,     # RPM is 2500
-
-  0x5A,       # 90% fuel level
-
-  0x01,       # Washer fluid filled
-
-  0x04,       # Tire pressure of 4 tires follows
-
-  0x00,       # Front Left tire pressure
-  0x4013d70a, # 2.31 BAR
-
-  0x01,       # Front Right tire pressure
-  0x4013d70a, # 2.31 BAR
-
-  0x02,       # Rear Right tire pressure
-  0x40166666, # 2.35 BAR
-
-  0x03,       # Rear Left tire pressure
-  0x40166666  # 2.35 BAR
-         */
-
         FeatureState state = null;
         for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
             FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
@@ -333,5 +304,22 @@ public class VehicleStatus {
         assertTrue(((Diagnostics)state).getRpm() == 2500);
         assertTrue(((Diagnostics)state).getFuelLevel() == .9f);
         assertTrue(((Diagnostics)state).getWasherFluidLevel() == Constants.WasherFluidLevel.FULL);
+    }
+
+    @Test
+    public void maintenance() {
+        FeatureState state = null;
+        for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
+            FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
+            if (iteratingState.getFeature() == Identifier.MAINTENANCE) {
+                state = iteratingState;
+                break;
+            }
+        }
+
+        assertTrue(state != null);
+        assertTrue(state.getClass() == Maintenance.class);
+        assertTrue(((Maintenance)state).getDaysToNextService() == 501);
+        assertTrue(((Maintenance)state).getKilometersToNextService() == 3681);
     }
 }
