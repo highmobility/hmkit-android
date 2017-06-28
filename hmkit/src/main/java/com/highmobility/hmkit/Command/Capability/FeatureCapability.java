@@ -22,7 +22,9 @@ public class FeatureCapability {
         if (feature == Identifier.DOOR_LOCKS
                 || feature == Identifier.CHARGING
                 || feature == Identifier.VALET_MODE
-                || feature == Identifier.ENGINE) {
+                || feature == Identifier.ENGINE
+                || feature == Identifier.THEFT_ALARM
+                || feature == Identifier.PARKING_TICKET) {
             featureCapability = new AvailableGetStateCapability(feature, capabilityBytes);
         }
         else if (feature == Identifier.TRUNK_ACCESS) {
@@ -39,7 +41,8 @@ public class FeatureCapability {
                 || feature == Identifier.DRIVER_FATIGUE
                 || feature == Identifier.VIDEO_HANDOVER
                 || feature == Identifier.TEXT_INPUT
-                || feature == Identifier.WINDOWS) {
+                || feature == Identifier.WINDOWS
+                || feature == Identifier.KEYFOB_POSITION) {
             featureCapability =  new AvailableCapability(feature, capabilityBytes);
         }
         else if (feature == Identifier.CLIMATE) {

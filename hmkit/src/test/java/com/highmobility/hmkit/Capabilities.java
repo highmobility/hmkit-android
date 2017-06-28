@@ -29,7 +29,7 @@ import static org.junit.Assert.fail;
 
 public class Capabilities {
     byte[] knownCapabilitiesBytes = ByteUtils.bytesFromHex("001001" +
-            "19" + // length
+            "1C" + // length
             "002001010021020300002201000023010000240201000025020101002603010101002701010028010100290100003001010031010100320101" +
             "00330100" +
             "00340101" +
@@ -42,7 +42,10 @@ public class Capabilities {
             "00430100" +
             "00440100" + // 24(0x18)
             "00450101" +
-            "00350102");
+            "00350102" +
+            "00460101" +
+            "00470102" +
+            "00480100");
     
     com.highmobility.hmkit.Command.Incoming.Capabilities capabilites = null;
     @Before
@@ -59,7 +62,7 @@ public class Capabilities {
     @Test
     public void capabilities_init() {
         assertTrue(capabilites.getCapabilites() != null);
-        assertTrue(capabilites.getCapabilites().length == 25);
+        assertTrue(capabilites.getCapabilites().length == 28);
     }
 
     @Test
@@ -518,6 +521,57 @@ public class Capabilities {
         assertTrue(featureCapability.getClass() == AvailableCapability.class);
         assertTrue(((AvailableCapability) featureCapability).getCapability()
                 == AvailableCapability.Capability.AVAILABLE);
+    }
+
+    @Test
+    public void capabilites_init_theft_alarm() {
+        FeatureCapability featureCapability = null;
+        for (int i = 0; i < capabilites.getCapabilites().length; i++) {
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getIdentifier() == Identifier.THEFT_ALARM) {
+                featureCapability = iteratingFeatureCapability;
+                break;
+            }
+        }
+
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableGetStateCapability.class);
+        assertTrue(((AvailableGetStateCapability) featureCapability).getCapability()
+                == AvailableGetStateCapability.Capability.AVAILABLE);
+    }
+
+    @Test
+    public void capabilites_init_parking_ticket() {
+        FeatureCapability featureCapability = null;
+        for (int i = 0; i < capabilites.getCapabilites().length; i++) {
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getIdentifier() == Identifier.PARKING_TICKET) {
+                featureCapability = iteratingFeatureCapability;
+                break;
+            }
+        }
+
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableGetStateCapability.class);
+        assertTrue(((AvailableGetStateCapability) featureCapability).getCapability()
+                == AvailableGetStateCapability.Capability.GET_STATE_AVAILABLE);
+    }
+
+    @Test
+    public void capabilites_init_keyfob_position() {
+        FeatureCapability featureCapability = null;
+        for (int i = 0; i < capabilites.getCapabilites().length; i++) {
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getIdentifier() == Identifier.KEYFOB_POSITION) {
+                featureCapability = iteratingFeatureCapability;
+                break;
+            }
+        }
+
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableCapability.class);
+        assertTrue(((AvailableCapability) featureCapability).getCapability()
+                == AvailableCapability.Capability.UNAVAILABLE);
     }
 
     // single capabilities

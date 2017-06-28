@@ -39,100 +39,26 @@ public class Command {
         VIDEO_HANDOVER(new byte[] { 0x00, (byte)0x43 }),
         TEXT_INPUT(new byte[] { 0x00, (byte)0x44 }),
         FUELING(new byte[] { 0x00, (byte)0x40 }),
-        DRIVER_FATIGUE(new byte[] { 0x00, (byte)0x41 });
+        DRIVER_FATIGUE(new byte[] { 0x00, (byte)0x41 }),
+        THEFT_ALARM(new byte[] { 0x00, (byte)0x46 }),
+        PARKING_TICKET(new byte[] { 0x00, (byte)0x47 }),
+        KEYFOB_POSITION(new byte[] { 0x00, (byte)0x48 });
 
         public static Identifier fromIdentifier(byte[] bytes) {
             return fromIdentifier(bytes[0], bytes[1]);
         }
 
         public static Identifier fromIdentifier(byte firstByte, byte secondByte) {
-            if (is(FAILURE, firstByte, secondByte)) {
-                return FAILURE;
+            Identifier[] allValues = Identifier.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Identifier identifier = allValues[i];
+                if (is(identifier, firstByte, secondByte)) {
+                    return identifier;
+                }
             }
-            else if (is(CAPABILITIES, firstByte, secondByte)) {
-                return CAPABILITIES;
-            }
-            else if (is(VEHICLE_STATUS, firstByte, secondByte)) {
-                return VEHICLE_STATUS;
-            }
-            else if (is(DOOR_LOCKS, firstByte, secondByte)) {
-                return DOOR_LOCKS;
-            }
-            else if (is(TRUNK_ACCESS, firstByte, secondByte)) {
-                return TRUNK_ACCESS;
-            }
-            else if (is(WAKE_UP, firstByte, secondByte)) {
-                return WAKE_UP;
-            }
-            else if (is(CHARGING, firstByte, secondByte)) {
-                return CHARGING;
-            }
-            else if (is(CLIMATE, firstByte, secondByte)) {
-                return CLIMATE;
-            }
-            else if (is(ROOFTOP, firstByte, secondByte)) {
-                return ROOFTOP;
-            }
-            else if (is(HONK_FLASH, firstByte, secondByte)) {
-                return HONK_FLASH;
-            }
-            else if (is(REMOTE_CONTROL, firstByte, secondByte)) {
-                return REMOTE_CONTROL;
-            }
-            else if (is(VALET_MODE, firstByte, secondByte)) {
-                return VALET_MODE;
-            }
-            else if (is(HEART_RATE, firstByte, secondByte)) {
-                return HEART_RATE;
-            }
-            else if (is(VEHICLE_LOCATION, firstByte, secondByte)) {
-                return VEHICLE_LOCATION;
-            }
-            else if (is(NAVI_DESTINATION, firstByte, secondByte)) {
-                return NAVI_DESTINATION;
-            }
-            else if (is(DELIVERED_PARCELS, firstByte, secondByte)) {
-                return DELIVERED_PARCELS;
-            }
-            else if (is(DIAGNOSTICS, firstByte, secondByte)) {
-                return DIAGNOSTICS;
-            }
-            else if (is(MAINTENANCE, firstByte, secondByte)) {
-                return MAINTENANCE;
-            }
-            else if (is(ENGINE, firstByte, secondByte)) {
-                return ENGINE;
-            }
-            else if (is(LIGHTS, firstByte, secondByte)) {
-                return LIGHTS;
-            }
-            else if (is(MESSAGING, firstByte, secondByte)) {
-                return MESSAGING;
-            }
-            else if (is(NOTIFICATIONS, firstByte, secondByte)) {
-                return NOTIFICATIONS;
-            }
-            else if (is(WINDOWS, firstByte, secondByte)) {
-                return WINDOWS;
-            }
-            else if (is(WINDSCREEN, firstByte, secondByte)) {
-                return WINDSCREEN;
-            }
-            else if (is(VIDEO_HANDOVER, firstByte, secondByte)) {
-                return VIDEO_HANDOVER;
-            }
-            else if (is(TEXT_INPUT, firstByte, secondByte)) {
-                return TEXT_INPUT;
-            }
-            else if (is(FUELING, firstByte, secondByte)) {
-                return FUELING;
-            }
-            else if (is(DRIVER_FATIGUE, firstByte, secondByte)) {
-                return DRIVER_FATIGUE;
-            }
-            else {
-                return null;
-            }
+
+            return null;
         }
 
         Identifier(byte[] identifier) {
@@ -1930,6 +1856,153 @@ public class Command {
         @Override
         public Identifier getIdentifier() {
             return Identifier.DRIVER_FATIGUE;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Theft Alarm category of the Auto API.
+     */
+    public enum TheftAlarm implements Type {
+        GET_THEFT_ALARM_STATE((byte)0x00),
+        THEFT_ALARM_STATE((byte)0x01),
+        SET_THEFT_ALARM((byte)0x02);
+
+        static TheftAlarm fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.THEFT_ALARM.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            TheftAlarm[] allValues = TheftAlarm.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                TheftAlarm command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        TheftAlarm(byte messageType) {
+            this.messageType = messageType;
+        }
+
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.THEFT_ALARM;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Parking Ticket category of the Auto API.
+     */
+    public enum ParkingTicket implements Type {
+        GET_PARKING_TICKET((byte)0x00),
+        PARKING_TICKET((byte)0x01),
+        START_PARKING((byte)0x02),
+        END_PARKING((byte)0x03);
+
+        static ParkingTicket fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.PARKING_TICKET.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            ParkingTicket[] allValues = ParkingTicket.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                ParkingTicket command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        ParkingTicket(byte messageType) {
+            this.messageType = messageType;
+        }
+
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.PARKING_TICKET;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Keyfob position category of the Auto API.
+     */
+    public enum KeyfobPosition implements Type {
+        GET_KEYFOB_POSITION((byte)0x00),
+        KEYFOB_POSITION((byte)0x01);
+
+        static KeyfobPosition fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.KEYFOB_POSITION.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            KeyfobPosition[] allValues = KeyfobPosition.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                KeyfobPosition command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        KeyfobPosition(byte messageType) {
+            this.messageType = messageType;
+        }
+
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.KEYFOB_POSITION;
         }
 
         @Override

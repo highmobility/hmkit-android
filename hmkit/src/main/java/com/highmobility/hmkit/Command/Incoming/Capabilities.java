@@ -1,9 +1,13 @@
 package com.highmobility.hmkit.Command.Incoming;
 
+import android.util.Log;
+
 import com.highmobility.hmkit.Command.Capability.FeatureCapability;
 import com.highmobility.hmkit.Command.CommandParseException;
 
 import java.util.Arrays;
+
+import static com.highmobility.hmkit.Command.Incoming.DeliveredParcels.TAG;
 
 /**
  * Created by ttiganik on 14/09/16.
@@ -33,7 +37,13 @@ public class Capabilities extends IncomingCommand {
 
             capabilites[i] = featureCapability;
             capabilityPosition += capabilityLength + 3;
-            if (featureCapability != null) knownCapabilitesCount++;
+            if (featureCapability != null) {
+                knownCapabilitesCount++;
+            }
+            else {
+                knownCapabilitesCount ++;
+                knownCapabilitesCount --;
+            }
         }
 
         if (capabilitiesCount != knownCapabilitesCount) {
