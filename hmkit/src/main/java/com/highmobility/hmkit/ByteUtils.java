@@ -1,6 +1,8 @@
 package com.highmobility.hmkit;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -97,6 +99,36 @@ public class ByteUtils {
 
     public static boolean getBit(int n, int k) {
         return ((n >> k) & 1) == 1;
+    }
+
+    public static float getFloat(byte[] bytes) {
+        return ByteBuffer.wrap(bytes).getFloat();
+    }
+
+    public static int getInt(byte[] bytes) {
+        if (bytes.length == 3) {
+            int result = (bytes[2] & 0xFF) | ((bytes[1] & 0xFF) << 8) | ((bytes[0] & 0x0F) << 16);
+            return result;
+        }
+        else if (bytes.length == 2) {
+            int result = ((bytes[0] & 0xff) << 8) | (bytes[1] & 0xff);
+            return result;
+        }
+
+        return ByteBuffer.wrap(bytes).getInt();
+    }
+
+    public static int getInt(byte value) {
+        return (int)value;
+    }
+
+    public static String getString(byte[] bytes) {
+        try {
+            return new String(bytes, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return "parse error";
+        }
     }
 
     static UUID UUIDFromByteArray(byte[] bytes) {

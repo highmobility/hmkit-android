@@ -5,37 +5,7 @@ package com.highmobility.hmkit.Command;
  */
 
 public class Constants {
-    /**
-     * The possible states of the car lock.
-     */
-    public enum LockState {
-        LOCKED, UNLOCKED;
-
-        public static LockState fromByte(byte value) throws CommandParseException {
-            switch (value) {
-                case 0x00: return UNLOCKED;
-                case 0x01: return LOCKED;
-            }
-
-            throw new CommandParseException();
-        }
-    }
-
-    /**
-     * The possible positions of a car door
-     */
-    public enum DoorPosition {
-        OPEN, CLOSED;
-
-        public static DoorPosition fromByte(byte value) throws CommandParseException {
-            switch (value) {
-                case 0x00: return CLOSED;
-                case 0x01: return OPEN;
-            }
-
-            throw new CommandParseException();
-        }
-    }
+    public enum WasherFluidLevel { LOW, FULL }
 
     /**
      * The possible trunk lock states

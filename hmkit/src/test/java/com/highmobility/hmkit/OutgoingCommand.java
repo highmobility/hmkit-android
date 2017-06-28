@@ -151,6 +151,13 @@ public class OutgoingCommand {
     }
 
     @Test
+    public void getDiagnosticsState() {
+        String waitingForBytes = "003300";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Diagnostics.getDiagnosticsState());
+        assertTrue(waitingForBytes.equals(commandBytes));
+    }
+
+    @Test
     public void setClimateProfile() {
         String waitingForBytes = "0024026000000000000000000000071E071E41ac000041ac0000";
         AutoHvacState[] states = new AutoHvacState[7];

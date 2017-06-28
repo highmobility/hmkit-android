@@ -1305,6 +1305,15 @@ public class Command {
         GET_DIAGNOSTICS_STATE((byte)0x00),
         DIAGNOSTICS_STATE((byte)0x01);
 
+        /**
+         * Get the diagnostics state of the car. The car will respond with the Diagnostics State message.
+         *
+         * @return the command bytes
+         */
+        public static byte[] getDiagnosticsState() {
+            return GET_DIAGNOSTICS_STATE.getIdentifierAndType();
+        }
+
         static Diagnostics fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
             byte[] identiferBytes = Identifier.DIAGNOSTICS.getIdentifier();
             if (firstIdentifierByte != identiferBytes[0]

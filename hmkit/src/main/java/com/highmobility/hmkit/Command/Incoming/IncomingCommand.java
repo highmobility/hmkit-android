@@ -51,6 +51,9 @@ public class IncomingCommand {
             else if (ByteUtils.startsWith(bytes, Command.FailureMessage.FAILURE_MESSAGE.getIdentifierAndType())) {
                 return new Failure(bytes);
             }
+            else if (ByteUtils.startsWith(bytes, Command.Diagnostics.DIAGNOSTICS_STATE.getIdentifierAndType())) {
+                return new Diagnostics(bytes);
+            }
             else {
                 throw new CommandParseException();
             }

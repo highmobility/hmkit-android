@@ -4,10 +4,12 @@ import com.highmobility.hmkit.Command.AutoHvacState;
 import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.Command.CommandParseException;
 import com.highmobility.hmkit.Command.Constants;
+import com.highmobility.hmkit.Command.DoorLockState;
 import com.highmobility.hmkit.Command.Incoming.ChargeState;
 import com.highmobility.hmkit.Command.Incoming.ClimateState;
 import com.highmobility.hmkit.Command.Incoming.ControlMode;
 import com.highmobility.hmkit.Command.Incoming.DeliveredParcels;
+import com.highmobility.hmkit.Command.Incoming.Diagnostics;
 import com.highmobility.hmkit.Command.Incoming.Failure;
 import com.highmobility.hmkit.Command.Incoming.LockState;
 import com.highmobility.hmkit.Command.Incoming.RooftopState;
@@ -120,17 +122,17 @@ public class IncomingCommand {
         assertTrue(((LockState)command).getRearLeft() != null);
         assertTrue(((LockState)command).getRearRight() != null);
 
-        assertTrue(((LockState)command).getFrontLeft().getPosition() == Constants.DoorPosition.OPEN);
-        assertTrue(((LockState)command).getFrontLeft().getLockState() == Constants.LockState.UNLOCKED);
+        assertTrue(((LockState)command).getFrontLeft().getPosition() == DoorLockState.DoorPosition.OPEN);
+        assertTrue(((LockState)command).getFrontLeft().getLockState() == DoorLockState.LockState.UNLOCKED);
 
-        assertTrue(((LockState)command).getFrontRight().getPosition() == Constants.DoorPosition.CLOSED);
-        assertTrue(((LockState)command).getFrontRight().getLockState() == Constants.LockState.UNLOCKED);
+        assertTrue(((LockState)command).getFrontRight().getPosition() == DoorLockState.DoorPosition.CLOSED);
+        assertTrue(((LockState)command).getFrontRight().getLockState() == DoorLockState.LockState.UNLOCKED);
 
-        assertTrue(((LockState)command).getRearLeft().getPosition() == Constants.DoorPosition.CLOSED);
-        assertTrue(((LockState)command).getRearLeft().getLockState() == Constants.LockState.LOCKED);
+        assertTrue(((LockState)command).getRearLeft().getPosition() == DoorLockState.DoorPosition.CLOSED);
+        assertTrue(((LockState)command).getRearLeft().getLockState() == DoorLockState.LockState.LOCKED);
 
-        assertTrue(((LockState)command).getRearRight().getPosition() == Constants.DoorPosition.CLOSED);
-        assertTrue(((LockState)command).getRearRight().getLockState() == Constants.LockState.LOCKED);
+        assertTrue(((LockState)command).getRearRight().getPosition() == DoorLockState.DoorPosition.CLOSED);
+        assertTrue(((LockState)command).getRearRight().getLockState() == DoorLockState.LockState.LOCKED);
     }
 
     @Test
@@ -152,11 +154,11 @@ public class IncomingCommand {
         assertTrue(((LockState)command).getRearLeft() == null);
         assertTrue(((LockState)command).getRearRight() == null);
 
-        assertTrue(((LockState)command).getFrontLeft().getPosition() == Constants.DoorPosition.OPEN);
-        assertTrue(((LockState)command).getFrontLeft().getLockState() == Constants.LockState.UNLOCKED);
+        assertTrue(((LockState)command).getFrontLeft().getPosition() == DoorLockState.DoorPosition.OPEN);
+        assertTrue(((LockState)command).getFrontLeft().getLockState() == DoorLockState.LockState.UNLOCKED);
 
-        assertTrue(((LockState)command).getFrontRight().getPosition() == Constants.DoorPosition.CLOSED);
-        assertTrue(((LockState)command).getFrontRight().getLockState() == Constants.LockState.UNLOCKED);
+        assertTrue(((LockState)command).getFrontRight().getPosition() == DoorLockState.DoorPosition.CLOSED);
+        assertTrue(((LockState)command).getFrontRight().getLockState() == DoorLockState.LockState.UNLOCKED);
     }
 
     @Test
@@ -305,5 +307,31 @@ public class IncomingCommand {
 
         assertTrue(command.getClass() == VehicleLocation.class);
         assertTrue(((VehicleLocation)command).getLatitude() == 52.520008f);
-        assertTrue(((VehicleLocation)command).getLongitude() == 13.404954f);    }
+        assertTrue(((VehicleLocation)command).getLongitude() == 13.404954f);
+    }
+
+    @Test
+    public void diagnostics() {
+        byte[] bytes = ByteUtils.bytesFromHex("0033010249F00063003C09C45A0104004013d70a014013d70a02401666660340166666");
+
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == Diagnostics.class);
+        assertTrue(((Diagnostics)command).getMileage() == 150000);
+        assertTrue(((Diagnostics)command).getOilTemperature() == 99);
+        assertTrue(((Diagnostics)command).getSpeed() == 60);
+        assertTrue(((Diagnostics)command).getRpm() == 2500);
+        assertTrue(((Diagnostics)command).getFuelLevel() == .9f);
+        assertTrue(((Diagnostics)command).getWasherFluidLevel() == Constants.WasherFluidLevel.FULL);
+        assertTrue(((Diagnostics)command).getFrontLeftTirePressure() == 2.31f);
+        assertTrue(((Diagnostics)command).getFrontRightTirePressure() == 2.31f);
+        assertTrue(((Diagnostics)command).getRearLeftTirePressure() == 2.35f);
+        assertTrue(((Diagnostics)command).getRearRightTirePressure() == 2.35f);
+    }
 }

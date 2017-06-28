@@ -51,19 +51,19 @@ public class DoorLocks extends FeatureState {
      * @return true if all doors are closed and locked, otherwise false
      */
     public boolean isLocked() {
-        if (getFrontLeft() != null && getFrontLeft().getLockState() != Constants.LockState.LOCKED) {
+        if (getFrontLeft() != null && getFrontLeft().getLockState() != DoorLockState.LockState.LOCKED) {
             return false;
         }
 
-        if (getFrontRight() != null && getFrontRight().getLockState() != Constants.LockState.LOCKED) {
+        if (getFrontRight() != null && getFrontRight().getLockState() != DoorLockState.LockState.LOCKED) {
             return false;
         }
 
-        if (getRearLeft() != null && getRearLeft().getLockState() != Constants.LockState.LOCKED) {
+        if (getRearLeft() != null && getRearLeft().getLockState() != DoorLockState.LockState.LOCKED) {
             return false;
         }
 
-        if (getRearRight() != null && getRearRight().getLockState() != Constants.LockState.LOCKED) {
+        if (getRearRight() != null && getRearRight().getLockState() != DoorLockState.LockState.LOCKED) {
             return false;
         }
 

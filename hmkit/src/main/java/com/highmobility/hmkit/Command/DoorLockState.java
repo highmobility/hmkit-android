@@ -5,19 +5,51 @@ package com.highmobility.hmkit.Command;
  */
 
 public class DoorLockState {
-    Constants.DoorPosition position;
-    Constants.LockState lockState;
+    /**
+     * The possible positions of a car door
+     */
+    public enum DoorPosition {
+        OPEN, CLOSED;
 
-    public DoorLockState(byte position, byte lockState) throws CommandParseException {
-        this.position = Constants.DoorPosition.fromByte(position);
-        this.lockState = Constants.LockState.fromByte(lockState);
+        public static DoorPosition fromByte(byte value) throws CommandParseException {
+            switch (value) {
+                case 0x00: return CLOSED;
+                case 0x01: return OPEN;
+            }
+
+            throw new CommandParseException();
+        }
     }
 
-    public Constants.DoorPosition getPosition() {
+    /**
+     * The possible states of the car lock.
+     */
+    public enum LockState {
+        LOCKED, UNLOCKED;
+
+        public static LockState fromByte(byte value) throws CommandParseException {
+            switch (value) {
+                case 0x00: return UNLOCKED;
+                case 0x01: return LOCKED;
+            }
+
+            throw new CommandParseException();
+        }
+    }
+
+    DoorPosition position;
+    LockState lockState;
+
+    public DoorLockState(byte position, byte lockState) throws CommandParseException {
+        this.position = DoorPosition.fromByte(position);
+        this.lockState = LockState.fromByte(lockState);
+    }
+
+    public DoorPosition getPosition() {
         return position;
     }
 
-    public Constants.LockState getLockState() {
+    public LockState getLockState() {
         return lockState;
     }
 }

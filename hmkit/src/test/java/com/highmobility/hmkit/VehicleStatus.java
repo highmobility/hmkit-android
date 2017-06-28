@@ -1,12 +1,15 @@
 package com.highmobility.hmkit;
 
+import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.Command.CommandParseException;
 import com.highmobility.hmkit.Command.Constants;
 import com.highmobility.hmkit.Command.Command.Identifier;
+import com.highmobility.hmkit.Command.DoorLockState;
 import com.highmobility.hmkit.Command.Incoming.IncomingCommand;
 import com.highmobility.hmkit.Command.VehicleStatus.Charging;
 import com.highmobility.hmkit.Command.VehicleStatus.Climate;
 
+import com.highmobility.hmkit.Command.VehicleStatus.Diagnostics;
 import com.highmobility.hmkit.Command.VehicleStatus.DoorLocks;
 import com.highmobility.hmkit.Command.VehicleStatus.FeatureState;
 import com.highmobility.hmkit.Command.VehicleStatus.RemoteControl;
@@ -50,7 +53,7 @@ public class VehicleStatus {
                 "00270102" +
                 "00280101" + // valet mode
                 "00300842561eb941567ab1" + // location 53.530003 13.404954; // 8 feature states
-                "00330101" + // TODO: implement/test diagnostics
+                "00330B0249F00063003C09C45A01" +
                 "";
         byte[] bytes = ByteUtils.bytesFromHex(vehicleStatusHexString);
 
@@ -130,17 +133,17 @@ public class VehicleStatus {
         assertTrue(((DoorLocks)state).getRearLeft() != null);
         assertTrue(((DoorLocks)state).getRearRight() != null);
 
-        assertTrue(((DoorLocks)state).getFrontLeft().getPosition() == Constants.DoorPosition.OPEN);
-        assertTrue(((DoorLocks)state).getFrontLeft().getLockState() == Constants.LockState.UNLOCKED);
+        assertTrue(((DoorLocks)state).getFrontLeft().getPosition() == DoorLockState.DoorPosition.OPEN);
+        assertTrue(((DoorLocks)state).getFrontLeft().getLockState() == DoorLockState.LockState.UNLOCKED);
 
-        assertTrue(((DoorLocks)state).getFrontRight().getPosition() == Constants.DoorPosition.CLOSED);
-        assertTrue(((DoorLocks)state).getFrontRight().getLockState() == Constants.LockState.UNLOCKED);
+        assertTrue(((DoorLocks)state).getFrontRight().getPosition() == DoorLockState.DoorPosition.CLOSED);
+        assertTrue(((DoorLocks)state).getFrontRight().getLockState() == DoorLockState.LockState.UNLOCKED);
 
-        assertTrue(((DoorLocks)state).getRearLeft().getPosition() == Constants.DoorPosition.CLOSED);
-        assertTrue(((DoorLocks)state).getRearLeft().getLockState() == Constants.LockState.LOCKED);
+        assertTrue(((DoorLocks)state).getRearLeft().getPosition() == DoorLockState.DoorPosition.CLOSED);
+        assertTrue(((DoorLocks)state).getRearLeft().getLockState() == DoorLockState.LockState.LOCKED);
 
-        assertTrue(((DoorLocks)state).getRearRight().getPosition() == Constants.DoorPosition.CLOSED);
-        assertTrue(((DoorLocks)state).getRearRight().getLockState() == Constants.LockState.LOCKED);
+        assertTrue(((DoorLocks)state).getRearRight().getPosition() == DoorLockState.DoorPosition.CLOSED);
+        assertTrue(((DoorLocks)state).getRearRight().getLockState() == DoorLockState.LockState.LOCKED);
     }
 
     @Test
@@ -278,5 +281,57 @@ public class VehicleStatus {
         assertTrue(state.getClass() == RooftopState.class);
         assertTrue(((RooftopState)state).getDimmingPercentage() == .01f);
         assertTrue(((RooftopState)state).getOpenPercentage() == .53f);
+    }
+
+    @Test
+    public void diagnostics() {
+        /*
+          0x00, 0x33, # MSB, LSB Message Identifier for Diagnostics
+  0x01, # Message Type for Diagnostics State
+
+  0x0249F0,   # Odometer is 150'000 km
+
+  0x0063,     # Engine oil teperature is 99C
+
+  0x003C,     # Car speed is 60km/h
+
+  0x09C4,     # RPM is 2500
+
+  0x5A,       # 90% fuel level
+
+  0x01,       # Washer fluid filled
+
+  0x04,       # Tire pressure of 4 tires follows
+
+  0x00,       # Front Left tire pressure
+  0x4013d70a, # 2.31 BAR
+
+  0x01,       # Front Right tire pressure
+  0x4013d70a, # 2.31 BAR
+
+  0x02,       # Rear Right tire pressure
+  0x40166666, # 2.35 BAR
+
+  0x03,       # Rear Left tire pressure
+  0x40166666  # 2.35 BAR
+         */
+
+        FeatureState state = null;
+        for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
+            FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
+            if (iteratingState.getFeature() == Identifier.DIAGNOSTICS) {
+                state = iteratingState;
+                break;
+            }
+        }
+
+        assertTrue(state != null);
+        assertTrue(state.getClass() == Diagnostics.class);
+        assertTrue(((Diagnostics)state).getMileage() == 150000);
+        assertTrue(((Diagnostics)state).getOilTemperature() == 99);
+        assertTrue(((Diagnostics)state).getSpeed() == 60);
+        assertTrue(((Diagnostics)state).getRpm() == 2500);
+        assertTrue(((Diagnostics)state).getFuelLevel() == .9f);
+        assertTrue(((Diagnostics)state).getWasherFluidLevel() == Constants.WasherFluidLevel.FULL);
     }
 }
