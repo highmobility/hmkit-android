@@ -8,7 +8,6 @@ import android.widget.Toast;
 import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.Command.CommandParseException;
 import com.highmobility.hmkit.Command.Constants;
-import com.highmobility.hmkit.Command.DoorLockState;
 import com.highmobility.hmkit.Command.Incoming.Failure;
 import com.highmobility.hmkit.Command.Incoming.IncomingCommand;
 import com.highmobility.hmkit.Command.Incoming.LockState;
@@ -26,7 +25,6 @@ import com.highmobility.hmkit.Manager;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.highmobility.hmkit.Command.Constants.LockState.LOCKED;
 
 public class LinkViewController implements ILinkViewController, ConnectedLinkListener {
     static final String LINK_IDENTIFIER_MESSAGE = "com.highmobility.digitalkeydemo.LINKIDENTIFIER";
@@ -36,7 +34,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
     ConnectedLink link;
 
-    Constants.LockState doorLockState;
+    boolean doorsLocked;
     Constants.TrunkLockState trunkLockState;
 
     CountDownTimer timeoutTimer;
@@ -85,7 +83,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
             IncomingCommand command = IncomingCommand.create(bytes);
 
             if (command.is(Command.DoorLocks.LOCK_STATE)) {
-                onLockStateUpdate(((LockState)command).getFrontLeft().getLockState());
+                onLockStateUpdate(((LockState)command).isLocked());
             }
             else if (command.is(Command.TrunkAccess.TRUNK_STATE)) {
                 onTrunkStateUpdate(((TrunkState) command).getLockState());
@@ -96,12 +94,13 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
             else if (command.is(Command.FailureMessage.FAILURE_MESSAGE)) {
                 Failure failure = (Failure)command;
                 Log.d(TAG, "failure " + failure.getFailureReason().toString());
-                if (doorLockState == null) {
+                // TODO: fix me. Catch initialization error somehow. add initializing boolean
+                /*if (doorsLocked == false) {
                     onInitializeFinished(-13, failure.getFailureReason().toString());
                 }
                 else {
 
-                }
+                }*/
             }
         }
         catch (CommandParseException e) {
@@ -112,8 +111,6 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     @Override
     public void onLockDoorsClicked() {
         view.showLoadingView(true);
-
-        boolean doorsLocked = doorLockState == LOCKED;
 
         link.sendCommand(Command.DoorLocks.lockDoors(doorsLocked ? false : true), new Link.CommandCallback() {
             @Override
@@ -171,10 +168,10 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
         });
     }
 
-    void onLockStateUpdate(Constants.LockState lockState) {
-        Log.i(TAG, "Lock status changed " + lockState);
+    void onLockStateUpdate(boolean locked) {
+        Log.i(TAG, "Lock status changed " + locked);
 
-        if (doorLockState == LOCKED) {
+        if (doorsLocked == true) {
             view.onDoorsLocked(true);
         }
         else {
@@ -223,7 +220,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
             return;
         }
 
-        if (doorLocksState != null) onLockStateUpdate(doorLocksState.getFrontLeft().getLockState());
+        if (doorLocksState != null) onLockStateUpdate(doorLocksState.isLocked());
         if (trunkAccessState != null) onTrunkStateUpdate(trunkAccessState.getLockState());
     }
 
