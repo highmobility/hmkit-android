@@ -343,7 +343,7 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] lockDoors(boolean lock) {
-            return ByteUtils.concatBytes(LOCK_UNLOCK.getIdentifierAndType(), booleanByte(lock));
+            return ByteUtils.concatBytes(LOCK_UNLOCK.getIdentifierAndType(), ByteUtils.getByte(lock));
         }
 
         static DoorLocks fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
@@ -546,7 +546,7 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] startCharging(boolean start) {
-            return ByteUtils.concatBytes(START_STOP_CHARGING.getIdentifierAndType(), booleanByte(start));
+            return ByteUtils.concatBytes(START_STOP_CHARGING.getIdentifierAndType(), ByteUtils.getByte(start));
         }
 
         /**
@@ -672,7 +672,7 @@ public class Command {
          * @return The command bytes
          */
         public static byte[] startHvac(boolean start) {
-            return ByteUtils.concatBytes(START_STOP_HVAC.getIdentifierAndType(), booleanByte(start));
+            return ByteUtils.concatBytes(START_STOP_HVAC.getIdentifierAndType(), ByteUtils.getByte(start));
         }
 
         /**
@@ -683,7 +683,7 @@ public class Command {
          * @return The command bytes
          */
         public static byte[] startDefog(boolean start) {
-            return ByteUtils.concatBytes(START_STOP_DEFOGGING.getIdentifierAndType(), booleanByte(start));
+            return ByteUtils.concatBytes(START_STOP_DEFOGGING.getIdentifierAndType(), ByteUtils.getByte(start));
         }
 
         /**
@@ -694,7 +694,7 @@ public class Command {
          * @return The command bytes
          */
         public static byte[] startDefrost(boolean start) {
-            return ByteUtils.concatBytes(START_STOP_DEFROSTING.getIdentifierAndType(), booleanByte(start));
+            return ByteUtils.concatBytes(START_STOP_DEFROSTING.getIdentifierAndType(), ByteUtils.getByte(start));
         }
 
         static Climate fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
@@ -852,7 +852,7 @@ public class Command {
          * @return the command bytes
          */
         public static byte[] startEmergencyFlasher(boolean start) {
-            return ByteUtils.concatBytes(EMERGENCY_FLASHER.getIdentifierAndType(), booleanByte(start));
+            return ByteUtils.concatBytes(EMERGENCY_FLASHER.getIdentifierAndType(), ByteUtils.getByte(start));
         }
 
         static HonkFlash fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
@@ -1018,7 +1018,7 @@ public class Command {
          */
         public static byte[] activateValetMode(boolean activate) {
             return ByteUtils.concatBytes(ACTIVATE_DEACTIVATE_VALET_MODE.getIdentifierAndType(),
-                    booleanByte(activate));
+                    ByteUtils.getByte(activate));
         }
 
         static ValetMode fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
@@ -1411,12 +1411,20 @@ public class Command {
     }
 
     /**
-     * Commands for the Engine category of the Auto API.
+     * Commands for the IgnitionState category of the Auto API.
      */
     public enum Engine implements Type {
         GET_IGNITION_STATE((byte)0x00),
         IGNITION_STATE((byte)0x01),
         TURN_ENGINE_ON_OFF((byte)0x02);
+
+        public static byte[] getIgnitionState() {
+            return GET_IGNITION_STATE.getIdentifierAndType();
+        }
+
+        public static byte[] turnEngineOn(boolean on) {
+            return ByteUtils.concatBytes(TURN_ENGINE_ON_OFF.getIdentifierAndType(), ByteUtils.getByte(on));
+        }
 
         static Engine fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
             byte[] identiferBytes = Identifier.ENGINE.getIdentifier();
@@ -2027,9 +2035,5 @@ public class Command {
         public byte[] getIdentifierAndType() {
             return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
         }
-    }
-
-    static byte booleanByte(boolean value) {
-        return (byte)(value == true ? 0x01 : 0x00);
     }
 }

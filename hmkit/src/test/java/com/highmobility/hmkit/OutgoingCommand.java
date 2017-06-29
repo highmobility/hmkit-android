@@ -226,4 +226,18 @@ public class OutgoingCommand {
         String commandBytes = ByteUtils.hexFromBytes(Command.Maintenance.getMaintenanceState());
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
+
+    @Test
+    public void getIgnitionState() {
+        String waitingForBytes = "003500";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Engine.getIgnitionState());
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void turnEngineOnOff() {
+        String waitingForBytes = "00350200";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Engine.turnEngineOn(false));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
 }

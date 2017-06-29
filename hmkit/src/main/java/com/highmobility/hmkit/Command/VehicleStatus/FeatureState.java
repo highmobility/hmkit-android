@@ -8,6 +8,7 @@ import static com.highmobility.hmkit.Command.Command.Identifier.CHARGING;
 import static com.highmobility.hmkit.Command.Command.Identifier.CLIMATE;
 import static com.highmobility.hmkit.Command.Command.Identifier.DIAGNOSTICS;
 import static com.highmobility.hmkit.Command.Command.Identifier.DOOR_LOCKS;
+import static com.highmobility.hmkit.Command.Command.Identifier.ENGINE;
 import static com.highmobility.hmkit.Command.Command.Identifier.MAINTENANCE;
 import static com.highmobility.hmkit.Command.Command.Identifier.REMOTE_CONTROL;
 import static com.highmobility.hmkit.Command.Command.Identifier.ROOFTOP;
@@ -31,15 +32,16 @@ public class FeatureState {
         Identifier feature = Identifier.fromIdentifier(bytes[0], bytes[1]);
 
         if (feature == DOOR_LOCKS) return new DoorLocks(bytes);
-        if (feature == TRUNK_ACCESS) return new TrunkAccess(bytes);
-        if (feature == REMOTE_CONTROL) return new RemoteControl(bytes);
-        if (feature == CHARGING) return new Charging(bytes);
-        if (feature == CLIMATE) return new Climate(bytes);
-        if (feature == VEHICLE_LOCATION) return new VehicleLocation(bytes);
-        if (feature == VALET_MODE) return new ValetMode(bytes);
-        if (feature == ROOFTOP) return new RooftopState(bytes);
-        if (feature == DIAGNOSTICS) return new Diagnostics(bytes);
-        if (feature == MAINTENANCE) return new Maintenance(bytes);
+        else if (feature == TRUNK_ACCESS) return new TrunkAccess(bytes);
+        else if (feature == REMOTE_CONTROL) return new RemoteControl(bytes);
+        else if (feature == CHARGING) return new Charging(bytes);
+        else if (feature == CLIMATE) return new Climate(bytes);
+        else if (feature == VEHICLE_LOCATION) return new VehicleLocation(bytes);
+        else if (feature == VALET_MODE) return new ValetMode(bytes);
+        else if (feature == ROOFTOP) return new RooftopState(bytes);
+        else if (feature == DIAGNOSTICS) return new Diagnostics(bytes);
+        else if (feature == MAINTENANCE) return new Maintenance(bytes);
+        else if (feature == ENGINE) return new Engine(bytes);
 
         return null;
     }

@@ -10,6 +10,7 @@ import com.highmobility.hmkit.Command.Incoming.ClimateState;
 import com.highmobility.hmkit.Command.Incoming.ControlMode;
 import com.highmobility.hmkit.Command.Incoming.DeliveredParcels;
 import com.highmobility.hmkit.Command.Incoming.Diagnostics;
+import com.highmobility.hmkit.Command.Incoming.IgnitionState;
 import com.highmobility.hmkit.Command.Incoming.Failure;
 import com.highmobility.hmkit.Command.Incoming.LockState;
 import com.highmobility.hmkit.Command.Incoming.Maintenance;
@@ -352,5 +353,22 @@ public class IncomingCommand {
         assertTrue(command.getClass() == Maintenance.class);
         assertTrue(((Maintenance)command).getDaysToNextService() == 501);
         assertTrue(((Maintenance)command).getKilometersToNextService() == 3681);
+    }
+
+    @Test
+    public void engine() {
+        byte[] bytes = ByteUtils.bytesFromHex("00350101");
+
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == IgnitionState.class);
+        assertTrue(((IgnitionState)command).isOn() == true);
+
     }
 }

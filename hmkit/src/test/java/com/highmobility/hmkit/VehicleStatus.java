@@ -11,6 +11,7 @@ import com.highmobility.hmkit.Command.VehicleStatus.Climate;
 
 import com.highmobility.hmkit.Command.VehicleStatus.Diagnostics;
 import com.highmobility.hmkit.Command.VehicleStatus.DoorLocks;
+import com.highmobility.hmkit.Command.VehicleStatus.Engine;
 import com.highmobility.hmkit.Command.VehicleStatus.FeatureState;
 import com.highmobility.hmkit.Command.VehicleStatus.Maintenance;
 import com.highmobility.hmkit.Command.VehicleStatus.RemoteControl;
@@ -45,7 +46,7 @@ public class VehicleStatus {
                 "4d7920436172" + // "My Car"
                 "06"           + // License plate is 6 bytes
                 "414243313233" + // "ABC123"
-                "0A" +
+                "0B" +      // length
                 "00200D04000100010000020001030001" + // door locks
                 "0021020001" +
                 "0023080200FF32bf19999a" +
@@ -56,6 +57,7 @@ public class VehicleStatus {
                 "00300842561eb941567ab1" + // location 53.530003 13.404954; // 8 feature states
                 "00330B0249F00063003C09C45A01" +
                 "00340501F5000E61" +
+                "00350100" +
                 "";
         byte[] bytes = ByteUtils.bytesFromHex(vehicleStatusHexString);
 
@@ -71,7 +73,7 @@ public class VehicleStatus {
 
     @Test
     public void states_size() {
-        assertTrue(vehicleStatus.getFeatureStates().length == 10);
+        assertTrue(vehicleStatus.getFeatureStates().length == 11);
     }
 
     @Test
@@ -321,5 +323,21 @@ public class VehicleStatus {
         assertTrue(state.getClass() == Maintenance.class);
         assertTrue(((Maintenance)state).getDaysToNextService() == 501);
         assertTrue(((Maintenance)state).getKilometersToNextService() == 3681);
+    }
+
+    @Test
+    public void engine() {
+        FeatureState state = null;
+        for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
+            FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
+            if (iteratingState.getFeature() == Identifier.ENGINE) {
+                state = iteratingState;
+                break;
+            }
+        }
+
+        assertTrue(state != null);
+        assertTrue(state.getClass() == Engine.class);
+        assertTrue(((Engine)state).isOn() == false);
     }
 }

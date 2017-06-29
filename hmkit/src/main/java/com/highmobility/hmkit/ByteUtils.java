@@ -122,6 +122,14 @@ public class ByteUtils {
         return (int)value;
     }
 
+    public static boolean getBool(byte value) {
+        return value == 0x00 ? false : true;
+    }
+
+    public static byte getByte(boolean value) {
+        return (byte) (value == false ? 0x00 : 0x01);
+    }
+
     public static String getString(byte[] bytes) {
         try {
             return new String(bytes, "UTF-8");
