@@ -5,6 +5,20 @@ package com.highmobility.hmkit.Command;
  */
 
 public class Constants {
+    public enum ScreenPosition {
+        FRONT, REAR;
+
+        byte getByte() {
+            switch (this) {
+                case FRONT:
+                    return 0x00;
+                case REAR:
+                    return 0x01;
+                default: return 0x00;
+            }
+        }
+    }
+
     public enum FrontExteriorLightState {
         INACTIVE, ACTIVE, ACTIVE_WITH_FULL_BEAM;
 

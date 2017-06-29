@@ -1836,6 +1836,18 @@ public class Command {
     public enum VideoHandover implements Type {
         VIDEO_HANDOVER((byte)0x00);
 
+        public static byte[] videoHandover(String url, int startingSecond, Constants.ScreenPosition position) throws UnsupportedEncodingException {
+            byte[] command = VIDEO_HANDOVER.getIdentifierAndType();
+
+            byte[] urlBytes = url.getBytes("UTF-8");
+            command = ByteUtils.concatBytes(command, (byte) url.length());
+            command = ByteUtils.concatBytes(command, urlBytes);
+            command = ByteUtils.concatBytes(command, (byte) startingSecond);
+            command = ByteUtils.concatBytes(command, position.getByte());
+
+            return command;
+        }
+
         static VideoHandover fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
             byte[] identiferBytes = Identifier.VIDEO_HANDOVER.getIdentifier();
             if (firstIdentifierByte != identiferBytes[0]

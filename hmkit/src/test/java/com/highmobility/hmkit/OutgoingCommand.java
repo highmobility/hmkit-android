@@ -330,4 +330,15 @@ public class OutgoingCommand {
                 ));
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
+
+    @Test
+    public void videoHandover() throws UnsupportedEncodingException {
+        String waitingForBytes = "0043002b68747470733a2f2f7777772e796f75747562652e636f6d2f77617463683f763d795756423755366d5832595a00";
+
+        WindscreenDamagePosition position = new WindscreenDamagePosition(4, 3, 3, 3);
+        String commandBytes = ByteUtils.hexFromBytes(Command.VideoHandover.videoHandover(
+                "https://www.youtube.com/watch?v=yWVB7U6mX2Y", 90, Constants.ScreenPosition.FRONT
+        ));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
 }
