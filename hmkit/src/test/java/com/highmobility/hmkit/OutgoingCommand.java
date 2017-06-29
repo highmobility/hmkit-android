@@ -7,6 +7,7 @@ import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.Command.Constants;
 import com.highmobility.hmkit.Command.Command.Identifier;
 import com.highmobility.hmkit.Command.NotificationAction;
+import com.highmobility.hmkit.Command.WindowState;
 
 import org.junit.Test;
 
@@ -291,6 +292,20 @@ public class OutgoingCommand {
     public void notificationAction() {
         String waitingForBytes = "003801FE";
         String commandBytes = ByteUtils.hexFromBytes(Command.Notifications.notificationAction(-2));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void windows() {
+        String waitingForBytes = "0045020200010101";
+
+        WindowState[] positions = new WindowState[2];
+        WindowState action1 = new WindowState(WindowState.Location.FRONT_LEFT, WindowState.Position.OPEN);
+        WindowState action2 = new WindowState(WindowState.Location.FRONT_RIGHT, WindowState.Position.OPEN);
+        positions[0] = action1;
+        positions[1] = action2;
+
+        String commandBytes = ByteUtils.hexFromBytes(Command.Windows.openCloseWindows(positions));
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
 }

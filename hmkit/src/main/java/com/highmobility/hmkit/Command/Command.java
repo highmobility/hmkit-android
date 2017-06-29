@@ -1551,6 +1551,17 @@ public class Command {
     public enum Windows implements Type {
         OPEN_CLOSE_WINDOWS((byte)0x02);
 
+        public static byte[] openCloseWindows(WindowState[] windowStates) {
+            byte[] command = OPEN_CLOSE_WINDOWS.getIdentifierAndType();
+            command = ByteUtils.concatBytes(command, (byte) windowStates.length);
+
+            for (int i = 0; i < windowStates.length; i++) {
+                command = ByteUtils.concatBytes(command, windowStates[i].getBytes());
+            }
+
+            return command;
+        }
+
         static Windows fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
             byte[] identiferBytes = Identifier.WINDOWS.getIdentifier();
             if (firstIdentifierByte != identiferBytes[0]
