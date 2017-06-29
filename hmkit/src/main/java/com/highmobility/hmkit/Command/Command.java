@@ -1693,6 +1693,29 @@ public class Command {
         MESSAGE_RECEIVED((byte)0x00),
         SEND_MESSAGE((byte)0x01);
 
+        /**
+         *
+         * @param handle The sender handle (e.g. phone number)
+         * @param message The message text
+         * @return the command bytes
+         */
+        public static byte[] messageReceived(String handle, String message) {
+            byte[] command = MESSAGE_RECEIVED.getIdentifierAndType();
+
+            byte handleLength = (byte)handle.length();
+            byte[] handleBytes = handle.getBytes();
+
+            byte messageLength = (byte)message.length();
+            byte[] messageBytes = message.getBytes();
+
+            command = ByteUtils.concatBytes(command, handleLength);
+            command = ByteUtils.concatBytes(command, handleBytes);
+            command = ByteUtils.concatBytes(command, messageLength);
+            command = ByteUtils.concatBytes(command, messageBytes);
+
+            return command;
+        }
+
         static Messaging fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
             byte[] identiferBytes = Identifier.MESSAGING.getIdentifier();
             if (firstIdentifierByte != identiferBytes[0]

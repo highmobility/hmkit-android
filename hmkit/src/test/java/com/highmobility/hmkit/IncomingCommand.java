@@ -18,6 +18,7 @@ import com.highmobility.hmkit.Command.Incoming.Lights;
 import com.highmobility.hmkit.Command.Incoming.LockState;
 import com.highmobility.hmkit.Command.Incoming.Maintenance;
 import com.highmobility.hmkit.Command.Incoming.RooftopState;
+import com.highmobility.hmkit.Command.Incoming.SendMessage;
 import com.highmobility.hmkit.Command.Incoming.TrunkState;
 import com.highmobility.hmkit.Command.Incoming.ValetMode;
 import com.highmobility.hmkit.Command.Incoming.VehicleLocation;
@@ -391,5 +392,22 @@ public class IncomingCommand {
         assertTrue(((Lights)command).isRearExteriorLightActive() == true);
         assertTrue(((Lights)command).isInteriorLightActive() == false);
 //        assertTrue(((Lights)command).getAmbientColor() == Color.RED); // Color is not mocked
+    }
+
+    @Test
+    public void sendMessage() {
+        byte[] bytes = ByteUtils.bytesFromHex("0037010e2b31203535352d3535352d3535350d48656c6c6f20796f7520746f6f");
+
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == SendMessage.class);
+        assertTrue(((SendMessage)command).getRecipientHandle().equals("+1 555-555-555"));
+        assertTrue(((SendMessage)command).getText().equals("Hello you too"));
     }
 }

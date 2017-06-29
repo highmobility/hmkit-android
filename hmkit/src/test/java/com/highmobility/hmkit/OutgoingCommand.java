@@ -255,7 +255,13 @@ public class OutgoingCommand {
         String waitingForBytes = "003602020100ff0000";
         String commandBytes = ByteUtils.hexFromBytes(Command.Lights.controlLights(Constants.FrontExteriorLightState.ACTIVE_WITH_FULL_BEAM
         , true, false, Color.RED));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
 
+    @Test
+    public void messageReceived() {
+        String waitingForBytes = "0037000e2b31203535352d3535352d3535350548656c6c6f";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Messaging.messageReceived("+1 555-555-555", "Hello"));
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
 }
