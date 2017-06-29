@@ -1646,6 +1646,37 @@ public class Command {
         NOTIFICATION((byte)0x00),
         NOTIFICATION_ACTION((byte)0x01);
 
+        /**
+         * Send a notification to the car or smart device. The notification can have action items
+         * that the user can respond with.
+         *
+         * @param notification
+         * @param actions
+         * @return the command bytes
+         */
+        public static byte[] notification(String notification, NotificationAction[] actions) {
+            byte[] command = NOTIFICATION.getIdentifierAndType();
+            command = ByteUtils.concatBytes(command, (byte)notification.length());
+            command = ByteUtils.concatBytes(command, notification.getBytes());
+            command = ByteUtils.concatBytes(command, (byte)actions.length);
+
+            for (int i = 0; i <actions.length; i++) {
+                command = ByteUtils.concatBytes(command, actions[i].getBytes());
+            }
+
+            return command;
+        }
+
+        /**
+         * Send an action to a previously received Notification message.
+         *
+         * @param actionIdentifier
+         * @return the command bytes
+         */
+        public static byte[] notificationAction(int actionIdentifier) {
+            return ByteUtils.concatBytes(NOTIFICATION_ACTION.getIdentifierAndType(), (byte)actionIdentifier);
+        }
+
         static Notifications fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
             byte[] identiferBytes = Identifier.NOTIFICATIONS.getIdentifier();
             if (firstIdentifierByte != identiferBytes[0]

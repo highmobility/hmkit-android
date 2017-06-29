@@ -1,7 +1,5 @@
 package com.highmobility.hmkit;
 
-import android.graphics.Color;
-
 import com.highmobility.hmkit.Command.AutoHvacState;
 import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.Command.CommandParseException;
@@ -17,6 +15,8 @@ import com.highmobility.hmkit.Command.Incoming.Failure;
 import com.highmobility.hmkit.Command.Incoming.Lights;
 import com.highmobility.hmkit.Command.Incoming.LockState;
 import com.highmobility.hmkit.Command.Incoming.Maintenance;
+import com.highmobility.hmkit.Command.Incoming.Notification;
+import com.highmobility.hmkit.Command.Incoming.NotificationAction;
 import com.highmobility.hmkit.Command.Incoming.RooftopState;
 import com.highmobility.hmkit.Command.Incoming.SendMessage;
 import com.highmobility.hmkit.Command.Incoming.TrunkState;
@@ -409,5 +409,43 @@ public class IncomingCommand {
         assertTrue(command.getClass() == SendMessage.class);
         assertTrue(((SendMessage)command).getRecipientHandle().equals("+1 555-555-555"));
         assertTrue(((SendMessage)command).getText().equals("Hello you too"));
+    }
+
+    @Test
+    public void notificationAction() {
+        byte[] bytes = ByteUtils.bytesFromHex("003801FE");
+
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == NotificationAction.class);
+        assertTrue(((NotificationAction)command).getActionIdentifier() == -2);
+    }
+
+
+    @Test
+    public void notification() {
+        byte[] bytes = ByteUtils.bytesFromHex("003800115374617274206e617669676174696f6e3f0200024e6f0103596573");
+
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == Notification.class);
+        assertTrue(((Notification)command).getText().equals("Start navigation?"));
+        assertTrue(((Notification)command).getNotificationActions().length == 2);
+        assertTrue(((Notification)command).getNotificationActions()[0].getIdentifier() == 0);
+        assertTrue(((Notification)command).getNotificationActions()[0].getText().equals("No"));
+        assertTrue(((Notification)command).getNotificationActions()[1].getIdentifier() == 1);
+        assertTrue(((Notification)command).getNotificationActions()[1].getText().equals("Yes"));
     }
 }

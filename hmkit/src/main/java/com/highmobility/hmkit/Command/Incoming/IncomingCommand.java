@@ -66,6 +66,12 @@ public class IncomingCommand {
             else if (ByteUtils.startsWith(bytes, Command.Messaging.SEND_MESSAGE.getIdentifierAndType())) {
                 return new SendMessage(bytes);
             }
+            else if (ByteUtils.startsWith(bytes, Command.Notifications.NOTIFICATION_ACTION.getIdentifierAndType())) {
+                return new NotificationAction(bytes);
+            }
+            else if (ByteUtils.startsWith(bytes, Command.Notifications.NOTIFICATION.getIdentifierAndType())) {
+                return new Notification(bytes);
+            }
             else {
                 throw new CommandParseException();
             }

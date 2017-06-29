@@ -6,6 +6,7 @@ import com.highmobility.hmkit.Command.AutoHvacState;
 import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.Command.Constants;
 import com.highmobility.hmkit.Command.Command.Identifier;
+import com.highmobility.hmkit.Command.NotificationAction;
 
 import org.junit.Test;
 
@@ -262,6 +263,34 @@ public class OutgoingCommand {
     public void messageReceived() {
         String waitingForBytes = "0037000e2b31203535352d3535352d3535350548656c6c6f";
         String commandBytes = ByteUtils.hexFromBytes(Command.Messaging.messageReceived("+1 555-555-555", "Hello"));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void notification() {
+        /*
+        assertTrue(((Notification)command).getText().equals("Start navigation?"));
+        assertTrue(((Notification)command).getNotificationActions().length == 2);
+        assertTrue(((Notification)command).getNotificationActions()[0].getIdentifier() == 0);
+        assertTrue(((Notification)command).getNotificationActions()[0].getText().equals("No"));
+        assertTrue(((Notification)command).getNotificationActions()[1].getIdentifier() == 1);
+        assertTrue(((Notification)command).getNotificationActions()[1].getText().equals("Yes"));
+         */
+        String waitingForBytes = "003800115374617274206e617669676174696f6e3f0200024e6f0103596573";
+        NotificationAction[] notificationActions = new NotificationAction[2];
+        NotificationAction action1 = new NotificationAction(0, "No");
+        NotificationAction action2 = new NotificationAction(1, "Yes");
+        notificationActions[0] = action1;
+        notificationActions[1] = action2;
+
+        String commandBytes = ByteUtils.hexFromBytes(Command.Notifications.notification("Start navigation?", notificationActions));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void notificationAction() {
+        String waitingForBytes = "003801FE";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Notifications.notificationAction(-2));
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
 }
