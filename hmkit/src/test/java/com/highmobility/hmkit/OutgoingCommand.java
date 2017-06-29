@@ -16,6 +16,7 @@ import org.junit.Test;
 import java.io.UnsupportedEncodingException;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Created by ttiganik on 15/09/16.
@@ -265,8 +266,13 @@ public class OutgoingCommand {
     @Test
     public void messageReceived() {
         String waitingForBytes = "0037000e2b31203535352d3535352d3535350548656c6c6f";
-        String commandBytes = ByteUtils.hexFromBytes(Command.Messaging.messageReceived("+1 555-555-555", "Hello"));
-        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+        String commandBytes = null;
+        try {
+            commandBytes = ByteUtils.hexFromBytes(Command.Messaging.messageReceived("+1 555-555-555", "Hello"));
+            assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+        } catch (UnsupportedEncodingException e) {
+            fail();
+        }
     }
 
     @Test
@@ -286,8 +292,13 @@ public class OutgoingCommand {
         notificationActions[0] = action1;
         notificationActions[1] = action2;
 
-        String commandBytes = ByteUtils.hexFromBytes(Command.Notifications.notification("Start navigation?", notificationActions));
-        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+        String commandBytes = null;
+        try {
+            commandBytes = ByteUtils.hexFromBytes(Command.Notifications.notification("Start navigation?", notificationActions));
+            assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+        } catch (UnsupportedEncodingException e) {
+            fail();
+        }
     }
 
     @Test
@@ -335,10 +346,16 @@ public class OutgoingCommand {
     public void videoHandover() throws UnsupportedEncodingException {
         String waitingForBytes = "0043002b68747470733a2f2f7777772e796f75747562652e636f6d2f77617463683f763d795756423755366d5832595a00";
 
-        WindscreenDamagePosition position = new WindscreenDamagePosition(4, 3, 3, 3);
         String commandBytes = ByteUtils.hexFromBytes(Command.VideoHandover.videoHandover(
-                "https://www.youtube.com/watch?v=yWVB7U6mX2Y", 90, Constants.ScreenPosition.FRONT
+                "https://www.youtube.com/watch?v=yWVB7U6mX2Y", 90, Constants.ScreenLocation.FRONT
         ));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void textInput() throws UnsupportedEncodingException {
+        String waitingForBytes = "00440003796573";
+        String commandBytes = ByteUtils.hexFromBytes(Command.TextInput.textInput("yes"));
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
 }

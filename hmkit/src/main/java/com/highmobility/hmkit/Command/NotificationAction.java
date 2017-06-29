@@ -2,6 +2,8 @@ package com.highmobility.hmkit.Command;
 
 import com.highmobility.hmkit.ByteUtils;
 
+import java.io.UnsupportedEncodingException;
+
 /**
  * Created by root on 6/29/17.
  */
@@ -23,9 +25,9 @@ public class NotificationAction {
         this.text = text;
     }
 
-    public byte[] getBytes() {
+    public byte[] getBytes() throws UnsupportedEncodingException {
         byte[] command = new byte[] {(byte) identifier, (byte) text.length()};
-        command = ByteUtils.concatBytes(command, text.getBytes());
+        command = ByteUtils.concatBytes(command, text.getBytes("UTF-8"));
         return command;
     }
 }

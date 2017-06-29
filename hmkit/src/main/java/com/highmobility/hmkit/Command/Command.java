@@ -1696,11 +1696,12 @@ public class Command {
          * @param notification
          * @param actions
          * @return the command bytes
+         * @throws UnsupportedEncodingException if the notification is not UTF-8
          */
-        public static byte[] notification(String notification, NotificationAction[] actions) {
+        public static byte[] notification(String notification, NotificationAction[] actions) throws UnsupportedEncodingException {
             byte[] command = NOTIFICATION.getIdentifierAndType();
             command = ByteUtils.concatBytes(command, (byte)notification.length());
-            command = ByteUtils.concatBytes(command, notification.getBytes());
+            command = ByteUtils.concatBytes(command, notification.getBytes("UTF-8"));
             command = ByteUtils.concatBytes(command, (byte)actions.length);
 
             for (int i = 0; i <actions.length; i++) {
@@ -1772,15 +1773,16 @@ public class Command {
          * @param handle The sender handle (e.g. phone number)
          * @param message The message text
          * @return the command bytes
+         * @throws UnsupportedEncodingException when the text is not UTF-8
          */
-        public static byte[] messageReceived(String handle, String message) {
+        public static byte[] messageReceived(String handle, String message) throws UnsupportedEncodingException {
             byte[] command = MESSAGE_RECEIVED.getIdentifierAndType();
 
             byte handleLength = (byte)handle.length();
-            byte[] handleBytes = handle.getBytes();
+            byte[] handleBytes = handle.getBytes("UTF-8");
 
             byte messageLength = (byte)message.length();
-            byte[] messageBytes = message.getBytes();
+            byte[] messageBytes = message.getBytes("UTF-8");
 
             command = ByteUtils.concatBytes(command, handleLength);
             command = ByteUtils.concatBytes(command, handleBytes);
@@ -1836,14 +1838,23 @@ public class Command {
     public enum VideoHandover implements Type {
         VIDEO_HANDOVER((byte)0x00);
 
-        public static byte[] videoHandover(String url, int startingSecond, Constants.ScreenPosition position) throws UnsupportedEncodingException {
+        /**
+         * Hand over a video from smart device to car headunit to be shown in the car display.
+         *
+         * @param url The URL of the video stream, formatted in UTF-8
+         * @param startingSecond The starting second of the video
+         * @param location The screen on which to play the video
+         * @return the command bytes
+         * @throws UnsupportedEncodingException when URL is not UTF-8
+         */
+        public static byte[] videoHandover(String url, int startingSecond, Constants.ScreenLocation location) throws UnsupportedEncodingException {
             byte[] command = VIDEO_HANDOVER.getIdentifierAndType();
 
             byte[] urlBytes = url.getBytes("UTF-8");
             command = ByteUtils.concatBytes(command, (byte) url.length());
             command = ByteUtils.concatBytes(command, urlBytes);
             command = ByteUtils.concatBytes(command, (byte) startingSecond);
-            command = ByteUtils.concatBytes(command, position.getByte());
+            command = ByteUtils.concatBytes(command, location.getByte());
 
             return command;
         }
@@ -1894,6 +1905,21 @@ public class Command {
      */
     public enum TextInput implements Type {
         TEXT_INPUT((byte)0x00);
+
+        /**
+         * Send a keystroke or entire sentences as input to the car headunit. This can act as an
+         * alternative to the input devices that the car is equipped with.
+         *
+         * @param text The text to send
+         * @return the command bytes
+         * @throws UnsupportedEncodingException when text is not UTF-8
+         */
+        public static byte[] textInput(String text) throws UnsupportedEncodingException {
+            byte[] command = TEXT_INPUT.getIdentifierAndType();
+            command = ByteUtils.concatBytes(command, (byte) text.length());
+            command = ByteUtils.concatBytes(command, text.getBytes("UTF-8"));
+            return command;
+        }
 
         static TextInput fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
             byte[] identiferBytes = Identifier.TEXT_INPUT.getIdentifier();

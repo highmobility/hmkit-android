@@ -5,7 +5,7 @@ package com.highmobility.hmkit.Command;
  */
 
 public class Constants {
-    public enum ScreenPosition {
+    public enum ScreenLocation {
         FRONT, REAR;
 
         byte getByte() {
