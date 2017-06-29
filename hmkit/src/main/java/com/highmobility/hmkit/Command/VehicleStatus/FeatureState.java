@@ -9,6 +9,7 @@ import static com.highmobility.hmkit.Command.Command.Identifier.CLIMATE;
 import static com.highmobility.hmkit.Command.Command.Identifier.DIAGNOSTICS;
 import static com.highmobility.hmkit.Command.Command.Identifier.DOOR_LOCKS;
 import static com.highmobility.hmkit.Command.Command.Identifier.ENGINE;
+import static com.highmobility.hmkit.Command.Command.Identifier.LIGHTS;
 import static com.highmobility.hmkit.Command.Command.Identifier.MAINTENANCE;
 import static com.highmobility.hmkit.Command.Command.Identifier.REMOTE_CONTROL;
 import static com.highmobility.hmkit.Command.Command.Identifier.ROOFTOP;
@@ -42,6 +43,7 @@ public class FeatureState {
         else if (feature == DIAGNOSTICS) return new Diagnostics(bytes);
         else if (feature == MAINTENANCE) return new Maintenance(bytes);
         else if (feature == ENGINE) return new Engine(bytes);
+        else if (feature == LIGHTS) return new Lights(bytes);
 
         return null;
     }

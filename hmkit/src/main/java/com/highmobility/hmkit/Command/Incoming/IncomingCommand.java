@@ -60,6 +60,9 @@ public class IncomingCommand {
             else if (ByteUtils.startsWith(bytes, Command.Engine.IGNITION_STATE.getIdentifierAndType())) {
                 return new IgnitionState(bytes);
             }
+            else if (ByteUtils.startsWith(bytes, Command.Lights.LIGHTS_STATE.getIdentifierAndType())) {
+                return new Lights(bytes);
+            }
             else {
                 throw new CommandParseException();
             }

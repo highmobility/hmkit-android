@@ -5,6 +5,17 @@ package com.highmobility.hmkit.Command;
  */
 
 public class Constants {
+    public enum FrontExteriorLightState {
+        INACTIVE, ACTIVE, ACTIVE_WITH_FULL_BEAM;
+
+        byte byteValue() {
+            if (this == INACTIVE) return 0x00;
+            else if (this == ACTIVE) return 0x01;
+            else if (this == ACTIVE_WITH_FULL_BEAM) return 0x02;
+            return 0x00;
+        }
+    }
+
     public enum WasherFluidLevel { LOW, FULL }
 
     /**

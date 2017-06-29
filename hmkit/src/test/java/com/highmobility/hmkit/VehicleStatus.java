@@ -13,6 +13,7 @@ import com.highmobility.hmkit.Command.VehicleStatus.Diagnostics;
 import com.highmobility.hmkit.Command.VehicleStatus.DoorLocks;
 import com.highmobility.hmkit.Command.VehicleStatus.Engine;
 import com.highmobility.hmkit.Command.VehicleStatus.FeatureState;
+import com.highmobility.hmkit.Command.VehicleStatus.Lights;
 import com.highmobility.hmkit.Command.VehicleStatus.Maintenance;
 import com.highmobility.hmkit.Command.VehicleStatus.RemoteControl;
 import com.highmobility.hmkit.Command.VehicleStatus.RooftopState;
@@ -46,7 +47,7 @@ public class VehicleStatus {
                 "4d7920436172" + // "My Car"
                 "06"           + // License plate is 6 bytes
                 "414243313233" + // "ABC123"
-                "0B" +      // length
+                "0C" +      // length
                 "00200D04000100010000020001030001" + // door locks
                 "0021020001" +
                 "0023080200FF32bf19999a" +
@@ -58,6 +59,7 @@ public class VehicleStatus {
                 "00330B0249F00063003C09C45A01" +
                 "00340501F5000E61" +
                 "00350100" +
+                "003603020100" +
                 "";
         byte[] bytes = ByteUtils.bytesFromHex(vehicleStatusHexString);
 
@@ -73,7 +75,7 @@ public class VehicleStatus {
 
     @Test
     public void states_size() {
-        assertTrue(vehicleStatus.getFeatureStates().length == 11);
+        assertTrue(vehicleStatus.getFeatureStates().length == 12);
     }
 
     @Test
@@ -339,5 +341,23 @@ public class VehicleStatus {
         assertTrue(state != null);
         assertTrue(state.getClass() == Engine.class);
         assertTrue(((Engine)state).isOn() == false);
+    }
+
+    @Test
+    public void lights() {
+        FeatureState state = null;
+        for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
+            FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
+            if (iteratingState.getFeature() == Identifier.LIGHTS) {
+                state = iteratingState;
+                break;
+            }
+        }
+
+        assertTrue(state != null);
+        assertTrue(state.getClass() == Lights.class);
+        assertTrue(((Lights)state).getFrontExteriorLightState() == Constants.FrontExteriorLightState.ACTIVE_WITH_FULL_BEAM);
+        assertTrue(((Lights)state).isRearExteriorLightActive() == true);
+        assertTrue(((Lights)state).isInteriorLightActive() == false);
     }
 }

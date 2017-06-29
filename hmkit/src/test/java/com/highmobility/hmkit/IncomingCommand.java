@@ -1,5 +1,7 @@
 package com.highmobility.hmkit;
 
+import android.graphics.Color;
+
 import com.highmobility.hmkit.Command.AutoHvacState;
 import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.Command.CommandParseException;
@@ -12,6 +14,7 @@ import com.highmobility.hmkit.Command.Incoming.DeliveredParcels;
 import com.highmobility.hmkit.Command.Incoming.Diagnostics;
 import com.highmobility.hmkit.Command.Incoming.IgnitionState;
 import com.highmobility.hmkit.Command.Incoming.Failure;
+import com.highmobility.hmkit.Command.Incoming.Lights;
 import com.highmobility.hmkit.Command.Incoming.LockState;
 import com.highmobility.hmkit.Command.Incoming.Maintenance;
 import com.highmobility.hmkit.Command.Incoming.RooftopState;
@@ -369,6 +372,24 @@ public class IncomingCommand {
 
         assertTrue(command.getClass() == IgnitionState.class);
         assertTrue(((IgnitionState)command).isOn() == true);
+    }
 
+    @Test
+    public void lights() {
+        byte[] bytes = ByteUtils.bytesFromHex("003601020100FF0000");
+
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == Lights.class);
+        assertTrue(((Lights)command).getFrontExteriorLightState() == Constants.FrontExteriorLightState.ACTIVE_WITH_FULL_BEAM);
+        assertTrue(((Lights)command).isRearExteriorLightActive() == true);
+        assertTrue(((Lights)command).isInteriorLightActive() == false);
+//        assertTrue(((Lights)command).getAmbientColor() == Color.RED); // Color is not mocked
     }
 }

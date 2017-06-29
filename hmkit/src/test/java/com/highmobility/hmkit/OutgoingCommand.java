@@ -1,5 +1,7 @@
 package com.highmobility.hmkit;
 
+import android.graphics.Color;
+
 import com.highmobility.hmkit.Command.AutoHvacState;
 import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.Command.Constants;
@@ -238,6 +240,22 @@ public class OutgoingCommand {
     public void turnEngineOnOff() {
         String waitingForBytes = "00350200";
         String commandBytes = ByteUtils.hexFromBytes(Command.Engine.turnEngineOn(false));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void getLightsState() {
+        String waitingForBytes = "003600";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Lights.getLightsState());
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void controlLights() {
+        String waitingForBytes = "003602020100ff0000";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Lights.controlLights(Constants.FrontExteriorLightState.ACTIVE_WITH_FULL_BEAM
+        , true, false, Color.RED));
+
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
 }

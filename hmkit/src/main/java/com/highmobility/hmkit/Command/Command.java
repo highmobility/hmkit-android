@@ -4,6 +4,7 @@ import com.highmobility.hmkit.ByteUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import static com.highmobility.hmkit.Command.Command.Identifier.FAILURE;
 
@@ -1473,6 +1474,36 @@ public class Command {
         GET_LIGHTS_STATE((byte)0x00),
         LIGHTS_STATE((byte)0x01),
         CONTROL_LIGHTS((byte)0x02);
+
+        public static byte[] getLightsState() {
+            return GET_LIGHTS_STATE.getIdentifierAndType();
+        }
+
+        /**
+         * Set the lights state. The result is sent through the Lights State message.
+         *
+         * @param frontExteriorLightState Front exterior light state
+         * @param rearExteriorLightActive Rear exterior light state
+         * @param interiorLightActive Interior light state
+         * @param ambientColor Ambient color
+         *
+         * @return the command bytes
+         */
+        public static byte[] controlLights(Constants.FrontExteriorLightState frontExteriorLightState,
+                                           boolean rearExteriorLightActive,
+                                           boolean interiorLightActive,
+                                           int ambientColor) {
+            byte[] command = CONTROL_LIGHTS.getIdentifierAndType();
+            command =  ByteUtils.concatBytes(command, frontExteriorLightState.byteValue());
+            command = ByteUtils.concatBytes(command, ByteUtils.getByte(rearExteriorLightActive));
+            command = ByteUtils.concatBytes(command, ByteUtils.getByte(interiorLightActive));
+
+            byte[] colorBytes = ByteBuffer.allocate(4).putInt(ambientColor).array();
+            byte[] colorBytesWithoutAlpha = Arrays.copyOfRange(colorBytes, 1, 1 + 3);
+            command = ByteUtils.concatBytes(command, colorBytesWithoutAlpha);
+
+            return command;
+        }
 
         static Lights fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
             byte[] identiferBytes = Identifier.LIGHTS.getIdentifier();
