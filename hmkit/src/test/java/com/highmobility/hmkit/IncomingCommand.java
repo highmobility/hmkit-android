@@ -22,9 +22,17 @@ import com.highmobility.hmkit.Command.Incoming.SendMessage;
 import com.highmobility.hmkit.Command.Incoming.TrunkState;
 import com.highmobility.hmkit.Command.Incoming.ValetMode;
 import com.highmobility.hmkit.Command.Incoming.VehicleLocation;
+import com.highmobility.hmkit.Command.Incoming.WindscreenState;
+import com.highmobility.hmkit.Command.WindscreenDamagePosition;
 
 
 import org.junit.Test;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import static org.junit.Assert.*;
 
@@ -447,5 +455,43 @@ public class IncomingCommand {
         assertTrue(((Notification)command).getNotificationActions()[0].getText().equals("No"));
         assertTrue(((Notification)command).getNotificationActions()[1].getIdentifier() == 1);
         assertTrue(((Notification)command).getNotificationActions()[1].getText().equals("Yes"));
+    }
+
+    @Test
+    public void windscreenState() {
+        byte[] bytes = ByteUtils.bytesFromHex("0042010203024312025f11010a102005");
+
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == WindscreenState.class);
+        assertTrue(((WindscreenState)command).getWiperState() == WindscreenState.WiperState.AUTOMATIC);
+        assertTrue(((WindscreenState)command).getWiperIntensity() == WindscreenState.WiperIntensity.LEVEL_3);
+        assertTrue(((WindscreenState)command).getWindscreenDamage() == WindscreenState.WindscreenDamage.DAMAGE_SMALLER_THAN_1);
+        assertTrue(((WindscreenState)command).getWindscreenReplacementState() == WindscreenState.WindscreenReplacementState.REPLACEMENT_NEEDED);
+        WindscreenDamagePosition position = ((WindscreenState)command).getWindscreenDamagePosition();
+
+        assertTrue(position.getWindscreenSizeHorizontal() == 4);
+        assertTrue(position.getWindscreenSizeVertical() == 3);
+
+        assertTrue(position.getDamagePositionX() == 1);
+        assertTrue(position.getDamagePositionY() == 2);
+
+        assertTrue(((WindscreenState)command).getDamageConfidence() == .95f);
+        //2017-07-29T14:09:31+00:00
+        String string = "2017-01-10T16:32:05";
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        try {
+            Date date = format.parse(string);
+            Date commandDate = ((WindscreenState)command).getDamageDetectionTime();
+            assertTrue((format.format(commandDate).equals(format.format(date))));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 }

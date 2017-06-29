@@ -72,6 +72,9 @@ public class IncomingCommand {
             else if (ByteUtils.startsWith(bytes, Command.Notifications.NOTIFICATION.getIdentifierAndType())) {
                 return new Notification(bytes);
             }
+            else if (ByteUtils.startsWith(bytes, Command.Windscreen.WINDSCREEN_STATE.getIdentifierAndType())) {
+                return new WindscreenState(bytes);
+            }
             else {
                 throw new CommandParseException();
             }

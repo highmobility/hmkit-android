@@ -6,8 +6,10 @@ import com.highmobility.hmkit.Command.AutoHvacState;
 import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.Command.Constants;
 import com.highmobility.hmkit.Command.Command.Identifier;
+import com.highmobility.hmkit.Command.Incoming.WindscreenState;
 import com.highmobility.hmkit.Command.NotificationAction;
 import com.highmobility.hmkit.Command.WindowState;
+import com.highmobility.hmkit.Command.WindscreenDamagePosition;
 
 import org.junit.Test;
 
@@ -306,6 +308,26 @@ public class OutgoingCommand {
         positions[1] = action2;
 
         String commandBytes = ByteUtils.hexFromBytes(Command.Windows.openCloseWindows(positions));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void getWindscreenState() {
+        String waitingForBytes = "004200";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Windscreen.getWindscreenState());
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void setWindscreenDamage() {
+        String waitingForBytes = "004202023301";
+
+        WindscreenDamagePosition position = new WindscreenDamagePosition(4, 3, 3, 3);
+        String commandBytes = ByteUtils.hexFromBytes(Command.Windscreen.setWindscreenDamage(
+                WindscreenState.WindscreenDamage.DAMAGE_SMALLER_THAN_1,
+                position,
+                WindscreenState.WindscreenReplacementState.REPLACEMENT_NOT_NEEDED
+                ));
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
 }

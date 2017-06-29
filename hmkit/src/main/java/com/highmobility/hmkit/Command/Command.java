@@ -1,6 +1,7 @@
 package com.highmobility.hmkit.Command;
 
 import com.highmobility.hmkit.ByteUtils;
+import com.highmobility.hmkit.Command.Incoming.WindscreenState;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -1609,6 +1610,37 @@ public class Command {
         GET_WINDSCREEN_STATE((byte)0x00),
         WINDSCREEN_STATE((byte)0x01),
         SET_WINDSCREEN_DAMAGE((byte)0x02);
+
+        /**
+         *
+         * @return the command bytes for Get Windscreen State
+         */
+        public static byte[] getWindscreenState() {
+            return GET_WINDSCREEN_STATE.getIdentifierAndType();
+        }
+
+        /**
+         * Set the windscreen damage. This is for instance used to reset the glass damage or
+         * correct it. The result is sent through the Windscreen State message. Damage confidence
+         * percentage is automatically set to either 0% or 100%.
+         *
+         * @param damage Damage amount
+         * @param position Damage position
+         * @param replacementState The replacement state
+         *
+         * @return the command bytes
+         */
+        public static byte[] setWindscreenDamage(WindscreenState.WindscreenDamage damage,
+                                                 WindscreenDamagePosition position,
+                                                 WindscreenState.WindscreenReplacementState replacementState) {
+            byte[] command = SET_WINDSCREEN_DAMAGE.getIdentifierAndType();
+
+            command = ByteUtils.concatBytes(command, damage.getByte());
+            command = ByteUtils.concatBytes(command, position.getPositionByte());
+            command = ByteUtils.concatBytes(command, replacementState.getByte());
+
+            return command;
+        }
 
         static Windscreen fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
             byte[] identiferBytes = Identifier.WINDSCREEN.getIdentifier();
