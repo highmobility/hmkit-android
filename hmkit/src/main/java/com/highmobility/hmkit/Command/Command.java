@@ -1968,6 +1968,10 @@ public class Command {
     public enum Fueling implements Type {
         OPEN_GAS_FLAP((byte)0x02);
 
+        public static byte[] openGasFlap() {
+            return OPEN_GAS_FLAP.getIdentifierAndType();
+        }
+
         static Fueling fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
             byte[] identiferBytes = Identifier.FUELING.getIdentifier();
             if (firstIdentifierByte != identiferBytes[0]

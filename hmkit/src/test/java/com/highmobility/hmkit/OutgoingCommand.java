@@ -358,4 +358,11 @@ public class OutgoingCommand {
         String commandBytes = ByteUtils.hexFromBytes(Command.TextInput.textInput("yes"));
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
+
+    @Test
+    public void openGasFlap() throws UnsupportedEncodingException {
+        String waitingForBytes = "004002";
+        String commandBytes = ByteUtils.hexFromBytes(Command.Fueling.openGasFlap());
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
 }
