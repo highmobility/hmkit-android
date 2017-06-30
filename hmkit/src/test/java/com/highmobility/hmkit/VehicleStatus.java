@@ -16,6 +16,7 @@ import com.highmobility.hmkit.Command.VehicleStatus.Engine;
 import com.highmobility.hmkit.Command.VehicleStatus.FeatureState;
 import com.highmobility.hmkit.Command.VehicleStatus.Lights;
 import com.highmobility.hmkit.Command.VehicleStatus.Maintenance;
+import com.highmobility.hmkit.Command.VehicleStatus.ParkingTicket;
 import com.highmobility.hmkit.Command.VehicleStatus.RemoteControl;
 import com.highmobility.hmkit.Command.VehicleStatus.RooftopState;
 import com.highmobility.hmkit.Command.VehicleStatus.TheftAlarm;
@@ -25,6 +26,11 @@ import com.highmobility.hmkit.Command.VehicleStatus.VehicleLocation;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -49,7 +55,7 @@ public class VehicleStatus {
                 "4d7920436172" + // "My Car"
                 "06"           + // License plate is 6 bytes
                 "414243313233" + // "ABC123"
-                "0D" +      // length
+                "0E" +      // length
                 "00200D04000100010000020001030001" + // door locks
                 "0021020001" +
                 "0023080200FF32bf19999a" +
@@ -63,6 +69,7 @@ public class VehicleStatus {
                 "00350100" +
                 "003603020100" +
                 "00460102" +
+                "004720010e4265726c696e205061726b696e670363054F11010a11220A000000000000" +
                 "";
         byte[] bytes = ByteUtils.bytesFromHex(vehicleStatusHexString);
 
@@ -78,7 +85,7 @@ public class VehicleStatus {
 
     @Test
     public void states_size() {
-        assertTrue(vehicleStatus.getFeatureStates().length == 13);
+        assertTrue(vehicleStatus.getFeatureStates().length == 14);
     }
 
     @Test
@@ -378,6 +385,35 @@ public class VehicleStatus {
         assertTrue(state != null);
         assertTrue(state.getClass() == TheftAlarm.class);
         assertTrue(((TheftAlarm)state).getState() == TheftAlarmState.State.TRIGGERED);
+    }
 
+    @Test
+    public void parking() {
+        FeatureState state = null;
+        for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
+            FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
+            if (iteratingState.getFeature() == Identifier.PARKING_TICKET) {
+                state = iteratingState;
+                break;
+            }
+        }
+
+        assertTrue(state != null);
+        assertTrue(state.getClass() == ParkingTicket.class);
+        assertTrue(((ParkingTicket)state).getState() == com.highmobility.hmkit.Command.Incoming.ParkingTicket.State.STARTED);
+        assertTrue(((ParkingTicket)state).getOperatorName().equals("Berlin Parking"));
+        assertTrue(((ParkingTicket)state).getOperatorTicketId() == 6489423);
+        assertTrue(((ParkingTicket)state).getTicketEndDate() == null);
+
+        String string = "2017-01-10T17:34:10";
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        try {
+            Date date = format.parse(string);
+
+            Date commandDate = ((ParkingTicket)state).getTicketStartDate();
+            assertTrue((format.format(commandDate).equals(format.format(date))));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 }

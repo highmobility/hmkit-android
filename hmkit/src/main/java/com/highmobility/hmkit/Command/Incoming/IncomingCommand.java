@@ -81,6 +81,9 @@ public class IncomingCommand {
             else if (ByteUtils.startsWith(bytes, Command.TheftAlarm.THEFT_ALARM_STATE.getIdentifierAndType())) {
                 return new TheftAlarmState(bytes);
             }
+            else if (ByteUtils.startsWith(bytes, Command.ParkingTicket.PARKING_TICKET.getIdentifierAndType())) {
+                return new ParkingTicket(bytes);
+            }
             else {
                 throw new CommandParseException();
             }

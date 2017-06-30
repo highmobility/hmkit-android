@@ -18,6 +18,7 @@ import com.highmobility.hmkit.Command.Incoming.LockState;
 import com.highmobility.hmkit.Command.Incoming.Maintenance;
 import com.highmobility.hmkit.Command.Incoming.Notification;
 import com.highmobility.hmkit.Command.Incoming.NotificationAction;
+import com.highmobility.hmkit.Command.Incoming.ParkingTicket;
 import com.highmobility.hmkit.Command.Incoming.RooftopState;
 import com.highmobility.hmkit.Command.Incoming.SendMessage;
 import com.highmobility.hmkit.Command.Incoming.TheftAlarmState;
@@ -527,5 +528,35 @@ public class IncomingCommand {
 
         assertTrue(command.getClass() == TheftAlarmState.class);
         assertTrue(((TheftAlarmState)command).getState() == TheftAlarmState.State.ARMED);
+    }
+
+    @Test
+    public void parkingTicket() {
+        byte[] bytes = ByteUtils.bytesFromHex("004701010e4265726c696e205061726b696e670363054F11010a11220A000000000000");
+
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == ParkingTicket.class);
+        assertTrue(((ParkingTicket)command).getState() == ParkingTicket.State.STARTED);
+        assertTrue(((ParkingTicket)command).getOperatorName().equals("Berlin Parking"));
+        assertTrue(((ParkingTicket)command).getOperatorTicketId() == 6489423);
+        assertTrue(((ParkingTicket)command).getTicketEndDate() == null);
+
+
+        String string = "2017-01-10T17:34:10";
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        try {
+            Date date = format.parse(string);
+            Date commandDate = ((ParkingTicket)command).getTicketStartDate();
+            assertTrue((format.format(commandDate).equals(format.format(date))));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 }

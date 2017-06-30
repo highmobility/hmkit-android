@@ -3,6 +3,7 @@ import com.highmobility.hmkit.ByteUtils;
 import com.highmobility.hmkit.Command.CommandParseException;
 import com.highmobility.hmkit.Command.WindscreenDamagePosition;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -193,9 +194,6 @@ public class WindscreenState extends IncomingCommand {
                     verticalDamagePosition);
         }
 
-        Calendar c = Calendar.getInstance();
-        c.set(2000 + bytes[10], bytes[11] - 1, bytes[12], bytes[13], bytes[14], bytes[15]);
-        //c.setTimeZone(TimeZone.getTimeZone("UTC"));
-        damageDetectionTime = c.getTime();
+        damageDetectionTime = ByteUtils.getDate(Arrays.copyOfRange(bytes, 10, 10 + 6));
     }
 }

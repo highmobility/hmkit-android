@@ -1,6 +1,5 @@
-package com.highmobility.hmkit.Command.VehicleStatus;
+package com.highmobility.hmkit.Command.Incoming;
 import com.highmobility.hmkit.ByteUtils;
-import com.highmobility.hmkit.Command.Command.Identifier;
 import com.highmobility.hmkit.Command.CommandParseException;
 
 import java.io.UnsupportedEncodingException;
@@ -8,21 +7,39 @@ import java.util.Arrays;
 import java.util.Date;
 
 /**
- * Created by ttiganik on 14/12/2016.
+ * Created by ttiganik on 13/09/16.
+ *
+ * This is an evented message that is sent from the car every time the parking ticket state changes.
+ * This message is also sent when a Get Parking Ticket message is received by the car. The state is
+ * 0x00 Ended also when the parking ticket has never been set. Afterwards the car always keeps the
+ * last parking ticket information.
  */
+public class ParkingTicket extends IncomingCommand {
+    public enum State {
+        STARTED, ENDED;
+        public static State fromByte(byte value) {
+            switch (value) {
+                case 0x00:
+                    return ENDED;
+                case 0x01:
+                    return STARTED;
+            }
 
-public class ParkingTicket extends FeatureState {
+            return STARTED;
+        }
+    }
+
     String operatorName;
     int operatorTicketId;
     Date ticketStart;
     Date ticketEnd;
-    com.highmobility.hmkit.Command.Incoming.ParkingTicket.State state;
+    State state;
 
     /**
      *
      * @return The ticket state
      */
-    public com.highmobility.hmkit.Command.Incoming.ParkingTicket.State getState() {
+    public State getState() {
         return state;
     }
 
@@ -59,13 +76,12 @@ public class ParkingTicket extends FeatureState {
     }
 
     public ParkingTicket(byte[] bytes) throws CommandParseException {
-        super(Identifier.PARKING_TICKET);
+        super(bytes);
         if (bytes.length < 4) throw new CommandParseException();
 
-        state = com.highmobility.hmkit.Command.Incoming.ParkingTicket.State.fromByte(bytes[3]);
+        state = State.fromByte(bytes[3]);
         int operatorNameSize = bytes[4];
         int position = 5;
-
         try {
             operatorName = new String(Arrays.copyOfRange(bytes, position, position + operatorNameSize), "UTF-8");
         } catch (UnsupportedEncodingException e) {

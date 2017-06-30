@@ -14,6 +14,10 @@ import com.highmobility.hmkit.Command.WindscreenDamagePosition;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -360,16 +364,47 @@ public class OutgoingCommand {
     }
 
     @Test
-    public void openGasFlap() throws UnsupportedEncodingException {
+    public void openGasFlap() {
         String waitingForBytes = "004002";
         String commandBytes = ByteUtils.hexFromBytes(Command.Fueling.openGasFlap());
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
 
     @Test
-    public void getTheftAlarmState() throws UnsupportedEncodingException {
+    public void getTheftAlarmState()  {
         String waitingForBytes = "004600";
         String commandBytes = ByteUtils.hexFromBytes(Command.TheftAlarm.getTheftAlarmState());
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void getParkingTicket() {
+        String waitingForBytes = "004700";
+        String commandBytes = ByteUtils.hexFromBytes(Command.ParkingTicket.getParkingTicket());
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
+    public void startParking() throws UnsupportedEncodingException {
+        String waitingForBytes = "0047020e4265726c696e205061726b696e670363054F11010a11220A000000000000";
+        String string = "2017-01-10T17:34:10";
+
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        try {
+            Date startDate = format.parse(string);
+
+            String commandBytes = ByteUtils.hexFromBytes(Command.ParkingTicket.startParking("Berlin Parking", 6489423, startDate, null));
+            assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+        } catch (ParseException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    public void endParking() {
+        String waitingForBytes = "004703";
+        String commandBytes = ByteUtils.hexFromBytes(Command.ParkingTicket.endParking());
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
 }

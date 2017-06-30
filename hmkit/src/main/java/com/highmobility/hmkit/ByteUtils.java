@@ -1,8 +1,12 @@
 package com.highmobility.hmkit;
 
+import com.highmobility.hmkit.Command.CommandParseException;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -107,7 +111,7 @@ public class ByteUtils {
 
     public static int getInt(byte[] bytes) {
         if (bytes.length == 3) {
-            int result = (bytes[2] & 0xFF) | ((bytes[1] & 0xFF) << 8) | ((bytes[0] & 0x0F) << 16);
+            int result = (bytes[0] & 0xff) << 16 | (bytes[1] & 0xff) << 8 | (bytes[2] & 0xff);
             return result;
         }
         else if (bytes.length == 2) {
@@ -137,6 +141,18 @@ public class ByteUtils {
             e.printStackTrace();
             return "parse error";
         }
+    }
+
+    // 5 bytes eg yy mm dd mm ss. year is from 2000
+    public static Date getDate(byte[] bytes) throws CommandParseException {
+        if (bytes.length != 6) throw new CommandParseException();
+
+        if (bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0x00 && bytes[3] == 0x00 &&
+                bytes[4] == 0x00 && bytes[5] == 0x00) return null;
+
+        Calendar c = Calendar.getInstance();
+        c.set(2000 + bytes[0], bytes[1] - 1, bytes[2], bytes[3], bytes[4], bytes[5]);
+        return c.getTime();
     }
 
     static UUID UUIDFromByteArray(byte[] bytes) {

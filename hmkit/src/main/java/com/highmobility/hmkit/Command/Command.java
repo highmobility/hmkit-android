@@ -4,8 +4,11 @@ import com.highmobility.hmkit.ByteUtils;
 import com.highmobility.hmkit.Command.Incoming.WindscreenState;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 
 import static com.highmobility.hmkit.Command.Command.Identifier.FAILURE;
 
@@ -2129,6 +2132,81 @@ public class Command {
         PARKING_TICKET((byte)0x01),
         START_PARKING((byte)0x02),
         END_PARKING((byte)0x03);
+
+        public static byte[] getParkingTicket() {
+            return GET_PARKING_TICKET.getIdentifierAndType();
+        }
+
+        /**
+         * Start parking. This clears the last parking ticket information and starts a new one.
+         * The result is sent through the evented Parking Ticket message. The end time can be left
+         * unset depending on the operator.
+         *
+         * @param operatorName The operator name
+         * @param operatorIdentifier The operator identifier
+         * @param startDate Ticket start date
+         * @param endDate ticket end date
+         *
+         * @return the command bytes
+         * @throws UnsupportedEncodingException when a string is not in UTF-8
+         * @throws IllegalArgumentException when input is invalid
+         */
+        public static byte[] startParking(String operatorName, int operatorIdentifier,
+                                          Date startDate, Date endDate) throws UnsupportedEncodingException {
+            byte[] command = START_PARKING.getIdentifierAndType();
+
+            command = ByteUtils.concatBytes(command, (byte) operatorName.length());
+            command = ByteUtils.concatBytes(command, operatorName.getBytes("UTF-8"));
+
+            byte[] operatorBytes = BigInteger.valueOf(operatorIdentifier).toByteArray();
+            command = ByteUtils.concatBytes(command, (byte) operatorBytes.length);
+            command = ByteUtils.concatBytes(command, operatorBytes);
+
+            if (startDate == null) throw new IllegalArgumentException();
+
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(startDate);
+            int year = cal.get(Calendar.YEAR) - 2000;
+            int month = cal.get(Calendar.MONTH) + 1;
+            int day = cal.get(Calendar.DAY_OF_MONTH);
+            int hour = cal.get(Calendar.HOUR_OF_DAY);
+            int minute = cal.get(Calendar.MINUTE);
+            int second = cal.get(Calendar.SECOND);
+
+            command = ByteUtils.concatBytes(command, (byte)year);
+            command = ByteUtils.concatBytes(command, (byte)month);
+            command = ByteUtils.concatBytes(command, (byte)day);
+            command = ByteUtils.concatBytes(command, (byte)hour);
+            command = ByteUtils.concatBytes(command, (byte)minute);
+            command = ByteUtils.concatBytes(command, (byte)second);
+
+            if (endDate == null) {
+                byte[] emptyDate = new byte[6];
+                command = ByteUtils.concatBytes(command, emptyDate);
+            }
+            else {
+                cal.setTime(startDate);
+                year = cal.get(Calendar.YEAR) - 2000;
+                month = cal.get(Calendar.MONTH) + 1;
+                day = cal.get(Calendar.DAY_OF_MONTH);
+                hour = cal.get(Calendar.HOUR_OF_DAY);
+                minute = cal.get(Calendar.MINUTE);
+                second = cal.get(Calendar.SECOND);
+
+                command = ByteUtils.concatBytes(command, (byte)year);
+                command = ByteUtils.concatBytes(command, (byte)month);
+                command = ByteUtils.concatBytes(command, (byte)day);
+                command = ByteUtils.concatBytes(command, (byte)hour);
+                command = ByteUtils.concatBytes(command, (byte)minute);
+                command = ByteUtils.concatBytes(command, (byte)second);
+            }
+
+            return command;
+        }
+
+        public static byte[] endParking() {
+            return END_PARKING.getIdentifierAndType();
+        }
 
         static ParkingTicket fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
             byte[] identiferBytes = Identifier.PARKING_TICKET.getIdentifier();
