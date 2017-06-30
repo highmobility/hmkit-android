@@ -75,6 +75,9 @@ public class IncomingCommand {
             else if (ByteUtils.startsWith(bytes, Command.Windscreen.WINDSCREEN_STATE.getIdentifierAndType())) {
                 return new WindscreenState(bytes);
             }
+            else if (ByteUtils.startsWith(bytes, Command.DriverFatigue.DRIVER_FATIGUE_DETECTED.getIdentifierAndType())) {
+                return new DriverFatigue(bytes);
+            }
             else {
                 throw new CommandParseException();
             }

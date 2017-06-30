@@ -10,6 +10,7 @@ import com.highmobility.hmkit.Command.Incoming.ClimateState;
 import com.highmobility.hmkit.Command.Incoming.ControlMode;
 import com.highmobility.hmkit.Command.Incoming.DeliveredParcels;
 import com.highmobility.hmkit.Command.Incoming.Diagnostics;
+import com.highmobility.hmkit.Command.Incoming.DriverFatigue;
 import com.highmobility.hmkit.Command.Incoming.IgnitionState;
 import com.highmobility.hmkit.Command.Incoming.Failure;
 import com.highmobility.hmkit.Command.Incoming.Lights;
@@ -493,5 +494,22 @@ public class IncomingCommand {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void fatigueLevel() {
+        byte[] bytes = ByteUtils.bytesFromHex("00410101");
+
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == DriverFatigue.class);
+        assertTrue(((DriverFatigue)command).getFatigueLevel() == DriverFatigue.FatigueLevel.PAUSE_RECOMMENDED);
+
     }
 }
