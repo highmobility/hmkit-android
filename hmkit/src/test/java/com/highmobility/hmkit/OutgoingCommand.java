@@ -365,4 +365,11 @@ public class OutgoingCommand {
         String commandBytes = ByteUtils.hexFromBytes(Command.Fueling.openGasFlap());
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
+
+    @Test
+    public void getTheftAlarmState() throws UnsupportedEncodingException {
+        String waitingForBytes = "004600";
+        String commandBytes = ByteUtils.hexFromBytes(Command.TheftAlarm.getTheftAlarmState());
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
 }

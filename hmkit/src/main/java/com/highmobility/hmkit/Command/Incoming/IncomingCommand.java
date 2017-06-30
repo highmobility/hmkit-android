@@ -78,6 +78,9 @@ public class IncomingCommand {
             else if (ByteUtils.startsWith(bytes, Command.DriverFatigue.DRIVER_FATIGUE_DETECTED.getIdentifierAndType())) {
                 return new DriverFatigue(bytes);
             }
+            else if (ByteUtils.startsWith(bytes, Command.TheftAlarm.THEFT_ALARM_STATE.getIdentifierAndType())) {
+                return new TheftAlarmState(bytes);
+            }
             else {
                 throw new CommandParseException();
             }

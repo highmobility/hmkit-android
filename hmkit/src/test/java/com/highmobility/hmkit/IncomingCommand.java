@@ -20,6 +20,7 @@ import com.highmobility.hmkit.Command.Incoming.Notification;
 import com.highmobility.hmkit.Command.Incoming.NotificationAction;
 import com.highmobility.hmkit.Command.Incoming.RooftopState;
 import com.highmobility.hmkit.Command.Incoming.SendMessage;
+import com.highmobility.hmkit.Command.Incoming.TheftAlarmState;
 import com.highmobility.hmkit.Command.Incoming.TrunkState;
 import com.highmobility.hmkit.Command.Incoming.ValetMode;
 import com.highmobility.hmkit.Command.Incoming.VehicleLocation;
@@ -510,6 +511,21 @@ public class IncomingCommand {
 
         assertTrue(command.getClass() == DriverFatigue.class);
         assertTrue(((DriverFatigue)command).getFatigueLevel() == DriverFatigue.FatigueLevel.PAUSE_RECOMMENDED);
+    }
 
+    @Test
+    public void theftAlarmState() {
+        byte[] bytes = ByteUtils.bytesFromHex("00460101");
+
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == TheftAlarmState.class);
+        assertTrue(((TheftAlarmState)command).getState() == TheftAlarmState.State.ARMED);
     }
 }

@@ -13,6 +13,7 @@ import static com.highmobility.hmkit.Command.Command.Identifier.LIGHTS;
 import static com.highmobility.hmkit.Command.Command.Identifier.MAINTENANCE;
 import static com.highmobility.hmkit.Command.Command.Identifier.REMOTE_CONTROL;
 import static com.highmobility.hmkit.Command.Command.Identifier.ROOFTOP;
+import static com.highmobility.hmkit.Command.Command.Identifier.THEFT_ALARM;
 import static com.highmobility.hmkit.Command.Command.Identifier.TRUNK_ACCESS;
 import static com.highmobility.hmkit.Command.Command.Identifier.VALET_MODE;
 import static com.highmobility.hmkit.Command.Command.Identifier.VEHICLE_LOCATION;
@@ -44,6 +45,7 @@ public class FeatureState {
         else if (feature == MAINTENANCE) return new Maintenance(bytes);
         else if (feature == ENGINE) return new Engine(bytes);
         else if (feature == LIGHTS) return new Lights(bytes);
+        else if (feature == THEFT_ALARM) return new TheftAlarm(bytes);
 
         return null;
     }

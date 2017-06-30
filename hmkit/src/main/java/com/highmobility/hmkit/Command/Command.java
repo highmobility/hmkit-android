@@ -1968,6 +1968,10 @@ public class Command {
     public enum Fueling implements Type {
         OPEN_GAS_FLAP((byte)0x02);
 
+        /**
+         *
+         * @return Open the gas flap of the car. This is possible even if the car is locked.
+         */
         public static byte[] openGasFlap() {
             return OPEN_GAS_FLAP.getIdentifierAndType();
         }
@@ -2067,6 +2071,14 @@ public class Command {
         GET_THEFT_ALARM_STATE((byte)0x00),
         THEFT_ALARM_STATE((byte)0x01),
         SET_THEFT_ALARM((byte)0x02);
+
+        /**
+         *
+         * @return Get the theft alarm state. The car will respond with the Theft Alarm message.
+         */
+        public static byte[] getTheftAlarmState() {
+            return GET_THEFT_ALARM_STATE.getIdentifierAndType();
+        }
 
         static TheftAlarm fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
             byte[] identiferBytes = Identifier.THEFT_ALARM.getIdentifier();

@@ -1,10 +1,6 @@
 package com.highmobility.hmkit.Command.Incoming;
 
-import com.highmobility.hmkit.ByteUtils;
 import com.highmobility.hmkit.Command.CommandParseException;
-import com.highmobility.hmkit.Command.Constants;
-
-import java.util.Arrays;
 
 /**
  * Created by root on 6/28/17.
@@ -30,6 +26,10 @@ public class DriverFatigue extends IncomingCommand {
 
     FatigueLevel fatigueLevel;
 
+    /**
+     *
+     * @return An evented message that notifies about driver fatigue. Sent continously when level 1 or higher.
+     */
     public FatigueLevel getFatigueLevel() {
         return fatigueLevel;
     }
