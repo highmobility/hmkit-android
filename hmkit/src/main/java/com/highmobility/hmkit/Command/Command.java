@@ -2256,6 +2256,10 @@ public class Command {
         GET_KEYFOB_POSITION((byte)0x00),
         KEYFOB_POSITION((byte)0x01);
 
+        public static byte[] getKeyfobPosition() {
+            return GET_KEYFOB_POSITION.getIdentifierAndType();
+        }
+
         static KeyfobPosition fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
             byte[] identiferBytes = Identifier.KEYFOB_POSITION.getIdentifier();
             if (firstIdentifierByte != identiferBytes[0]

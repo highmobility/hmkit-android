@@ -407,4 +407,11 @@ public class OutgoingCommand {
         String commandBytes = ByteUtils.hexFromBytes(Command.ParkingTicket.endParking());
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
+
+    @Test
+    public void getKeyfobPosition() {
+        String waitingForBytes = "004800";
+        String commandBytes = ByteUtils.hexFromBytes(Command.KeyfobPosition.getKeyfobPosition());
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
 }

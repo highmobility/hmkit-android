@@ -84,6 +84,9 @@ public class IncomingCommand {
             else if (ByteUtils.startsWith(bytes, Command.ParkingTicket.PARKING_TICKET.getIdentifierAndType())) {
                 return new ParkingTicket(bytes);
             }
+            else if (ByteUtils.startsWith(bytes, Command.KeyfobPosition.KEYFOB_POSITION.getIdentifierAndType())) {
+                return new KeyfobPosition(bytes);
+            }
             else {
                 throw new CommandParseException();
             }

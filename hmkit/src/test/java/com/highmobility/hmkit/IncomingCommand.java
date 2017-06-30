@@ -13,6 +13,7 @@ import com.highmobility.hmkit.Command.Incoming.Diagnostics;
 import com.highmobility.hmkit.Command.Incoming.DriverFatigue;
 import com.highmobility.hmkit.Command.Incoming.IgnitionState;
 import com.highmobility.hmkit.Command.Incoming.Failure;
+import com.highmobility.hmkit.Command.Incoming.KeyfobPosition;
 import com.highmobility.hmkit.Command.Incoming.Lights;
 import com.highmobility.hmkit.Command.Incoming.LockState;
 import com.highmobility.hmkit.Command.Incoming.Maintenance;
@@ -558,5 +559,21 @@ public class IncomingCommand {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void keyfobPosition() {
+        byte[] bytes = ByteUtils.bytesFromHex("00480105");
+
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == KeyfobPosition.class);
+        assertTrue(((KeyfobPosition) command).getPosition() == KeyfobPosition.Position.INSIDE_CAR);
     }
 }
