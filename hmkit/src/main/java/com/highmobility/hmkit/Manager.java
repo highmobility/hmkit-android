@@ -42,8 +42,20 @@ public class Manager {
         }
     }
 
+    /**
+     * DownloadCallback is used to notify the user about the certificate download result.
+     */
     public interface DownloadCallback {
+        /**
+         * Invoked if the certificate download was successful.
+         * @param vehicleSerial the certificate's gainer serial
+         */
         void onDownloaded(byte[] vehicleSerial);
+
+        /**
+         * Invoked when there was an error with the certificate download.
+         * @param error The error
+         */
         void onDownloadFailed(DownloadAccessCertificateError error);
     }
 
@@ -203,7 +215,7 @@ public class Manager {
 
     /**
      *
-     * @return A description about the SDK version name and type(mobile or wear).
+     * @return An SDK description string containing version name and type(mobile or wear).
      * @throws IllegalStateException when SDK is not initialized
      */
     public String getInfoString() throws IllegalStateException {
@@ -223,57 +235,15 @@ public class Manager {
     }
 
     /**
-     *
-     * @return All Access Certificates where device serial is providing access
-     * @throws IllegalStateException when SDK is not initialized
-     */
-    public AccessCertificate[] getCertificates() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
-        return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial());
-    }
-
-    /**
-     * Find an Access Certificate.
-     *
-     * @param serial The serial of the device that is gaining access
-     * @return An Access Certificate if one exists for the given serial, otherwise null.
-     * @throws IllegalStateException when SDK is not initialized
-     */
-    public AccessCertificate getCertificate(byte[] serial) throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
-        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial);
-
-        if (certificates != null && certificates.length > 0) {
-            return certificates[0];
-        }
-
-        return null;
-    }
-
-    /**
-     * Delete an access certificate.
-     *
-     * @param serial The serial of the device that is gaining access.
-     * @return true if the certificate existed and was deleted successfully, otherwise false
-     * @throws IllegalStateException when SDK is not initialized
-     */
-    public boolean deleteCertificate(byte[] serial) throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
-        return storage.deleteCertificateWithGainingSerial(serial);
-    }
-
-    /**
-     * Download and store the device access certificate for the given access token.
+     * Download and store a access certificate for the given access token. The access token needs to
+     * be provided by the certificate provider.
      *
      * @param accessToken The token that is used to download the certificates
-     * @param callback onDownloaded is invoked with the certificate's gainer serial if the certificate
-     *                 download was successful.
-     *                 onDownloadFailed is invoked when there was an error.
-     *
+     * @param callback A {@link DownloadCallback} object that is invoked after the download is finished or failed
      * @throws IllegalStateException when SDK is not initialized
      */
-    public void downloadAccessCertificate(String accessToken,
-                                          final Manager.DownloadCallback callback) throws IllegalStateException {
+    public void downloadCertificate(String accessToken,
+                                    final DownloadCallback callback) throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
         webService.requestAccessCertificate(accessToken,
                 privateKey,
@@ -331,10 +301,50 @@ public class Manager {
     }
 
     /**
-     * Deletes all the stored certificates.
+     *
+     * @return All Access Certificates where this device's serial is providing access.
      * @throws IllegalStateException when SDK is not initialized
      */
-    public void resetStorage() throws IllegalStateException {
+    public AccessCertificate[] getCertificates() throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
+        return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial());
+    }
+
+    /**
+     * Find an Access Certificate with the given serial number.
+     *
+     * @param serial The serial number of the device that is gaining access.
+     * @return An Access Certificate for the given serial if one exists, otherwise null.
+     * @throws IllegalStateException when SDK is not initialized
+     */
+    public AccessCertificate getCertificate(byte[] serial) throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
+        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial);
+
+        if (certificates != null && certificates.length > 0) {
+            return certificates[0];
+        }
+
+        return null;
+    }
+
+    /**
+     * Delete an access certificate.
+     *
+     * @param serial The serial of the device that is gaining access.
+     * @return true if the certificate existed and was deleted successfully, otherwise false
+     * @throws IllegalStateException when SDK is not initialized
+     */
+    public boolean deleteCertificate(byte[] serial) throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
+        return storage.deleteCertificateWithGainingSerial(serial);
+    }
+
+    /**
+     * Deletes all the stored Access Certificates.
+     * @throws IllegalStateException when SDK is not initialized
+     */
+    public void deleteCertificates() throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
         storage.resetStorage();
     }

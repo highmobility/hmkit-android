@@ -1302,7 +1302,6 @@ public class Command {
         }
     }
 
-    // TODO: add comments, implement
     /**
      * Commands for the Diagnostics category of the Auto API.
      */

@@ -34,8 +34,20 @@ public class Broadcaster implements SharedBleListener {
 
     public enum State { BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING }
 
+    /**
+     * Startcallback is used to notify the user about the start broadcasting result
+     */
     public interface StartCallback {
+        /**
+         * Invoked when the broadcasting was started.
+         */
         void onBroadcastingStarted();
+
+        /**
+         * Invoked when there was an error with starting the broadcast.
+         *
+         * @param error The error
+         */
         void onBroadcastingFailed(BroadcastError error);
     }
 
@@ -243,6 +255,7 @@ public class Broadcaster implements SharedBleListener {
      * if this device is interesting to them or not.
      *
      * Set this before calling startBroadcasting. Set this to null to use regular broadcast info.
+     * It is not required to set this before starting broadcasting.
      *
      * @param serial the serial set in the broadcast info
      */
@@ -253,7 +266,7 @@ public class Broadcaster implements SharedBleListener {
     /**
      * Activate or disable the alive ping mode.
      *
-     * @param alivePinging Whether the alive ping mode should be actived or stopped
+     * @param alivePinging a boolean indicating whether the alive ping mode should be actived or stopped.
      */
     public void setIsAlivePinging(boolean alivePinging) {
         if (alivePinging == isAlivePinging) return;
@@ -268,7 +281,7 @@ public class Broadcaster implements SharedBleListener {
      * connection to another broadcaster.
      *
      * @param certificate The certificate that can be used by the Device to authorised Links
-     * @return Result code 0 on success or
+     * @return {@link Storage.Result#SUCCESS} on success or
      *         {@link Storage.Result#INTERNAL_ERROR} if the given certificates providing serial doesn't match with
      *                      broadcaster's serial or the certificate is null.
      *         {@link Storage.Result#STORAGE_FULL} if the storage is full.
@@ -289,9 +302,9 @@ public class Broadcaster implements SharedBleListener {
      * Stores a Certificate to Device's storage. This certificate is usually read by other Devices.
      *
      * @param certificate The certificate that will be saved to the database
-     * @return Result code 0 on success or
-     * {@link Storage.Result#STORAGE_FULL} if the storage is full
-     * {@link Storage.Result#INTERNAL_ERROR} if certificate is null.
+     * @return  {@link Storage.Result#SUCCESS} on success or
+     *          {@link Storage.Result#STORAGE_FULL} if the storage is full.
+     *          {@link Storage.Result#INTERNAL_ERROR} if certificate is null.
      */
     public Storage.Result storeCertificate(AccessCertificate certificate) {
         return manager.storage.storeCertificate(certificate);
@@ -302,8 +315,8 @@ public class Broadcaster implements SharedBleListener {
      * accompanying registered certificate are deleted from the storage.
      *
      *  @param serial The 9-byte serial number of the access providing broadcaster
-     *  @return {@link Storage.Result#SUCCESS }
-     *  {@link Storage.Result#INTERNAL_ERROR } if there are no matching certificate pairs for this serial.
+     *  @return {@link Storage.Result#SUCCESS} on success or
+     *          {@link Storage.Result#INTERNAL_ERROR } if there are no matching certificate pairs for this serial.
      */
     public Storage.Result revokeCertificate(byte[] serial) {
         if (manager.storage.certWithGainingSerial(serial) == null

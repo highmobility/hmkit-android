@@ -21,8 +21,19 @@ public class Link {
         DISCONNECTED, CONNECTED, AUTHENTICATED
     }
 
+    /**
+     * CommandCallback is used to notify the user about the command result.
+     */
     public interface CommandCallback {
+        /**
+         * Invoked when the command was successfully sent.
+         */
         void onCommandSent();
+
+        /**
+         * Invoked when there was an issue with the command.
+         * @param error The command error.
+         */
         void onCommandFailed(LinkError error);
     }
 
@@ -86,12 +97,10 @@ public class Link {
     }
 
     /**
-     * Send command to the ConnectedLink inside a secure container.
+     * Send command to the Link.
      *
-     * @param bytes       The bytes that will be sent inside the secure container.
-     * @param callback    callback that is invoked with the command result
-     *                    onCommandSent is invoked if command was sent successfully
-     *                    onCommandFailed is invoked if something went wrong.
+     * @param bytes       The command bytes that will be sent to the link.
+     * @param callback    A {@link CommandCallback} object that is invoked with the command result.
      */
     public void sendCommand(final byte[] bytes, CommandCallback callback) {
         if (state != State.AUTHENTICATED) {

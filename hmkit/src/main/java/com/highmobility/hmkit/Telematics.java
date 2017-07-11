@@ -13,8 +13,9 @@ import org.json.JSONObject;
 
 /**
  * Created by ttiganik on 03/05/2017.
+ *
+ * Telematics provides the option to send commands via telematics.
  */
-
 public class Telematics {
     static final String TAG = "Telematics";
 
@@ -22,8 +23,20 @@ public class Telematics {
     CommandCallback callback;
     boolean sendingCommand;
 
+    /**
+     * CommandCallback is used to notify the user about telematics command result.
+     */
     public interface CommandCallback {
+        /**
+         * Invoked if the command was sent successfully and a response was received.
+         * @param bytes the response bytes
+         */
         void onCommandResponse(byte[] bytes);
+
+        /**
+         * Invoked if something went wrong.
+         * @param error The error
+         */
         void onCommandFailed(TelematicsError error);
     }
 
@@ -35,12 +48,11 @@ public class Telematics {
      * Send a command to a device via telematics.
      *
      * @param command the bytes to send to the device
-     * @param serial serial of the command's target
-     * @param callback callback that is invoked with the command result
-     *                 onCommandResponse is invoked with the response if the command was sent successfully.
-     *                 onCommandFailed is invoked if something went wrong.
+     * @param serial serial of the device
+     * @param callback A {@link CommandCallback} object that is invoked with the command result.
+     *
      */
-    public void sendTelematicsCommand(final byte[] command, final byte[] serial, final CommandCallback callback) {
+    public void sendCommand(final byte[] command, byte[] serial, final CommandCallback callback) {
         if (sendingCommand == true) {
             TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_IN_PROGRESS, 0, "Already sending a command");
             callback.onCommandFailed(error);
