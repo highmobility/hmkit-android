@@ -11,7 +11,7 @@ void hm_bt_debug_hal_log(const char *str, ...){
 }
 
 void hm_bt_debug_hal_log_hex(const uint8_t *data, const uint16_t length){
-   uint8_t i;
+   uint16_t i;
    for(i = 0 ; i < length ; i++){
    __android_log_print(ANDROID_LOG_DEBUG, "HM BT Core", "%x",data[i]);
   }
