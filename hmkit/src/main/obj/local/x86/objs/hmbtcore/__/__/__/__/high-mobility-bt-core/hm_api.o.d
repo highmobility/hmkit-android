@@ -1,5 +1,5 @@
-/Users/maiduule/Workspace/android-sdk/hmlink/src/main/obj/local/x86/objs/hmbtcore/__/__/__/__/high-mobility-bt-core/hm_api.o: \
-  /Users/maiduule/Workspace/android-sdk/hmlink/src/main/jni/../../../../high-mobility-bt-core/hm_api.c \
+/Users/maiduule/Workspace/android-sdk/hmkit/src/main/obj/local/x86/objs/hmbtcore/__/__/__/__/high-mobility-bt-core/hm_api.o: \
+  /Users/maiduule/Workspace/android-sdk/hmkit/src/main/jni/../../../../high-mobility-bt-core/hm_api.c \
   ../../../../high-mobility-bt-core/hm_api.h \
   ../../../../high-mobility-bt-core/hm_cert.h \
   ../../../../high-mobility-bt-core/hm_bt_core.h \
