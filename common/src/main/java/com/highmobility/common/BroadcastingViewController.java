@@ -180,5 +180,6 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
                 "***REMOVED***==",
                 view.getActivity()
         );
+
     }
 }
