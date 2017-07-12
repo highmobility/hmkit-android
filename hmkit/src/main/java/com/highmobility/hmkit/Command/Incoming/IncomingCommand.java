@@ -52,7 +52,7 @@ public class IncomingCommand {
                 return new Failure(bytes);
             }
             else if (ByteUtils.startsWith(bytes, Command.Diagnostics.DIAGNOSTICS_STATE.getIdentifierAndType())) {
-                return new Diagnostics(bytes);
+                return new DiagnosticsState(bytes);
             }
             else if (ByteUtils.startsWith(bytes, Command.Maintenance.MAINTENANCE_STATE.getIdentifierAndType())) {
                 return new Maintenance(bytes);

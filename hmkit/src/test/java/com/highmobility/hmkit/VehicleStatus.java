@@ -4,6 +4,8 @@ import com.highmobility.hmkit.Command.CommandParseException;
 import com.highmobility.hmkit.Command.Constants;
 import com.highmobility.hmkit.Command.Command.Identifier;
 import com.highmobility.hmkit.Command.DoorLockState;
+import com.highmobility.hmkit.Command.Incoming.ChargeState;
+import com.highmobility.hmkit.Command.Incoming.DiagnosticsState;
 import com.highmobility.hmkit.Command.Incoming.IncomingCommand;
 import com.highmobility.hmkit.Command.Incoming.LightsState;
 import com.highmobility.hmkit.Command.Incoming.TheftAlarmState;
@@ -212,7 +214,7 @@ public class VehicleStatus {
 
         assertTrue(state != null);
         assertTrue(state.getClass() == Charging.class);
-        assertTrue(((Charging)state).getChargingState() == Constants.ChargingState.CHARGING);
+        assertTrue(((Charging)state).getChargingState() == ChargeState.ChargingState.CHARGING);
         assertTrue(((Charging)state).getEstimatedRange() == 255f);
         assertTrue(((Charging)state).getBatteryLevel() == .5f);
         assertTrue(((Charging)state).getBatteryCurrent() == -.6f);
@@ -318,7 +320,7 @@ public class VehicleStatus {
         assertTrue(((Diagnostics)state).getSpeed() == 60);
         assertTrue(((Diagnostics)state).getRpm() == 2500);
         assertTrue(((Diagnostics)state).getFuelLevel() == .9f);
-        assertTrue(((Diagnostics)state).getWasherFluidLevel() == Constants.WasherFluidLevel.FULL);
+        assertTrue(((Diagnostics)state).getWasherFluidLevel() == DiagnosticsState.WasherFluidLevel.FULL);
     }
 
     @Test

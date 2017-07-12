@@ -14,7 +14,42 @@ import java.util.Arrays;
  * is changed.
  */
 public class ChargeState extends IncomingCommand {
-    Constants.ChargingState chargingState;
+    /**
+     * The possible charge states
+     */
+    public enum ChargingState {
+        DISCONNECTED, PLUGGED_IN, CHARGING, CHARGING_COMPLETE;
+
+        public static ChargingState fromByte(byte value) throws CommandParseException {
+            switch (value) {
+                case 0x00: return DISCONNECTED;
+                case 0x01: return PLUGGED_IN;
+                case 0x02: return CHARGING;
+                case 0x03: return CHARGING_COMPLETE;
+            }
+
+            throw new CommandParseException();
+        }
+    }
+
+    /**
+     * The possible charge port states
+     */
+    public enum PortState {
+        CLOSED, OPEN, UNAVAILABLE;
+
+        public static PortState fromByte(byte value) throws CommandParseException {
+            switch (value) {
+                case 0x00: return CLOSED;
+                case 0x01: return OPEN;
+                case (byte)0xFF: return UNAVAILABLE;
+            }
+
+            throw new CommandParseException();
+        }
+    }
+
+    ChargingState chargingState;
     float estimatedRange;
     float batteryLevel;
     float batteryCurrent;
@@ -22,31 +57,13 @@ public class ChargeState extends IncomingCommand {
     float chargeLimit;
     float timeToCompleteCharge;
     float chargingRate;
-    Constants.ChargePortState chargePortState;
-
-    ChargeState(byte[] bytes) throws CommandParseException {
-        super(bytes);
-
-        if (bytes.length != 21) throw new CommandParseException();
-
-        chargingState = Constants.ChargingState.fromByte(bytes[3]);
-        estimatedRange = ((bytes[4] & 0xff) << 8) | (bytes[5] & 0xff);
-        batteryLevel = bytes[6] / 100f;
-        byte[] batteryCurrentBytes = Arrays.copyOfRange(bytes, 7, 7 + 4);
-        batteryCurrent = ByteBuffer.wrap(batteryCurrentBytes).getFloat();
-        chargerVoltage = ((bytes[11] & 0xff) << 8) | (bytes[12] & 0xff);
-        chargeLimit = bytes[13] / 100f;
-        timeToCompleteCharge = ((bytes[14] & 0xff) << 8) | (bytes[15] & 0xff);
-        byte[] chargingRateBytes = Arrays.copyOfRange(bytes, 16, 16 + 4);
-        chargingRate = ByteBuffer.wrap(chargingRateBytes).getFloat();
-        chargePortState = Constants.ChargePortState.fromByte(bytes[20]);
-    }
+    PortState chargePortState;
 
     /**
      *
      * @return The Charge State
      */
-    public Constants.ChargingState getChargingState() {
+    public ChargingState getChargingState() {
         return chargingState;
     }
 
@@ -110,7 +127,25 @@ public class ChargeState extends IncomingCommand {
      *
      * @return Charge Port State
      */
-    public Constants.ChargePortState getChargePortState() {
+    public PortState getChargePortState() {
         return chargePortState;
+    }
+
+    ChargeState(byte[] bytes) throws CommandParseException {
+        super(bytes);
+
+        if (bytes.length != 21) throw new CommandParseException();
+
+        chargingState = ChargingState.fromByte(bytes[3]);
+        estimatedRange = ((bytes[4] & 0xff) << 8) | (bytes[5] & 0xff);
+        batteryLevel = bytes[6] / 100f;
+        byte[] batteryCurrentBytes = Arrays.copyOfRange(bytes, 7, 7 + 4);
+        batteryCurrent = ByteBuffer.wrap(batteryCurrentBytes).getFloat();
+        chargerVoltage = ((bytes[11] & 0xff) << 8) | (bytes[12] & 0xff);
+        chargeLimit = bytes[13] / 100f;
+        timeToCompleteCharge = ((bytes[14] & 0xff) << 8) | (bytes[15] & 0xff);
+        byte[] chargingRateBytes = Arrays.copyOfRange(bytes, 16, 16 + 4);
+        chargingRate = ByteBuffer.wrap(chargingRateBytes).getFloat();
+        chargePortState = PortState.fromByte(bytes[20]);
     }
 }

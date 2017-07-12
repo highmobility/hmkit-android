@@ -9,7 +9,7 @@ import com.highmobility.hmkit.Command.Incoming.ChargeState;
 import com.highmobility.hmkit.Command.Incoming.ClimateState;
 import com.highmobility.hmkit.Command.Incoming.ControlMode;
 import com.highmobility.hmkit.Command.Incoming.DeliveredParcels;
-import com.highmobility.hmkit.Command.Incoming.Diagnostics;
+import com.highmobility.hmkit.Command.Incoming.DiagnosticsState;
 import com.highmobility.hmkit.Command.Incoming.DriverFatigue;
 import com.highmobility.hmkit.Command.Incoming.IgnitionState;
 import com.highmobility.hmkit.Command.Incoming.Failure;
@@ -244,7 +244,7 @@ public class IncomingCommand {
         }
 
         assertTrue(command.getClass() == ChargeState.class);
-        assertTrue(((ChargeState)command).getChargingState() == Constants.ChargingState.CHARGING);
+        assertTrue(((ChargeState)command).getChargingState() == ChargeState.ChargingState.CHARGING);
         assertTrue(((ChargeState)command).getEstimatedRange() == 255f);
         assertTrue(((ChargeState)command).getBatteryLevel() == .5f);
         assertTrue(((ChargeState)command).getChargerVoltage() == 400f);
@@ -252,7 +252,7 @@ public class IncomingCommand {
         assertTrue(((ChargeState)command).getTimeToCompleteCharge() == 60f);
         assertTrue(((ChargeState)command).getChargingRate() == .87f);
         assertTrue(((ChargeState)command).getBatteryCurrent() == -.6f);
-        assertTrue(((ChargeState)command).getChargePortState() == Constants.ChargePortState.OPEN);
+        assertTrue(((ChargeState)command).getChargePortState() == ChargeState.PortState.OPEN);
     }
 
     @Test
@@ -340,17 +340,17 @@ public class IncomingCommand {
             fail("init failed");
         }
 
-        assertTrue(command.getClass() == Diagnostics.class);
-        assertTrue(((Diagnostics)command).getMileage() == 150000);
-        assertTrue(((Diagnostics)command).getOilTemperature() == 99);
-        assertTrue(((Diagnostics)command).getSpeed() == 60);
-        assertTrue(((Diagnostics)command).getRpm() == 2500);
-        assertTrue(((Diagnostics)command).getFuelLevel() == .9f);
-        assertTrue(((Diagnostics)command).getWasherFluidLevel() == Constants.WasherFluidLevel.FULL);
-        assertTrue(((Diagnostics)command).getFrontLeftTirePressure() == 2.31f);
-        assertTrue(((Diagnostics)command).getFrontRightTirePressure() == 2.31f);
-        assertTrue(((Diagnostics)command).getRearLeftTirePressure() == 2.35f);
-        assertTrue(((Diagnostics)command).getRearRightTirePressure() == 2.35f);
+        assertTrue(command.getClass() == DiagnosticsState.class);
+        assertTrue(((DiagnosticsState)command).getMileage() == 150000);
+        assertTrue(((DiagnosticsState)command).getOilTemperature() == 99);
+        assertTrue(((DiagnosticsState)command).getSpeed() == 60);
+        assertTrue(((DiagnosticsState)command).getRpm() == 2500);
+        assertTrue(((DiagnosticsState)command).getFuelLevel() == .9f);
+        assertTrue(((DiagnosticsState)command).getWasherFluidLevel() == DiagnosticsState.WasherFluidLevel.FULL);
+        assertTrue(((DiagnosticsState)command).getFrontLeftTirePressure() == 2.31f);
+        assertTrue(((DiagnosticsState)command).getFrontRightTirePressure() == 2.31f);
+        assertTrue(((DiagnosticsState)command).getRearLeftTirePressure() == 2.35f);
+        assertTrue(((DiagnosticsState)command).getRearRightTirePressure() == 2.35f);
     }
 
     @Test

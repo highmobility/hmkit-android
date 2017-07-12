@@ -9,13 +9,15 @@ import java.util.Arrays;
 /**
  * Created by root on 6/28/17.
  */
-public class Diagnostics extends IncomingCommand {
+public class DiagnosticsState extends IncomingCommand {
+    public enum WasherFluidLevel { LOW, FULL }
+
     int mileage;
     int oilTemperature;
     int speed;
     int rpm;
     float fuelLevel;
-    Constants.WasherFluidLevel washerFluidLevel;
+    WasherFluidLevel washerFluidLevel;
 
     Float frontRightTirePressure;
     Float frontLeftTirePressure;
@@ -66,7 +68,7 @@ public class Diagnostics extends IncomingCommand {
      *
      * @return Washer fluid level
      */
-    public Constants.WasherFluidLevel getWasherFluidLevel() {
+    public WasherFluidLevel getWasherFluidLevel() {
         return washerFluidLevel;
     }
 
@@ -106,7 +108,7 @@ public class Diagnostics extends IncomingCommand {
         return rearLeftTirePressure;
     }
 
-    public Diagnostics(byte[] bytes) throws CommandParseException {
+    public DiagnosticsState(byte[] bytes) throws CommandParseException {
         super(bytes);
 
         if (bytes.length < 13) throw new CommandParseException();
@@ -116,8 +118,8 @@ public class Diagnostics extends IncomingCommand {
         speed = ByteUtils.getInt(Arrays.copyOfRange(bytes, 8, 8 + 2));
         rpm = ByteUtils.getInt(Arrays.copyOfRange(bytes, 10, 10 + 2));
         fuelLevel = (int)bytes[12] / 100f;
-        if (bytes[13] == 0x00) washerFluidLevel = Constants.WasherFluidLevel.LOW;
-        else washerFluidLevel = Constants.WasherFluidLevel.FULL;
+        if (bytes[13] == 0x00) washerFluidLevel = WasherFluidLevel.LOW;
+        else washerFluidLevel = WasherFluidLevel.FULL;
 
         int numberOfTires = bytes[14];
         int position = 15;

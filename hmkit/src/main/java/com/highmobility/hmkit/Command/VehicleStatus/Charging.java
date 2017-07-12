@@ -3,6 +3,7 @@ package com.highmobility.hmkit.Command.VehicleStatus;
 import com.highmobility.hmkit.Command.CommandParseException;
 import com.highmobility.hmkit.Command.Constants;
 import com.highmobility.hmkit.Command.Command;
+import com.highmobility.hmkit.Command.Incoming.ChargeState;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -12,7 +13,7 @@ import java.util.Arrays;
  */
 
 public class Charging extends FeatureState {
-    Constants.ChargingState chargingState;
+    ChargeState.ChargingState chargingState;
     float estimatedRange;
     float batteryLevel;
     float batteryCurrent;
@@ -22,14 +23,14 @@ public class Charging extends FeatureState {
 
         if (bytes.length != 11) throw new CommandParseException();
 
-        chargingState = Constants.ChargingState.fromByte(bytes[3]);
+        chargingState = ChargeState.ChargingState.fromByte(bytes[3]);
         estimatedRange = ((bytes[4] & 0xff) << 8) | (bytes[5] & 0xff);
         batteryLevel = bytes[6] / 100f;
         byte[] batteryCurrentBytes = Arrays.copyOfRange(bytes, 7, 7 + 4);
         batteryCurrent = ByteBuffer.wrap(batteryCurrentBytes).getFloat();
     }
 
-    public Constants.ChargingState getChargingState() {
+    public ChargeState.ChargingState getChargingState() {
         return chargingState;
     }
 

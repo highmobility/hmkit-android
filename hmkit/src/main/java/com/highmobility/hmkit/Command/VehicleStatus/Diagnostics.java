@@ -4,6 +4,7 @@ import com.highmobility.hmkit.ByteUtils;
 import com.highmobility.hmkit.Command.Command.Identifier;
 import com.highmobility.hmkit.Command.CommandParseException;
 import com.highmobility.hmkit.Command.Constants;
+import com.highmobility.hmkit.Command.Incoming.DiagnosticsState;
 
 import java.util.Arrays;
 
@@ -16,7 +17,7 @@ public class Diagnostics extends FeatureState {
     int speed;
     int rpm;
     float fuelLevel;
-    Constants.WasherFluidLevel washerFluidLevel;
+    DiagnosticsState.WasherFluidLevel washerFluidLevel;
 
     Diagnostics(byte[] bytes) throws CommandParseException {
         super(Identifier.DIAGNOSTICS);
@@ -28,8 +29,8 @@ public class Diagnostics extends FeatureState {
         speed = ByteUtils.getInt(Arrays.copyOfRange(bytes, 8, 8 + 2));
         rpm = ByteUtils.getInt(Arrays.copyOfRange(bytes, 10, 10 + 2));
         fuelLevel = (int)bytes[12] / 100f;
-        if (bytes[13] == 0x00) washerFluidLevel = Constants.WasherFluidLevel.LOW;
-        else washerFluidLevel = Constants.WasherFluidLevel.FULL;
+        if (bytes[13] == 0x00) washerFluidLevel = DiagnosticsState.WasherFluidLevel.LOW;
+        else washerFluidLevel = DiagnosticsState.WasherFluidLevel.FULL;
     }
 
     /**
@@ -76,7 +77,7 @@ public class Diagnostics extends FeatureState {
      *
      * @return Washer fluid level
      */
-    public Constants.WasherFluidLevel getWasherFluidLevel() {
+    public DiagnosticsState.WasherFluidLevel getWasherFluidLevel() {
         return washerFluidLevel;
     }
 }
