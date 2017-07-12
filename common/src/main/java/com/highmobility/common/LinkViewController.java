@@ -60,7 +60,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     }
 
     @Override
-    public void onAuthorizationRequested(ConnectedLink link, ConnectedLink.AuthorizationCallback approvedCallback) {
+    public void onAuthorizationRequested(ConnectedLink link, AuthorizationCallback approvedCallback) {
 
     }
 

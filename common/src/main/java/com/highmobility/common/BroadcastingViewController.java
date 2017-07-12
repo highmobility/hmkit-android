@@ -17,7 +17,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     public static final int LINK_ACTIVITY_RESULT = 1;
     IBroadcastingView view;
 
-    ConnectedLink.AuthorizationCallback authorizationCallback;
+    AuthorizationCallback authorizationCallback;
     Broadcaster broadcaster;
     ConnectedLink link;
     Cloud cloud;
@@ -122,7 +122,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     }
 
     @Override
-    public void onAuthorizationRequested(ConnectedLink connectedLink, ConnectedLink.AuthorizationCallback authorizationCallback) {
+    public void onAuthorizationRequested(ConnectedLink connectedLink, AuthorizationCallback authorizationCallback) {
         this.authorizationCallback = authorizationCallback;
         view.showPairingView(true);
         Log.d(TAG, "show pairing view " + true);

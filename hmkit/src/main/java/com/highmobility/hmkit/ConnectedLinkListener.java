@@ -5,22 +5,36 @@ package com.highmobility.hmkit;
  */
 public interface ConnectedLinkListener extends LinkListener {
     /**
-     * Callback for when a link received a pairing request from another broadcaster.
+     * This interface is used by the user to either approve or decline the authorization request.
+     */
+    interface AuthorizationCallback {
+        /**
+         * Approve the authorization request
+         */
+        void approve();
+        /**
+         * Decline the authorization request
+         */
+        void decline();
+    }
+
+    /**
+     * Callback for when a link received an authorization request.
      * User should approve or decline this request in the callback parameter, otherwise authorization
      * will be timed out.
      *
-     * @param link The link that received the pairing request.
+     * @param link The link that received the authorization request.
      * @param callback Object containing approve and decline functions.
      */
-    void onAuthorizationRequested(ConnectedLink link, ConnectedLink.AuthorizationCallback callback);
+    void onAuthorizationRequested(ConnectedLink link, AuthorizationCallback callback);
 
     /**
-     * Callback for when a pairing request has timed out.
+     * Callback for when the authorization request has timed out.
      *
-     * This is always called on the main thread. This occurs when the approvedCallback of a pairing
-     * request has not been invoked in time, which denies the pairing.
+     * This occurs when the callback of the authorization
+     * request has not been invoked in time, which denies the authorization.
      *
-     * @param link The link that received the pairing request.
+     * @param link The link that received the authorization request.
      */
     void onAuthorizationTimeout(ConnectedLink link);
 }

@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.highmobility.digitalkey.R;
 import com.highmobility.hmkit.ConnectedLink;
+import com.highmobility.hmkit.ConnectedLinkListener;
 import com.highmobility.hmkit.Constants;
 import com.highmobility.hmkit.Link;
 
@@ -25,7 +26,6 @@ import butterknife.ButterKnife;
  * Created by ttiganik on 02/06/16.
  */
 public class BroadcastActivity extends AppCompatActivity implements IBroadcastingView {
-    static final String TAG = "BroadcastActivity";
     IBroadcastingViewController controller;
 
     @BindView(R.id.status_textview) TextView statusTextView;
@@ -33,7 +33,7 @@ public class BroadcastActivity extends AppCompatActivity implements IBroadcastin
     @BindView(R.id.confirm_pairing_button) Button confirmPairButton;
     @BindView(R.id.show_button) Button showButton;
 
-    ConnectedLink.AuthorizationCallback pairApproveCallback;
+    ConnectedLinkListener.AuthorizationCallback pairApproveCallback;
 
     void onPairConfirmClick() {
         controller.onPairingApproved(true);
