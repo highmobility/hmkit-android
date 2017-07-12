@@ -2,7 +2,7 @@ package com.highmobility.hmkit.Command.Incoming;
 
 import com.highmobility.hmkit.ByteUtils;
 import com.highmobility.hmkit.Command.CommandParseException;
-import com.highmobility.hmkit.Command.Constants;
+
 
 import java.util.Arrays;
 

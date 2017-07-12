@@ -1,6 +1,6 @@
 package com.highmobility.hmkit.Command.Incoming;
 import com.highmobility.hmkit.Command.CommandParseException;
-import com.highmobility.hmkit.Command.Constants;
+
 import com.highmobility.hmkit.Command.DoorLockState;
 
 /**

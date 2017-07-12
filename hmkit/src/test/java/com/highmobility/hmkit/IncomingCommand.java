@@ -3,7 +3,7 @@ package com.highmobility.hmkit;
 import com.highmobility.hmkit.Command.AutoHvacState;
 import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.Command.CommandParseException;
-import com.highmobility.hmkit.Command.Constants;
+
 import com.highmobility.hmkit.Command.DoorLockState;
 import com.highmobility.hmkit.Command.Incoming.ChargeState;
 import com.highmobility.hmkit.Command.Incoming.ClimateState;

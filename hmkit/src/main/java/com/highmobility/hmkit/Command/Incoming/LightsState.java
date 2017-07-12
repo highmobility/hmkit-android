@@ -3,7 +3,7 @@ import android.graphics.Color;
 
 import com.highmobility.hmkit.ByteUtils;
 import com.highmobility.hmkit.Command.CommandParseException;
-import com.highmobility.hmkit.Command.Constants;
+
 
 /**
  * Created by ttiganik on 13/09/16.

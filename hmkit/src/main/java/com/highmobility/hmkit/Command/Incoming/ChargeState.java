@@ -1,7 +1,7 @@
 package com.highmobility.hmkit.Command.Incoming;
 
 import com.highmobility.hmkit.Command.CommandParseException;
-import com.highmobility.hmkit.Command.Constants;
+
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

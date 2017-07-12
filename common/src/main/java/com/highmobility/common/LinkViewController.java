@@ -7,7 +7,7 @@ import android.widget.Toast;
 
 import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.Command.CommandParseException;
-import com.highmobility.hmkit.Command.Constants;
+
 import com.highmobility.hmkit.Command.Incoming.Failure;
 import com.highmobility.hmkit.Command.Incoming.IncomingCommand;
 import com.highmobility.hmkit.Command.Incoming.LockState;

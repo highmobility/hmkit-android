@@ -1,7 +1,6 @@
 package com.highmobility.hmkit.Command.Incoming;
 
 import com.highmobility.hmkit.Command.CommandParseException;
-import com.highmobility.hmkit.Command.Constants;
 
 /**
  * This is an evented message that is sent from the car every time the trunk state changes. This

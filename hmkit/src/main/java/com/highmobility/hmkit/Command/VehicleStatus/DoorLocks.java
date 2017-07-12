@@ -1,7 +1,7 @@
 package com.highmobility.hmkit.Command.VehicleStatus;
 import com.highmobility.hmkit.Command.Command.Identifier;
 import com.highmobility.hmkit.Command.CommandParseException;
-import com.highmobility.hmkit.Command.Constants;
+
 import com.highmobility.hmkit.Command.DoorLockState;
 
 /**
