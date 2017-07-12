@@ -2,29 +2,28 @@ package com.highmobility.hmkit;
 
 /**
  * Created by ttiganik on 13/04/16.
+ *
+ * The listener of the Broadcaster is used to observe the device's state changes and for
+ * discovered/lost Links.
  */
 public interface BroadcasterListener {
-    /***
+    /**
      * Callback for when the Broadcaster's state has changed.
-     * This is always called on the main thread.
      *
      * @param oldState The old state of the Broadcaster.
      */
     void onStateChanged(Broadcaster.State oldState);
 
-    /***
+    /**
      * Callback for when a new link has connected to the Broadcaster.
      *
-     * This is always called on the main thread.
-     *
-     * @param link The link that connected successfully to the Broadcaster.
+     * @param link The link that successfully connected to the Broadcaster.
      */
     void onLinkReceived(ConnectedLink link);
 
-    /***
-     * Callback for when a known link has disconnected from the broadcaster.
+    /**
+     * Callback for when a link has disconnected from the broadcaster.
      *
-     * This is always called on the main thread.
      *
      * @param link The link that disconnected from the broadcaster.
      */
