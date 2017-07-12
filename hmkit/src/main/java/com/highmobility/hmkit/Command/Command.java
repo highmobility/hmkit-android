@@ -1,6 +1,7 @@
 package com.highmobility.hmkit.Command;
 
 import com.highmobility.hmkit.ByteUtils;
+import com.highmobility.hmkit.Command.Incoming.LightsState;
 import com.highmobility.hmkit.Command.Incoming.TrunkState;
 import com.highmobility.hmkit.Command.Incoming.WindscreenState;
 
@@ -1495,7 +1496,7 @@ public class Command {
          *
          * @return the command bytes
          */
-        public static byte[] controlLights(Constants.FrontExteriorLightState frontExteriorLightState,
+        public static byte[] controlLights(LightsState.FrontExteriorLightState frontExteriorLightState,
                                            boolean rearExteriorLightActive,
                                            boolean interiorLightActive,
                                            int ambientColor) {
@@ -1843,6 +1844,20 @@ public class Command {
     public enum VideoHandover implements Type {
         VIDEO_HANDOVER((byte)0x00);
 
+        public enum ScreenLocation {
+            FRONT, REAR;
+
+            byte getByte() {
+                switch (this) {
+                    case FRONT:
+                        return 0x00;
+                    case REAR:
+                        return 0x01;
+                    default: return 0x00;
+                }
+            }
+        }
+
         /**
          * Hand over a video from smart device to car headunit to be shown in the car display.
          *
@@ -1852,7 +1867,7 @@ public class Command {
          * @return the command bytes
          * @throws UnsupportedEncodingException when URL is not UTF-8
          */
-        public static byte[] videoHandover(String url, int startingSecond, Constants.ScreenLocation location) throws UnsupportedEncodingException {
+        public static byte[] videoHandover(String url, int startingSecond, ScreenLocation location) throws UnsupportedEncodingException {
             byte[] command = VIDEO_HANDOVER.getIdentifierAndType();
 
             byte[] urlBytes = url.getBytes("UTF-8");

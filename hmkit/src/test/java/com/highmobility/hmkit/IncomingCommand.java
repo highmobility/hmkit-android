@@ -14,7 +14,7 @@ import com.highmobility.hmkit.Command.Incoming.DriverFatigue;
 import com.highmobility.hmkit.Command.Incoming.IgnitionState;
 import com.highmobility.hmkit.Command.Incoming.Failure;
 import com.highmobility.hmkit.Command.Incoming.KeyfobPosition;
-import com.highmobility.hmkit.Command.Incoming.Lights;
+import com.highmobility.hmkit.Command.Incoming.LightsState;
 import com.highmobility.hmkit.Command.Incoming.LockState;
 import com.highmobility.hmkit.Command.Incoming.Maintenance;
 import com.highmobility.hmkit.Command.Incoming.Notification;
@@ -36,7 +36,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import static org.junit.Assert.*;
 
@@ -399,10 +398,10 @@ public class IncomingCommand {
             fail("init failed");
         }
 
-        assertTrue(command.getClass() == Lights.class);
-        assertTrue(((Lights)command).getFrontExteriorLightState() == Constants.FrontExteriorLightState.ACTIVE_WITH_FULL_BEAM);
-        assertTrue(((Lights)command).isRearExteriorLightActive() == true);
-        assertTrue(((Lights)command).isInteriorLightActive() == false);
+        assertTrue(command.getClass() == LightsState.class);
+        assertTrue(((LightsState)command).getFrontExteriorLightState() == LightsState.FrontExteriorLightState.ACTIVE_WITH_FULL_BEAM);
+        assertTrue(((LightsState)command).isRearExteriorLightActive() == true);
+        assertTrue(((LightsState)command).isInteriorLightActive() == false);
 //        assertTrue(((Lights)command).getAmbientColor() == Color.RED); // Color is not mocked
     }
 

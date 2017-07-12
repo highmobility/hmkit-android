@@ -4,8 +4,8 @@ import android.graphics.Color;
 
 import com.highmobility.hmkit.Command.AutoHvacState;
 import com.highmobility.hmkit.Command.Command;
-import com.highmobility.hmkit.Command.Constants;
 import com.highmobility.hmkit.Command.Command.Identifier;
+import com.highmobility.hmkit.Command.Incoming.LightsState;
 import com.highmobility.hmkit.Command.Incoming.TrunkState;
 import com.highmobility.hmkit.Command.Incoming.WindscreenState;
 import com.highmobility.hmkit.Command.NotificationAction;
@@ -263,7 +263,7 @@ public class OutgoingCommand {
     @Test
     public void controlLights() {
         String waitingForBytes = "003602020100ff0000";
-        String commandBytes = ByteUtils.hexFromBytes(Command.Lights.controlLights(Constants.FrontExteriorLightState.ACTIVE_WITH_FULL_BEAM
+        String commandBytes = ByteUtils.hexFromBytes(Command.Lights.controlLights(LightsState.FrontExteriorLightState.ACTIVE_WITH_FULL_BEAM
         , true, false, Color.RED));
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }
@@ -352,7 +352,7 @@ public class OutgoingCommand {
         String waitingForBytes = "0043002b68747470733a2f2f7777772e796f75747562652e636f6d2f77617463683f763d795756423755366d5832595a00";
 
         String commandBytes = ByteUtils.hexFromBytes(Command.VideoHandover.videoHandover(
-                "https://www.youtube.com/watch?v=yWVB7U6mX2Y", 90, Constants.ScreenLocation.FRONT
+                "https://www.youtube.com/watch?v=yWVB7U6mX2Y", 90, Command.VideoHandover.ScreenLocation.FRONT
         ));
         assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
     }

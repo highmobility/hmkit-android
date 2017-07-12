@@ -61,7 +61,7 @@ public class IncomingCommand {
                 return new IgnitionState(bytes);
             }
             else if (ByteUtils.startsWith(bytes, Command.Lights.LIGHTS_STATE.getIdentifierAndType())) {
-                return new Lights(bytes);
+                return new LightsState(bytes);
             }
             else if (ByteUtils.startsWith(bytes, Command.Messaging.SEND_MESSAGE.getIdentifierAndType())) {
                 return new SendMessage(bytes);

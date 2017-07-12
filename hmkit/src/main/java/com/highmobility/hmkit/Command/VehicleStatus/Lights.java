@@ -1,17 +1,16 @@
 package com.highmobility.hmkit.Command.VehicleStatus;
-import android.graphics.Color;
 
 import com.highmobility.hmkit.ByteUtils;
 import com.highmobility.hmkit.Command.Command.Identifier;
 import com.highmobility.hmkit.Command.CommandParseException;
-import com.highmobility.hmkit.Command.Constants;
+import com.highmobility.hmkit.Command.Incoming.LightsState;
 
 /**
  * Created by ttiganik on 14/12/2016.
  */
 
 public class Lights extends FeatureState {
-    Constants.FrontExteriorLightState frontExteriorLightState;
+    LightsState.FrontExteriorLightState frontExteriorLightState;
     boolean rearExteriorLightActive;
     boolean interiorLightActive;
 
@@ -19,7 +18,7 @@ public class Lights extends FeatureState {
      *
      * @return Front exterior light state
      */
-    public Constants.FrontExteriorLightState getFrontExteriorLightState() {
+    public LightsState.FrontExteriorLightState getFrontExteriorLightState() {
         return frontExteriorLightState;
     }
 
@@ -45,13 +44,13 @@ public class Lights extends FeatureState {
         if (bytes.length != 6) throw new CommandParseException();
 
         if (bytes[3] == 0x00) {
-            frontExteriorLightState = Constants.FrontExteriorLightState.INACTIVE;
+            frontExteriorLightState = LightsState.FrontExteriorLightState.INACTIVE;
         }
         else if (bytes[3] == 0x01) {
-            frontExteriorLightState = Constants.FrontExteriorLightState.ACTIVE;
+            frontExteriorLightState = LightsState.FrontExteriorLightState.ACTIVE;
         }
         else if (bytes[3] == 0x02) {
-            frontExteriorLightState = Constants.FrontExteriorLightState.ACTIVE_WITH_FULL_BEAM;
+            frontExteriorLightState = LightsState.FrontExteriorLightState.ACTIVE_WITH_FULL_BEAM;
         }
 
         rearExteriorLightActive = ByteUtils.getBool(bytes[4]);

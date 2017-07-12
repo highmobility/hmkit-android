@@ -5,31 +5,6 @@ package com.highmobility.hmkit.Command;
  */
 
 public class Constants {
-    public enum ScreenLocation {
-        FRONT, REAR;
-
-        byte getByte() {
-            switch (this) {
-                case FRONT:
-                    return 0x00;
-                case REAR:
-                    return 0x01;
-                default: return 0x00;
-            }
-        }
-    }
-
-    public enum FrontExteriorLightState {
-        INACTIVE, ACTIVE, ACTIVE_WITH_FULL_BEAM;
-
-        byte byteValue() {
-            if (this == INACTIVE) return 0x00;
-            else if (this == ACTIVE) return 0x01;
-            else if (this == ACTIVE_WITH_FULL_BEAM) return 0x02;
-            return 0x00;
-        }
-    }
-
     public enum WasherFluidLevel { LOW, FULL }
 
     /**

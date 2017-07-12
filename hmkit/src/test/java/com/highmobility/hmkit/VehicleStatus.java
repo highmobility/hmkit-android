@@ -1,11 +1,11 @@
 package com.highmobility.hmkit;
 
-import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.Command.CommandParseException;
 import com.highmobility.hmkit.Command.Constants;
 import com.highmobility.hmkit.Command.Command.Identifier;
 import com.highmobility.hmkit.Command.DoorLockState;
 import com.highmobility.hmkit.Command.Incoming.IncomingCommand;
+import com.highmobility.hmkit.Command.Incoming.LightsState;
 import com.highmobility.hmkit.Command.Incoming.TheftAlarmState;
 import com.highmobility.hmkit.Command.Incoming.TrunkState;
 import com.highmobility.hmkit.Command.VehicleStatus.Charging;
@@ -367,7 +367,7 @@ public class VehicleStatus {
 
         assertTrue(state != null);
         assertTrue(state.getClass() == Lights.class);
-        assertTrue(((Lights)state).getFrontExteriorLightState() == Constants.FrontExteriorLightState.ACTIVE_WITH_FULL_BEAM);
+        assertTrue(((Lights)state).getFrontExteriorLightState() == LightsState.FrontExteriorLightState.ACTIVE_WITH_FULL_BEAM);
         assertTrue(((Lights)state).isRearExteriorLightActive() == true);
         assertTrue(((Lights)state).isInteriorLightActive() == false);
     }
