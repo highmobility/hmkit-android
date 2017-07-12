@@ -6,6 +6,7 @@ import com.highmobility.hmkit.Command.AutoHvacState;
 import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.Command.Constants;
 import com.highmobility.hmkit.Command.Command.Identifier;
+import com.highmobility.hmkit.Command.Incoming.TrunkState;
 import com.highmobility.hmkit.Command.Incoming.WindscreenState;
 import com.highmobility.hmkit.Command.NotificationAction;
 import com.highmobility.hmkit.Command.WindowState;
@@ -78,7 +79,7 @@ public class OutgoingCommand {
     @Test
     public void setTrunkState() {
         String waitingForBytes = "0021020001";
-        String commandBytes = ByteUtils.hexFromBytes(Command.TrunkAccess.setTrunkState(Constants.TrunkLockState.UNLOCKED, Constants.TrunkPosition.OPEN));
+        String commandBytes = ByteUtils.hexFromBytes(Command.TrunkAccess.setTrunkState(TrunkState.LockState.UNLOCKED, TrunkState.Position.OPEN));
         assertTrue(waitingForBytes.equals(commandBytes));
     }
 

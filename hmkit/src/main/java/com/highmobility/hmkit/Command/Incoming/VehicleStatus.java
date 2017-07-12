@@ -33,6 +33,54 @@ public class VehicleStatus extends IncomingCommand {
         }
     }
 
+    /**
+     *
+     * @return The specific states for the vehicle's features.
+     */
+    public FeatureState[] getFeatureStates() {
+        return featureStates;
+    }
+
+    /**
+     *
+     * @return The vehicle's VIN number
+     */
+    public String getVin() {
+        return vin;
+    }
+
+    /**
+     *
+     * @return The vehicle's power train
+     */
+    public PowerTrain getPowerTrain() {
+        return powerTrain;
+    }
+
+    /**
+     *
+     * @return The vehicle's model name
+     */
+    public String getModelName() {
+        return modelName;
+    }
+
+    /**
+     *
+     * @return The vehicle's name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     *
+     * @return The vehicle's license plate
+     */
+    public String getLicensePlate() {
+        return licensePlate;
+    }
+
     FeatureState[] featureStates;
 
     String vin;
@@ -103,53 +151,5 @@ public class VehicleStatus extends IncomingCommand {
 
             featureStates = trimmedStates;
         }
-    }
-
-    /**
-     *
-     * @return The specific states for the vehicle's features.
-     */
-    public FeatureState[] getFeatureStates() {
-        return featureStates;
-    }
-
-    /**
-     *
-     * @return The vehicle's VIN number
-     */
-    public String getVin() {
-        return vin;
-    }
-
-    /**
-     *
-     * @return The vehicle's power train
-     */
-    public PowerTrain getPowerTrain() {
-        return powerTrain;
-    }
-
-    /**
-     *
-     * @return The vehicle's model name
-     */
-    public String getModelName() {
-        return modelName;
-    }
-
-    /**
-     *
-     * @return The vehicle's name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     *
-     * @return The vehicle's license plate
-     */
-    public String getLicensePlate() {
-        return licensePlate;
     }
 }

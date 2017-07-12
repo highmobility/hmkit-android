@@ -3,27 +3,28 @@ package com.highmobility.hmkit.Command.VehicleStatus;
 import com.highmobility.hmkit.Command.CommandParseException;
 import com.highmobility.hmkit.Command.Constants;
 import com.highmobility.hmkit.Command.Command;
+import com.highmobility.hmkit.Command.Incoming.TrunkState;
 
 /**
  * Created by ttiganik on 14/12/2016.
  */
 
 public class TrunkAccess extends FeatureState {
-    Constants.TrunkLockState lockState;
-    Constants.TrunkPosition position;
+    TrunkState.LockState lockState;
+    TrunkState.Position position;
 
     TrunkAccess(byte[] bytes) throws CommandParseException {
         super(Command.Identifier.TRUNK_ACCESS);
 
-        lockState = Constants.TrunkLockState.fromByte(bytes[3]);
-        position = Constants.TrunkPosition.fromByte(bytes[4]);
+        lockState = TrunkState.LockState.fromByte(bytes[3]);
+        position = TrunkState.Position.fromByte(bytes[4]);
     }
 
-    public Constants.TrunkLockState getLockState() {
+    public TrunkState.LockState getLockState() {
         return lockState;
     }
 
-    public Constants.TrunkPosition getPosition() {
+    public TrunkState.Position getPosition() {
         return position;
     }
 }

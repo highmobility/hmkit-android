@@ -11,21 +11,56 @@ import com.highmobility.hmkit.Command.Constants;
 
 public class TrunkState extends IncomingCommand {
     /**
+     * The possible trunk lock states
+     */
+    public enum LockState {
+        LOCKED, UNLOCKED, UNSUPPORTED;
+
+        public static LockState fromByte(byte value) throws CommandParseException {
+            switch (value) {
+                case 0x00: return UNLOCKED;
+                case 0x01: return LOCKED;
+                case (byte)0xFF: return UNSUPPORTED;
+            }
+
+
+            throw new CommandParseException();
+        }
+    }
+
+    /**
+     * The possible trunk positions
+     */
+    public enum Position {
+        OPEN, CLOSED, UNSUPPORTED;
+
+        public static Position fromByte(byte value) throws CommandParseException {
+            switch (value) {
+                case 0x00: return CLOSED;
+                case 0x01: return OPEN;
+                case (byte)0xFF: return UNSUPPORTED;
+            }
+
+            throw new CommandParseException();
+        }
+    }
+
+    /**
      * @return the current lock status of the trunk
      */
-    public Constants.TrunkLockState getLockState() {
+    public LockState getLockState() {
         return state;
     }
 
     /**
      * @return the current position of the trunk
      */
-    public Constants.TrunkPosition getPosition() {
+    public Position getPosition() {
         return position;
     }
 
-    Constants.TrunkLockState state;
-    Constants.TrunkPosition position;
+    LockState state;
+    Position position;
 
     public TrunkState(byte[] bytes) throws CommandParseException {
         super(bytes);
@@ -34,7 +69,7 @@ public class TrunkState extends IncomingCommand {
             throw new CommandParseException();
         }
 
-        state = Constants.TrunkLockState.fromByte(bytes[3]);
-        position = Constants.TrunkPosition.fromByte(bytes[4]);
+        state = LockState.fromByte(bytes[3]);
+        position = Position.fromByte(bytes[4]);
     }
 }

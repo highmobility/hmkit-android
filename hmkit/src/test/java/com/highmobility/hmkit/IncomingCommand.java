@@ -227,8 +227,8 @@ public class IncomingCommand {
         }
 
         assertTrue(command.getClass() == TrunkState.class);
-        assertTrue(((TrunkState)command).getLockState() == Constants.TrunkLockState.UNLOCKED);
-        assertTrue(((TrunkState)command).getPosition() == Constants.TrunkPosition.OPEN);
+        assertTrue(((TrunkState)command).getLockState() == TrunkState.LockState.UNLOCKED);
+        assertTrue(((TrunkState)command).getPosition() == TrunkState.Position.OPEN);
     }
 
 

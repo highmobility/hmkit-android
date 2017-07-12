@@ -8,8 +8,10 @@ import java.util.Calendar;
 /**
  * The ConnectedLink is a representation of the connection between the Broadcaster and a Device
  * that has connected to it. The ConnectedLink is created by the other Device via discovering
- * and connecting to the Broadcaster. The ConnectedLink's interface provides the ability
- * to send commands and handle incoming requests from the ConnectedLink.
+ * and connecting to the Broadcaster.
+ *
+ * The ConnectedLink inherits fron Link, which provides the ability to send and receive commands.
+ * ConnectedLink is used to provide the authorization callbacks.
  *
  * Created by ttiganik on 13/04/16.
  */

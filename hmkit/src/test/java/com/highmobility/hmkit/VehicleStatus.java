@@ -7,6 +7,7 @@ import com.highmobility.hmkit.Command.Command.Identifier;
 import com.highmobility.hmkit.Command.DoorLockState;
 import com.highmobility.hmkit.Command.Incoming.IncomingCommand;
 import com.highmobility.hmkit.Command.Incoming.TheftAlarmState;
+import com.highmobility.hmkit.Command.Incoming.TrunkState;
 import com.highmobility.hmkit.Command.VehicleStatus.Charging;
 import com.highmobility.hmkit.Command.VehicleStatus.Climate;
 
@@ -177,8 +178,8 @@ public class VehicleStatus {
         assertTrue(state.getClass() == TrunkAccess.class);
 
         if (state.getClass() == TrunkAccess.class) {
-            assertTrue(((TrunkAccess)state).getLockState() == Constants.TrunkLockState.UNLOCKED);
-            assertTrue(((TrunkAccess)state).getPosition() == Constants.TrunkPosition.OPEN);
+            assertTrue(((TrunkAccess)state).getLockState() == TrunkState.LockState.UNLOCKED);
+            assertTrue(((TrunkAccess)state).getPosition() == TrunkState.Position.OPEN);
         }
     }
 

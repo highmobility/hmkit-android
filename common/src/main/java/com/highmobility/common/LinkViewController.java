@@ -35,7 +35,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     ConnectedLink link;
 
     boolean doorsLocked;
-    Constants.TrunkLockState trunkLockState;
+    TrunkState.LockState trunkLockState;
 
     CountDownTimer timeoutTimer;
 
@@ -130,13 +130,13 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     public void onLockTrunkClicked() {
         view.showLoadingView(true);
 
-        boolean trunkLocked = trunkLockState == Constants.TrunkLockState.LOCKED;
+        boolean trunkLocked = trunkLockState == TrunkState.LockState.LOCKED;
 
         byte[] command =
                 Command.TrunkAccess.setTrunkState(trunkLocked ?
-                        Constants.TrunkLockState.UNLOCKED :
-                        Constants.TrunkLockState.LOCKED,
-                        Constants.TrunkPosition.OPEN);
+                        TrunkState.LockState.UNLOCKED :
+                        TrunkState.LockState.LOCKED,
+                        TrunkState.Position.OPEN);
 
         link.sendCommand(command, new Link.CommandCallback() {
             @Override
@@ -181,11 +181,11 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
         onCommandFinished(null);
     }
 
-    void onTrunkStateUpdate(Constants.TrunkLockState lockState) {
+    void onTrunkStateUpdate(TrunkState.LockState lockState) {
         this.trunkLockState = lockState;
         Log.i(TAG, "trunk status changed " + trunkLockState);
 
-        if (trunkLockState == Constants.TrunkLockState.LOCKED) {
+        if (trunkLockState == TrunkState.LockState.LOCKED) {
             view.onTrunkLocked(true);
 
         }

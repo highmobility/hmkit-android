@@ -1,6 +1,7 @@
 package com.highmobility.hmkit.Command;
 
 import com.highmobility.hmkit.ByteUtils;
+import com.highmobility.hmkit.Command.Incoming.TrunkState;
 import com.highmobility.hmkit.Command.Incoming.WindscreenState;
 
 import java.io.UnsupportedEncodingException;
@@ -11,6 +12,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static com.highmobility.hmkit.Command.Command.Identifier.FAILURE;
+import static com.highmobility.hmkit.Command.Incoming.TrunkState.LockState.UNLOCKED;
+import static com.highmobility.hmkit.Command.Incoming.TrunkState.Position.CLOSED;
 
 /**
  * Created by ttiganik on 25/05/16.
@@ -417,13 +420,13 @@ public class Command {
          * @param position whether to open or close the trunk
          * @return the command bytes
          */
-        public static byte[] setTrunkState(Constants.TrunkLockState lockState, Constants.TrunkPosition position) {
+        public static byte[] setTrunkState(TrunkState.LockState lockState, TrunkState.Position position) {
             byte[] bytes = new byte[5];
             bytes[0] = OPEN_CLOSE.getIdentifier().getIdentifier()[0];
             bytes[1] = OPEN_CLOSE.getIdentifier().getIdentifier()[1];
             bytes[2] = OPEN_CLOSE.getType();
-            bytes[3] = (byte)(lockState == Constants.TrunkLockState.UNLOCKED ? 0x00 : 0x01);
-            bytes[4] = (byte)(position == Constants.TrunkPosition.CLOSED ? 0x00 : 0x01);
+            bytes[3] = (byte)(lockState == UNLOCKED ? 0x00 : 0x01);
+            bytes[4] = (byte)(position == CLOSED ? 0x00 : 0x01);
             return bytes;
         }
 
