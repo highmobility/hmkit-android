@@ -407,7 +407,7 @@ public class IncomingCommand {
 
     @Test
     public void sendMessage() {
-        byte[] bytes = ByteUtils.bytesFromHex("0037010e2b31203535352d3535352d3535350d48656c6c6f20796f7520746f6f");
+        byte[] bytes = ByteUtils.bytesFromHex("0037010e2b31203535352d3535352d35353501D554696d6520746f2067657420737461727465642e2057697468207468652053444b7320697420697320706f737369626c6520746f206275696c64206e65772074797065206f662061707073206f7220696e74656772617465206578697374696e6720617070732077697468206361722066756e6374696f6e732e2054686520415049732068617665206265656e2064657369676e656420746f2070726f7669646520612073696d706c6520696e7465726661636520746f20746865206361722c207468617420697320626f74682075736566756c20616e642073696d706c6520746f20657874656e642e2054696d6520746f2067657420737461727465642e2057697468207468652053444b7320697420697320706f737369626c6520746f206275696c64206e65772074797065206f662061707073206f7220696e74656772617465206578697374696e6720617070732077697468206361722066756e6374696f6e732e2054686520415049732068617665206265656e2064657369676e656420746f2070726f7669646520612073696d706c6520696e7465726661636520746f20746865206361722c207468617420697320626f74682075736566756c20616e642073696d706c6520746f20657874656e642e");
 
         com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
@@ -419,7 +419,7 @@ public class IncomingCommand {
 
         assertTrue(command.getClass() == SendMessage.class);
         assertTrue(((SendMessage)command).getRecipientHandle().equals("+1 555-555-555"));
-        assertTrue(((SendMessage)command).getText().equals("Hello you too"));
+        assertTrue(((SendMessage)command).getText().equals("Time to get started. With the SDKs it is possible to build new type of apps or integrate existing apps with car functions. The APIs have been designed to provide a simple interface to the car, that is both useful and simple to extend. Time to get started. With the SDKs it is possible to build new type of apps or integrate existing apps with car functions. The APIs have been designed to provide a simple interface to the car, that is both useful and simple to extend."));
     }
 
     @Test
@@ -441,7 +441,7 @@ public class IncomingCommand {
 
     @Test
     public void notification() {
-        byte[] bytes = ByteUtils.bytesFromHex("003800115374617274206e617669676174696f6e3f0200024e6f0103596573");
+        byte[] bytes = ByteUtils.bytesFromHex("00380000115374617274206e617669676174696f6e3f0200024e6f0103596573");
 
         com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 

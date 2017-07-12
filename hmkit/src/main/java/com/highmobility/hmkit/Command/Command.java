@@ -1699,15 +1699,16 @@ public class Command {
          * Send a notification to the car or smart device. The notification can have action items
          * that the user can respond with.
          *
-         * @param notification
-         * @param actions
+         * @param notificationText the notification text
+         * @param actions the possible actions for this notification
          * @return the command bytes
          * @throws UnsupportedEncodingException if the notification is not UTF-8
+         * @throws IllegalArgumentException if the notification text is too long
          */
-        public static byte[] notification(String notification, NotificationAction[] actions) throws UnsupportedEncodingException {
+        public static byte[] notification(String notificationText, NotificationAction[] actions) throws UnsupportedEncodingException, IllegalArgumentException {
             byte[] command = NOTIFICATION.getIdentifierAndType();
-            command = ByteUtils.concatBytes(command, (byte)notification.length());
-            command = ByteUtils.concatBytes(command, notification.getBytes("UTF-8"));
+            command = ByteUtils.concatBytes(command, ByteUtils.intToTwoBytes(notificationText.length()));
+            command = ByteUtils.concatBytes(command, notificationText.getBytes("UTF-8"));
             command = ByteUtils.concatBytes(command, (byte)actions.length);
 
             for (int i = 0; i <actions.length; i++) {
@@ -1780,14 +1781,16 @@ public class Command {
          * @param message The message text
          * @return the command bytes
          * @throws UnsupportedEncodingException when the text is not UTF-8
+         * @throws IllegalArgumentException if the message is too long
          */
-        public static byte[] messageReceived(String handle, String message) throws UnsupportedEncodingException {
+        public static byte[] messageReceived(String handle, String message) throws UnsupportedEncodingException, IllegalArgumentException {
             byte[] command = MESSAGE_RECEIVED.getIdentifierAndType();
 
             byte handleLength = (byte)handle.length();
             byte[] handleBytes = handle.getBytes("UTF-8");
 
-            byte messageLength = (byte)message.length();
+
+            byte[] messageLength = ByteUtils.intToTwoBytes(message.length());
             byte[] messageBytes = message.getBytes("UTF-8");
 
             command = ByteUtils.concatBytes(command, handleLength);
@@ -1866,12 +1869,13 @@ public class Command {
          * @param location The screen on which to play the video
          * @return the command bytes
          * @throws UnsupportedEncodingException when URL is not UTF-8
+         * @throws IllegalArgumentException if the url is too long
          */
-        public static byte[] videoHandover(String url, int startingSecond, ScreenLocation location) throws UnsupportedEncodingException {
+        public static byte[] videoHandover(String url, int startingSecond, ScreenLocation location) throws UnsupportedEncodingException, IllegalArgumentException {
             byte[] command = VIDEO_HANDOVER.getIdentifierAndType();
 
             byte[] urlBytes = url.getBytes("UTF-8");
-            command = ByteUtils.concatBytes(command, (byte) url.length());
+            command = ByteUtils.concatBytes(command, ByteUtils.intToTwoBytes(url.length()));
             command = ByteUtils.concatBytes(command, urlBytes);
             command = ByteUtils.concatBytes(command, (byte) startingSecond);
             command = ByteUtils.concatBytes(command, location.getByte());

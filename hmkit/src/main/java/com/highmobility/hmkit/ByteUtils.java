@@ -3,6 +3,7 @@ package com.highmobility.hmkit;
 import com.highmobility.hmkit.Command.CommandParseException;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -124,6 +125,22 @@ public class ByteUtils {
 
     public static int getInt(byte value) {
         return (int)value;
+    }
+
+    public static byte[] intToTwoBytes(int value) throws IllegalArgumentException {
+        byte[] bytes = BigInteger.valueOf(value).toByteArray();
+
+        if (bytes.length > 2) {
+            throw new IllegalArgumentException();
+        }
+        else if (bytes.length == 2) {
+            return bytes;
+        }
+        else {
+            byte[] result = new byte[2];
+            result[1] = bytes[0];
+            return result;
+        }
     }
 
     public static boolean getBool(byte value) {

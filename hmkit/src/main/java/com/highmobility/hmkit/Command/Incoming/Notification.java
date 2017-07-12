@@ -1,4 +1,5 @@
 package com.highmobility.hmkit.Command.Incoming;
+import com.highmobility.hmkit.ByteUtils;
 import com.highmobility.hmkit.Command.*;
 import com.highmobility.hmkit.Command.NotificationAction;
 
@@ -32,10 +33,11 @@ public class Notification extends IncomingCommand {
 
         if (bytes.length < 3) throw new CommandParseException();
 
-        int textLength = bytes[3];
-        text = new String(Arrays.copyOfRange(bytes, 4, 4 + textLength));
+        byte[] lengthBytes = Arrays.copyOfRange(bytes, 3, 3 + 2);
+        int textLength = ByteUtils.getInt(lengthBytes);
+        text = new String(Arrays.copyOfRange(bytes, 5, 5 + textLength));
 
-        int actionItemsCountPosition = 4 + textLength;
+        int actionItemsCountPosition = 5 + textLength;
         int actionItemCount = bytes[actionItemsCountPosition];
         int position = actionItemsCountPosition + 1;
         notificationActions = new NotificationAction[actionItemCount];

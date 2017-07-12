@@ -1,4 +1,5 @@
 package com.highmobility.hmkit.Command.Incoming;
+import com.highmobility.hmkit.ByteUtils;
 import com.highmobility.hmkit.Command.CommandParseException;
 
 import java.io.UnsupportedEncodingException;
@@ -35,8 +36,8 @@ public class SendMessage extends IncomingCommand {
         try {
             recipientHandle = new String(Arrays.copyOfRange(bytes, 4, 4 + recipientSize), "UTF-8");
             int messageSizePosition = 4 + recipientSize;
-            int messageSize = bytes[messageSizePosition];
-            text = new String(Arrays.copyOfRange(bytes, messageSizePosition + 1, messageSizePosition + 1 + messageSize), "UTF-8");
+            int messageSize = ByteUtils.getInt(Arrays.copyOfRange(bytes, messageSizePosition, messageSizePosition + 2));
+            text = new String(Arrays.copyOfRange(bytes, messageSizePosition + 2, messageSizePosition + 2 + messageSize), "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw new CommandParseException();
         }

@@ -270,7 +270,7 @@ public class OutgoingCommand {
 
     @Test
     public void messageReceived() {
-        String waitingForBytes = "0037000e2b31203535352d3535352d3535350548656c6c6f";
+        String waitingForBytes = "0037000e2b31203535352d3535352d353535000548656c6c6f";
         String commandBytes = null;
         try {
             commandBytes = ByteUtils.hexFromBytes(Command.Messaging.messageReceived("+1 555-555-555", "Hello"));
@@ -290,7 +290,7 @@ public class OutgoingCommand {
         assertTrue(((Notification)command).getNotificationActions()[1].getIdentifier() == 1);
         assertTrue(((Notification)command).getNotificationActions()[1].getText().equals("Yes"));
          */
-        String waitingForBytes = "003800115374617274206e617669676174696f6e3f0200024e6f0103596573";
+        String waitingForBytes = "00380000115374617274206e617669676174696f6e3f0200024e6f0103596573";
         NotificationAction[] notificationActions = new NotificationAction[2];
         NotificationAction action1 = new NotificationAction(0, "No");
         NotificationAction action2 = new NotificationAction(1, "Yes");
@@ -349,7 +349,7 @@ public class OutgoingCommand {
 
     @Test
     public void videoHandover() throws UnsupportedEncodingException {
-        String waitingForBytes = "0043002b68747470733a2f2f7777772e796f75747562652e636f6d2f77617463683f763d795756423755366d5832595a00";
+        String waitingForBytes = "004300002b68747470733a2f2f7777772e796f75747562652e636f6d2f77617463683f763d795756423755366d5832595a00";
 
         String commandBytes = ByteUtils.hexFromBytes(Command.VideoHandover.videoHandover(
                 "https://www.youtube.com/watch?v=yWVB7U6mX2Y", 90, Command.VideoHandover.ScreenLocation.FRONT
