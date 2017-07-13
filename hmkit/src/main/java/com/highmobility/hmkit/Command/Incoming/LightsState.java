@@ -62,7 +62,7 @@ public class LightsState extends IncomingCommand {
 
     public LightsState(byte[] bytes) throws CommandParseException {
         super(bytes);
-        
+
         if (bytes.length != 9) throw new CommandParseException();
 
         if (bytes[3] == 0x00) {
