@@ -575,4 +575,7 @@ public class IncomingCommand {
         assertTrue(command.getClass() == KeyfobPosition.class);
         assertTrue(((KeyfobPosition) command).getPosition() == KeyfobPosition.Position.INSIDE_CAR);
     }
+
+    // TODO: always test the failure as well, or make failure dynamically get the identifier.
+    // failure requires writing separate parsing
 }

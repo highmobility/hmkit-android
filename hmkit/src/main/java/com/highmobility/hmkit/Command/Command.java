@@ -1,7 +1,10 @@
 package com.highmobility.hmkit.Command;
 
+import android.util.Log;
+
 import com.highmobility.hmkit.ByteUtils;
 import com.highmobility.hmkit.Command.Incoming.LightsState;
+import com.highmobility.hmkit.Command.Incoming.Notification;
 import com.highmobility.hmkit.Command.Incoming.TrunkState;
 import com.highmobility.hmkit.Command.Incoming.WindscreenState;
 
@@ -143,6 +146,47 @@ public class Command {
         parsedType = Diagnostics.fromBytes(identifierByteOne, identifierByteTwo, type);
         if (parsedType != null) return parsedType;
 
+        parsedType = Maintenance.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = Engine.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = Lights.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = Messaging.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = Notifications.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = Windows.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = Windscreen.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = VideoHandover.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = TextInput.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = Fueling.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = DriverFatigue.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = TheftAlarm.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = ParkingTicket.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = KeyfobPosition.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
 
         throw new CommandParseException();
     }
