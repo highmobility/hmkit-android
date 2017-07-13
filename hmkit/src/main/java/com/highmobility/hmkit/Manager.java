@@ -289,7 +289,7 @@ public class Manager {
                         else {
                             dispatchedError = new DownloadAccessCertificateError(
                                     DownloadAccessCertificateError.Type.CONNECTION_ERROR,
-                                    0,
+                                    -1,
                                     "Cannot connect to the web service. Check your internet connection");
                         }
 

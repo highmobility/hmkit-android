@@ -13,7 +13,7 @@ public class DownloadAccessCertificateError {
         /// Invalid data from the server.
         INVALID_SERVER_RESPONSE,
         /// There is a problem connecting to the server
-        CONNECTION_ERROR,
+        NO_CONNECTION,
         /// Server returned an error
         SERVER_ERROR
     }
