@@ -13,12 +13,10 @@ import com.highmobility.hmkit.Crypto.AccessCertificate;
 import com.highmobility.hmkit.Crypto.DeviceCertificate;
 import com.highmobility.btcore.HMBTCore;
 import com.highmobility.hmkit.Error.DownloadAccessCertificateError;
-import com.highmobility.hmkit.Error.TelematicsError;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -290,8 +288,8 @@ public class Manager {
                         }
                         else {
                             dispatchedError = new DownloadAccessCertificateError(
-                                    DownloadAccessCertificateError.Type.NO_CONNECTION,
-                                    error.networkResponse.statusCode,
+                                    DownloadAccessCertificateError.Type.CONNECTION_ERROR,
+                                    0,
                                     "Cannot connect to the web service. Check your internet connection");
                         }
 
