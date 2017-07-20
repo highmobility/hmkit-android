@@ -1921,7 +1921,7 @@ public class Command {
             byte[] urlBytes = url.getBytes("UTF-8");
             command = ByteUtils.concatBytes(command, ByteUtils.intToTwoBytes(url.length()));
             command = ByteUtils.concatBytes(command, urlBytes);
-            command = ByteUtils.concatBytes(command, (byte) startingSecond);
+            command = ByteUtils.concatBytes(command, ByteUtils.intToTwoBytes(startingSecond));
             command = ByteUtils.concatBytes(command, location.getByte());
 
             return command;
