@@ -2236,34 +2236,31 @@ public class Command {
             int day = cal.get(Calendar.DAY_OF_MONTH);
             int hour = cal.get(Calendar.HOUR_OF_DAY);
             int minute = cal.get(Calendar.MINUTE);
-            int second = cal.get(Calendar.SECOND);
 
             command = ByteUtils.concatBytes(command, (byte)year);
             command = ByteUtils.concatBytes(command, (byte)month);
             command = ByteUtils.concatBytes(command, (byte)day);
             command = ByteUtils.concatBytes(command, (byte)hour);
             command = ByteUtils.concatBytes(command, (byte)minute);
-            command = ByteUtils.concatBytes(command, (byte)second);
 
             if (endDate == null) {
-                byte[] emptyDate = new byte[6];
+                byte[] emptyDate = new byte[5];
                 command = ByteUtils.concatBytes(command, emptyDate);
             }
             else {
-                cal.setTime(startDate);
+                cal = Calendar.getInstance();
+                cal.setTime(endDate);
                 year = cal.get(Calendar.YEAR) - 2000;
                 month = cal.get(Calendar.MONTH) + 1;
                 day = cal.get(Calendar.DAY_OF_MONTH);
                 hour = cal.get(Calendar.HOUR_OF_DAY);
                 minute = cal.get(Calendar.MINUTE);
-                second = cal.get(Calendar.SECOND);
 
                 command = ByteUtils.concatBytes(command, (byte)year);
                 command = ByteUtils.concatBytes(command, (byte)month);
                 command = ByteUtils.concatBytes(command, (byte)day);
                 command = ByteUtils.concatBytes(command, (byte)hour);
                 command = ByteUtils.concatBytes(command, (byte)minute);
-                command = ByteUtils.concatBytes(command, (byte)second);
             }
 
             return command;
