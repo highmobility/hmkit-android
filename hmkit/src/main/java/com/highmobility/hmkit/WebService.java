@@ -42,7 +42,7 @@ class WebService {
     RequestQueue queue;
 
     WebService(Context context) {
-        ignoreSslErrors(); // TODO: delete at some point
+        // ignoreSslErrors();
         queue = Volley.newRequestQueue(context);
     }
 
