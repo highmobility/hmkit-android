@@ -95,8 +95,8 @@ public class ParkingTicket extends IncomingCommand {
         operatorTicketId = ByteUtils.getInt(Arrays.copyOfRange(bytes, position, position + ticketIdSize));
         position = position + ticketIdSize;
 
-        ticketStart = ByteUtils.getDate(Arrays.copyOfRange(bytes, position, position + 6));
-        position = position + 6;
-        ticketEnd = ByteUtils.getDate(Arrays.copyOfRange(bytes, position, position + 6));
+        ticketStart = ByteUtils.getDate(Arrays.copyOfRange(bytes, position, position + 5));
+        position = position + 5;
+        ticketEnd = ByteUtils.getDate(Arrays.copyOfRange(bytes, position, position + 5));
     }
 }
