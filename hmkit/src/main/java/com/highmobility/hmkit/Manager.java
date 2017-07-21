@@ -317,7 +317,7 @@ public class Manager {
      */
     public AccessCertificate getCertificate(byte[] serial) throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
-        AccessCertificate[] certificates = storage.getCertificatesWithProvidingSerial(serial);
+        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial);
 
         if (certificates != null && certificates.length > 0) {
             return certificates[0];
