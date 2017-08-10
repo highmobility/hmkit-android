@@ -162,13 +162,23 @@ public class ByteUtils {
 
     // 5 bytes eg yy mm dd mm ss. year is from 2000
     public static Date getDate(byte[] bytes) throws CommandParseException {
-        if (bytes.length != 6) throw new CommandParseException();
-
-        if (bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0x00 && bytes[3] == 0x00 &&
-                bytes[4] == 0x00 && bytes[5] == 0x00) return null;
+        for (int i = 0; i < bytes.length; i++) {
+            if (i == bytes.length - 1 && bytes[i] == 0x00) return null; // all bytes are 0x00
+            else if (bytes[i] != 0x00) break; // one byte is not 0x00, some date is set
+        }
 
         Calendar c = Calendar.getInstance();
-        c.set(2000 + bytes[0], bytes[1] - 1, bytes[2], bytes[3], bytes[4], bytes[5]);
+
+        if (bytes.length == 5) {
+            c.set(2000 + bytes[0], bytes[1] - 1, bytes[2], bytes[3], bytes[4], 0x00);
+        }
+        else if (bytes.length == 6) {
+            c.set(2000 + bytes[0], bytes[1] - 1, bytes[2], bytes[3], bytes[4], bytes[5]);
+        }
+        else {
+            throw new CommandParseException();
+        }
+
         return c.getTime();
     }
 

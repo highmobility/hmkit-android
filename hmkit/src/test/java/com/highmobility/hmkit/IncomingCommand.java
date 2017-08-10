@@ -532,7 +532,7 @@ public class IncomingCommand {
 
     @Test
     public void parkingTicket() {
-        byte[] bytes = ByteUtils.bytesFromHex("004701010e4265726c696e205061726b696e670363054F11010a11220A000000000000");
+        byte[] bytes = ByteUtils.bytesFromHex("004701010e4265726c696e205061726b696e670363054F11010a11220000000000");
 
         com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
@@ -549,7 +549,7 @@ public class IncomingCommand {
         assertTrue(((ParkingTicket)command).getTicketEndDate() == null);
 
 
-        String string = "2017-01-10T17:34:10";
+        String string = "2017-01-10T17:34:00";
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         try {
             Date date = format.parse(string);
