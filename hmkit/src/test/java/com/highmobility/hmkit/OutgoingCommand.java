@@ -349,7 +349,7 @@ public class OutgoingCommand {
 
     @Test
     public void videoHandover() throws UnsupportedEncodingException {
-        String waitingForBytes = "004300002b68747470733a2f2f7777772e796f75747562652e636f6d2f77617463683f763d795756423755366d5832595a00";
+        String waitingForBytes = "004300002b68747470733a2f2f7777772e796f75747562652e636f6d2f77617463683f763d795756423755366d583259005a00";
 
         String commandBytes = ByteUtils.hexFromBytes(Command.VideoHandover.videoHandover(
                 "https://www.youtube.com/watch?v=yWVB7U6mX2Y", 90, Command.VideoHandover.ScreenLocation.FRONT
@@ -387,8 +387,8 @@ public class OutgoingCommand {
 
     @Test
     public void startParking() throws UnsupportedEncodingException {
-        String waitingForBytes = "0047020e4265726c696e205061726b696e670363054F11010a11220A000000000000";
-        String string = "2017-01-10T17:34:10";
+        String waitingForBytes = "0047020e4265726c696e205061726b696e670363054F11010a11220000000000";
+        String string = "2017-01-10T17:34:00";
 
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         try {
