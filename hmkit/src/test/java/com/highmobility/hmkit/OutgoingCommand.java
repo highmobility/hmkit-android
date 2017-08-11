@@ -172,6 +172,7 @@ public class OutgoingCommand {
     @Test
     public void setClimateProfile() {
         String waitingForBytes = "0024026000000000000000000000071E071E41ac000041ac0000";
+        // create 7 HVAC states where weekdays are inactive and weekend is active
         AutoHvacState[] states = new AutoHvacState[7];
         for (int i = 0; i < 7; i++) {
             AutoHvacState state;

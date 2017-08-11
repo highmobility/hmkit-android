@@ -88,8 +88,7 @@ class WebService {
             }
         };
 
-        printRequest(request);
-        queue.add(request);
+        queueRequest(request);
     }
 
     void sendTelematicsCommand(byte[] command, byte[] serial, byte[] issuer, final Response.Listener<JSONObject> response, Response.ErrorListener error) {
@@ -128,8 +127,7 @@ class WebService {
             }
         };
 
-        printRequest(request);
-        queue.add(request);
+        queueRequest(request);
     }
 
     void getNonce(byte[] serial, final Response.Listener<JSONObject> response, Response.ErrorListener error) {
@@ -167,8 +165,17 @@ class WebService {
             }
         };
 
+        queueRequest(request);
+    }
+
+    void queueRequest(JsonObjectRequest request) {
+        request.setTag(this);
         printRequest(request);
         queue.add(request);
+    }
+
+    void cancelAllRequests() {
+        queue.cancelAll(this);
     }
 
     private static void ignoreSslErrors() {

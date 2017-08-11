@@ -166,6 +166,8 @@ public class Manager {
         coreClockTimer = null;
         ble.terminate();
         ble = null;
+        webService.cancelAllRequests();
+        webService = null;
         telematics = null;
         context = null;
     }
