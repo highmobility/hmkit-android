@@ -57,8 +57,11 @@ public class Storage {
         // providing device, gaining vehicle
         deviceAccessCertificateBase64 = response.getString("device_access_certificate");
         deviceAccessCertificate = new AccessCertificate(deviceAccessCertificateBase64);
-
-        if (storeCertificate(deviceAccessCertificate) != Result.SUCCESS) {
+        Result result = storeCertificate(deviceAccessCertificate);
+        if (result != Result.SUCCESS) {
+            if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
+                Log.d(TAG, "storeDownloadedCertificates: storeCertificate failed " + result);
+            }
             throw new Exception();
         }
         if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
@@ -181,7 +184,7 @@ public class Storage {
                 removedIndex = i;
 
                 if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
-                    Log.d(TAG, "deleteCertificate: " + cert.toString());
+                    Log.d(TAG, "deleteCertificate success: " + cert.toString());
                 }
 
                 break;
@@ -194,6 +197,10 @@ public class Storage {
             return true;
         }
         else {
+            if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
+                Log.d(TAG, "deleteCertificate: failed for gaining: " + ByteUtils.hexFromBytes(gainingSerial)
+                        + " providing: " + ByteUtils.hexFromBytes(providingSerial));
+            }
             return false;
         }
     }
@@ -207,7 +214,7 @@ public class Storage {
             if (Arrays.equals(cert.getGainerSerial(), serial)) {
                 removedIndex = i;
                 if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
-                    Log.d(TAG, "deleteCertificateWithGainingSerial: " + cert.toString());
+                    Log.d(TAG, "deleteCertificateWithGainingSerial success:" + cert.toString());
                 }
                 break;
             }
@@ -219,6 +226,9 @@ public class Storage {
             return true;
         }
         else {
+            if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
+                Log.d(TAG, "deleteCertificateWithGainingSerial failed: " + ByteUtils.hexFromBytes(serial));
+            }
             return false;
         }
     }
@@ -232,7 +242,7 @@ public class Storage {
             if (Arrays.equals(cert.getProviderSerial(), serial)) {
                 removedIndex = i;
                 if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
-                    Log.d(TAG, "deleteCertificateWithProvidingSerial: " + cert.toString());
+                    Log.d(TAG, "deleteCertificateWithProvidingSerial success: " + cert.toString());
                 }
                 break;
             }

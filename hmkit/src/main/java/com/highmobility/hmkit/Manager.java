@@ -251,14 +251,16 @@ public class Manager {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        AccessCertificate certificate = null;
                         try {
-                            AccessCertificate certificate = storage.storeDownloadedCertificates(response);
-                            callback.onDownloaded(certificate.getGainerSerial());
+                             certificate = storage.storeDownloadedCertificates(response);
                         } catch (Exception e) {
                             DownloadAccessCertificateError error = new DownloadAccessCertificateError(
                                     DownloadAccessCertificateError.Type.INVALID_SERVER_RESPONSE, 0, "Invalid certificate data");
                             callback.onDownloadFailed(error);
                         }
+
+                        if (certificate != null) callback.onDownloaded(certificate.getGainerSerial());
                     }
                 },
                 new Response.ErrorListener() {
