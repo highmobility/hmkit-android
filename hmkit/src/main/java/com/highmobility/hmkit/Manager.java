@@ -339,7 +339,7 @@ public class Manager {
      */
     public boolean deleteCertificate(byte[] serial) throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
-        return storage.deleteCertificateWithGainingSerial(serial);
+        return storage.deleteCertificate(serial, certificate.getSerial());
     }
 
     /**
