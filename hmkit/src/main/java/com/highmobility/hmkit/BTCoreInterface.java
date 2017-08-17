@@ -136,11 +136,11 @@ class BTCoreInterface implements HMBTCoreInterface {
             Log.d(TAG, "HMPersistenceHaladdPublicKey: " + ByteUtils.hexFromBytes(serial));
 
 
-            int errorCode = manager.storage.storeCertificate(cert).getValue();
-            if (errorCode != 0) {
-                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+        int errorCode = manager.storage.storeCertificate(cert).getValue();
+        if (errorCode != 0) {
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(TAG, "Cant register certificate: " + errorCode);
-            }
+        }
 
         return 0;
     }
@@ -159,6 +159,11 @@ class BTCoreInterface implements HMBTCoreInterface {
         copyBytesToJNI(certificate.getStartDateBytes(), startDate);
         copyBytesToJNI(certificate.getEndDateBytes(), endDate);
         byte[] permissions = certificate.getPermissions();
+
+        int beforeLength = permissions.length; // TODO:  THIS IS TEMP delete when fixed in JNI (buffer increased, currently size is 8 but buffer 7)
+        permissions = trimmedBytes(permissions, 6);
+        Log.d(TAG, "HMPersistenceHalgetPublicKey: before" + beforeLength + " after: " + permissions.length);
+
         copyBytesToJNI(permissions, command);
         commandSize[0] = permissions.length;
 
@@ -175,6 +180,13 @@ class BTCoreInterface implements HMBTCoreInterface {
             copyBytesToJNI(certificate.getStartDateBytes(), startDate);
             copyBytesToJNI(certificate.getEndDateBytes(), endDate);
             byte[] permissions = certificate.getPermissions();
+
+            ///
+            int beforeLength = permissions.length; // TODO:  THIS IS TEMP delete when fixed in JNI (buffer increased, currently size is 8 but buffer 7)
+            permissions = trimmedBytes(permissions, 6);
+            Log.d(TAG, "HMPersistenceHalgetPublicKeyByIndex: before" + beforeLength + " after: " + permissions.length);
+            ///
+
             copyBytesToJNI(permissions, command);
             commandSize[0] = permissions.length;
 
