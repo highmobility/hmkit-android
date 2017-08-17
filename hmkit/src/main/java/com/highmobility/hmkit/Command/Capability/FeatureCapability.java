@@ -40,6 +40,7 @@ public class FeatureCapability {
                 || feature == Identifier.MAINTENANCE
                 || feature == Identifier.DRIVER_FATIGUE
                 || feature == Identifier.VIDEO_HANDOVER
+                || feature == Identifier.BROWSER
                 || feature == Identifier.TEXT_INPUT
                 || feature == Identifier.WINDOWS
                 || feature == Identifier.KEYFOB_POSITION) {

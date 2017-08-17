@@ -359,6 +359,16 @@ public class OutgoingCommand {
     }
 
     @Test
+    public void loadUrl() throws UnsupportedEncodingException {
+        String waitingForBytes = "004900001268747470733a2f2f676f6f676c652e636f6d";
+
+        String commandBytes = ByteUtils.hexFromBytes(Command.Browser.loadUrl(
+                "https://google.com"
+        ));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
     public void textInput() throws UnsupportedEncodingException {
         String waitingForBytes = "00440003796573";
         String commandBytes = ByteUtils.hexFromBytes(Command.TextInput.textInput("yes"));

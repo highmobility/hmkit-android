@@ -49,6 +49,7 @@ public class Command {
         WINDOWS(new byte[] { 0x00, (byte)0x45 }),
         WINDSCREEN(new byte[] { 0x00, (byte)0x42 }),
         VIDEO_HANDOVER(new byte[] { 0x00, (byte)0x43 }),
+        BROWSER(new byte[] { 0x00, (byte)0x49 }),
         TEXT_INPUT(new byte[] { 0x00, (byte)0x44 }),
         FUELING(new byte[] { 0x00, (byte)0x40 }),
         DRIVER_FATIGUE(new byte[] { 0x00, (byte)0x41 }),
@@ -168,6 +169,9 @@ public class Command {
         if (parsedType != null) return parsedType;
 
         parsedType = VideoHandover.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = Browser.fromBytes(identifierByteOne, identifierByteTwo, type);
         if (parsedType != null) return parsedType;
 
         parsedType = TextInput.fromBytes(identifierByteOne, identifierByteTwo, type);
@@ -1960,6 +1964,71 @@ public class Command {
         @Override
         public Identifier getIdentifier() {
             return Identifier.VIDEO_HANDOVER;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Browser category of the Auto API.
+     */
+    public enum Browser implements Type {
+        LOAD_URL((byte)0x00);
+
+        /**
+         * Load a URL in the headunit browser.
+         *
+         * @param url The URL
+         * @return the command bytes
+         * @throws UnsupportedEncodingException when URL is not UTF-8
+         * @throws IllegalArgumentException if the url is too long
+         */
+        public static byte[] loadUrl(String url) throws UnsupportedEncodingException, IllegalArgumentException {
+            byte[] command = LOAD_URL.getIdentifierAndType();
+
+            byte[] urlBytes = url.getBytes("UTF-8");
+            command = ByteUtils.concatBytes(command, ByteUtils.intToTwoBytes(url.length()));
+            command = ByteUtils.concatBytes(command, urlBytes);
+
+            return command;
+        }
+
+        static Browser fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.BROWSER.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            Browser[] allValues = Browser.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Browser command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        Browser(byte messageType) {
+            this.messageType = messageType;
+        }
+
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.BROWSER;
         }
 
         @Override
