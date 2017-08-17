@@ -369,6 +369,17 @@ public class OutgoingCommand {
     }
 
     @Test
+    public void displayImage() throws UnsupportedEncodingException {
+        String waitingForBytes = "005100001568747470733a2f2f676f6f2e676c2f567955316970";
+
+        String commandBytes = ByteUtils.hexFromBytes(Command.Graphics.displayImage(
+                "https://goo.gl/VyU1ip"
+        ));
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+
+    @Test
     public void textInput() throws UnsupportedEncodingException {
         String waitingForBytes = "00440003796573";
         String commandBytes = ByteUtils.hexFromBytes(Command.TextInput.textInput("yes"));

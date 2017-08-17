@@ -50,6 +50,7 @@ public class Command {
         WINDSCREEN(new byte[] { 0x00, (byte)0x42 }),
         VIDEO_HANDOVER(new byte[] { 0x00, (byte)0x43 }),
         BROWSER(new byte[] { 0x00, (byte)0x49 }),
+        GRAPHICS(new byte[] { 0x00, (byte)0x51 }),
         TEXT_INPUT(new byte[] { 0x00, (byte)0x44 }),
         FUELING(new byte[] { 0x00, (byte)0x40 }),
         DRIVER_FATIGUE(new byte[] { 0x00, (byte)0x41 }),
@@ -172,6 +173,9 @@ public class Command {
         if (parsedType != null) return parsedType;
 
         parsedType = Browser.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = Graphics.fromBytes(identifierByteOne, identifierByteTwo, type);
         if (parsedType != null) return parsedType;
 
         parsedType = TextInput.fromBytes(identifierByteOne, identifierByteTwo, type);
@@ -2029,6 +2033,71 @@ public class Command {
         @Override
         public Identifier getIdentifier() {
             return Identifier.BROWSER;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Graphics category of the Auto API.
+     */
+    public enum Graphics implements Type {
+        DISPLAY_IMAGE((byte)0x00);
+
+        /**
+         * Load a URL in the headunit browser.
+         *
+         * @param url The URL
+         * @return the command bytes
+         * @throws UnsupportedEncodingException when URL is not UTF-8
+         * @throws IllegalArgumentException if the url is too long
+         */
+        public static byte[] displayImage(String url) throws UnsupportedEncodingException, IllegalArgumentException {
+            byte[] command = DISPLAY_IMAGE.getIdentifierAndType();
+
+            byte[] urlBytes = url.getBytes("UTF-8");
+            command = ByteUtils.concatBytes(command, ByteUtils.intToTwoBytes(url.length()));
+            command = ByteUtils.concatBytes(command, urlBytes);
+
+            return command;
+        }
+
+        static Graphics fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.GRAPHICS.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            Graphics[] allValues = Graphics.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                Graphics command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        Graphics(byte messageType) {
+            this.messageType = messageType;
+        }
+
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.GRAPHICS;
         }
 
         @Override
