@@ -87,6 +87,9 @@ public class IncomingCommand {
             else if (ByteUtils.startsWith(bytes, Command.KeyfobPosition.KEYFOB_POSITION.getIdentifierAndType())) {
                 return new KeyfobPosition(bytes);
             }
+            else if (ByteUtils.startsWith(bytes, Command.VehicleTime.VEHICLE_TIME.getIdentifierAndType())) {
+                return new VehicleTime(bytes);
+            }
             else {
                 throw new CommandParseException();
             }

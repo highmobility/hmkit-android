@@ -1,5 +1,7 @@
 package com.highmobility.hmkit;
 
+import android.util.Log;
+
 import com.highmobility.hmkit.Command.CommandParseException;
 
 import java.io.UnsupportedEncodingException;
@@ -8,6 +10,8 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import java.util.UUID;
 
 /**
@@ -102,6 +106,15 @@ public class ByteUtils {
         return true;
     }
 
+    static long getLong(byte[] b) {
+        long result = 0;
+        for (int i = 0; i < 8; i++) {
+            result <<= 8;
+            result |= (b[i] & 0xFF);
+        }
+        return result;
+    }
+
     public static boolean getBit(int n, int k) {
         return ((n >> k) & 1) == 1;
     }
@@ -121,6 +134,14 @@ public class ByteUtils {
         }
 
         return ByteBuffer.wrap(bytes).getInt();
+    }
+
+    public static int getSignedInt(byte[] bytes) throws IllegalArgumentException {
+        if (bytes.length == 2) {
+            return bytes[0] << 8 | (byte)bytes[1];
+        }
+
+        throw new IllegalArgumentException();
     }
 
     public static int getInt(byte value) {
@@ -175,11 +196,43 @@ public class ByteUtils {
         else if (bytes.length == 6) {
             c.set(2000 + bytes[0], bytes[1] - 1, bytes[2], bytes[3], bytes[4], bytes[5]);
         }
+
         else {
             throw new CommandParseException();
         }
 
         return c.getTime();
+    }
+
+    public static Calendar getCalendar(byte[] bytes) throws CommandParseException {
+        for (int i = 0; i < bytes.length; i++) {
+            if (i == bytes.length - 1 && bytes[i] == 0x00) return null; // all bytes are 0x00
+            else if (bytes[i] != 0x00) break; // one byte is not 0x00, some date is set
+        }
+
+        Calendar c = new GregorianCalendar();
+
+        if (bytes.length == 8) {
+            c.set(2000 + bytes[0], bytes[1] - 1, bytes[2], bytes[3], bytes[4], bytes[5]);
+            int minutesOffset = getSignedInt(new byte[] {bytes[6], bytes[7]});
+
+            int msOffset = minutesOffset * 60 * 1000;
+            String[] availableIds = TimeZone.getAvailableIDs(msOffset);
+            if (availableIds.length == 0) {
+                Log.d("", "getDate: invalid timezone");
+                c.setTimeZone(TimeZone.getTimeZone("UTC"));
+            }
+            else {
+                TimeZone timeZone = TimeZone.getTimeZone(availableIds[0]);
+                c.setTimeZone(timeZone);
+            }
+        }
+        else {
+            throw new CommandParseException();
+        }
+
+        c.getTime(); // this is needed to set the right time...
+        return c;
     }
 
     static UUID UUIDFromByteArray(byte[] bytes) {
@@ -211,16 +264,6 @@ public class ByteUtils {
         }
         return result;
     }
-
-    static long bytesToLong(byte[] b) {
-        long result = 0;
-        for (int i = 0; i < 8; i++) {
-            result <<= 8;
-            result |= (b[i] & 0xFF);
-        }
-        return result;
-    }
-
 
     static void reverse(byte[] array) {
         if (array == null) {

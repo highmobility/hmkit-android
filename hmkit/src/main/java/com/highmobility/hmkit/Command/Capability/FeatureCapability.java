@@ -34,6 +34,7 @@ public class FeatureCapability {
                 || feature == Identifier.REMOTE_CONTROL
                 || feature == Identifier.HEART_RATE
                 || feature == Identifier.VEHICLE_LOCATION
+                || feature == Identifier.VEHICLE_TIME
                 || feature == Identifier.NAVI_DESTINATION
                 || feature == Identifier.DELIVERED_PARCELS
                 || feature == Identifier.DIAGNOSTICS

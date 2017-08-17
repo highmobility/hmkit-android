@@ -18,6 +18,7 @@ import static com.highmobility.hmkit.Command.Command.Identifier.THEFT_ALARM;
 import static com.highmobility.hmkit.Command.Command.Identifier.TRUNK_ACCESS;
 import static com.highmobility.hmkit.Command.Command.Identifier.VALET_MODE;
 import static com.highmobility.hmkit.Command.Command.Identifier.VEHICLE_LOCATION;
+import static com.highmobility.hmkit.Command.Command.Identifier.VEHICLE_TIME;
 
 /**
  * Created by ttiganik on 14/12/2016.
@@ -48,6 +49,7 @@ public class FeatureState {
         else if (feature == LIGHTS) return new Lights(bytes);
         else if (feature == THEFT_ALARM) return new TheftAlarm(bytes);
         else if (feature == PARKING_TICKET) return new ParkingTicket(bytes);
+        else if (feature == VEHICLE_TIME) return new VehicleTime(bytes);
 
         return null;
     }

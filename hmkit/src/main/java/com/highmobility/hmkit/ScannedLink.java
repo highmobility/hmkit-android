@@ -195,7 +195,7 @@ class ScannedLink extends Link {
 
                 ByteUtils.reverse(msb);
                 ByteUtils.reverse(lsb);
-                UUID reverseUUID = new UUID(ByteUtils.bytesToLong(lsb), ByteUtils.bytesToLong(msb));
+                UUID reverseUUID = new UUID(ByteUtils.getLong(lsb), ByteUtils.getLong(msb));
 
                 if (reverseUUID.equals(Constants.SERVICE_UUID)) {
                     for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {

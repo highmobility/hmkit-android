@@ -26,6 +26,7 @@ import com.highmobility.hmkit.Command.VehicleStatus.TheftAlarm;
 import com.highmobility.hmkit.Command.VehicleStatus.TrunkAccess;
 import com.highmobility.hmkit.Command.VehicleStatus.ValetMode;
 import com.highmobility.hmkit.Command.VehicleStatus.VehicleLocation;
+import com.highmobility.hmkit.Command.VehicleStatus.VehicleTime;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +34,7 @@ import org.junit.Test;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import static org.junit.Assert.assertTrue;
@@ -58,7 +60,7 @@ public class VehicleStatus {
                 "4d7920436172" + // "My Car"
                 "06"           + // License plate is 6 bytes
                 "414243313233" + // "ABC123"
-                "0E" +      // length
+                "0F" +      // length
                 "00200D04000100010000020001030001" + // door locks
                 "0021020001" +
                 "0023080200FF32bf19999a" +
@@ -73,7 +75,7 @@ public class VehicleStatus {
                 "003603020100" +
                 "00460102" +
                 "004720010e4265726c696e205061726b696e670363054F11010a11220A000000000000" +
-                "";
+                "00500811010a1020000078";
         byte[] bytes = ByteUtils.bytesFromHex(vehicleStatusHexString);
 
         try {
@@ -88,7 +90,7 @@ public class VehicleStatus {
 
     @Test
     public void states_size() {
-        assertTrue(vehicleStatus.getFeatureStates().length == 14);
+        assertTrue(vehicleStatus.getFeatureStates().length == 15);
     }
 
     @Test
@@ -418,5 +420,36 @@ public class VehicleStatus {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void vehicleTime() {
+        FeatureState state = null;
+        for (int i = 0; i < vehicleStatus.getFeatureStates().length; i++) {
+            FeatureState iteratingState = vehicleStatus.getFeatureStates()[i];
+            if (iteratingState.getFeature() == Identifier.VEHICLE_TIME) {
+                state = iteratingState;
+                break;
+            }
+        }
+
+        assertTrue(state != null);
+        assertTrue(state.getClass() == VehicleTime.class);
+
+        Calendar c = ((VehicleTime)state).getVehicleTime();
+
+        assertTrue(c.getTimeZone().getRawOffset() == 120 * 60 * 1000);
+        Date commandDate = c.getTime();
+
+        String string = "2017-01-10T16:32:00";
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        try {
+            Date date = format.parse(string);
+            assertTrue((format.format(commandDate).equals(format.format(date))));
+            // msSince1970 are random
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
     }
 }

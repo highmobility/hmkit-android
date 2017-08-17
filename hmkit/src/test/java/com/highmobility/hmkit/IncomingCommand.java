@@ -26,6 +26,7 @@ import com.highmobility.hmkit.Command.Incoming.TheftAlarmState;
 import com.highmobility.hmkit.Command.Incoming.TrunkState;
 import com.highmobility.hmkit.Command.Incoming.ValetMode;
 import com.highmobility.hmkit.Command.Incoming.VehicleLocation;
+import com.highmobility.hmkit.Command.Incoming.VehicleTime;
 import com.highmobility.hmkit.Command.Incoming.WindscreenState;
 import com.highmobility.hmkit.Command.WindscreenDamagePosition;
 
@@ -35,6 +36,7 @@ import org.junit.Test;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import static org.junit.Assert.*;
@@ -574,6 +576,35 @@ public class IncomingCommand {
 
         assertTrue(command.getClass() == KeyfobPosition.class);
         assertTrue(((KeyfobPosition) command).getPosition() == KeyfobPosition.Position.INSIDE_CAR);
+    }
+
+
+    @Test
+    public void vehicleTime() {
+        byte[] bytes = ByteUtils.bytesFromHex("00500111010a102000FF10");
+        com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
+
+        try {
+            command = com.highmobility.hmkit.Command.Incoming.IncomingCommand.create(bytes);
+        } catch (CommandParseException e) {
+            fail("init failed");
+        }
+
+        assertTrue(command.getClass() == VehicleTime.class);
+        Calendar c = ((VehicleTime)command).getVehicleTime();
+        float rawOffset = c.getTimeZone().getRawOffset();
+        assertTrue(rawOffset == -240 * 60 * 1000);
+        Date commandDate = c.getTime();
+
+        String string = "2017-01-10T22:32:00";
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        try {
+            Date date = format.parse(string);
+            assertTrue((format.format(commandDate).equals(format.format(date))));
+            // msSince1970 are random
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     // TODO: always test the failure as well, or make failure dynamically get the identifier.

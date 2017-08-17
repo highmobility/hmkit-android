@@ -29,7 +29,7 @@ import static org.junit.Assert.fail;
 
 public class Capabilities {
     byte[] knownCapabilitiesBytes = ByteUtils.bytesFromHex("001001" +
-            "1C" + // length
+            "1F" + // length
             "002001010021020300002201000023010000240201000025020101002603010101002701010028010100290100003001010031010100320101" +
             "00330100" +
             "00340101" +
@@ -45,7 +45,11 @@ public class Capabilities {
             "00350102" +
             "00460101" +
             "00470102" +
-            "00480100");
+            "00480100" +
+            "00500101" +
+            "00490101" +
+            "00510100"
+    );
     
     com.highmobility.hmkit.Command.Incoming.Capabilities capabilites = null;
     @Before
@@ -62,7 +66,7 @@ public class Capabilities {
     @Test
     public void capabilities_init() {
         assertTrue(capabilites.getCapabilites() != null);
-        assertTrue(capabilites.getCapabilites().length == 28);
+        assertTrue(capabilites.getCapabilites().length == 31);
     }
 
     @Test
@@ -613,6 +617,60 @@ public class Capabilities {
         if (capability.getCapability().getClass() == AvailableCapability.class) {
             assertTrue(((AvailableCapability)capability.getCapability()).getCapability() ==
                     AvailableCapability.Capability.AVAILABLE);
+        }
+    }
+
+    @Test
+    public void capabilites_init_graphics() {
+        FeatureCapability featureCapability = null;
+        for (int i = 0; i < capabilites.getCapabilites().length; i++) {
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getIdentifier() == Identifier.GRAPHICS) {
+                featureCapability = iteratingFeatureCapability;
+                break;
+            }
+        }
+
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableCapability.class);
+        if (featureCapability.getClass() == AvailableCapability.class) {
+            assertTrue(((AvailableCapability) featureCapability).getCapability() == AvailableCapability.Capability.UNAVAILABLE);
+        }
+    }
+
+    @Test
+    public void capabilites_init_browser() {
+        FeatureCapability featureCapability = null;
+        for (int i = 0; i < capabilites.getCapabilites().length; i++) {
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getIdentifier() == Identifier.BROWSER) {
+                featureCapability = iteratingFeatureCapability;
+                break;
+            }
+        }
+
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableCapability.class);
+        if (featureCapability.getClass() == AvailableCapability.class) {
+            assertTrue(((AvailableCapability) featureCapability).getCapability() == AvailableCapability.Capability.AVAILABLE);
+        }
+    }
+
+    @Test
+    public void capabilites_init_vehicle_time() {
+        FeatureCapability featureCapability = null;
+        for (int i = 0; i < capabilites.getCapabilites().length; i++) {
+            FeatureCapability iteratingFeatureCapability = capabilites.getCapabilites()[i];
+            if (iteratingFeatureCapability.getIdentifier() == Identifier.VEHICLE_TIME) {
+                featureCapability = iteratingFeatureCapability;
+                break;
+            }
+        }
+
+        assertTrue(featureCapability != null);
+        assertTrue(featureCapability.getClass() == AvailableCapability.class);
+        if (featureCapability.getClass() == AvailableCapability.class) {
+            assertTrue(((AvailableCapability) featureCapability).getCapability() == AvailableCapability.Capability.AVAILABLE);
         }
     }
 }

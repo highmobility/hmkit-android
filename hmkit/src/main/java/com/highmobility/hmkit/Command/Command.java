@@ -38,6 +38,7 @@ public class Command {
         VALET_MODE(new byte[] { 0x00, (byte)0x28 }),
         HEART_RATE(new byte[] { 0x00, (byte)0x29 }),
         VEHICLE_LOCATION(new byte[] { 0x00, (byte)0x30 }),
+        VEHICLE_TIME(new byte[] { 0x00, (byte)0x50 }),
         NAVI_DESTINATION(new byte[] { 0x00, (byte)0x31 }),
         DELIVERED_PARCELS(new byte[] { 0x00, (byte)0x32 }),
         DIAGNOSTICS(new byte[] { 0x00, (byte)0x33 }),
@@ -137,6 +138,9 @@ public class Command {
         if (parsedType != null) return parsedType;
 
         parsedType = VehicleLocation.fromBytes(identifierByteOne, identifierByteTwo, type);
+        if (parsedType != null) return parsedType;
+
+        parsedType = VehicleTime.fromBytes(identifierByteOne, identifierByteTwo, type);
         if (parsedType != null) return parsedType;
 
         parsedType = NaviDestination.fromBytes(identifierByteOne, identifierByteTwo, type);
@@ -1224,6 +1228,63 @@ public class Command {
         @Override
         public Identifier getIdentifier() {
             return Identifier.VEHICLE_LOCATION;
+        }
+
+        @Override
+        public byte[] getIdentifierAndType() {
+            return ByteUtils.concatBytes(getIdentifier().getIdentifier(), getType());
+        }
+    }
+
+    /**
+     * Commands for the Vehicle Time category of the Auto API.
+     */
+    public enum VehicleTime implements Type {
+        GET_VEHICLE_TIME((byte)0x00),
+        VEHICLE_TIME((byte)0x01);
+
+        /**
+         * Get the vehicle time, which will return the local time of the car.
+         * The car will respond with the Vehicle Time message.
+         *
+         * @return The command bytes
+         */
+        public static byte[] getVehicleTime() {
+            return GET_VEHICLE_TIME.getIdentifierAndType();
+        }
+
+        static VehicleTime fromBytes(byte firstIdentifierByte, byte secondIdentifierByte, byte typeByte) {
+            byte[] identiferBytes = Identifier.VEHICLE_TIME.getIdentifier();
+            if (firstIdentifierByte != identiferBytes[0]
+                    || secondIdentifierByte != identiferBytes[1]) {
+                return null;
+            }
+
+            VehicleTime[] allValues = VehicleTime.values();
+
+            for (int i = 0; i < allValues.length; i++) {
+                VehicleTime command = allValues[i];
+                byte commandType = command.getType();
+
+                if (commandType == typeByte) {
+                    return command;
+                }
+            }
+
+            return null;
+        }
+
+        VehicleTime(byte messageType) {
+            this.messageType = messageType;
+        }
+        private byte messageType;
+        public byte getType() {
+            return messageType;
+        }
+
+        @Override
+        public Identifier getIdentifier() {
+            return Identifier.VEHICLE_TIME;
         }
 
         @Override

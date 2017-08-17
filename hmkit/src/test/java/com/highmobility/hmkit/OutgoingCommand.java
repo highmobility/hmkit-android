@@ -234,6 +234,13 @@ public class OutgoingCommand {
     }
 
     @Test
+    public void getVehicleTime() {
+        String waitingForBytes = "005000";
+        String commandBytes = ByteUtils.hexFromBytes(Command.VehicleTime.getVehicleTime());
+        assertTrue(waitingForBytes.equalsIgnoreCase(commandBytes));
+    }
+
+    @Test
     public void getMaintenance() {
         String waitingForBytes = "003400";
         String commandBytes = ByteUtils.hexFromBytes(Command.Maintenance.getMaintenanceState());
