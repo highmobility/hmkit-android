@@ -5,12 +5,17 @@ import android.util.Log;
 
 import com.highmobility.hmkit.Broadcaster;
 import com.highmobility.hmkit.BroadcasterListener;
+import com.highmobility.hmkit.ByteUtils;
+import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
 import com.highmobility.hmkit.Constants;
 import com.highmobility.hmkit.Error.BroadcastError;
+import com.highmobility.hmkit.Error.DownloadAccessCertificateError;
+import com.highmobility.hmkit.Error.TelematicsError;
 import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
+import com.highmobility.hmkit.Telematics;
 
 public class BroadcastingViewController implements IBroadcastingViewController, BroadcasterListener, ConnectedLinkListener {
     private static final String TAG = "BroadcastingVC";
@@ -30,6 +35,43 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
         // set the broadcaster listener
         broadcaster.setListener(this);
         startBroadcasting();
+//        sendTelematicsCommand();
+    }
+
+    private void sendTelematicsCommand() {
+        Manager.getInstance().initialize(
+                "***REMOVED***",
+                "***REMOVED***=",
+                "***REMOVED***==",
+                view.getActivity()
+        );
+
+        String token = "***REMOVED***";
+
+        //ByteUtils.bytesFromHex("***REMOVED***")
+
+        Manager.getInstance().downloadCertificate(token, new Manager.DownloadCallback() {
+            @Override
+            public void onDownloaded(byte[] vehicleSerial) {
+                byte[] command = Command.DoorLocks.lockDoors(true);
+                Manager.getInstance().getTelematics().sendCommand(command, vehicleSerial, new Telematics.CommandCallback() {
+                    @Override
+                    public void onCommandResponse(byte[] bytes) {
+                        Log.d(TAG, "onCommandResponse: ");
+                    }
+
+                    @Override
+                    public void onCommandFailed(TelematicsError error) {
+                        Log.d(TAG, "onCommandFailed: " + error.getType());
+                    }
+                });
+            }
+
+            @Override
+            public void onDownloadFailed(DownloadAccessCertificateError error) {
+
+            }
+        });
     }
 
     @Override

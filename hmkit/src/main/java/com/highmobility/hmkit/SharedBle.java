@@ -29,7 +29,7 @@ public class SharedBle {
     }
 
     public void addListener(SharedBleListener listener) {
-        listeners.add(listener);
+        if (listeners.contains(listener) == false) listeners.add(listener);
     }
 
     public void removeListener(SharedBleListener listener) {

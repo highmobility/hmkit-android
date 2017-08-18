@@ -166,6 +166,9 @@ public class Broadcaster implements SharedBleListener {
      *                 onBroadcastingFailed is invoked if something went wrong.
      */
     public void startBroadcasting(StartCallback callback) {
+        manager.initializeBle();
+        manager.ble.addListener(this);
+
         if (state == State.BROADCASTING) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "will not start broadcasting: already broadcasting");
@@ -332,7 +335,6 @@ public class Broadcaster implements SharedBleListener {
 
     Broadcaster(Manager manager) {
         this.manager = manager;
-        manager.ble.addListener(this);
     }
 
     @Override

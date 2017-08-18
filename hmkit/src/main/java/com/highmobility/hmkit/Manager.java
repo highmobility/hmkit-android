@@ -121,11 +121,9 @@ public class Manager {
             workThread.start();
         workHandler = new Handler(workThread.getLooper());
 
-        ble = new SharedBle(this.context);
-
+        telematics = new Telematics(this);
         broadcaster = new Broadcaster(this);
         scanner = new Scanner(this);
-        telematics = new Telematics(this);
 
         coreInterface = new BTCoreInterface(this);
         core.HMBTCoreInit(coreInterface);
@@ -349,6 +347,11 @@ public class Manager {
     public void deleteCertificates() throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
         storage.resetStorage();
+    }
+
+    void initializeBle() {
+        // we only want to initialize ble when we start using it
+        if (ble == null) ble = new SharedBle(context);
     }
 
     private void startClock() {

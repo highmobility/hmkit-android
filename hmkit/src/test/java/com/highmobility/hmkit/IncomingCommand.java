@@ -87,7 +87,6 @@ public class IncomingCommand {
         assertTrue(((Failure)command).getFailureReason() == Failure.Reason.UNAUTHORIZED);
     }
 
-
     @Test
     public void failure_vs() {
         byte[] bytes = ByteUtils.bytesFromHex("00020100100101");
@@ -231,7 +230,6 @@ public class IncomingCommand {
         assertTrue(((TrunkState)command).getLockState() == TrunkState.LockState.UNLOCKED);
         assertTrue(((TrunkState)command).getPosition() == TrunkState.Position.OPEN);
     }
-
 
     @Test
     public void charging_init() {
@@ -440,7 +438,6 @@ public class IncomingCommand {
         assertTrue(((NotificationAction)command).getActionIdentifier() == -2);
     }
 
-
     @Test
     public void notification() {
         byte[] bytes = ByteUtils.bytesFromHex("00380000115374617274206e617669676174696f6e3f0200024e6f0103596573");
@@ -577,7 +574,6 @@ public class IncomingCommand {
         assertTrue(command.getClass() == KeyfobPosition.class);
         assertTrue(((KeyfobPosition) command).getPosition() == KeyfobPosition.Position.INSIDE_CAR);
     }
-
 
     @Test
     public void vehicleTime() {
