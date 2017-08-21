@@ -2,6 +2,7 @@ package com.highmobility.hmkit;
 
 import android.util.Log;
 
+import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.Command.CommandParseException;
 
 import java.io.UnsupportedEncodingException;
@@ -219,7 +220,7 @@ public class ByteUtils {
             int msOffset = minutesOffset * 60 * 1000;
             String[] availableIds = TimeZone.getAvailableIDs(msOffset);
             if (availableIds.length == 0) {
-                Log.d("", "getDate: invalid timezone");
+                Log.d(Broadcaster.TAG, "getDate: invalid timezone for minute offset " + minutesOffset + ", use UTC");
                 c.setTimeZone(TimeZone.getTimeZone("UTC"));
             }
             else {
