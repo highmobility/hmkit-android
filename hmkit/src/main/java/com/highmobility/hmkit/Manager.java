@@ -162,8 +162,10 @@ public class Manager {
         broadcaster = null;
         coreClockTimer.cancel();
         coreClockTimer = null;
-        ble.terminate();
-        ble = null;
+        if (ble != null) {
+            ble.terminate();
+            ble = null;
+        }
         webService.cancelAllRequests();
         webService = null;
         telematics = null;

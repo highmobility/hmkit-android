@@ -359,7 +359,9 @@ public class Broadcaster implements SharedBleListener {
         manager.workHandler.removeCallbacks(clockRunnable);
         setIsAlivePinging(false);
 
-        manager.ble.removeListener(this);
+        if (manager.ble != null) {
+            manager.ble.removeListener(this);
+        }
 
         if (GATTServer != null) {
             GATTServer.clearServices();
