@@ -128,8 +128,8 @@ uint32_t hm_bt_persistence_hal_get_access_certificate(uint8_t *serial, uint8_t *
   jbyteArray endDate_ = (*envRef)->NewByteArray(envRef,5);
   (*envRef)->SetByteArrayRegion(envRef, endDate_, 0, 5, (const jbyte*) endDate );
 
-  jbyteArray command_ = (*envRef)->NewByteArray(envRef,7);
-  (*envRef)->SetByteArrayRegion(envRef, command_, 0, 7, (const jbyte*) command );
+  jbyteArray command_ = (*envRef)->NewByteArray(envRef,16);
+  (*envRef)->SetByteArrayRegion(envRef, command_, 0, 16, (const jbyte*) command );
 
   jintArray commandSize_ = (*envRef)->NewIntArray(envRef,1);
   (*envRef)->SetIntArrayRegion(envRef, commandSize_, 0, 1, (const jint*) commandSize );
@@ -175,8 +175,8 @@ uint32_t hm_bt_persistence_hal_get_access_certificate_by_index(uint8_t index, ui
   jbyteArray endDate_ = (*envRef)->NewByteArray(envRef,5);
   (*envRef)->SetByteArrayRegion(envRef, endDate_, 0, 5, (const jbyte*) endDate );
 
-  jbyteArray command_ = (*envRef)->NewByteArray(envRef,7);
-  (*envRef)->SetByteArrayRegion(envRef, command_, 0, 7, (const jbyte*) command );
+  jbyteArray command_ = (*envRef)->NewByteArray(envRef,16);
+  (*envRef)->SetByteArrayRegion(envRef, command_, 0, 16, (const jbyte*) command );
 
   jintArray commandSize_ = (*envRef)->NewIntArray(envRef,1);
   (*envRef)->SetIntArrayRegion(envRef, commandSize_, 0, 1, (const jint*) commandSize );
