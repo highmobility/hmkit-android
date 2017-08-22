@@ -240,6 +240,7 @@ public class Command {
         }
 
         private byte messageType;
+        @Override
         public byte getType() {
             return messageType;
         }
@@ -1297,7 +1298,7 @@ public class Command {
      * Commands for the Navi Destination category of the Auto API.
      */
     public enum NaviDestination implements Type {
-        SET_DESTINATION((byte)0x00);
+        SET_DESTINATION((byte)0x02);
 
         /**
          * Set the navigation destination. This will be forwarded to the navigation system of the car.

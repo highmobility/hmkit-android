@@ -179,7 +179,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
             copyBytesToJNI(permissions, command);
             commandSize[0] = permissions.length;
-            
+
             return 0;
         }
 

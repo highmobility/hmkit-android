@@ -92,7 +92,7 @@ public class OutgoingCommand {
 
     @Test
     public void setDestination() {
-        String waitingForBytes = "0031004252147D41567AB1064265726C696E";
+        String waitingForBytes = "0031024252147D41567AB1064265726C696E";
 
         String commandBytes = null;
         try {
