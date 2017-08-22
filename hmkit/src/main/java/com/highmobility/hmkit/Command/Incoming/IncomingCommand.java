@@ -94,24 +94,28 @@ public class IncomingCommand {
                 throw new CommandParseException();
             }
         }
+        else if (bytes.length == 0) {
+            return new IncomingCommand(bytes);
+        }
         else {
             throw new CommandParseException();
         }
     }
 
-    Command.Identifier feature;
+    Command.Identifier identifier;
     byte type;
     byte[] bytes;
 
     IncomingCommand(byte[] bytes) throws CommandParseException {
+        if (bytes.length == 0) return; // empty IncomingCommand
         if (bytes.length < 3) throw new CommandParseException();
         this.bytes = bytes;
-        feature = Command.Identifier.fromIdentifier(bytes);
+        identifier = Command.Identifier.fromIdentifier(bytes);
         type = bytes[2];
     }
 
     public Command.Identifier getIdentifier() {
-        return feature;
+        return identifier;
     }
 
     byte getType() {
@@ -119,7 +123,7 @@ public class IncomingCommand {
     }
 
     byte[] getIdentifierAndType() {
-        return ByteUtils.concatBytes(feature.getIdentifier(), type);
+        return ByteUtils.concatBytes(identifier.getIdentifier(), type);
     }
 
     byte[] getBytes() {
@@ -132,6 +136,7 @@ public class IncomingCommand {
      * @return True if the command has the given type.
      */
     public boolean is(Command.Type type) {
+        if (bytes == null) return false;
         if (Arrays.equals(getIdentifierAndType(), type.getIdentifierAndType())) {
             return true;
         }
