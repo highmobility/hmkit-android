@@ -415,7 +415,7 @@ public class Broadcaster implements SharedBleListener {
         links.remove(link);
 
         // set new adapter name
-        if (links.size() == 0) {
+        if (links.size() == 0 && getState() != State.BROADCASTING) {
             manager.ble.setRandomAdapterName();
         }
 
