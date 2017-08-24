@@ -33,7 +33,7 @@ public class AccessCertificate extends Certificate {
 //        byte[] bytes = new byte[4];
 //        System.arraycopy(this.bytes, 0, bytes, 0, 4);
 //        return bytes;
-        // TODO: this should not be hard coded
+        // Parse when its added to the certificate
         return new byte[] { 0x74, 0x6D, 0x63, 0x73 };
     }
     /**

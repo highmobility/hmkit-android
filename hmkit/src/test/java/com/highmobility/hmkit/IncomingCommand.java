@@ -602,7 +602,4 @@ public class IncomingCommand {
             e.printStackTrace();
         }
     }
-
-    // TODO: always test the failure as well, or make failure dynamically get the identifier.
-    // failure requires writing separate parsing
 }
