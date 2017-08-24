@@ -45,7 +45,7 @@ public class Cloud {
     RequestQueue queue;
 
     Cloud(Context context) {
-        ignoreSslErrors(); // TODO: delete at some point
+        //ignoreSslErrors();
         queue = Volley.newRequestQueue(context);
         url = baseUrl + "/" + apiUrl;
     }
