@@ -61,7 +61,7 @@ public class VehicleStatus {
                 "06"           + // License plate is 6 bytes
                 "414243313233" + // "ABC123"
                 "0F" +      // length
-                "00200D04000100010000020001030001" + // door locks
+                "00200D04000100010000020101030001" + // door locks
                 "0021020001" +
                 "0023080200FF32bf19999a" +
                 "002410419800004140000001000041ac000060" + // climate
@@ -160,11 +160,11 @@ public class VehicleStatus {
         assertTrue(((DoorLocks)state).getFrontRight().getPosition() == DoorLockState.DoorPosition.CLOSED);
         assertTrue(((DoorLocks)state).getFrontRight().getLockState() == DoorLockState.LockState.UNLOCKED);
 
+        assertTrue(((DoorLocks)state).getRearRight().getPosition() == DoorLockState.DoorPosition.OPEN);
+        assertTrue(((DoorLocks)state).getRearRight().getLockState() == DoorLockState.LockState.LOCKED);
+
         assertTrue(((DoorLocks)state).getRearLeft().getPosition() == DoorLockState.DoorPosition.CLOSED);
         assertTrue(((DoorLocks)state).getRearLeft().getLockState() == DoorLockState.LockState.LOCKED);
-
-        assertTrue(((DoorLocks)state).getRearRight().getPosition() == DoorLockState.DoorPosition.CLOSED);
-        assertTrue(((DoorLocks)state).getRearRight().getLockState() == DoorLockState.LockState.LOCKED);
     }
 
     @Test

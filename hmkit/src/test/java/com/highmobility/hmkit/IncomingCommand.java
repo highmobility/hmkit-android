@@ -124,7 +124,7 @@ public class IncomingCommand {
 
     @Test
     public void lockstate_init() {
-        byte[] bytes = ByteUtils.bytesFromHex("00200104000100010000020001030001");
+        byte[] bytes = ByteUtils.bytesFromHex("00200104000100010000020001030101");
 
         com.highmobility.hmkit.Command.Incoming.IncomingCommand command = null;
 
@@ -147,11 +147,12 @@ public class IncomingCommand {
         assertTrue(((LockState)command).getFrontRight().getPosition() == DoorLockState.DoorPosition.CLOSED);
         assertTrue(((LockState)command).getFrontRight().getLockState() == DoorLockState.LockState.UNLOCKED);
 
-        assertTrue(((LockState)command).getRearLeft().getPosition() == DoorLockState.DoorPosition.CLOSED);
-        assertTrue(((LockState)command).getRearLeft().getLockState() == DoorLockState.LockState.LOCKED);
-
         assertTrue(((LockState)command).getRearRight().getPosition() == DoorLockState.DoorPosition.CLOSED);
         assertTrue(((LockState)command).getRearRight().getLockState() == DoorLockState.LockState.LOCKED);
+
+        assertTrue(((LockState)command).getRearLeft().getPosition() == DoorLockState.DoorPosition.OPEN);
+        assertTrue(((LockState)command).getRearLeft().getLockState() == DoorLockState.LockState.LOCKED);
+
     }
 
     @Test

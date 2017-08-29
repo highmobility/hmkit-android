@@ -87,10 +87,10 @@ public class DoorLocks extends FeatureState {
                 frontRight = doorLockState;
             }
             else if (location == 0x02) {
-                rearLeft = doorLockState;
+                rearRight = doorLockState;
             }
             else if (location == 0x03) {
-                rearRight = doorLockState;
+                rearLeft = doorLockState;
             }
 
             position += 3;
