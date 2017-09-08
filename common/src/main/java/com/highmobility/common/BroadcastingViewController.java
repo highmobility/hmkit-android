@@ -5,11 +5,9 @@ import android.util.Log;
 
 import com.highmobility.hmkit.Broadcaster;
 import com.highmobility.hmkit.BroadcasterListener;
-import com.highmobility.hmkit.ByteUtils;
-import com.highmobility.hmkit.Command.Command;
+import com.highmobility.autoapi.Command;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
-import com.highmobility.hmkit.Constants;
 import com.highmobility.hmkit.Error.BroadcastError;
 import com.highmobility.hmkit.Error.DownloadAccessCertificateError;
 import com.highmobility.hmkit.Error.TelematicsError;
@@ -32,6 +30,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
         cloud = new Cloud(view.getActivity());
         initializeManager();
         broadcaster = Manager.getInstance().getBroadcaster();
+
         // set the broadcaster listener
         broadcaster.setListener(this);
         startBroadcasting();
@@ -48,7 +47,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
 
         String token = "***REMOVED***";
 
-        //ByteUtils.bytesFromHex("***REMOVED***")
+        //Bytes.bytesFromHex("***REMOVED***")
 
         Manager.getInstance().downloadCertificate(token, new Manager.DownloadCallback() {
             @Override
@@ -219,7 +218,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
         Manager.getInstance().initialize(
                 "***REMOVED***",
                 "***REMOVED***=",
-                "***REMOVED***+6pXmtkYxynMQm0rfcBU0XFF5A==",
+                "***REMOVED***==",
                 view.getActivity()
         );
     }

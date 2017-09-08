@@ -1,8 +1,7 @@
 package com.highmobility.hmkit.Crypto;
 
 import android.util.Base64;
-
-import com.highmobility.hmkit.ByteUtils;
+import com.highmobility.byteutils.Bytes;
 
 import java.util.Date;
 
@@ -169,7 +168,7 @@ public class AccessCertificate extends Certificate {
      */
     public void setSignature(byte[] bytes) {
         if (bytes.length == 64) {
-            this.bytes = ByteUtils.concatBytes(getCertificateData(), bytes);
+            this.bytes = Bytes.concatBytes(getCertificateData(), bytes);
         }
     }
 
@@ -177,12 +176,12 @@ public class AccessCertificate extends Certificate {
     public String toString() {
         String description = "";
 
-        description += "\ngainingSerial: " + ByteUtils.hexFromBytes(getGainerSerial());
-        description += "\ngainingPublicKey: " + ByteUtils.hexFromBytes(getGainerPublicKey());
-        description += "\nprovidingSerial: " + ByteUtils.hexFromBytes(getProviderSerial());
+        description += "\ngainingSerial: " + Bytes.hexFromBytes(getGainerSerial());
+        description += "\ngainingPublicKey: " + Bytes.hexFromBytes(getGainerPublicKey());
+        description += "\nprovidingSerial: " + Bytes.hexFromBytes(getProviderSerial());
         description += "\nvalid from: : " + getStartDate() + " to: " + getEndDate();
-        description += "\npermissions: " + ByteUtils.hexFromBytes(getPermissions());
-        description += "\nsignature: " + ByteUtils.hexFromBytes(getSignature()) + "\n";
+        description += "\npermissions: " + Bytes.hexFromBytes(getPermissions());
+        description += "\nsignature: " + Bytes.hexFromBytes(getSignature()) + "\n";
 
         return description;
     }
@@ -236,18 +235,18 @@ public class AccessCertificate extends Certificate {
 
         byte[] bytes = new byte[0];
 
-        bytes = ByteUtils.concatBytes(bytes, gainerSerial);
-        bytes = ByteUtils.concatBytes(bytes, gainingPublicKey);
-        bytes = ByteUtils.concatBytes(bytes, providingSerial);
-        bytes = ByteUtils.concatBytes(bytes, startDate);
-        bytes = ByteUtils.concatBytes(bytes, endDate);
+        bytes = Bytes.concatBytes(bytes, gainerSerial);
+        bytes = Bytes.concatBytes(bytes, gainingPublicKey);
+        bytes = Bytes.concatBytes(bytes, providingSerial);
+        bytes = Bytes.concatBytes(bytes, startDate);
+        bytes = Bytes.concatBytes(bytes, endDate);
 
         if (permissions != null && permissions.length > 0) {
-            bytes = ByteUtils.concatBytes(bytes, new byte[] {(byte)permissions.length});
-            bytes = ByteUtils.concatBytes(bytes, permissions);
+            bytes = Bytes.concatBytes(bytes, new byte[] {(byte)permissions.length});
+            bytes = Bytes.concatBytes(bytes, permissions);
         }
         else {
-            bytes = ByteUtils.concatBytes(bytes, new byte[] {0x00});
+            bytes = Bytes.concatBytes(bytes, new byte[] {0x00});
         }
 
         this.bytes = bytes;

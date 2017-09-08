@@ -11,6 +11,7 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
+import com.highmobility.byteutils.Bytes;
 import com.highmobility.hmkit.Crypto.Crypto;
 
 import org.json.JSONException;
@@ -34,8 +35,8 @@ import javax.net.ssl.X509TrustManager;
 class WebService {
     private static final String TAG = "WebService";
 
-    private static final String baseUrl = "https://developers.high-mobility.com"; // production
-//    private static final String baseUrl = "https://developers.h-m.space"; // staging
+//    private static final String baseUrl = "https://developers.high-mobility.com"; // production
+    private static final String baseUrl = "https://developers.h-m.space"; // staging
     private static final String apiUrl = "/api/v1";
     private static final String telematicsUrl = baseUrl + "/hm_cloud" + apiUrl;
 
@@ -61,7 +62,7 @@ class WebService {
         JSONObject payload = new JSONObject();
         try {
             byte[] accessTokenBytes = accessToken.getBytes("UTF-8");
-            payload.put("serial_number", ByteUtils.hexFromBytes(serialNumber));
+            payload.put("serial_number", Bytes.hexFromBytes(serialNumber));
             payload.put("access_token", accessToken);
             payload.put("signature", new String(Base64.encode(Crypto.sign(accessTokenBytes, privateKey), Base64.NO_WRAP)));
         }
@@ -100,8 +101,8 @@ class WebService {
         // payload
         JSONObject payload = new JSONObject();
         try {
-            payload.put("serial_number", ByteUtils.hexFromBytes(serial));
-            payload.put("issuer", ByteUtils.hexFromBytes(issuer));
+            payload.put("serial_number", Bytes.hexFromBytes(serial));
+            payload.put("issuer", Bytes.hexFromBytes(issuer));
             payload.put("data", new String(Base64.encode(command, Base64.NO_WRAP)));
         } catch (JSONException e) {
             throw new IllegalArgumentException();
@@ -140,7 +141,7 @@ class WebService {
         // payload
         JSONObject payload = new JSONObject();
         try {
-            payload.put("serial_number", ByteUtils.hexFromBytes(serial));
+            payload.put("serial_number", Bytes.hexFromBytes(serial));
         } catch (JSONException e) {
             throw new IllegalArgumentException();
         }

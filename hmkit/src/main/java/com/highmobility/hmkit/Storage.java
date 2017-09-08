@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.highmobility.byteutils.Bytes;
 import com.highmobility.hmkit.Crypto.AccessCertificate;
 import com.highmobility.hmkit.Crypto.Certificate;
 
@@ -94,7 +95,7 @@ public class Storage {
 
             int counter = 0;
             for (String bytesString : bytesStringSet) {
-                AccessCertificate cert = new AccessCertificate(ByteUtils.bytesFromHex(bytesString));
+                AccessCertificate cert = new AccessCertificate(Bytes.bytesFromHex(bytesString));
                 certificates[counter] = cert;
                 counter++;
             }
@@ -109,7 +110,7 @@ public class Storage {
         HashSet<String> stringSet = new HashSet<>();
 
         for (Certificate cert : certificates) {
-            stringSet.add(ByteUtils.hexFromBytes(cert.getBytes()));
+            stringSet.add(Bytes.hexFromBytes(cert.getBytes()));
         }
 
         editor.putStringSet(ACCESS_CERTIFICATE_STORAGE_KEY, stringSet);
@@ -198,8 +199,8 @@ public class Storage {
         }
         else {
             if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
-                Log.d(TAG, "deleteCertificate: failed for gaining: " + ByteUtils.hexFromBytes(gainingSerial)
-                        + " providing: " + ByteUtils.hexFromBytes(providingSerial));
+                Log.d(TAG, "deleteCertificate: failed for gaining: " + Bytes.hexFromBytes(gainingSerial)
+                        + " providing: " + Bytes.hexFromBytes(providingSerial));
             }
             return false;
         }
@@ -227,7 +228,7 @@ public class Storage {
         }
         else {
             if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
-                Log.d(TAG, "deleteCertificateWithGainingSerial failed: " + ByteUtils.hexFromBytes(serial));
+                Log.d(TAG, "deleteCertificateWithGainingSerial failed: " + Bytes.hexFromBytes(serial));
             }
             return false;
         }
@@ -337,8 +338,8 @@ public class Storage {
     private void _test_Storage() {
         editor.clear();
         editor.commit();
-        AccessCertificate cert1 = new AccessCertificate(ByteUtils.bytesFromHex("***REMOVED***"));
-        AccessCertificate cert2 = new AccessCertificate(ByteUtils.bytesFromHex("***REMOVED***"));
+        AccessCertificate cert1 = new AccessCertificate(Bytes.bytesFromHex("***REMOVED***"));
+        AccessCertificate cert2 = new AccessCertificate(Bytes.bytesFromHex("***REMOVED***"));
 
         AccessCertificate[] certs = new AccessCertificate[] {cert1, cert2};
         setCertificates(certs);

@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.util.Log;
 
+import com.highmobility.byteutils.Bytes;
 import com.highmobility.hmkit.Crypto.AccessCertificate;
 
 import java.util.List;
@@ -106,7 +107,7 @@ class ScannedLink extends Link {
     void writeValue(byte[] value) {
         if (writeCharacteristic != null){
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "write value " + ByteUtils.hexFromBytes(value));
+                Log.d(TAG, "write value " + Bytes.hexFromBytes(value));
 
             if (writeCharacteristic.setValue(value) == false || gatt.writeCharacteristic(writeCharacteristic) == false) {
                 // TODO: fail auth or command
@@ -190,12 +191,12 @@ class ScannedLink extends Link {
                 // service UUID is reversed
                 UUID uuid = service.getUuid();
 
-                byte[] msb = ByteUtils.longToBytes(uuid.getMostSignificantBits());
-                byte[] lsb = ByteUtils.longToBytes(uuid.getLeastSignificantBits());
+                byte[] msb = Bytes.longToBytes(uuid.getMostSignificantBits());
+                byte[] lsb = Bytes.longToBytes(uuid.getLeastSignificantBits());
 
-                ByteUtils.reverse(msb);
-                ByteUtils.reverse(lsb);
-                UUID reverseUUID = new UUID(ByteUtils.getLong(lsb), ByteUtils.getLong(msb));
+                Bytes.reverse(msb);
+                Bytes.reverse(lsb);
+                UUID reverseUUID = new UUID(Bytes.getLong(lsb), Bytes.getLong(msb));
 
                 if (reverseUUID.equals(Constants.SERVICE_UUID)) {
                     for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
@@ -252,7 +253,7 @@ class ScannedLink extends Link {
                                          final BluetoothGattCharacteristic characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                    Log.d(TAG, "onCharacteristicRead " + ByteUtils.hexFromBytes(characteristic.getValue()));
+                    Log.d(TAG, "onCharacteristicRead " + Bytes.hexFromBytes(characteristic.getValue()));
                 if (characteristic.getUuid().equals(Constants.READ_CHAR_UUID)) {
                     scanner.manager.workHandler.post(new Runnable() {
                         @Override
@@ -293,7 +294,7 @@ class ScannedLink extends Link {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "onCharacteristicChanged " + ByteUtils.hexFromBytes(characteristic.getValue()));
+                Log.d(TAG, "onCharacteristicChanged " + Bytes.hexFromBytes(characteristic.getValue()));
             scanner.manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {

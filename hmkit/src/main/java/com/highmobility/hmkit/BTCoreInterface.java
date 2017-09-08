@@ -2,6 +2,7 @@ package com.highmobility.hmkit;
 
 import android.util.Log;
 
+import com.highmobility.byteutils.Bytes;
 import com.highmobility.hmkit.Crypto.AccessCertificate;
 import com.highmobility.hmkit.Crypto.Crypto;
 import com.highmobility.btcore.HMBTCoreInterface;
@@ -133,7 +134,7 @@ class BTCoreInterface implements HMBTCoreInterface {
         AccessCertificate cert = new AccessCertificate(serial, publicKey, manager.getDeviceCertificate().getSerial(), startDate, endDate, command);
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(TAG, "HMPersistenceHaladdPublicKey: " + ByteUtils.hexFromBytes(serial));
+            Log.d(TAG, "HMPersistenceHaladdPublicKey: " + Bytes.hexFromBytes(serial));
 
 
         int errorCode = manager.storage.storeCertificate(cert).getValue();
@@ -151,7 +152,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
         if (certificate == null) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "No registered cert with gaining serial " + ByteUtils.hexFromBytes(serial));
+                Log.d(TAG, "No registered cert with gaining serial " + Bytes.hexFromBytes(serial));
             return 1;
         }
 
@@ -225,7 +226,7 @@ class BTCoreInterface implements HMBTCoreInterface {
         }
         else {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(TAG, "HMPersistenceHaladdStoredCertificate " + ByteUtils.hexFromBytes(certificate.getGainerSerial()) + " success");
+                Log.d(TAG, "HMPersistenceHaladdStoredCertificate " + Bytes.hexFromBytes(certificate.getGainerSerial()) + " success");
         }
 
         return 0;
@@ -240,13 +241,13 @@ class BTCoreInterface implements HMBTCoreInterface {
                 copyBytesToJNI(storedCert.getBytes(), cert);
                 size[0] = storedCert.getBytes().length;
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                    Log.d(Broadcaster.TAG, "Returned stored cert for serial " + ByteUtils.hexFromBytes(serial));
+                    Log.d(Broadcaster.TAG, "Returned stored cert for serial " + Bytes.hexFromBytes(serial));
                 return 0;
             }
         }
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(Broadcaster.TAG, "No stored cert for serial " + ByteUtils.hexFromBytes(serial));
+            Log.d(Broadcaster.TAG, "No stored cert for serial " + Bytes.hexFromBytes(serial));
 
         return 1;
     }
@@ -259,19 +260,19 @@ class BTCoreInterface implements HMBTCoreInterface {
             if (Arrays.equals(cert.getProviderSerial(), serial)) {
                 if (manager.storage.deleteCertificate(cert.getGainerSerial(), cert.getProviderSerial())) {
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                        Log.d(Broadcaster.TAG, "Erased stored cert for serial " + ByteUtils.hexFromBytes(serial));
+                        Log.d(Broadcaster.TAG, "Erased stored cert for serial " + Bytes.hexFromBytes(serial));
 
                     return 0;
                 }
                 else {
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                        Log.d(Broadcaster.TAG, "Could not erase cert for serial " + ByteUtils.hexFromBytes(serial));
+                        Log.d(Broadcaster.TAG, "Could not erase cert for serial " + Bytes.hexFromBytes(serial));
                     return 1;
                 }
             }
         }
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(Broadcaster.TAG, "No cert to erase for serial " + ByteUtils.hexFromBytes(serial));
+            Log.d(Broadcaster.TAG, "No cert to erase for serial " + Bytes.hexFromBytes(serial));
 
         return 1;
     }

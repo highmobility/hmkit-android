@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothProfile;
 import android.util.Log;
+import com.highmobility.byteutils.Bytes;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -33,7 +34,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
             broadcaster.manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    broadcaster.manager.core.HMBTCorelinkDisconnect(broadcaster.manager.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
+                    broadcaster.manager.core.HMBTCorelinkDisconnect(broadcaster.manager.coreInterface, Bytes.bytesFromMacString(device.getAddress()));
                 }
             });
         }
@@ -49,7 +50,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         final int characteristicId = getCharacteristicIdForCharacteristic(characteristic);
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "onCharacteristicReadRequest: " + characteristicId + " "
-                + ByteUtils.hexFromBytes(offsetBytes));
+                + Bytes.hexFromBytes(offsetBytes));
         broadcaster.GATTServer.sendResponse(device,
                 requestId,
                 BluetoothGatt.GATT_SUCCESS,
@@ -61,7 +62,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                 @Override
                 public void run() {
                     broadcaster.manager.core.HMBTCorelinkWriteResponse(broadcaster.manager.coreInterface,
-                            ByteUtils.bytesFromMacString(device.getAddress()),
+                            Bytes.bytesFromMacString(device.getAddress()),
                             characteristicId);
                 }
             });
@@ -82,8 +83,8 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         }
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(TAG, "incoming data " + ByteUtils.hexFromBytes(value) + " from "
-                    + ByteUtils.hexFromBytes(ByteUtils.bytesFromMacString(device.getAddress())));
+            Log.d(TAG, "incoming data " + Bytes.hexFromBytes(value) + " from "
+                    + Bytes.hexFromBytes(Bytes.bytesFromMacString(device.getAddress())));
 
         if (responseNeeded) {
             broadcaster.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
@@ -95,7 +96,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                             devicePointer.manager.coreInterface,
                             value,
                             value.length,
-                            ByteUtils.bytesFromMacString(device.getAddress()),
+                            Bytes.bytesFromMacString(device.getAddress()),
                             characteristicId);
                 }
             });
@@ -125,7 +126,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                     @Override
                     public void run() {
                         broadcaster.linkDidConnect(device);
-                        broadcaster.manager.core.HMBTCorelinkConnect(broadcaster.manager.coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
+                        broadcaster.manager.core.HMBTCorelinkConnect(broadcaster.manager.coreInterface, Bytes.bytesFromMacString(device.getAddress()));
                     }
                 });
             }

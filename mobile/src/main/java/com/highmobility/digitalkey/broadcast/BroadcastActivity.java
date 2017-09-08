@@ -8,19 +8,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.highmobility.digitalkey.R;
-import com.highmobility.hmkit.ConnectedLink;
-import com.highmobility.hmkit.ConnectedLinkListener;
-import com.highmobility.hmkit.Constants;
-import com.highmobility.hmkit.Link;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import com.highmobility.common.BroadcastingViewController;
 import com.highmobility.common.IBroadcastingView;
 import com.highmobility.common.IBroadcastingViewController;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.highmobility.digitalkey.R;
+import com.highmobility.hmkit.ConnectedLink;
+import com.highmobility.hmkit.ConnectedLinkListener;
+import com.highmobility.hmkit.Link;
 
 /**
  * Created by ttiganik on 02/06/16.
@@ -46,18 +42,8 @@ public class BroadcastActivity extends AppCompatActivity implements IBroadcastin
         setContentView(R.layout.broadcast_view);
         ButterKnife.bind(this);
         controller = new BroadcastingViewController(this);
-        confirmPairButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onPairConfirmClick();
-            }
-        });
-        showButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                controller.onLinkClicked();
-            }
-        });
+        confirmPairButton.setOnClickListener(v -> onPairConfirmClick());
+        showButton.setOnClickListener(v -> controller.onLinkClicked());
     }
 
     @Override
@@ -84,7 +70,7 @@ public class BroadcastActivity extends AppCompatActivity implements IBroadcastin
     }
 
     @Override
-    public Class getLinkActivityClass() {
+    public Class<?> getLinkActivityClass() {
         return LinkView.class;
     }
 

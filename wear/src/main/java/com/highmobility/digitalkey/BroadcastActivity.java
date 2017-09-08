@@ -8,16 +8,13 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.highmobility.hmkit.ConnectedLink;
-import com.highmobility.hmkit.Constants;
-import com.highmobility.hmkit.Link;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import com.highmobility.common.BroadcastingViewController;
 import com.highmobility.common.IBroadcastingView;
 import com.highmobility.common.IBroadcastingViewController;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.highmobility.hmkit.ConnectedLink;
+import com.highmobility.hmkit.Link;
 
 /**
  * Created by ttiganik on 02/06/16.

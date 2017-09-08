@@ -74,7 +74,6 @@ class WebSocket {
     }
 
     void sendCommand(byte[] command) throws IOException {
-        // TODO:
         ObjectNode node = new ObjectNode(JsonNodeFactory.instance)
                 .put("user", "my_username")
                 .put("body", "");

@@ -13,6 +13,8 @@ import android.os.Looper;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+
+import com.highmobility.byteutils.Bytes;
 import com.highmobility.hmkit.Crypto.AccessCertificate;
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.hmkit.Error.BroadcastError;
@@ -219,14 +221,14 @@ public class Broadcaster implements SharedBleListener {
 
         UUID advertiseUUID;
         if (advertisedSerial == null) {
-            byte[] uuidBytes = ByteUtils.concatBytes(issuer, appId);
-            ByteUtils.reverse(uuidBytes);
-            advertiseUUID = ByteUtils.UUIDFromByteArray(uuidBytes);
+            byte[] uuidBytes = Bytes.concatBytes(issuer, appId);
+            Bytes.reverse(uuidBytes);
+            advertiseUUID = Bytes.UUIDFromByteArray(uuidBytes);
         }
         else {
-            byte[] uuidBytes = ByteUtils.concatBytes(new byte[] {0x00, 0x00, 0x00, 0x00}, advertisedSerial);
-            uuidBytes = ByteUtils.concatBytes(uuidBytes, new byte[] {0x00, 0x00, 0x00});
-            advertiseUUID = ByteUtils.UUIDFromByteArray(uuidBytes);
+            byte[] uuidBytes = Bytes.concatBytes(new byte[] {0x00, 0x00, 0x00, 0x00}, advertisedSerial);
+            uuidBytes = Bytes.concatBytes(uuidBytes, new byte[] {0x00, 0x00, 0x00});
+            advertiseUUID = Bytes.UUIDFromByteArray(uuidBytes);
         }
 
         final AdvertiseData data = new AdvertiseData.Builder()
@@ -402,7 +404,7 @@ public class Broadcaster implements SharedBleListener {
 
     boolean deviceExitedProximity(HMDevice device) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
+            Log.d(TAG, "lose link " + Bytes.hexFromBytes(device.getMac()));
 
         final ConnectedLink link = getLinkForMac(device.getMac());
         if (link == null) return false;
@@ -462,7 +464,7 @@ public class Broadcaster implements SharedBleListener {
         if (link == null) return false;
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(link.getAddressBytes()) + " char " + characteristicId);
+            Log.d(TAG, "write " + Bytes.hexFromBytes(value) + " to " + Bytes.hexFromBytes(link.getAddressBytes()) + " char " + characteristicId);
 
         BluetoothGattCharacteristic characteristic = getCharacteristicForId(characteristicId);
         if (characteristic == null) {

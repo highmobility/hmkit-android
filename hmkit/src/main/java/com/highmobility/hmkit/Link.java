@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
 import com.highmobility.btcore.HMDevice;
+import com.highmobility.byteutils.Bytes;
 import com.highmobility.hmkit.Error.LinkError;
 
 import java.util.Calendar;
@@ -119,8 +120,8 @@ public class Link {
         }
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "send command " + ByteUtils.hexFromBytes(bytes)
-                    + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
+            Log.d(TAG, "send command " + Bytes.hexFromBytes(bytes)
+                    + " to " + Bytes.hexFromBytes(hmDevice.getMac()));
 
         sentCommand = new SentCommand(callback, manager.mainHandler);
 
@@ -145,8 +146,8 @@ public class Link {
 
     void onCommandReceived(final byte[] bytes) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
-                    + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()));
+            Log.d(TAG, "did receive command " + Bytes.hexFromBytes(bytes)
+                    + " from " + Bytes.hexFromBytes(hmDevice.getMac()));
 
         if (listener == null) {
             Log.d(TAG, "can't dispatch notification: no listener set");
@@ -162,8 +163,8 @@ public class Link {
 
     void onCommandResponseReceived(final byte[] data) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
-                    + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()) + " in " +
+            Log.d(TAG, "did receive command response " + Bytes.hexFromBytes(data)
+                    + " from " + Bytes.hexFromBytes(hmDevice.getMac()) + " in " +
                     (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime) + "ms");
 
         if (sentCommand == null) {
@@ -176,6 +177,6 @@ public class Link {
     }
 
     byte[] getAddressBytes() {
-        return ByteUtils.bytesFromMacString(btDevice.getAddress());
+        return Bytes.bytesFromMacString(btDevice.getAddress());
     }
 }

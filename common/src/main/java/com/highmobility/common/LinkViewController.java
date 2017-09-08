@@ -5,17 +5,13 @@ import android.os.CountDownTimer;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.highmobility.hmkit.Command.Command;
-import com.highmobility.hmkit.Command.CommandParseException;
+import com.highmobility.autoapi.Command;
+import com.highmobility.autoapi.CommandParseException;
 
-import com.highmobility.hmkit.Command.Incoming.Failure;
-import com.highmobility.hmkit.Command.Incoming.IncomingCommand;
-import com.highmobility.hmkit.Command.Incoming.LockState;
-import com.highmobility.hmkit.Command.Incoming.TrunkState;
-import com.highmobility.hmkit.Command.Incoming.VehicleStatus;
-import com.highmobility.hmkit.Command.VehicleStatus.DoorLocks;
-import com.highmobility.hmkit.Command.VehicleStatus.FeatureState;
-import com.highmobility.hmkit.Command.VehicleStatus.TrunkAccess;
+import com.highmobility.autoapi.incoming.*;
+import com.highmobility.autoapi.vehiclestatus.DoorLocks;
+import com.highmobility.autoapi.vehiclestatus.FeatureState;
+import com.highmobility.autoapi.vehiclestatus.TrunkAccess;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
 import com.highmobility.hmkit.Error.LinkError;
@@ -56,7 +52,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
         }
 
         // ask for initial state
-        requestInitialState();
+//        requestInitialState();
     }
 
     @Override
@@ -84,6 +80,13 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
             if (command.is(Command.DoorLocks.LOCK_STATE)) {
                 onLockStateUpdate(((LockState)command).isLocked());
+            }
+            else if (command.is(Command.Diagnostics.DIAGNOSTICS_STATE)) {
+                DiagnosticsState diagnostics = (DiagnosticsState)command;
+                Log.d(TAG, "front left: " + diagnostics.getFrontLeftTirePressure());
+                Log.d(TAG, "front right: " + diagnostics.getFrontRightTirePressure());
+                Log.d(TAG, "rear left: " + diagnostics.getRearLeftTirePressure());
+                Log.d(TAG, "rear right: " + diagnostics.getRearRightTirePressure());
             }
             else if (command.is(Command.TrunkAccess.TRUNK_STATE)) {
                 onTrunkStateUpdate(((TrunkState) command).getLockState());

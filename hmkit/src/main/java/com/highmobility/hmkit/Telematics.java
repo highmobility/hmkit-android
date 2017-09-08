@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.highmobility.byteutils.Bytes;
 import com.highmobility.hmkit.Crypto.AccessCertificate;
 import com.highmobility.hmkit.Error.TelematicsError;
 
@@ -69,7 +70,7 @@ public class Telematics {
         }
 
         if (manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "sendTelematicsCommand: " + ByteUtils.hexFromBytes(command));
+            Log.d(TAG, "sendTelematicsCommand: " + Bytes.hexFromBytes(command));
 
         sendingCommand = true;
 
@@ -161,7 +162,7 @@ public class Telematics {
         }
         else {
             if (manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "onTelematicsResponseDecrypted: " + ByteUtils.hexFromBytes(data));
+                Log.d(TAG, "onTelematicsResponseDecrypted: " + Bytes.hexFromBytes(data));
 
             sendingCommand = false;
             manager.mainHandler.post(new Runnable() {

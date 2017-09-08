@@ -1,7 +1,7 @@
 package com.highmobility.hmkit.Crypto;
 
 
-import com.highmobility.hmkit.ByteUtils;
+import com.highmobility.byteutils.Bytes;
 
 /**
  * Created by ttiganik on 13/04/16.
@@ -83,7 +83,7 @@ public class DeviceCertificate extends Certificate {
      */
     public void setSignature(byte[] bytes) {
         if (bytes.length == 64) {
-            this.bytes = ByteUtils.concatBytes(getCertificateData(), bytes);
+            this.bytes = Bytes.concatBytes(getCertificateData(), bytes);
         }
     }
 
@@ -91,11 +91,11 @@ public class DeviceCertificate extends Certificate {
     public String toString() {
         String description = "";
 
-        description += "\nissuer: " + ByteUtils.hexFromBytes(getIssuer());
-        description += "\nappIdentifer: " + ByteUtils.hexFromBytes(getAppIdentifier());
-        description += "\nserial: " + ByteUtils.hexFromBytes(getSerial());
-        description += "\npublic key: " + ByteUtils.hexFromBytes(getPublicKey());
-        description += "\nsignature: " + ByteUtils.hexFromBytes(getSignature());
+        description += "\nissuer: " + Bytes.hexFromBytes(getIssuer());
+        description += "\nappIdentifer: " + Bytes.hexFromBytes(getAppIdentifier());
+        description += "\nserial: " + Bytes.hexFromBytes(getSerial());
+        description += "\npublic key: " + Bytes.hexFromBytes(getPublicKey());
+        description += "\nsignature: " + Bytes.hexFromBytes(getSignature());
 
         return description;
     }
@@ -136,10 +136,10 @@ public class DeviceCertificate extends Certificate {
         }
 
         byte[] bytes = new byte[0];
-        bytes = ByteUtils.concatBytes(bytes, issuer);
-        bytes = ByteUtils.concatBytes(bytes, appIdentifier);
-        bytes = ByteUtils.concatBytes(bytes, serial);
-        bytes = ByteUtils.concatBytes(bytes, publicKey);
+        bytes = Bytes.concatBytes(bytes, issuer);
+        bytes = Bytes.concatBytes(bytes, appIdentifier);
+        bytes = Bytes.concatBytes(bytes, serial);
+        bytes = Bytes.concatBytes(bytes, publicKey);
 
         this.bytes = bytes;
     }

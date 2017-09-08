@@ -5,19 +5,14 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import com.highmobility.common.ILinkView;
 import com.highmobility.common.ILinkViewController;
 import com.highmobility.common.LinkViewController;
 import com.highmobility.digitalkey.R;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class LinkView extends AppCompatActivity implements ILinkView {
     static final String TAG = "LinkView";
