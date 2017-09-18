@@ -38,6 +38,7 @@ public class BroadcastActivity extends WearableActivity implements IBroadcasting
         setContentView(R.layout.broadcast_view);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         ButterKnife.bind(this);
+
         controller = new BroadcastingViewController(this);
         confirmPairButton.setOnClickListener(new View.OnClickListener() {
             @Override

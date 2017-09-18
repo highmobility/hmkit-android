@@ -1,4 +1,1 @@
 include ':mobile', ':wear', ':hmkit', ':common'
-include 'jars'
-include 'jars'
-
