@@ -2,6 +2,7 @@ package com.highmobility.hmkit.Crypto;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Created by ttiganik on 13/04/16.
@@ -37,19 +38,20 @@ public class Certificate {
     }
 
     static Date dateFromBytes(byte[] bytes) {
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTimeInMillis(0);
-        cal.set(2000 + bytes[0], bytes[1], bytes[2], bytes[3], bytes[4]);
+        cal.set(2000 + bytes[0], bytes[1] - 1, bytes[2], bytes[3], bytes[4]);
+
         return cal.getTime(); // get back a Date object
     }
 
     static byte[] bytesFromDate(Date date) {
         byte [] bytes = new byte[5];
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(date);
 
         bytes[0] = (byte)(calendar.get(Calendar.YEAR) - 2000);
-        bytes[1] = (byte)(calendar.get(Calendar.MONTH));
+        bytes[1] = (byte)(calendar.get(Calendar.MONTH) + 1);
         bytes[2] = (byte)(calendar.get(Calendar.DAY_OF_MONTH));
         bytes[3] = (byte)(calendar.get(Calendar.HOUR));
         bytes[4] = (byte)(calendar.get(Calendar.MINUTE));
