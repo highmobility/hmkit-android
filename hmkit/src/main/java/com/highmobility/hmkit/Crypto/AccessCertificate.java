@@ -1,9 +1,7 @@
 package com.highmobility.hmkit.Crypto;
 
 import android.util.Base64;
-
 import com.highmobility.hmkit.ByteUtils;
-
 import java.util.Date;
 
 /**
@@ -135,7 +133,7 @@ public class AccessCertificate extends Certificate {
      * @return A boolean value indicating if the certificate has expired.
      */
     public boolean isExpired() {
-        return getEndDate().after(new Date());
+        return getEndDate().before(new Date());
     }
 
     @Override
