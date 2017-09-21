@@ -5,8 +5,8 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.highmobility.byteutils.Bytes;
-import com.highmobility.hmkit.Crypto.AccessCertificate;
-import com.highmobility.hmkit.Crypto.Certificate;
+import com.highmobility.crypto.AccessCertificate;
+import com.highmobility.crypto.Certificate;
 
 import org.json.JSONObject;
 

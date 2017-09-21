@@ -9,8 +9,8 @@ import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.highmobility.hmkit.Crypto.AccessCertificate;
-import com.highmobility.hmkit.Crypto.DeviceCertificate;
+import com.highmobility.crypto.AccessCertificate;
+import com.highmobility.crypto.DeviceCertificate;
 import com.highmobility.btcore.HMBTCore;
 import com.highmobility.hmkit.Error.DownloadAccessCertificateError;
 

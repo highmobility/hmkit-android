@@ -3,8 +3,8 @@ package com.highmobility.hmkit;
 import android.util.Log;
 
 import com.highmobility.byteutils.Bytes;
-import com.highmobility.hmkit.Crypto.AccessCertificate;
-import com.highmobility.hmkit.Crypto.Crypto;
+import com.highmobility.crypto.AccessCertificate;
+import com.highmobility.crypto.Crypto;
 import com.highmobility.btcore.HMBTCoreInterface;
 import com.highmobility.btcore.HMDevice;
 

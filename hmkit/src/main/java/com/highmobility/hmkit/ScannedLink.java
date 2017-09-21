@@ -10,7 +10,7 @@ import android.bluetooth.BluetoothProfile;
 import android.util.Log;
 
 import com.highmobility.byteutils.Bytes;
-import com.highmobility.hmkit.Crypto.AccessCertificate;
+import com.highmobility.crypto.AccessCertificate;
 
 import java.util.List;
 import java.util.UUID;

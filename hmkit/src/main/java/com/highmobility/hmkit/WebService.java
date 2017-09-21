@@ -12,7 +12,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 import com.highmobility.byteutils.Bytes;
-import com.highmobility.hmkit.Crypto.Crypto;
+import com.highmobility.crypto.Crypto;
 
 import org.json.JSONException;
 import org.json.JSONObject;
