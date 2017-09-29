@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.highmobility.byteutils.Bytes;
+import com.highmobility.utils.Bytes;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.Certificate;
 

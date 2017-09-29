@@ -4,7 +4,6 @@ package com.highmobility.hmkit.Error;
  * Created by ttiganik on 6/22/17.
  *
  */
-
 public class TelematicsError {
     public enum Type {
         /// Trying to send a command when one is already in progress

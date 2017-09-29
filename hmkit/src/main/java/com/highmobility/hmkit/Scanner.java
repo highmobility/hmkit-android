@@ -7,7 +7,7 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 
 import com.highmobility.btcore.HMDevice;
-import com.highmobility.byteutils.Bytes;
+import com.highmobility.utils.Bytes;
 
 import java.util.ArrayList;
 import java.util.Arrays;

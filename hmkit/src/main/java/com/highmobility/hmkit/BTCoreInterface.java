@@ -2,7 +2,7 @@ package com.highmobility.hmkit;
 
 import android.util.Log;
 
-import com.highmobility.byteutils.Bytes;
+import com.highmobility.utils.Bytes;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.Crypto;
 import com.highmobility.btcore.HMBTCoreInterface;
@@ -95,37 +95,37 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetSerial(byte[] serial) {
-        copyBytesToJNI(manager.getDeviceCertificate().getSerial(), serial);
+        copyBytes(manager.getDeviceCertificate().getSerial(), serial);
         return 0;
     }
 
     @Override
     public int HMPersistenceHalgetLocalPublicKey(byte[] publicKey) {
-        copyBytesToJNI(manager.getDeviceCertificate().getPublicKey(), publicKey);
+        copyBytes(manager.getDeviceCertificate().getPublicKey(), publicKey);
         return 0;
     }
 
     @Override
     public int HMPersistenceHalgetLocalPrivateKey(byte[] privateKey) {
-        copyBytesToJNI(manager.privateKey, privateKey);
+        copyBytes(manager.privateKey, privateKey);
         return 0;
     }
 
     @Override
     public int HMPersistenceHalgetDeviceCertificate(byte[] cert) {
-        copyBytesToJNI(manager.getDeviceCertificate().getBytes(), cert);
+        copyBytes(manager.getDeviceCertificate().getBytes(), cert);
         return 0;
     }
 
     @Override
     public int HMPersistenceHalgetCaPublicKey(byte[] publicKey) {
-        copyBytesToJNI(manager.caPublicKey, publicKey);
+        copyBytes(manager.caPublicKey, publicKey);
         return 0;
     }
 
     @Override
     public int HMPersistenceHalgetOEMCaPublicKey(byte[] publicKey) {
-        copyBytesToJNI(manager.caPublicKey, publicKey);
+        copyBytes(manager.caPublicKey, publicKey);
         return 0;
     }
 
@@ -156,12 +156,12 @@ class BTCoreInterface implements HMBTCoreInterface {
             return 1;
         }
 
-        copyBytesToJNI(certificate.getGainerPublicKey(), publicKey);
-        copyBytesToJNI(certificate.getStartDateBytes(), startDate);
-        copyBytesToJNI(certificate.getEndDateBytes(), endDate);
+        copyBytes(certificate.getGainerPublicKey(), publicKey);
+        copyBytes(certificate.getStartDateBytes(), startDate);
+        copyBytes(certificate.getEndDateBytes(), endDate);
         byte[] permissions = certificate.getPermissions();
 
-        copyBytesToJNI(permissions, command);
+        copyBytes(permissions, command);
         commandSize[0] = permissions.length;
 
         return 0;
@@ -173,12 +173,12 @@ class BTCoreInterface implements HMBTCoreInterface {
 
         if (certificates.length >= index) {
             AccessCertificate certificate = certificates[index];
-            copyBytesToJNI(certificate.getGainerPublicKey(), publicKey);
-            copyBytesToJNI(certificate.getStartDateBytes(), startDate);
-            copyBytesToJNI(certificate.getEndDateBytes(), endDate);
+            copyBytes(certificate.getGainerPublicKey(), publicKey);
+            copyBytes(certificate.getStartDateBytes(), startDate);
+            copyBytes(certificate.getEndDateBytes(), endDate);
             byte[] permissions = certificate.getPermissions();
 
-            copyBytesToJNI(permissions, command);
+            copyBytes(permissions, command);
             commandSize[0] = permissions.length;
 
             return 0;
@@ -238,7 +238,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
         for (AccessCertificate storedCert : storedCerts) {
             if (Arrays.equals(storedCert.getProviderSerial(), serial)) {
-                copyBytesToJNI(storedCert.getBytes(), cert);
+                copyBytes(storedCert.getBytes(), cert);
                 size[0] = storedCert.getBytes().length;
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                     Log.d(Broadcaster.TAG, "Returned stored cert for serial " + Bytes.hexFromBytes(serial));
@@ -344,13 +344,15 @@ class BTCoreInterface implements HMBTCoreInterface {
         random.nextBytes(nonce);
     }
 
-    void copyBytesToJNI(byte[] from, byte[] to) {
+    void copyBytes(byte[] from, byte[] to) {
         for (int i = 0; i < from.length; i++) {
             to[i] = from[i];
         }
     }
 
     byte[] trimmedBytes(byte[] bytes, int length) {
+        if (bytes.length == length) return bytes;
+
         byte[] trimmedBytes = new byte[length];
 
         for (int i = 0; i < length; i++) {

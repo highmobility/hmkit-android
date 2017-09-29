@@ -7,7 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import com.highmobility.byteutils.Bytes;
+import com.highmobility.utils.Bytes;
 
 import java.util.ArrayList;
 import java.util.Random;

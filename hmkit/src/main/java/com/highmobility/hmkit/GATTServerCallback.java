@@ -7,7 +7,7 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothProfile;
 import android.util.Log;
-import com.highmobility.byteutils.Bytes;
+import com.highmobility.utils.Bytes;
 
 import java.util.Arrays;
 import java.util.UUID;

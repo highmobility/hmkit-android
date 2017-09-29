@@ -9,7 +9,7 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.util.Log;
 
-import com.highmobility.byteutils.Bytes;
+import com.highmobility.utils.Bytes;
 import com.highmobility.crypto.AccessCertificate;
 
 import java.util.List;

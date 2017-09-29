@@ -4,7 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
 import com.highmobility.btcore.HMDevice;
-import com.highmobility.byteutils.Bytes;
+import com.highmobility.utils.Bytes;
 import com.highmobility.hmkit.Error.LinkError;
 
 import java.util.Calendar;

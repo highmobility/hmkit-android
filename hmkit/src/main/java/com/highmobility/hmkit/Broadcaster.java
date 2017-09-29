@@ -14,7 +14,7 @@ import android.os.ParcelUuid;
 import android.util.Log;
 
 
-import com.highmobility.byteutils.Bytes;
+import com.highmobility.utils.Bytes;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.hmkit.Error.BroadcastError;
