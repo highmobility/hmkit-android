@@ -103,6 +103,13 @@ public class Link {
      * @param callback    A {@link CommandCallback} object that is invoked with the command result.
      */
     public void sendCommand(final byte[] bytes, CommandCallback callback) {
+        if (bytes.length > Constants.MAX_COMMAND_LENGTH)  {
+            LinkError error = new LinkError(LinkError.Type.COMMAND_TOO_BIG, 0,
+                    "Command size is bigger than " + Constants.MAX_COMMAND_LENGTH + " bytes");
+            callback.onCommandFailed(error);
+            return;
+        }
+
         if (state != State.AUTHENTICATED) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "not authenticated");

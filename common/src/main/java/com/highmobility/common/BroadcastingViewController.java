@@ -39,13 +39,6 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     }
 
     private void sendTelematicsCommand() {
-        Manager.getInstance().initialize(
-                "***REMOVED***",
-                "***REMOVED***=",
-                "***REMOVED***==",
-                view.getActivity()
-        );
-
         String token = "***REMOVED***";
 
         //ByteUtils.bytesFromHex("***REMOVED***")
@@ -219,7 +212,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
         Manager.getInstance().initialize(
                 "***REMOVED***",
                 "***REMOVED***=",
-                "***REMOVED***+6pXmtkYxynMQm0rfcBU0XFF5A==",
+                "***REMOVED***==",
                 view.getActivity()
         );
     }

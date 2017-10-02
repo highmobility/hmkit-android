@@ -22,6 +22,7 @@ import com.highmobility.hmkit.Error.LinkError;
 import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 

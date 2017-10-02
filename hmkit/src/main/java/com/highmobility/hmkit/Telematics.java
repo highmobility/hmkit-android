@@ -53,6 +53,13 @@ public class Telematics {
      *
      */
     public void sendCommand(final byte[] command, byte[] serial, final CommandCallback callback) {
+        if (command.length > Constants.MAX_COMMAND_LENGTH)  {
+            TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_TOO_BIG, 0,
+                    "Command size is bigger than " + Constants.MAX_COMMAND_LENGTH + " bytes");
+            callback.onCommandFailed(error);
+            return;
+        }
+
         if (sendingCommand == true) {
             TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_IN_PROGRESS, 0, "Already sending a command");
             callback.onCommandFailed(error);
