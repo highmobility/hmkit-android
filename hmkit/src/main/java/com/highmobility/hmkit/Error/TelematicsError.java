@@ -21,7 +21,9 @@ public class TelematicsError {
         /// The command timed out
         TIMEOUT,
         /// Server returned an error
-        SERVER_ERROR
+        SERVER_ERROR,
+        /// The command is too big. Max size is defined in Constants
+        COMMAND_TOO_BIG
     }
 
     Type type;

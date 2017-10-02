@@ -27,7 +27,9 @@ public class LinkError {
         /// The app is not authorised with the connected link to perform the action
         UNAUTHORIZED,
         /// Bluetooth Low Energy is unavailable for this device
-        UNSUPPORTED
+        UNSUPPORTED,
+        /// The command is too big. Max size is defined in Constants
+        COMMAND_TOO_BIG
     }
 
     Type errorType;

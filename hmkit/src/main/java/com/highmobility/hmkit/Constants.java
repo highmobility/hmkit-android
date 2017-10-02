@@ -10,6 +10,7 @@ public class Constants {
     static UUID INFO_CHAR_UUID = UUID.fromString("713D0105-503E-4C75-BA94-3148F18D941E");
     static UUID SENSING_READ_CHAR_UUID = UUID.fromString("713D0106-503E-4C75-BA94-3148F18D941E");
     static UUID SENSING_WRITE_CHAR_UUID = UUID.fromString("713D0107-503E-4C75-BA94-3148F18D941E");
+    static int MAX_COMMAND_LENGTH = 253; // this is without commandId, requiresHMAC and size
 
 
     static UUID NOTIFY_DESC_UUID = UUID.fromString("00002902-0000-1000-8000-00805F9B34FB");
