@@ -283,7 +283,7 @@ public class Broadcaster implements SharedBleListener {
 
     /**
      * Registers the AccessCertificate for the broadcaster, enabling authenticated
-     * connection to another broadcaster.
+     * connection to other devices.
      *
      * @param certificate The certificate that can be used by the Device to authorised Links
      * @return {@link Storage.Result#SUCCESS} on success or
