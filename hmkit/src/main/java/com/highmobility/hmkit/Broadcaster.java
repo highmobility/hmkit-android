@@ -335,21 +335,10 @@ public class Broadcaster implements SharedBleListener {
         return Storage.Result.SUCCESS;
     }
 
-    Broadcaster(Manager manager) {
-        this.manager = manager;
-    }
-
-    @Override
-    public void bluetoothChangedToAvailable(boolean available) {
-        if (available && getState() == State.BLUETOOTH_UNAVAILABLE) {
-            setState(State.IDLE);
-        }
-        else if (!available && getState() != State.BLUETOOTH_UNAVAILABLE) {
-            setState(State.BLUETOOTH_UNAVAILABLE);
-        }
-    }
-
-    void terminate() {
+    /**
+     * Stop broadcasting, clear all link listeners and stop internal processes.
+     */
+    public void terminate() {
         stopBroadcasting();
         setListener(null);
 
@@ -375,6 +364,20 @@ public class Broadcaster implements SharedBleListener {
         advertiseCallback = null;
         clockRunnable = null;
         startCallback = null;
+    }
+
+    Broadcaster(Manager manager) {
+        this.manager = manager;
+    }
+
+    @Override
+    public void bluetoothChangedToAvailable(boolean available) {
+        if (available && getState() == State.BLUETOOTH_UNAVAILABLE) {
+            setState(State.IDLE);
+        }
+        else if (!available && getState() != State.BLUETOOTH_UNAVAILABLE) {
+            setState(State.BLUETOOTH_UNAVAILABLE);
+        }
     }
 
     boolean didResolveDevice(HMDevice device) {
