@@ -1128,7 +1128,7 @@ public class Command {
     }
 
     public enum HeartRate implements Type {
-        SEND_HEART_RATE((byte)0x00);
+        SEND_HEART_RATE((byte)0x02);
 
         /**
          * Send the driver heart rate to the car.
