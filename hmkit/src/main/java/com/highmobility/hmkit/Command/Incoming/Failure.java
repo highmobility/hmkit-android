@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 public class Failure extends IncomingCommand {
     public enum Reason {
-        UNSUPPORTED_CAPABILITY, UNAUTHORIZED, INCORRECT_STATE, EXECUTION_TIMEOUT, VEHICLE_ASLEEP
+        UNSUPPORTED_CAPABILITY, UNAUTHORIZED, INCORRECT_STATE, EXECUTION_TIMEOUT, VEHICLE_ASLEEP, INVALID_COMMAND
     }
 
     private Command.Type failedType;
@@ -40,6 +40,10 @@ public class Failure extends IncomingCommand {
             case 0x04:
                 failureReason = Reason.VEHICLE_ASLEEP;
                 break;
+            case 0x05:
+                failureReason = Reason.INVALID_COMMAND;
+                break;
+
             default:
                 throw new CommandParseException();
         }
