@@ -271,6 +271,7 @@ public class Manager {
                         if (error.networkResponse != null) {
                             try {
                                 JSONObject json = new JSONObject(new String(error.networkResponse.data));
+                                Log.d(TAG, "onErrorResponse: " + json.toString());
                                 if (json.has("message")) {
                                     dispatchedError = new DownloadAccessCertificateError(
                                             DownloadAccessCertificateError.Type.HTTP_ERROR,

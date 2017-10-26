@@ -676,7 +676,6 @@ public class Broadcaster implements SharedBleListener {
                 broadcaster.get().setState(State.IDLE);
 
                 if (broadcaster.get().startCallback != null) {
-
                     broadcaster.get().startCallback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.BLUETOOTH_FAILURE
                             , 0, "Failed to start BLE advertisements"));
                 }
