@@ -102,8 +102,15 @@ public class Manager {
      *
      * @throws IllegalArgumentException if the parameters are invalid.
      */
-    public void initialize(DeviceCertificate certificate, byte[] privateKey, byte[] caPublicKey, Context context) throws IllegalArgumentException {
-        if (privateKey.length != 32 || caPublicKey.length != 64 || certificate == null) {
+    public void initialize(DeviceCertificate certificate,
+                           byte[] privateKey,
+                           byte[] caPublicKey,
+                           Context context) throws IllegalArgumentException {
+        if (privateKey == null
+            || privateKey.length != 32
+            || caPublicKey == null
+            || caPublicKey.length != 64
+            || certificate == null) {
             throw new IllegalArgumentException();
         }
 
