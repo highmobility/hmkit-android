@@ -1,8 +1,17 @@
-*.iml
-.gradle
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
+
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+
 .DS_Store
-/build
 /captures
+
+# Gradle
+.gradle
+/build/
+gradle-app.setting 
+!gradle-wrapper.jar # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+.gradletasknamecache
