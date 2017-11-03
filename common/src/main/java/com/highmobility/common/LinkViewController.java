@@ -207,10 +207,10 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
         for (int i = 0; i < states.length; i++) {
             FeatureState featureState = states[i];
-            if (featureState.getFeature() == Command.Identifier.DOOR_LOCKS) {
+            if (featureState.getIdentifier() == Command.Identifier.DOOR_LOCKS) {
                 doorLocksState = (DoorLocks)featureState;
             }
-            else if (featureState.getFeature() == Command.Identifier.TRUNK_ACCESS) {
+            else if (featureState.getIdentifier() == Command.Identifier.TRUNK_ACCESS) {
                 trunkAccessState = (TrunkAccess) featureState;
             }
         }
