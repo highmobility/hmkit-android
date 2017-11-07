@@ -49,7 +49,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         byte[] offsetBytes = Arrays.copyOfRange(value, offset, value.length);
         final int characteristicId = getCharacteristicIdForCharacteristic(characteristic);
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(TAG, "onCharacteristicReadRequest: " + characteristicId + " "
+            Log.d(TAG, "onCharacteristicReadRequest " + characteristicId + ": "
                 + Bytes.hexFromBytes(offsetBytes));
         broadcaster.GATTServer.sendResponse(device,
                 requestId,
@@ -83,7 +83,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         }
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(TAG, "incoming data " + Bytes.hexFromBytes(value) + " from "
+            Log.d(TAG, "incoming data " + characteristicId + ": " + Bytes.hexFromBytes(value) + " from "
                     + Bytes.hexFromBytes(Bytes.bytesFromMacString(device.getAddress())));
 
         if (responseNeeded) {
