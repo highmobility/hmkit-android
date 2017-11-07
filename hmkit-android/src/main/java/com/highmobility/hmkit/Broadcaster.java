@@ -361,7 +361,6 @@ public class Broadcaster implements SharedBleListener {
         }
 
         gattServerCallback = null;
-        advertiseCallback = null;
         clockRunnable = null;
         startCallback = null;
     }
@@ -467,7 +466,7 @@ public class Broadcaster implements SharedBleListener {
         if (link == null) return false;
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "write " + Bytes.hexFromBytes(value) + " to " + Bytes.hexFromBytes(link.getAddressBytes()) + " char " + characteristicId);
+            Log.d(TAG, "write " + Bytes.hexFromBytes(value) + " to " + Bytes.hexFromBytes(link.getAddressBytes()) + " char: " + characteristicId);
 
         BluetoothGattCharacteristic characteristic = getCharacteristicForId(characteristicId);
         if (characteristic == null) {
