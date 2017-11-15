@@ -131,7 +131,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHaladdPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int commandSize, byte[] command) {
-        AccessCertificate cert = new AccessCertificate(serial, publicKey, manager.getDeviceCertificate().getSerial(), startDate, endDate, command);
+        AccessCertificate cert = new AccessCertificate(null, serial, publicKey, manager.getDeviceCertificate().getSerial(), startDate, endDate, command);
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "HMPersistenceHaladdPublicKey: " + Bytes.hexFromBytes(serial));

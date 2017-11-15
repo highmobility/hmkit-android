@@ -23,7 +23,7 @@ gradle-app.setting
 .mtj.tmp/
 
 # Package Files #
-*.jar
+# *.jar #TODO: enable if libs from artifactory
 *.war
 *.ear
 
