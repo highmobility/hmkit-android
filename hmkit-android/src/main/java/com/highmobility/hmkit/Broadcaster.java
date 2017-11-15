@@ -220,16 +220,18 @@ public class Broadcaster implements SharedBleListener {
                 .build();
 
         UUID advertiseUUID;
+        byte[] uuidBytes;
+
         if (advertisedSerial == null) {
-            byte[] uuidBytes = Bytes.concatBytes(issuer, appId);
-            Bytes.reverse(uuidBytes);
-            advertiseUUID = Bytes.UUIDFromByteArray(uuidBytes);
+            uuidBytes = Bytes.concatBytes(issuer, appId);
         }
         else {
-            byte[] uuidBytes = Bytes.concatBytes(new byte[] {0x00, 0x00, 0x00, 0x00}, advertisedSerial);
+            uuidBytes = Bytes.concatBytes(new byte[] {0x00, 0x00, 0x00, 0x00}, advertisedSerial);
             uuidBytes = Bytes.concatBytes(uuidBytes, new byte[] {0x00, 0x00, 0x00});
-            advertiseUUID = Bytes.UUIDFromByteArray(uuidBytes);
         }
+
+        Bytes.reverse(uuidBytes);
+        advertiseUUID = Bytes.UUIDFromByteArray(uuidBytes);
 
         final AdvertiseData data = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true)
