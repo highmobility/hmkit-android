@@ -106,7 +106,7 @@ public class Storage {
         return new AccessCertificate[0];
     }
 
-    void setCertificates(AccessCertificate[] certificates) {
+    boolean writeCertificates(AccessCertificate[] certificates) {
         HashSet<String> stringSet = new HashSet<>();
 
         for (Certificate cert : certificates) {
@@ -114,7 +114,7 @@ public class Storage {
         }
 
         editor.putStringSet(ACCESS_CERTIFICATE_STORAGE_KEY, stringSet);
-        editor.commit();
+        return editor.commit();
     }
 
     AccessCertificate[] getCertificatesWithGainingSerial(byte[] serialNumber) {
@@ -194,16 +194,15 @@ public class Storage {
 
         if (removedIndex != -1) {
             AccessCertificate[] newCerts = removeAtIndex(removedIndex, certs);
-            setCertificates(newCerts);
-            return true;
+            if (writeCertificates(newCerts) == true) return true;
         }
-        else {
-            if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
-                Log.d(TAG, "deleteCertificate: failed for gaining: " + Bytes.hexFromBytes(gainingSerial)
-                        + " providing: " + Bytes.hexFromBytes(providingSerial));
-            }
-            return false;
+
+        if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
+            Log.d(TAG, "deleteCertificate: failed for gaining: " + Bytes.hexFromBytes(gainingSerial)
+                    + " providing: " + Bytes.hexFromBytes(providingSerial));
         }
+
+        return false;
     }
 
     boolean deleteCertificateWithGainingSerial(byte[] serial) {
@@ -223,15 +222,14 @@ public class Storage {
 
         if (removedIndex != -1) {
             AccessCertificate[] newCerts = removeAtIndex(removedIndex, certs);
-            setCertificates(newCerts);
-            return true;
+            if (writeCertificates(newCerts) == true) return true;
         }
-        else {
-            if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
-                Log.d(TAG, "deleteCertificateWithGainingSerial failed: " + Bytes.hexFromBytes(serial));
-            }
-            return false;
+
+        if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
+            Log.d(TAG, "deleteCertificateWithGainingSerial failed: " + Bytes.hexFromBytes(serial));
         }
+
+        return false;
     }
 
     boolean deleteCertificateWithProvidingSerial(byte[] serial) {
@@ -251,12 +249,10 @@ public class Storage {
 
         if (removedIndex != -1) {
             AccessCertificate[] newCerts = removeAtIndex(removedIndex, certs);
-            setCertificates(newCerts);
-            return true;
+            if (writeCertificates(newCerts) == true) return true;
         }
-        else {
-            return false;
-        }
+
+        return false;
     }
 
     AccessCertificate certWithProvidingSerial(byte[] serial) {
@@ -315,9 +311,9 @@ public class Storage {
 
         newCerts[newCerts.length - 1] = certificate;
 
-        setCertificates(newCerts);
+        if (writeCertificates(newCerts) == true) return Result.SUCCESS;
 
-        return Result.SUCCESS;
+        return Result.STORAGE_FULL;
     }
 
     private AccessCertificate[] removeAtIndex(int removedIndex, AccessCertificate[] certs) {
@@ -342,7 +338,7 @@ public class Storage {
         AccessCertificate cert2 = new AccessCertificate(Bytes.bytesFromHex("***REMOVED***"));
 
         AccessCertificate[] certs = new AccessCertificate[] {cert1, cert2};
-        setCertificates(certs);
+        writeCertificates(certs);
 
         AccessCertificate[] readCerts = getCertificates();
         boolean success = true;
