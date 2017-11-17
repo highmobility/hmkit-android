@@ -57,7 +57,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                 offset,
                 offsetBytes);
 
-        broadcaster.manager.workHandler.post(
+        broadcaster.manager.workHandler.postDelayed(
             new Runnable() {
                 @Override
                 public void run() {
@@ -65,7 +65,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                             Bytes.bytesFromMacString(device.getAddress()),
                             characteristicId);
                 }
-            });
+            }, 1);
     }
 
     @Override
