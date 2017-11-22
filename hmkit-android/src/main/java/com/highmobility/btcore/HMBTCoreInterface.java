@@ -60,12 +60,12 @@ public interface HMBTCoreInterface {
 
     //Add remote device publick key to storagr
     //TT
-    int HMPersistenceHaladdPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int commandSize, byte[] command);
+    int HMPersistenceHaladdPublicKey(byte[] serial, byte[] cert, int size);
     //Get remote device publick key from storage
     //TT
-    int HMPersistenceHalgetPublicKey(byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command);
+    int HMPersistenceHalgetPublicKey(byte[] serial, byte[] cert, int[] size);
     //TT
-    int HMPersistenceHalgetPublicKeyByIndex(int index, byte[] serial, byte[] publicKey, byte[] startDate, byte[] endDate, int[] commandSize, byte[] command);
+    int HMPersistenceHalgetPublicKeyByIndex(int index, byte[] cert, int[] size);
     //TT
     int HMPersistenceHalgetPublicKeyCount(int[] count);
     //Remove remote device publick key from storage

@@ -29,9 +29,9 @@ void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterfa
     interfaceMethodHMPersistenceHalgetDeviceCertificate = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetDeviceCertificate","([B)I");
     interfaceMethodHMPersistenceHalgetCaPublicKey = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetCaPublicKey","([B)I");
     interfaceMethodHMPersistenceHalgetOEMCaPublicKey = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetOEMCaPublicKey","([B)I");
-    interfaceMethodHMPersistenceHaladdPublicKey = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHaladdPublicKey","([B[B[B[BI[B)I");
-    interfaceMethodHMPersistenceHalgetPublicKey = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetPublicKey","([B[B[B[B[I[B)I");
-    interfaceMethodHMPersistenceHalgetPublicKeyByIndex = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetPublicKeyByIndex","(I[B[B[B[B[I[B)I");
+    interfaceMethodHMPersistenceHaladdPublicKey = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHaladdPublicKey","([B[BI)I");
+    interfaceMethodHMPersistenceHalgetPublicKey = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetPublicKey","([B[B[I)I");
+    interfaceMethodHMPersistenceHalgetPublicKeyByIndex = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetPublicKeyByIndex","(I[B[I)I");
     interfaceMethodHMPersistenceHalgetPublicKeyCount = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalgetPublicKeyCount","([I)I");
     interfaceMethodHMPersistenceHalremovePublicKey = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHalremovePublicKey","([B)I");
     interfaceMethodHMPersistenceHaladdStoredCertificate = (*env)->GetMethodID(env,interfaceClassRef, "HMPersistenceHaladdStoredCertificate","([BI)I");
