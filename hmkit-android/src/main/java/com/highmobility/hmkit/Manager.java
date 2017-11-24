@@ -106,12 +106,17 @@ public class Manager {
                            byte[] privateKey,
                            byte[] caPublicKey,
                            Context context) throws IllegalArgumentException {
+
+        if (context != null) {
+            throw new IllegalStateException("HMKit is already initialized. Call terminate() first.");
+        }
+
         if (privateKey == null
             || privateKey.length != 32
             || caPublicKey == null
             || caPublicKey.length != 64
             || certificate == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("HMKit initialization parameters are invalid.");
         }
 
         this.context = context;

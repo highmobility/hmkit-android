@@ -4,6 +4,8 @@
 
 //Turns on debug functionality
 #define DEBUG
+#define MAX_CLIENTS  5
+#define MAX_COMMAND_SIZE 500
 #define HM_BT_LOG_LEVEL 3
 
 ////H-M BT
