@@ -2,7 +2,6 @@ package com.highmobility.digitalkey.broadcast;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -14,7 +13,7 @@ import com.highmobility.common.ILinkViewController;
 import com.highmobility.common.LinkViewController;
 import com.highmobility.digitalkey.R;
 
-public class LinkView extends AppCompatActivity implements ILinkView {
+public class LinkView extends Activity implements ILinkView {
     static final String TAG = "LinkView";
 
     private ILinkViewController controller;
