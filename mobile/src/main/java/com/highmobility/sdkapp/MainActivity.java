@@ -1,4 +1,4 @@
-package com.highmobility.digitalkey;
+package com.highmobility.sdkapp;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import com.highmobility.digitalkey.broadcast.BroadcastActivity;
+import com.highmobility.sdkapp.broadcast.BroadcastActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

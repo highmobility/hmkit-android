@@ -1,10 +1,10 @@
-package com.highmobility.digitalkey.broadcast;
+package com.highmobility.sdkapp;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
-
+import android.support.wearable.activity.WearableActivity;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -13,15 +13,14 @@ import butterknife.ButterKnife;
 import com.highmobility.common.BroadcastingViewController;
 import com.highmobility.common.IBroadcastingView;
 import com.highmobility.common.IBroadcastingViewController;
-import com.highmobility.digitalkey.R;
 import com.highmobility.hmkit.ConnectedLink;
-import com.highmobility.hmkit.ConnectedLinkListener;
 import com.highmobility.hmkit.Link;
 
 /**
  * Created by ttiganik on 02/06/16.
  */
-public class BroadcastActivity extends Activity implements IBroadcastingView {
+public class BroadcastActivity extends WearableActivity implements IBroadcastingView {
+    static final String TAG = "BroadcastActivity";
     IBroadcastingViewController controller;
 
     @BindView(R.id.status_textview) TextView statusTextView;
@@ -29,33 +28,36 @@ public class BroadcastActivity extends Activity implements IBroadcastingView {
     @BindView(R.id.confirm_pairing_button) Button confirmPairButton;
     @BindView(R.id.show_button) Button showButton;
 
-    ConnectedLinkListener.AuthorizationCallback pairApproveCallback;
-
     void onPairConfirmClick() {
         controller.onPairingApproved(true);
-        pairApproveCallback = null;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.broadcast_view);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         ButterKnife.bind(this);
-        controller = new BroadcastingViewController(this);
-        confirmPairButton.setOnClickListener(v -> onPairConfirmClick());
-        showButton.setOnClickListener(v -> controller.onLinkClicked());
-    }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == BroadcastingViewController.LINK_ACTIVITY_RESULT) {
-            controller.onLinkViewResult(requestCode);
-        }
+        controller = new BroadcastingViewController(this);
+        confirmPairButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onPairConfirmClick();
+            }
+        });
+        showButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                controller.onLinkClicked();
+            }
+        });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        confirmPairButton.setOnClickListener(null);
         controller.onDestroy();
     }
 
@@ -70,7 +72,7 @@ public class BroadcastActivity extends Activity implements IBroadcastingView {
     }
 
     @Override
-    public Class<?> getLinkActivityClass() {
+    public Class getLinkActivityClass() {
         return LinkView.class;
     }
 

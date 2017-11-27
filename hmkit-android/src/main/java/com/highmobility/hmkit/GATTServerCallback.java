@@ -143,7 +143,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                     BluetoothGatt.GATT_SUCCESS,
                     offset,
                     value);
-            
+
             if (result == false) {
                 Log.e(TAG, "onDescriptorWriteRequest: failed to send response");
             }

@@ -1,4 +1,4 @@
-package com.high_mobility.digitalkey;
+package com.highmobility.sdkapp;
 
 import org.junit.Test;
 
