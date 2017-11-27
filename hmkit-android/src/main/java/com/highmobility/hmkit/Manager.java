@@ -107,7 +107,7 @@ public class Manager {
                            byte[] caPublicKey,
                            Context context) throws IllegalArgumentException {
 
-        if (context != null) {
+        if (this.context != null) {
             throw new IllegalStateException("HMKit is already initialized. Call terminate() first.");
         }
 
