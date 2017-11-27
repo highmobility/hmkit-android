@@ -1,4 +1,4 @@
-package com.high_mobility.digitalkey;
+package com.highmobility.sdkapp;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

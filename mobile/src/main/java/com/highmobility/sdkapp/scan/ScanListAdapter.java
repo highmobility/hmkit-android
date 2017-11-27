@@ -1,13 +1,4 @@
-package com.highmobility.digitalkey.scan;
-
-import android.content.Context;
-import android.graphics.Color;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-
-import java.util.List;
+package com.highmobility.sdkapp.scan;
 
 /**
  * Created by ttiganik on 02/06/16.

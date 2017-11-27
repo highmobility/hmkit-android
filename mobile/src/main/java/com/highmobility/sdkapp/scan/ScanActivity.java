@@ -1,11 +1,11 @@
-package com.highmobility.digitalkey.scan;
+package com.highmobility.sdkapp.scan;
 
-import android.support.v7.app.AppCompatActivity;
+import android.app.Activity;
 
 /**
  * Created by ttiganik on 02/06/16.
  */
-public class ScanActivity extends AppCompatActivity /*implements ScannerListener */{
+public class ScanActivity extends Activity /*implements ScannerListener */{
     /*
     private static final String TAG = "Scan";
 

@@ -1,4 +1,4 @@
-package com.highmobility.digitalkey.broadcast;
+package com.highmobility.sdkapp.broadcast;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -11,7 +11,7 @@ import butterknife.ButterKnife;
 import com.highmobility.common.ILinkView;
 import com.highmobility.common.ILinkViewController;
 import com.highmobility.common.LinkViewController;
-import com.highmobility.digitalkey.R;
+import com.highmobility.sdkapp.R;
 
 public class LinkView extends Activity implements ILinkView {
     static final String TAG = "LinkView";
