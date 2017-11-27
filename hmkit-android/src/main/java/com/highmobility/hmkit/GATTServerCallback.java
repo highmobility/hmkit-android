@@ -51,11 +51,15 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "onCharacteristicReadRequest " + characteristicId + ": "
                 + Bytes.hexFromBytes(offsetBytes));
-        broadcaster.GATTServer.sendResponse(device,
+        boolean result = broadcaster.GATTServer.sendResponse(device,
                 requestId,
                 BluetoothGatt.GATT_SUCCESS,
                 offset,
                 offsetBytes);
+
+        if (result == false) {
+            Log.e(TAG, "onCharacteristicReadRequest: failed to send response");
+        }
 
         broadcaster.manager.workHandler.postDelayed(
             new Runnable() {
@@ -87,7 +91,17 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                     + Bytes.hexFromBytes(Bytes.bytesFromMacString(device.getAddress())));
 
         if (responseNeeded) {
-            broadcaster.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, 0, null);
+            boolean result = broadcaster.GATTServer.sendResponse(
+                    device,
+                    requestId,
+                    BluetoothGatt.GATT_SUCCESS,
+                    0,
+                    null);
+
+            if (result == false) {
+                Log.e(TAG, "onCharacteristicWriteRequest: failed to send response");
+            }
+
             final Broadcaster devicePointer = this.broadcaster;
             broadcaster.manager.workHandler.post(new Runnable() {
                 @Override
@@ -108,19 +122,34 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         byte[] value = descriptor.getValue();
         byte[] offsetBytes = value == null ? new byte[] {} : Arrays.copyOfRange(value, offset, value.length);
 
-        broadcaster.GATTServer.sendResponse(device,
+        boolean result = broadcaster.GATTServer.sendResponse(
+                device,
                 requestId,
                 BluetoothGatt.GATT_SUCCESS,
                 offset,
                 offsetBytes);
+
+        if (result == false) {
+            Log.e(TAG, "onDescriptorReadRequest: failed to send response");
+        }
     }
 
     @Override
     public void onDescriptorWriteRequest(final BluetoothDevice device, int requestId, BluetoothGattDescriptor descriptor, boolean preparedWrite, boolean responseNeeded, int offset, byte[] value) {
         if (responseNeeded) {
-            broadcaster.GATTServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
+            boolean result = broadcaster.GATTServer.sendResponse(
+                    device,
+                    requestId,
+                    BluetoothGatt.GATT_SUCCESS,
+                    offset,
+                    value);
+            
+            if (result == false) {
+                Log.e(TAG, "onDescriptorWriteRequest: failed to send response");
+            }
 
             if (descriptor.getCharacteristic().getUuid().equals(Constants.READ_CHAR_UUID)) {
+                // if notifications don't start, try restarting bluetooth on android / other device
                 final Broadcaster broadcaster = this.broadcaster;
                 broadcaster.manager.workHandler.post(new Runnable() {
                     @Override
