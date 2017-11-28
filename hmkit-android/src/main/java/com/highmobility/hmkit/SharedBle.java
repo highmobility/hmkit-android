@@ -87,8 +87,4 @@ public class SharedBle {
             setRandomAdapterName();
         }
     }
-
-    void terminate() {
-        ctx.unregisterReceiver(receiver);
-    }
 }

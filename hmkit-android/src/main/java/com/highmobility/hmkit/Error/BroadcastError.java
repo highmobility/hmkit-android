@@ -11,7 +11,9 @@ public class BroadcastError {
         /// Bluetooth failed to act as expected
         BLUETOOTH_FAILURE,
         /// Bluetooth Low Energy is unavailable for this device
-        UNSUPPORTED
+        UNSUPPORTED,
+        /// SDK is not initialized
+        UNINITIALIZED
     }
 
     Type errorType;
