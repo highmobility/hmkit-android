@@ -14,6 +14,7 @@ import android.os.ParcelUuid;
 import android.util.Log;
 
 
+import com.highmobility.crypto.Crypto;
 import com.highmobility.utils.Bytes;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.btcore.HMDevice;
@@ -341,26 +342,27 @@ public class Broadcaster implements SharedBleListener {
      * Stop broadcasting, clear all link listeners and stop internal processes.
      */
     public void terminate() {
+        if (GATTServer == null) return;
+
         stopBroadcasting();
         setListener(null);
 
-        for (ConnectedLink link : getLinks()) {
-            link.setListener(null);
+        for (int i = 0; i < getLinks().size(); i++) {
+            ConnectedLink link = getLinks().get(i);
+            GATTServer.cancelConnection(link.btDevice);
+            link.setState(Link.State.DISCONNECTED);
             link.broadcaster = null;
+            links.remove(link);
+            link.setListener(null);
         }
 
         manager.workHandler.removeCallbacks(clockRunnable);
         setIsAlivePinging(false);
+        manager.ble.removeListener(this);
 
-        if (manager.ble != null) {
-            manager.ble.removeListener(this);
-        }
-
-        if (GATTServer != null) {
-            GATTServer.clearServices();
-            GATTServer.close();
-            GATTServer = null;
-        }
+        GATTServer.clearServices();
+        GATTServer.close();
+        GATTServer = null;
 
         gattServerCallback = null;
         clockRunnable = null;
@@ -404,6 +406,7 @@ public class Broadcaster implements SharedBleListener {
                 }
             });
         }
+
     }
 
     boolean deviceExitedProximity(HMDevice device) {
@@ -414,7 +417,7 @@ public class Broadcaster implements SharedBleListener {
         if (link == null) return false;
 
         if (link.getState() != Link.State.DISCONNECTED) {
-            GATTServer.cancelConnection(link.btDevice);
+            if (GATTServer != null) GATTServer.cancelConnection(link.btDevice);
             link.setState(Link.State.DISCONNECTED);
         }
 
@@ -602,7 +605,6 @@ public class Broadcaster implements SharedBleListener {
 
         return true;
     }
-
 
     private void sendAlivePing() {
         if (aliveCharacteristic != null) {
