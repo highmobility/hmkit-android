@@ -169,7 +169,17 @@ public class Broadcaster implements SharedBleListener {
      *                 onBroadcastingFailed is invoked if something went wrong.
      */
     public void startBroadcasting(StartCallback callback) {
-        manager.initializeBle();
+        try {
+            manager.initializeBle();
+        }
+        catch (IllegalStateException e) {
+            callback.onBroadcastingFailed(
+                    new BroadcastError(BroadcastError.Type.UNINITIALIZED,
+                    0,
+                    "HMKit is not initialized"));
+            return;
+        }
+
         manager.ble.addListener(this);
 
         if (state == State.BROADCASTING) {

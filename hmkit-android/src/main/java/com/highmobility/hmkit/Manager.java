@@ -173,10 +173,6 @@ public class Manager {
         broadcaster = null;
         coreClockTimer.cancel();
         coreClockTimer = null;
-        if (ble != null) {
-            ble.terminate();
-            ble = null;
-        }
         webService.cancelAllRequests();
         webService = null;
         telematics = null;
@@ -363,8 +359,9 @@ public class Manager {
         storage.resetStorage();
     }
 
-    void initializeBle() {
+    void initializeBle() throws IllegalStateException {
         // we only want to initialize ble when we start using it
+        if (context == null) throw new IllegalStateException("SDK not initialized");
         if (ble == null) ble = new SharedBle(context);
     }
 
