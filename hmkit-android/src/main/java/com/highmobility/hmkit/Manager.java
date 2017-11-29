@@ -106,7 +106,6 @@ public class Manager {
                            byte[] privateKey,
                            byte[] caPublicKey,
                            Context context) throws IllegalArgumentException {
-
         if (this.context != null) {
             throw new IllegalStateException("HMKit is already initialized. Call terminate() first.");
         }
@@ -178,6 +177,11 @@ public class Manager {
         webService = null;
         telematics = null;
         context = null;
+
+        if (ble != null) {
+            ble.terminate();
+            ble = null;
+        }
     }
 
     /**
