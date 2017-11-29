@@ -177,6 +177,11 @@ public class Manager {
         webService = null;
         telematics = null;
         context = null;
+
+        if (ble != null) {
+            ble.terminate();
+            ble = null;
+        }
     }
 
     /**

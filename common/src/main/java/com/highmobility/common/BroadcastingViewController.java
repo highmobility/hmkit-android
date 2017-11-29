@@ -215,6 +215,5 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
                 "***REMOVED***+6pXmtkYxynMQm0rfcBU0XFF5A==",
                 view.getActivity()
         );
-
     }
 }
