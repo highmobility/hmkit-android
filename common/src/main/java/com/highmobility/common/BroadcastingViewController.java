@@ -40,8 +40,6 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     private void sendTelematicsCommand() {
         String token = "***REMOVED***";
 
-        //Bytes.bytesFromHex("***REMOVED***")
-
         Manager.getInstance().downloadCertificate(token, new Manager.DownloadCallback() {
             @Override
             public void onDownloaded(byte[] vehicleSerial) {
@@ -69,6 +67,8 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     @Override
     public void onDestroy() {
         Manager.getInstance().terminate();
+        broadcaster = null;
+        link = null;
     }
 
     @Override

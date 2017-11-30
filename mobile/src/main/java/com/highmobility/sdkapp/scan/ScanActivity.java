@@ -1,7 +1,6 @@
 package com.highmobility.sdkapp.scan;
 
 import android.app.Activity;
-
 /**
  * Created by ttiganik on 02/06/16.
  */
