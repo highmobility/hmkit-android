@@ -158,7 +158,8 @@ public class Manager {
 
     /**
      * Call this function when the SDK is not used anymore - for instance when killing the app.
-     * This clears the Bluetooth service and unregisters all BroadcastReceivers.
+     * It clears all the internal processes and unregisters all BroadcastReceivers.
+     * Also, {@link Broadcaster#terminate() } is called.
      *
      * Stored certificates are not deleted.
      */
@@ -167,12 +168,15 @@ public class Manager {
 
         broadcaster.terminate();
         broadcaster = null;
+
         coreClockTimer.cancel();
         coreClockTimer = null;
+        
         if (ble != null) {
             ble.terminate();
             ble = null;
         }
+
         webService.cancelAllRequests();
         webService = null;
         telematics = null;

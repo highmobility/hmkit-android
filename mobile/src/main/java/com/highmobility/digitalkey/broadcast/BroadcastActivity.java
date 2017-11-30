@@ -3,7 +3,6 @@ package com.highmobility.digitalkey.broadcast;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -21,7 +20,7 @@ import com.highmobility.hmkit.Link;
 /**
  * Created by ttiganik on 02/06/16.
  */
-public class BroadcastActivity extends AppCompatActivity implements IBroadcastingView {
+public class BroadcastActivity extends Activity implements IBroadcastingView {
     IBroadcastingViewController controller;
 
     @BindView(R.id.status_textview) TextView statusTextView;

@@ -1,11 +1,11 @@
 package com.highmobility.digitalkey.scan;
 
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.Activity;
 
 /**
  * Created by ttiganik on 02/06/16.
  */
-public class ScannedLinkActivity extends AppCompatActivity /*{
+public class ScannedLinkActivity extends Activity /*{
     public final static String TAG = "ScannedLinkActivity";
     public final static String DEVICE_POSITION = "com.high_mobility.DEVICE_POSITION";
     ScannedLink link;
