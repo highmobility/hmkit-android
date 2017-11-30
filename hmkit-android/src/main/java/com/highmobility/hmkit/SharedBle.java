@@ -90,5 +90,7 @@ public class SharedBle {
 
     void terminate() {
         ctx.unregisterReceiver(receiver);
+        listeners.clear();
+        ctx = null;
     }
 }

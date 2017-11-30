@@ -341,12 +341,15 @@ public class Broadcaster implements SharedBleListener {
      * Stop broadcasting, clear all link listeners and stop internal processes.
      */
     public void terminate() {
+        if (GATTServer == null) return;
+
         stopBroadcasting();
         setListener(null);
 
         for (ConnectedLink link : getLinks()) {
             link.setListener(null);
             link.broadcaster = null;
+            GATTServer.cancelConnection(link.btDevice);
         }
 
         manager.workHandler.removeCallbacks(clockRunnable);
@@ -361,10 +364,6 @@ public class Broadcaster implements SharedBleListener {
             GATTServer.close();
             GATTServer = null;
         }
-
-        gattServerCallback = null;
-        clockRunnable = null;
-        startCallback = null;
     }
 
     Broadcaster(Manager manager) {
