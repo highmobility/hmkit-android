@@ -67,7 +67,10 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     @Override
     public void onDestroy() {
         Manager.getInstance().terminate();
+        // clear the references
+        broadcaster.setListener(null);
         broadcaster = null;
+        link.setListener(null);
         link = null;
     }
 
@@ -208,10 +211,11 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     }
 
     void initializeManager() {
+        // prod
         Manager.getInstance().initialize(
-                "***REMOVED***",
+                "***REMOVED******REMOVED******REMOVED***",
                 "***REMOVED***=",
-                "***REMOVED***==",
+                "***REMOVED***+6pXmtkYxynMQm0rfcBU0XFF5A==",
                 view.getActivity()
         );
     }

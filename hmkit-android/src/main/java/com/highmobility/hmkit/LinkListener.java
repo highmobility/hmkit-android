@@ -7,6 +7,9 @@ public interface LinkListener {
     /**
      * Callback that is invoked when the Link's state changes.
      *
+     * The state can only go from Connected>Authenticated>Connected/Disconnected.
+     * If the state is Disconnected the link is gone and should be released from memory.
+     *
      * @param link The link that had a state change.
      * @param oldState The old state of the link.
      */

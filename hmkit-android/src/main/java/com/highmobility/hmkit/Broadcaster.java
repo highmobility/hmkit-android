@@ -281,6 +281,9 @@ public class Broadcaster implements SharedBleListener {
         if (isAlivePinging) {
             sendAlivePing();
         }
+        else {
+            manager.workHandler.removeCallbacks(clockRunnable);
+        }
     }
 
     /**
@@ -338,21 +341,23 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Stop broadcasting, clear all link listeners and stop internal processes.
+     * Stop broadcasting, clear all link listeners and stop internal processes. Also tries to
+     * disconnect all connected links. If successful, the link's state will change to disconnected and
+     * {@link com.highmobility.hmkit.BroadcasterListener#onLinkLost(ConnectedLink)}} will be called.
+     *
+     * The user is responsible for releasing the BroadcasterListener.
      */
     public void terminate() {
         if (GATTServer == null) return;
 
         stopBroadcasting();
-        setListener(null);
 
         for (ConnectedLink link : getLinks()) {
-            link.setListener(null);
-            link.broadcaster = null;
-            GATTServer.cancelConnection(link.btDevice);
+            if (link.getState() != Link.State.DISCONNECTED) {
+                GATTServer.cancelConnection(link.btDevice);
+            }
         }
 
-        manager.workHandler.removeCallbacks(clockRunnable);
         setIsAlivePinging(false);
 
         if (manager.ble != null) {
@@ -412,11 +417,8 @@ public class Broadcaster implements SharedBleListener {
         final ConnectedLink link = getLinkForMac(device.getMac());
         if (link == null) return false;
 
-        if (link.getState() != Link.State.DISCONNECTED) {
-            GATTServer.cancelConnection(link.btDevice);
-            link.setState(Link.State.DISCONNECTED);
-        }
 
+        link.setState(Link.State.DISCONNECTED);
         links.remove(link);
 
         // set new adapter name
