@@ -199,9 +199,10 @@ class Scanner {
         device.onDeviceExitedProximity();
 
         if (listener != null) {
-            manager.mainHandler.post(new Runnable() {
+            manager.postToMainThread(new Runnable() {
                 @Override
                 public void run() {
+                    if (listener == null) return;
                     listener.onDeviceExitedProximity(device);
                 }
             });
@@ -223,9 +224,10 @@ class Scanner {
         if (scannedLink != null) {
             scannedLink.setHmDevice(device);
             if (listener != null) {
-                manager.mainHandler.post(new Runnable() {
+                manager.postToMainThread(new Runnable() {
                     @Override
                     public void run() {
+                        if (listener == null) return;
                         listener.onDeviceEnteredProximity(scannedLink);
                     }
                 });
@@ -283,9 +285,10 @@ class Scanner {
             this.state = state;
 
             if (listener != null) {
-                manager.mainHandler.post(new Runnable() {
+                manager.postToMainThread(new Runnable() {
                     @Override
                     public void run() {
+                        if (listener == null) return;
                         listener.onStateChanged(oldState);
                     }
                 });

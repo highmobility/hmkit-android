@@ -416,7 +416,6 @@ public class Broadcaster implements SharedBleListener {
         final ConnectedLink link = getLinkForMac(device.getMac());
         if (link == null) return false;
 
-
         link.setState(Link.State.DISCONNECTED);
         links.remove(link);
 

@@ -41,9 +41,14 @@ public class ConnectedLink extends Link {
 
         final ConnectedLink reference = this;
         pairingResponse = -1;
-        broadcaster.manager.mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
+
+        broadcaster.manager.postToMainThread(new Runnable() {
+            @Override public void run() {
+                if (listener == null) {
+                    pairingResponse = 1;
+                    return;
+                }
+
                 ((ConnectedLinkListener) listener).onAuthorizationRequested(reference, new ConnectedLinkListener.AuthorizationCallback() {
                     @Override
                     public void approve() {
@@ -65,9 +70,9 @@ public class ConnectedLink extends Link {
             int passedSeconds = Calendar.getInstance().get(Calendar.SECOND);
             if (passedSeconds - startSeconds > Constants.registerTimeout) {
                 if (listener != null) {
-                    broadcaster.manager.mainHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
+                    broadcaster.manager.postToMainThread(new Runnable() {
+                        @Override public void run() {
+                            if (listener == null) return;
                             ((ConnectedLinkListener) listener).onAuthorizationTimeout(reference);
                         }
                     });

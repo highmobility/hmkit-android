@@ -69,7 +69,7 @@ public class Link {
 
             if (listener != null) {
                 final Link linkPointer = this;
-                manager.mainHandler.post(new Runnable() {
+                manager.postToMainThread(new Runnable() {
                     @Override public void run() {
                         if (linkPointer.listener == null) return;
                         linkPointer.listener.onStateChanged(linkPointer, oldState);
@@ -158,9 +158,10 @@ public class Link {
             Log.d(TAG, "can't dispatch notification: no listener set");
             return;
         }
-        manager.mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
+
+        manager.postToMainThread(new Runnable() {
+            @Override public void run() {
+                if (listener == null) return;
                 listener.onCommandReceived(Link.this, bytes);
             }
         });
