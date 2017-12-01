@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
 
@@ -365,6 +366,15 @@ public class Manager {
     public void deleteCertificates() throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
         storage.resetStorage();
+    }
+
+    void postToMainThread(Runnable runnable) {
+        if (Looper.myLooper() != mainHandler.getLooper()) {
+            mainHandler.post(runnable);
+        }
+        else {
+            runnable.run();
+        }
     }
 
     void initializeBle() throws IllegalStateException {

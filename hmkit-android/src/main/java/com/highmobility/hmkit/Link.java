@@ -67,23 +67,15 @@ public class Link {
 
             this.state = state;
 
-
-            final Link linkPointer = this;
-            Runnable callback = new Runnable() {
-                @Override
-                public void run() {
-                    if (linkPointer.listener == null) return;
-
-                    linkPointer.listener.onStateChanged(linkPointer, oldState);
-                    if (linkPointer.getState() == State.DISCONNECTED) {
-                        // link is now gone, can null the listener
-                        linkPointer.listener = null;
+            if (listener != null) {
+                final Link linkPointer = this;
+                manager.postToMainThread(new Runnable() {
+                    @Override public void run() {
+                        if (linkPointer.listener == null) return;
+                        linkPointer.listener.onStateChanged(linkPointer, oldState);
                     }
-                }
-            };
-
-            manager.mainHandler.post(callback);
-
+                });
+            }
         }
     }
 
@@ -166,9 +158,10 @@ public class Link {
             Log.d(TAG, "can't dispatch notification: no listener set");
             return;
         }
-        manager.mainHandler.post(new Runnable() {
-            @Override
-            public void run() {
+
+        manager.postToMainThread(new Runnable() {
+            @Override public void run() {
+                if (listener == null) return;
                 listener.onCommandReceived(Link.this, bytes);
             }
         });

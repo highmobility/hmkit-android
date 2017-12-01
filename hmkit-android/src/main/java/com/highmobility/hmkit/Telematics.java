@@ -172,7 +172,8 @@ public class Telematics {
                 Log.d(TAG, "onTelematicsResponseDecrypted: " + Bytes.hexFromBytes(data));
 
             sendingCommand = false;
-            manager.mainHandler.post(new Runnable() {
+
+            manager.postToMainThread(new Runnable() {
                 @Override
                 public void run() {
                     callback.onCommandResponse(data);
@@ -182,7 +183,7 @@ public class Telematics {
     }
 
     void dispatchError(final TelematicsError.Type type, final int code, final String message) {
-        manager.mainHandler.post(new Runnable() {
+        manager.postToMainThread(new Runnable() {
             @Override
             public void run() {
                 final TelematicsError error = new TelematicsError(type, code, message);

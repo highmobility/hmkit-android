@@ -292,6 +292,9 @@ public class Broadcaster implements SharedBleListener {
         if (isAlivePinging) {
             sendAlivePing();
         }
+        else {
+            manager.workHandler.removeCallbacks(clockRunnable);
+        }
     }
 
     /**
@@ -349,14 +352,18 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Stop broadcasting, clear all link listeners and stop internal processes.
+     * Stop broadcasting, clear all link listeners and stop internal processes. Also tries to
+     * disconnect all connected links. If successful, the link's state will change to disconnected and
+     * {@link com.highmobility.hmkit.BroadcasterListener#onLinkLost(ConnectedLink)}} will be called.
+     *
+     * The user is responsible for releasing the BroadcasterListener.
      */
     public void terminate() {
         if (GATTServer == null) return;
 
         stopBroadcasting();
-        setListener(null);
 
+<<<<<<< HEAD
         for (int i = 0; i < getLinks().size(); i++) {
             ConnectedLink link = getLinks().get(i);
             GATTServer.cancelConnection(link.btDevice);
@@ -364,9 +371,14 @@ public class Broadcaster implements SharedBleListener {
             link.broadcaster = null;
             links.remove(link);
             link.setListener(null);
+=======
+        for (ConnectedLink link : getLinks()) {
+            if (link.getState() != Link.State.DISCONNECTED) {
+                GATTServer.cancelConnection(link.btDevice);
+            }
+>>>>>>> f/no-autoapi
         }
 
-        manager.workHandler.removeCallbacks(clockRunnable);
         setIsAlivePinging(false);
 
         if (manager.ble != null) {
@@ -407,11 +419,10 @@ public class Broadcaster implements SharedBleListener {
         links.add(link);
 
         if (listener != null) {
-            final Broadcaster devicePointer = this;
-            devicePointer.manager.mainHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    devicePointer.listener.onLinkReceived(link);
+            manager.postToMainThread(new Runnable() {
+                @Override public void run() {
+                    if (listener == null) return;
+                    listener.onLinkReceived(link);
                 }
             });
         }
@@ -425,11 +436,7 @@ public class Broadcaster implements SharedBleListener {
         final ConnectedLink link = getLinkForMac(device.getMac());
         if (link == null) return false;
 
-        if (link.getState() != Link.State.DISCONNECTED) {
-            if (GATTServer != null) GATTServer.cancelConnection(link.btDevice);
-            link.setState(Link.State.DISCONNECTED);
-        }
-
+        link.setState(Link.State.DISCONNECTED);
         links.remove(link);
 
         // set new adapter name
@@ -439,11 +446,10 @@ public class Broadcaster implements SharedBleListener {
 
         // invoke the listener listener
         if (listener != null) {
-            final Broadcaster devicePointer = this;
-            devicePointer.manager.mainHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    devicePointer.listener.onLinkLost(link);
+            manager.postToMainThread(new Runnable() {
+                @Override public void run() {
+                    if (listener == null) return;
+                    listener.onLinkLost(link);
                 }
             });
         }
@@ -700,20 +706,14 @@ public class Broadcaster implements SharedBleListener {
             final State oldState = this.state;
             this.state = state;
 
-            Runnable broadcastStateChange = new Runnable() {
-                @Override
-                public void run() {
-                    if (listener != null) {
+
+            if (listener != null) {
+                manager.postToMainThread(new Runnable() {
+                    @Override public void run() {
+                        if (listener == null) return;
                         listener.onStateChanged(oldState);
                     }
-                }
-            };
-
-            if (Looper.myLooper() != manager.mainHandler.getLooper()) {
-                manager.mainHandler.post(broadcastStateChange);
-            }
-            else {
-                broadcastStateChange.run();
+                });
             }
         }
     }

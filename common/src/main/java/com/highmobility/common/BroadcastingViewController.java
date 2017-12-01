@@ -67,7 +67,10 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     @Override
     public void onDestroy() {
         Manager.getInstance().terminate();
+        // clear the references
+        broadcaster.setListener(null);
         broadcaster = null;
+        link.setListener(null);
         link = null;
     }
 
