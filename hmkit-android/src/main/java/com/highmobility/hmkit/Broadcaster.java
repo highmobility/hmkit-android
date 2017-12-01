@@ -400,11 +400,10 @@ public class Broadcaster implements SharedBleListener {
         links.add(link);
 
         if (listener != null) {
-            final Broadcaster devicePointer = this;
-            devicePointer.manager.mainHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    devicePointer.listener.onLinkReceived(link);
+            manager.postToMainThread(new Runnable() {
+                @Override public void run() {
+                    if (listener == null) return;
+                    listener.onLinkReceived(link);
                 }
             });
         }
@@ -428,11 +427,10 @@ public class Broadcaster implements SharedBleListener {
 
         // invoke the listener listener
         if (listener != null) {
-            final Broadcaster devicePointer = this;
-            devicePointer.manager.mainHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    devicePointer.listener.onLinkLost(link);
+            manager.postToMainThread(new Runnable() {
+                @Override public void run() {
+                    if (listener == null) return;
+                    listener.onLinkLost(link);
                 }
             });
         }
@@ -690,20 +688,14 @@ public class Broadcaster implements SharedBleListener {
             final State oldState = this.state;
             this.state = state;
 
-            Runnable broadcastStateChange = new Runnable() {
-                @Override
-                public void run() {
-                    if (listener != null) {
+
+            if (listener != null) {
+                manager.postToMainThread(new Runnable() {
+                    @Override public void run() {
+                        if (listener == null) return;
                         listener.onStateChanged(oldState);
                     }
-                }
-            };
-
-            if (Looper.myLooper() != manager.mainHandler.getLooper()) {
-                manager.mainHandler.post(broadcastStateChange);
-            }
-            else {
-                broadcastStateChange.run();
+                });
             }
         }
     }
