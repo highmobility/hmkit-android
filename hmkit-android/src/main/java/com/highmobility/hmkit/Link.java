@@ -67,17 +67,23 @@ public class Link {
 
             this.state = state;
 
-            if (listener != null) {
-                final Link linkPointer = this;
-                Runnable callback = new Runnable() {
-                    @Override
-                    public void run() {
+            if (listener == null) return;
+
+            final Link linkPointer = this;
+            Runnable callback = new Runnable() {
+                @Override
+                public void run() {
+                    if (linkPointer.listener == null) return;
+
                     linkPointer.listener.onStateChanged(linkPointer, oldState);
+                    if (linkPointer.getState() == State.DISCONNECTED) {
+                        // link is now gone, can null the listener
+                        linkPointer.listener = null;
                     }
-                };
-                
-                manager.mainHandler.post(callback);
-            }
+                }
+            };
+
+            manager.mainHandler.post(callback);
         }
     }
 
