@@ -107,8 +107,8 @@ uint32_t hm_bt_crypto_hal_ecc_validate_oem_ca_signature(uint8_t *data, uint8_t s
   return hm_crypto_openssl_verify(data, size, ca_pub, signature);
 }
 
-uint32_t hm_bt_crypto_hal_hmac(uint8_t *key, uint8_t *data, uint8_t *hmac){
-  return hm_crypto_openssl_hmac(data, 256, key, hmac);
+uint32_t hm_bt_crypto_hal_hmac(uint8_t *key, uint8_t *data, uint16_t size, uint8_t *hmac){
+  return hm_crypto_openssl_hmac(data, size, key, hmac);
 }
 
 uint32_t hm_bt_crypto_hal_generate_nonce(uint8_t *nonce){
