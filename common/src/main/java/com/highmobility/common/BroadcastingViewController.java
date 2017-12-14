@@ -210,10 +210,18 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
 
     void initializeManager() {
         // prod
+//        Manager.getInstance().initialize(
+//                "***REMOVED******REMOVED******REMOVED***",
+//                "***REMOVED***=",
+//                "***REMOVED***+6pXmtkYxynMQm0rfcBU0XFF5A==",
+//                view.getActivity()
+//        );
+
+        // staging
         Manager.getInstance().initialize(
-                "***REMOVED******REMOVED******REMOVED***",
+                "***REMOVED***",
                 "***REMOVED***=",
-                "***REMOVED***+6pXmtkYxynMQm0rfcBU0XFF5A==",
+                "***REMOVED***==",
                 view.getActivity()
         );
 
