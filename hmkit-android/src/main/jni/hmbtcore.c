@@ -298,6 +298,24 @@ Java_com_highmobility_btcore_HMBTCore_HMBTCoreCryptoAddSignature(JNIEnv *env, jo
     (*env)->ReleaseByteArrayElements(env, signature_, signature, 0);
 }
 
+JNIEXPORT jint JNICALL
+Java_com_highmobility_btcore_HMBTCore_HMBTCoreCryptoValidateSignature(JNIEnv *env, jobject instance,
+        jbyteArray data_, jint size,
+        jbyteArray pubKey_, jbyteArray signature_) {
+
+jbyte *data = (*env)->GetByteArrayElements(env, data_, NULL);
+jbyte *public_key = (*env)->GetByteArrayElements(env, pubKey_, NULL);
+jbyte *signature = (*env)->GetByteArrayElements(env, signature_, NULL);
+
+jint retvalue = hm_crypto_openssl_verify(data, size, public_key, signature);
+
+(*env)->ReleaseByteArrayElements(env, data_, data, 0);
+(*env)->ReleaseByteArrayElements(env, pubKey_, public_key, 0);
+(*env)->ReleaseByteArrayElements(env, signature_, signature, 0);
+
+return retvalue;
+}
+
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreTelematicsReceiveData(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                       jint length, jbyteArray data_) {
