@@ -363,20 +363,10 @@ public class Broadcaster implements SharedBleListener {
 
         stopBroadcasting();
 
-<<<<<<< HEAD
-        for (int i = 0; i < getLinks().size(); i++) {
-            ConnectedLink link = getLinks().get(i);
-            GATTServer.cancelConnection(link.btDevice);
-            link.setState(Link.State.DISCONNECTED);
-            link.broadcaster = null;
-            links.remove(link);
-            link.setListener(null);
-=======
         for (ConnectedLink link : getLinks()) {
             if (link.getState() != Link.State.DISCONNECTED) {
                 GATTServer.cancelConnection(link.btDevice);
             }
->>>>>>> f/no-autoapi
         }
 
         setIsAlivePinging(false);
