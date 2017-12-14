@@ -120,26 +120,27 @@ public class Manager {
         }
 
         this.context = context;
-        storage = new Storage(this.context);
-        webService = new WebService(this.context);
+        storage = new Storage(context);
+        webService = new WebService(context);
 
         this.caPublicKey = caPublicKey;
         this.certificate = certificate;
         this.privateKey = privateKey;
 
-        mainHandler = new Handler(this.context.getMainLooper());
+        mainHandler = new Handler(context.getMainLooper());
 
-        if (workThread.getState() == Thread.State.NEW)
+        if (workThread.getState() == Thread.State.NEW) {
             workThread.start();
-        workHandler = new Handler(workThread.getLooper());
+            workHandler = new Handler(workThread.getLooper());
+        }
 
-        telematics = new Telematics(this);
-        broadcaster = new Broadcaster(this);
-        scanner = new Scanner(this);
+        if (coreInterface == null) {
+            coreInterface = new BTCoreInterface(this);
+            core.HMBTCoreInit(coreInterface);
+        }
 
-        coreInterface = new BTCoreInterface(this);
-        core.HMBTCoreInit(coreInterface);
         startClock();
+
         Log.i(TAG, "Initialized High-Mobility " + getInfoString() + certificate.toString());
     }
 
@@ -172,7 +173,6 @@ public class Manager {
         if (context == null) return;
 
         broadcaster.terminate();
-        broadcaster = null;
 
         coreClockTimer.cancel();
         coreClockTimer = null;
@@ -184,7 +184,11 @@ public class Manager {
 
         webService.cancelAllRequests();
         webService = null;
-        telematics = null;
+
+        if (ble != null) {
+            ble.terminate();
+        }
+
         context = null;
     }
 
@@ -195,6 +199,8 @@ public class Manager {
      */
     public Broadcaster getBroadcaster() throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
+        if (broadcaster == null) broadcaster = new Broadcaster(this);
+
         return broadcaster;
     }
 
@@ -205,6 +211,8 @@ public class Manager {
      */
     public Telematics getTelematics() throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
+        if (telematics == null) telematics = new Telematics(this);
+
         return telematics;
     }
 
@@ -216,6 +224,7 @@ public class Manager {
 
     Scanner getScanner() throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
+        if (scanner == null) scanner = new Scanner(this);
         return scanner;
     }
 

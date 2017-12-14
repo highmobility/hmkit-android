@@ -352,42 +352,24 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Stop broadcasting, clear all link listeners and stop internal processes. Also tries to
+     * Stop broadcasting and internal processes. Also tries to
      * disconnect all connected links. If successful, the link's state will change to disconnected and
      * {@link com.highmobility.hmkit.BroadcasterListener#onLinkLost(ConnectedLink)}} will be called.
      *
      * The user is responsible for releasing the BroadcasterListener.
      */
-    public void terminate() {
+    void terminate() {
         if (GATTServer == null) return;
-
         stopBroadcasting();
 
-<<<<<<< HEAD
-        for (int i = 0; i < getLinks().size(); i++) {
-            ConnectedLink link = getLinks().get(i);
-            GATTServer.cancelConnection(link.btDevice);
-            link.setState(Link.State.DISCONNECTED);
-            link.broadcaster = null;
-            links.remove(link);
-            link.setListener(null);
-=======
         for (ConnectedLink link : getLinks()) {
             if (link.getState() != Link.State.DISCONNECTED) {
                 GATTServer.cancelConnection(link.btDevice);
             }
->>>>>>> f/no-autoapi
         }
 
         setIsAlivePinging(false);
-
-        if (manager.ble != null) {
-            manager.ble.removeListener(this);
-        }
-
         GATTServer.clearServices();
-        GATTServer.close();
-        GATTServer = null;
     }
 
     Broadcaster(Manager manager) {
@@ -450,6 +432,7 @@ public class Broadcaster implements SharedBleListener {
                 @Override public void run() {
                     if (listener == null) return;
                     listener.onLinkLost(link);
+                    link.listener = null; // nothing to do with the link anymore
                 }
             });
         }
@@ -520,22 +503,19 @@ public class Broadcaster implements SharedBleListener {
     }
 
     private boolean createGATTServer() {
-        if (GATTServer != null) return true;
-
-        gattServerCallback = new GATTServerCallback(this);
-        GATTServer = manager.ble.getManager().openGattServer(manager.context, gattServerCallback);
+        if (GATTServer != null && GATTServer.getServices().size() > 0) return true;
 
         if (GATTServer == null) {
-            Log.e(TAG, "Cannot create gatt server"); return false;
-        }
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "createGATTServer");
+            gattServerCallback = new GATTServerCallback(this);
+            GATTServer = manager.ble.getManager().openGattServer(manager.context, gattServerCallback);
 
-        /// bluez hack service
-        /*UUID BLUEZ_HACK_SERVICE_UUID = UUID.fromString("48494D4F-BB81-49AB-BE90-6F25D716E8DE");
-        BluetoothGattService bluezHackService = new BluetoothGattService(BLUEZ_HACK_SERVICE_UUID,
-                BluetoothGattService.SERVICE_TYPE_PRIMARY);
-        GATTServer.addService(bluezHackService);*/
-        ///
+            if (GATTServer == null) {
+                Log.e(TAG, "Cannot create gatt server");
+                return false;
+            }
+        }
+
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "createGATTServer");
 
         // create the service
         BluetoothGattService service = new BluetoothGattService(Constants.SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY);

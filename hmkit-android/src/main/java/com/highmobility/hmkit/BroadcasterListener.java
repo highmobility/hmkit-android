@@ -24,7 +24,6 @@ public interface BroadcasterListener {
     /**
      * Callback for when a link has disconnected from the broadcaster.
      *
-     *
      * @param link The link that disconnected from the broadcaster.
      */
     void onLinkLost(ConnectedLink link);

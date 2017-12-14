@@ -152,9 +152,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
             link.setListener(null);
             this.link = null;
             view.updateLink(link);
-
-            if (broadcaster.getState() == Broadcaster.State.BROADCASTING)
-                view.setStatusText("Looking for links...");
+            onStateChanged(broadcaster.getState());
         }
     }
 
