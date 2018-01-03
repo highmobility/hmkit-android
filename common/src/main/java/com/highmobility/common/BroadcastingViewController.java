@@ -221,7 +221,6 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
         Manager.getInstance().initialize(
                 "***REMOVED***",
                 "***REMOVED***=",
-
                 "***REMOVED***==",
                 view.getActivity()
         );
