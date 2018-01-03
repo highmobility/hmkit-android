@@ -35,8 +35,8 @@ import javax.net.ssl.X509TrustManager;
 class WebService {
     private static final String TAG = "WebService";
 
-    private static final String baseUrl = "https://developers.high-mobility.com"; // production
-//    private static final String baseUrl = "https://developers.h-m.space"; // staging
+//    private static final String baseUrl = "https://developers.high-mobility.com"; // production
+    private static final String baseUrl = "https://developers.h-m.space"; // staging
     private static final String apiUrl = "/api/v1";
     private static final String telematicsUrl = baseUrl + "/hm_cloud" + apiUrl;
 
