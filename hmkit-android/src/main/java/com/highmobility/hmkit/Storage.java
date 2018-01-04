@@ -26,6 +26,8 @@ import static com.highmobility.hmkit.Broadcaster.TAG;
  */
 public class Storage {
     private static final String ACCESS_CERTIFICATE_STORAGE_KEY = "ACCESS_CERTIFICATE_STORAGE_KEY";
+    static final String device_certificate_json_object = "device_access_certificate";
+
 
     public enum Result {
         SUCCESS(0), STORAGE_FULL(1), INTERNAL_ERROR(2);
@@ -50,21 +52,27 @@ public class Storage {
     }
 
     AccessCertificate storeDownloadedCertificates(JSONObject response) throws Exception {
-        if (response.has("device_access_certificate") == false) throw new Exception();
+        if (response.has(device_certificate_json_object) == false) {
+            throw new Exception("response does not have a " + device_certificate_json_object + " object");
+        }
 
         String vehicleAccessCertificateBase64, deviceAccessCertificateBase64;
         AccessCertificate vehicleAccessCertificate, deviceAccessCertificate;
 
         // providing device, gaining vehicle
-        deviceAccessCertificateBase64 = response.getString("device_access_certificate");
-        deviceAccessCertificate = new AccessCertificate(deviceAccessCertificateBase64);
+        deviceAccessCertificateBase64 = response.getString(device_certificate_json_object);
+        try {
+            deviceAccessCertificate = new AccessCertificate(deviceAccessCertificateBase64);
+        }
+        catch (IllegalArgumentException e) {
+            throw new Exception("response's " + device_certificate_json_object + " bytes could not be parsed to an Access Certificate");
+        }
+
         Result result = storeCertificate(deviceAccessCertificate);
         if (result != Result.SUCCESS) {
-            if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
-                Log.d(TAG, "storeDownloadedCertificates: storeCertificate failed " + result);
-            }
-            throw new Exception();
+            throw new Exception("certificate storage failed " + result);
         }
+
         if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(TAG, "storeDownloadedCertificates: deviceCert " + deviceAccessCertificate.toString());
 
@@ -75,8 +83,7 @@ public class Storage {
                 vehicleAccessCertificate = new AccessCertificate(vehicleAccessCertificateBase64);
 
                 if (storeCertificate(vehicleAccessCertificate) != Result.SUCCESS) {
-                    Log.d(TAG, "storeDownloadedCertificates: " + "cannot store vehicle access cert");
-                    throw new Exception();
+                    throw new Exception("cannot store vehicle access cert");
                 }
 
                 if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())

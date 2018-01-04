@@ -280,8 +280,11 @@ public class Manager {
                         try {
                              certificate = storage.storeDownloadedCertificates(response);
                         } catch (Exception e) {
+                            if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
+                                Log.d(TAG, "storeDownloadedCertificates error: " + e.getMessage());
+                            }
                             DownloadAccessCertificateError error = new DownloadAccessCertificateError(
-                                    DownloadAccessCertificateError.Type.INVALID_SERVER_RESPONSE, 0, "Invalid certificate data");
+                                    DownloadAccessCertificateError.Type.INVALID_SERVER_RESPONSE, 0, e.getMessage());
                             callback.onDownloadFailed(error);
                         }
 
