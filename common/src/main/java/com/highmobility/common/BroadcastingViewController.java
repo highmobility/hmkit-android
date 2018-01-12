@@ -1,6 +1,7 @@
 package com.highmobility.common;
 
 import android.content.Intent;
+import android.os.Handler;
 import android.util.Log;
 
 import com.highmobility.hmkit.Broadcaster;
@@ -14,6 +15,7 @@ import com.highmobility.hmkit.Error.TelematicsError;
 import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
 import com.highmobility.hmkit.Telematics;
+import com.highmobility.utils.Bytes;
 
 public class BroadcastingViewController implements IBroadcastingViewController, BroadcasterListener, ConnectedLinkListener {
     private static final String TAG = "BroadcastingVC";
@@ -23,11 +25,11 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     AuthorizationCallback authorizationCallback;
     Broadcaster broadcaster;
     ConnectedLink link;
-    Cloud cloud;
+
 
     public BroadcastingViewController(IBroadcastingView view) {
         this.view = view;
-        cloud = new Cloud(view.getActivity());
+
         initializeManager();
         broadcaster = Manager.getInstance().getBroadcaster();
 

@@ -191,12 +191,12 @@ class ScannedLink extends Link {
                 // service UUID is reversed
                 UUID uuid = service.getUuid();
 
-                byte[] msb = Bytes.longToBytes(uuid.getMostSignificantBits());
-                byte[] lsb = Bytes.longToBytes(uuid.getLeastSignificantBits());
+                byte[] msb = longToBytes(uuid.getMostSignificantBits());
+                byte[] lsb = longToBytes(uuid.getLeastSignificantBits());
 
                 Bytes.reverse(msb);
                 Bytes.reverse(lsb);
-                UUID reverseUUID = new UUID(Bytes.getLong(lsb), Bytes.getLong(msb));
+                UUID reverseUUID = new UUID(getLong(lsb), getLong(msb));
 
                 if (reverseUUID.equals(Constants.SERVICE_UUID)) {
                     for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
@@ -335,4 +335,22 @@ class ScannedLink extends Link {
             }
         }
     };
+
+    static long getLong(byte[] b) {
+        long result = 0;
+        for (int i = 0; i < 8; i++) {
+            result <<= 8;
+            result |= (b[i] & 0xFF);
+        }
+        return result;
+    }
+
+    static byte[] longToBytes(long l) {
+        byte[] result = new byte[8];
+        for (int i = 7; i >= 0; i--) {
+            result[i] = (byte)(l & 0xFF);
+            l >>= 8;
+        }
+        return result;
+    }
 }
