@@ -47,12 +47,14 @@ public class Manager {
     public interface DownloadCallback {
         /**
          * Invoked if the certificate download was successful.
+         *
          * @param vehicleSerial the certificate's gainer serial
          */
         void onDownloaded(byte[] vehicleSerial);
 
         /**
          * Invoked when there was an error with the certificate download.
+         *
          * @param error The error
          */
         void onDownloadFailed(DownloadAccessCertificateError error);
@@ -82,7 +84,6 @@ public class Manager {
     private HandlerThread workThread = new HandlerThread("BTCoreThread");
 
     /**
-     *
      * @return The singleton instance of Manager.
      */
     public static Manager getInstance() {
@@ -94,13 +95,13 @@ public class Manager {
     }
 
     /**
-     * Initialize the SDK with the necessary properties. Call this before using any other functionality.
+     * Initialize the SDK with the necessary properties. Call this before using any other
+     * functionality.
      *
      * @param certificate The broadcaster certificate.
-     * @param privateKey 32 byte private key with elliptic curve Prime 256v1.
+     * @param privateKey  32 byte private key with elliptic curve Prime 256v1.
      * @param caPublicKey 64 byte public key of the Certificate Authority.
-     * @param context the application context
-     *
+     * @param context     the application context
      * @throws IllegalArgumentException if the parameters are invalid.
      */
     public void initialize(DeviceCertificate certificate,
@@ -108,14 +109,15 @@ public class Manager {
                            byte[] caPublicKey,
                            Context context) throws IllegalArgumentException {
         if (this.context != null) {
-            throw new IllegalStateException("HMKit is already initialized. Call terminate() first.");
+            throw new IllegalStateException("HMKit is already initialized. Call terminate() first" +
+                    ".");
         }
 
         if (privateKey == null
-            || privateKey.length != 32
-            || caPublicKey == null
-            || caPublicKey.length != 64
-            || certificate == null) {
+                || privateKey.length != 32
+                || caPublicKey == null
+                || caPublicKey.length != 64
+                || certificate == null) {
             throw new IllegalArgumentException("HMKit initialization parameters are invalid.");
         }
 
@@ -145,38 +147,51 @@ public class Manager {
     }
 
     /**
-     * Initialize the SDK with the necessary properties. Call this before using any other functionality.
+     * Initialize the SDK with the necessary properties. Call this before using any other
+     * functionality.
      *
-     * @param certificate The broadcaster certificate, in Base64.
-     * @param privateKey 32 byte private key with elliptic curve Prime 256v1 in Base64.
+     * @param certificate     The broadcaster certificate, in Base64.
+     * @param privateKey      32 byte private key with elliptic curve Prime 256v1 in Base64.
      * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64.
-     * @param context the application context
-     *
+     * @param context         the application context
      * @throws IllegalArgumentException if the parameters are invalid.
      */
-    public void initialize(String certificate, String privateKey, String issuerPublicKey, Context context) throws IllegalArgumentException {
-        DeviceCertificate decodedCert = new DeviceCertificate(Base64.decode(certificate, Base64.DEFAULT));
+    public void initialize(String certificate, String privateKey, String issuerPublicKey, Context
+            context) throws IllegalArgumentException {
+        DeviceCertificate decodedCert = new DeviceCertificate(Base64.decode(certificate,
+                Base64.DEFAULT));
 
         byte[] decodedPrivateKey = Base64.decode(privateKey, Base64.DEFAULT);
-        byte[] decodedIssuer= Base64.decode(issuerPublicKey, Base64.DEFAULT);
+        byte[] decodedIssuer = Base64.decode(issuerPublicKey, Base64.DEFAULT);
         initialize(decodedCert, decodedPrivateKey, decodedIssuer, context);
     }
 
     /**
      * Call this function when the SDK is not used anymore - for instance when killing the app.
-     * It clears all the internal processes and unregisters all BroadcastReceivers.
-     * Also, {@link Broadcaster#terminate() } is called.
-     *
+     * It clears all the internal processes, unregisters all BroadcastReceivers and enables
+     * re-initializing
+     * the SDK with new certificates.
+     * <p>
+     * Terminate will fail if a connected link still exists. Disconnect all the links before
+     * terminating the SDK.
+     * <p>
      * Stored certificates are not deleted.
+     *
+     * @throws IllegalStateException when there are still links connected.
      */
-    public void terminate() {
-        if (context == null) return;
+    public void terminate() throws IllegalStateException {
+        if (context == null) return; // already not initialized
 
-        broadcaster.terminate();
+        if (broadcaster.getLinks().size() > 0) {
+            throw new IllegalStateException("Terminate cannot be done if there exists a connected" +
+                    " link");
+        }
+
+        broadcaster.disconnectAllLinks();
 
         coreClockTimer.cancel();
         coreClockTimer = null;
-        
+
         if (ble != null) {
             ble.terminate();
             ble = null;
@@ -193,7 +208,6 @@ public class Manager {
     }
 
     /**
-     *
      * @return The Broadcaster instance
      * @throws IllegalStateException when SDK is not initialized
      */
@@ -205,7 +219,6 @@ public class Manager {
     }
 
     /**
-     *
      * @return The Telematics instance
      * @throws IllegalStateException when SDK is not initialized
      */
@@ -217,7 +230,6 @@ public class Manager {
     }
 
     /**
-     *
      * @return The Scanner Instance
      * @throws IllegalStateException when SDK is not initialized
      */
@@ -229,7 +241,6 @@ public class Manager {
     }
 
     /**
-     *
      * @return The device certificate that is used by the SDK to identify itself.
      * @throws IllegalStateException when SDK is not initialized
      */
@@ -239,7 +250,6 @@ public class Manager {
     }
 
     /**
-     *
      * @return An SDK description string containing version name and type(mobile or wear).
      * @throws IllegalStateException when SDK is not initialized
      */
@@ -251,8 +261,7 @@ public class Manager {
 
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
             infoString += " w";
-        }
-        else {
+        } else {
             infoString += " m";
         }
 
@@ -264,7 +273,8 @@ public class Manager {
      * be provided by the certificate provider.
      *
      * @param accessToken The token that is used to download the certificates
-     * @param callback A {@link DownloadCallback} object that is invoked after the download is finished or failed
+     * @param callback    A {@link DownloadCallback} object that is invoked after the download is
+     *                    finished or failed
      * @throws IllegalStateException when SDK is not initialized
      */
     public void downloadCertificate(String accessToken,
@@ -278,17 +288,21 @@ public class Manager {
                     public void onResponse(JSONObject response) {
                         AccessCertificate certificate = null;
                         try {
-                             certificate = storage.storeDownloadedCertificates(response);
+                            certificate = storage.storeDownloadedCertificates(response);
                         } catch (Exception e) {
-                            if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
+                            if (Manager.getInstance().loggingLevel.getValue() >= Manager
+                                    .LoggingLevel.DEBUG.getValue()) {
                                 Log.d(TAG, "storeDownloadedCertificates error: " + e.getMessage());
                             }
-                            DownloadAccessCertificateError error = new DownloadAccessCertificateError(
-                                    DownloadAccessCertificateError.Type.INVALID_SERVER_RESPONSE, 0, e.getMessage());
+                            DownloadAccessCertificateError error = new
+                                    DownloadAccessCertificateError(
+                                    DownloadAccessCertificateError.Type.INVALID_SERVER_RESPONSE,
+                                    0, e.getMessage());
                             callback.onDownloadFailed(error);
                         }
 
-                        if (certificate != null) callback.onDownloaded(certificate.getGainerSerial());
+                        if (certificate != null)
+                            callback.onDownloaded(certificate.getGainerSerial());
                     }
                 },
                 new Response.ErrorListener() {
@@ -298,15 +312,15 @@ public class Manager {
 
                         if (error.networkResponse != null) {
                             try {
-                                JSONObject json = new JSONObject(new String(error.networkResponse.data));
+                                JSONObject json = new JSONObject(new String(error.networkResponse
+                                        .data));
                                 Log.d(TAG, "onErrorResponse: " + json.toString());
                                 if (json.has("message")) {
                                     dispatchedError = new DownloadAccessCertificateError(
                                             DownloadAccessCertificateError.Type.HTTP_ERROR,
                                             error.networkResponse.statusCode,
                                             json.getString("message"));
-                                }
-                                else {
+                                } else {
                                     dispatchedError = new DownloadAccessCertificateError(
                                             DownloadAccessCertificateError.Type.HTTP_ERROR,
                                             error.networkResponse.statusCode,
@@ -318,12 +332,12 @@ public class Manager {
                                         error.networkResponse.statusCode,
                                         "");
                             }
-                        }
-                        else {
+                        } else {
                             dispatchedError = new DownloadAccessCertificateError(
                                     DownloadAccessCertificateError.Type.NO_CONNECTION,
                                     -1,
-                                    "Cannot connect to the web service. Check your internet connection");
+                                    "Cannot connect to the web service. Check your internet " +
+                                            "connection");
                         }
 
                         callback.onDownloadFailed(dispatchedError);
@@ -332,7 +346,6 @@ public class Manager {
     }
 
     /**
-     *
      * @return All Access Certificates where this device's serial is providing access.
      * @throws IllegalStateException when SDK is not initialized
      */
@@ -373,6 +386,7 @@ public class Manager {
 
     /**
      * Deletes all the stored Access Certificates.
+     *
      * @throws IllegalStateException when SDK is not initialized
      */
     public void deleteCertificates() throws IllegalStateException {
@@ -383,8 +397,7 @@ public class Manager {
     void postToMainThread(Runnable runnable) {
         if (Looper.myLooper() != mainHandler.getLooper()) {
             mainHandler.post(runnable);
-        }
-        else {
+        } else {
             runnable.run();
         }
     }
