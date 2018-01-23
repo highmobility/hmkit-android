@@ -169,8 +169,7 @@ public class Manager {
     /**
      * Call this function when the SDK is not used anymore - for instance when killing the app.
      * It clears all the internal processes, unregisters all BroadcastReceivers and enables
-     * re-initializing
-     * the SDK with new certificates.
+     * re-initializing the SDK with new certificates.
      * <p>
      * Terminate will fail if a connected link still exists. Disconnect all the links before
      * terminating the SDK.
@@ -183,8 +182,8 @@ public class Manager {
         if (context == null) return; // already not initialized
 
         if (broadcaster.getLinks().size() > 0) {
-            throw new IllegalStateException("Terminate cannot be done if there exists a connected" +
-                    " link");
+            throw new IllegalStateException("Terminate should not be called if a connected link " +
+                    "exists. Disconnect from all of the links before calling.");
         }
 
         broadcaster.disconnectAllLinks();
