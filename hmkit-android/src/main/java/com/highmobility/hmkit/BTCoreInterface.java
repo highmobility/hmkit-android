@@ -17,6 +17,7 @@ import java.util.Arrays;
 class BTCoreInterface implements HMBTCoreInterface {
     static final String TAG = "HMBTCoreInterface";
     Manager manager;
+
     BTCoreInterface(Manager manager) {
         this.manager = manager;
     }
