@@ -3,6 +3,7 @@ package com.highmobility.sdkapp.broadcast;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -12,6 +13,7 @@ import butterknife.ButterKnife;
 import com.highmobility.common.BroadcastingViewController;
 import com.highmobility.common.IBroadcastingView;
 import com.highmobility.common.IBroadcastingViewController;
+import com.highmobility.hmkit.Manager;
 import com.highmobility.sdkapp.R;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
@@ -27,6 +29,7 @@ public class BroadcastActivity extends Activity implements IBroadcastingView {
     @BindView(R.id.pairing_view) LinearLayout pairingView;
     @BindView(R.id.confirm_pairing_button) Button confirmPairButton;
     @BindView(R.id.show_button) Button showButton;
+    @BindView(R.id.disconnect_button) Button disconnectButton;
 
     ConnectedLinkListener.AuthorizationCallback pairApproveCallback;
 
@@ -43,6 +46,13 @@ public class BroadcastActivity extends Activity implements IBroadcastingView {
         controller = new BroadcastingViewController(this);
         confirmPairButton.setOnClickListener(v -> onPairConfirmClick());
         showButton.setOnClickListener(v -> controller.onLinkClicked());
+
+        disconnectButton.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                Log.d("hm", "onClick: disconnect");
+                Manager.getInstance().getBroadcaster().disconnectAllLinks();
+            }
+        });
     }
 
     @Override

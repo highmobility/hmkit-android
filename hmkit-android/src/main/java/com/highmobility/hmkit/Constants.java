@@ -13,7 +13,7 @@ public class Constants {
     static int MAX_COMMAND_LENGTH = 253; // this is without commandId, requiresHMAC and size
 
 
-    static UUID NOTIFY_DESC_UUID = UUID.fromString("00002902-0000-1000-8000-00805F9B34FB");
+    static UUID NOTIFY_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805F9B34FB");
 
     public static final float registerTimeout           = 10.0f;
     public static final float commandTimeout            = 10.0f;

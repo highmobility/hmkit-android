@@ -5,16 +5,16 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattService;
+import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
-import android.os.Looper;
 import android.os.ParcelUuid;
 import android.util.Log;
 
 
-import com.highmobility.crypto.Crypto;
 import com.highmobility.utils.Bytes;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.btcore.HMDevice;
@@ -260,6 +260,7 @@ public class Broadcaster implements SharedBleListener {
 
         // stopAdvertising cancels all the BT connections as well.
         if (mBluetoothLeAdvertiser != null) {
+            Log.d(TAG, "stopBroadcasting: ");
             mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
             mBluetoothLeAdvertiser = null;
         }
@@ -367,16 +368,21 @@ public class Broadcaster implements SharedBleListener {
      */
     public void disconnectAllLinks() {
         if (GATTServer == null) return;
-        stopBroadcasting();
 
-        for (ConnectedLink link : getLinks()) {
-            if (link.getState() != Link.State.DISCONNECTED) {
-                GATTServer.cancelConnection(link.btDevice);
-            }
+        List<BluetoothDevice> devices = manager.ble.getManager().getConnectedDevices(BluetoothProfile.GATT_SERVER);
+
+        for (BluetoothDevice device : devices) {
+            // just to make sure all of the devices are tried to be disconnected. disconnect callback
+            // should find the one in this.links if it exists.
+            GATTServer.cancelConnection(device);
         }
 
+        stopBroadcasting();
         setIsAlivePinging(false);
+
         GATTServer.clearServices();
+        GATTServer.close();
+        GATTServer = null;
     }
 
     Broadcaster(Manager manager) {
@@ -565,7 +571,7 @@ public class Broadcaster implements SharedBleListener {
                 BluetoothGattCharacteristic.PROPERTY_READ,
                 BluetoothGattCharacteristic.PERMISSION_READ);
 
-        if (readCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESC_UUID,
+        if (readCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESCRIPTOR_UUID,
                 BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor
                         .PERMISSION_READ)) == false) {
             Log.e(TAG, "Cannot add read descriptor");
@@ -573,23 +579,24 @@ public class Broadcaster implements SharedBleListener {
         }
 
         if (sensingReadCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants
-                .NOTIFY_DESC_UUID,
+                .NOTIFY_DESCRIPTOR_UUID,
                 BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor
                         .PERMISSION_READ)) == false) {
             Log.e(TAG, "Cannot add sensing read descriptor");
             return false;
         }
 
-        if (aliveCharacteristic.setValue(new byte[]{}) == false) {
-            Log.e(TAG, "Cannot set alive char value");
-            return false;
-        }
 
         if (aliveCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants
-                .NOTIFY_DESC_UUID,
+                .NOTIFY_DESCRIPTOR_UUID,
                 BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor
                         .PERMISSION_READ)) == false) {
             Log.e(TAG, "Cannot add alive descriptor");
+            return false;
+        }
+
+        if (aliveCharacteristic.setValue(new byte[]{}) == false) {
+            Log.e(TAG, "Cannot set alive char value");
             return false;
         }
 

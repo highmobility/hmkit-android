@@ -10,7 +10,6 @@ import android.util.Log;
 import com.highmobility.utils.Bytes;
 
 import java.util.Arrays;
-import java.util.UUID;
 
 /**
  * Created by ttiganik on 15/04/16.
@@ -28,7 +27,8 @@ class GATTServerCallback extends BluetoothGattServerCallback {
             Log.e(TAG, "connecting failed with status" + status);
         }
 
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "onConnectionStateChange " + newState);
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) Log.d(TAG, "onConnectionStateChange: " + getConnectionState(newState)+ " " + device.getAddress());
+
         if (newState == BluetoothProfile.STATE_DISCONNECTED) {
             final Broadcaster broadcaster = this.broadcaster;
             broadcaster.manager.workHandler.post(new Runnable() {
@@ -190,5 +190,16 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         }
 
         return -1;
+    }
+
+    private String getConnectionState(int state) {
+        switch (state) {
+            case BluetoothProfile.STATE_DISCONNECTED: return "STATE_DISCONNECTED";
+            case BluetoothProfile.STATE_CONNECTING: return "STATE_CONNECTING";
+            case BluetoothProfile.STATE_CONNECTED: return "STATE_CONNECTED";
+            case BluetoothProfile.STATE_DISCONNECTING: return "STATE_DISCONNECTING";
+        }
+
+        return "Unknown";
     }
 }
