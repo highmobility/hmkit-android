@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
@@ -170,16 +169,6 @@ public class Broadcaster implements SharedBleListener {
      *                 onBroadcastingFailed is invoked if something went wrong.
      */
     public void startBroadcasting(StartCallback callback) {
-        try {
-            manager.initializeBle();
-        } catch (IllegalStateException e) {
-            callback.onBroadcastingFailed(
-                    new BroadcastError(BroadcastError.Type.UNINITIALIZED,
-                            0,
-                            "HMKit is not initialized"));
-            return;
-        }
-
         manager.ble.addListener(this);
 
         if (state == State.BROADCASTING) {
@@ -369,10 +358,12 @@ public class Broadcaster implements SharedBleListener {
     public void disconnectAllLinks() {
         if (GATTServer == null) return;
 
-        List<BluetoothDevice> devices = manager.ble.getManager().getConnectedDevices(BluetoothProfile.GATT_SERVER);
+        List<BluetoothDevice> devices = manager.ble.getManager().getConnectedDevices
+                (BluetoothProfile.GATT_SERVER);
 
         for (BluetoothDevice device : devices) {
-            // just to make sure all of the devices are tried to be disconnected. disconnect callback
+            // just to make sure all of the devices are tried to be disconnected. disconnect
+            // callback
             // should find the one in this.links if it exists.
             GATTServer.cancelConnection(device);
         }
@@ -380,9 +371,17 @@ public class Broadcaster implements SharedBleListener {
         stopBroadcasting();
         setIsAlivePinging(false);
 
+        // cant close service here, we wont get disconnect callback
+    }
+
+    void closeService() {
+        // this should never be called. Once you create a service it should not be changed. All
+        // communication should finish or be cancelled
+        if (GATTServer == null) return;
         GATTServer.clearServices();
         GATTServer.close();
-        GATTServer = null;
+        GATTServer = null; // but with this we wont get link callbacks
+        setListener(null); // there are no more callbacks coming
     }
 
     Broadcaster(Manager manager) {
@@ -571,7 +570,8 @@ public class Broadcaster implements SharedBleListener {
                 BluetoothGattCharacteristic.PROPERTY_READ,
                 BluetoothGattCharacteristic.PERMISSION_READ);
 
-        if (readCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants.NOTIFY_DESCRIPTOR_UUID,
+        if (readCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants
+                .NOTIFY_DESCRIPTOR_UUID,
                 BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor
                         .PERMISSION_READ)) == false) {
             Log.e(TAG, "Cannot add read descriptor");

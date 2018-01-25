@@ -122,6 +122,7 @@ public class Manager {
         }
 
         this.context = context;
+        ble = new SharedBle(context);
         storage = new Storage(context);
         webService = new WebService(context);
 
@@ -185,8 +186,6 @@ public class Manager {
             throw new IllegalStateException("Terminate should not be called if a connected link " +
                     "exists. Disconnect from all of the links before calling.");
         }
-
-        broadcaster.disconnectAllLinks();
 
         coreClockTimer.cancel();
         coreClockTimer = null;
@@ -399,12 +398,6 @@ public class Manager {
         } else {
             runnable.run();
         }
-    }
-
-    void initializeBle() throws IllegalStateException {
-        // we only want to initialize ble when we start using it
-        if (context == null) throw new IllegalStateException("SDK not initialized");
-        if (ble == null) ble = new SharedBle(context);
     }
 
     private void startClock() {

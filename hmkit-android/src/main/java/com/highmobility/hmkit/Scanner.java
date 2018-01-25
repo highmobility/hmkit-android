@@ -85,13 +85,6 @@ class Scanner {
      *                              Link.BLUETOOTH_OFF if BLE is turned off
      */
     public int startScanning() {
-        try {
-            manager.initializeBle();
-        }
-        catch (IllegalStateException e) {
-            return -1;
-        }
-
         // = new byte[][] { array1, array2, array3, array4, array5 };
         if (getState() == State.SCANNING) return 0;
 
