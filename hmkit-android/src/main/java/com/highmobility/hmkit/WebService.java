@@ -35,16 +35,29 @@ import javax.net.ssl.X509TrustManager;
 class WebService {
     private static final String TAG = "WebService";
 
-//    private static final String baseUrl = "https://developers.high-mobility.com"; // production
-    private static final String baseUrl = "https://developers.h-m.space"; // staging
+    private static final String testBaseUrl = "https://limitless-gorge-44605.herokuapp.com/"; // test
+    private static final String productionBaseUrl = "https://developers.high-mobility.com"; // production
+    private static final String stagingBaseUrl = "https://developers.h-m.space"; // staging
     private static final String apiUrl = "/api/v1";
-    private static final String telematicsUrl = baseUrl + "/hm_cloud" + apiUrl;
+
+    private static String telematicsUrl;
 
     RequestQueue queue;
 
     WebService(Context context) {
         // ignoreSslErrors();
         queue = Volley.newRequestQueue(context);
+        switch (Manager.environment) {
+            case TEST:
+                telematicsUrl = testBaseUrl + "/hm_cloud" + apiUrl;
+                break;
+            case STAGING:
+                telematicsUrl = stagingBaseUrl + "/hm_cloud" + apiUrl;
+                break;
+            case PRODUCTION:
+                telematicsUrl = productionBaseUrl + "/hm_cloud" + apiUrl;
+                break;
+        }
     }
 
     void requestAccessCertificate(String accessToken,
