@@ -103,14 +103,14 @@ public class Manager {
      * @param caPublicKey 64 byte public key of the Certificate Authority.
      * @param context     the application context
      * @throws IllegalArgumentException if the parameters are invalid.
+     * @throws IllegalStateException if the manager is still initialized and connected to links.
      */
     public void initialize(DeviceCertificate certificate,
                            byte[] privateKey,
                            byte[] caPublicKey,
-                           Context context) throws IllegalArgumentException {
+                           Context context) throws IllegalArgumentException, IllegalStateException {
         if (this.context != null) {
-            throw new IllegalStateException("HMKit is already initialized. Call terminate() first" +
-                    ".");
+            terminate();
         }
 
         if (privateKey == null
@@ -197,10 +197,6 @@ public class Manager {
 
         webService.cancelAllRequests();
         webService = null;
-
-        if (ble != null) {
-            ble.terminate();
-        }
 
         context = null;
     }
