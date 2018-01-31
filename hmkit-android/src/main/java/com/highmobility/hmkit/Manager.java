@@ -72,6 +72,11 @@ public class Manager {
      */
     public static Environment environment = Environment.PRODUCTION;
 
+    /**
+     * Set a custom environment url.
+     */
+    public static String customEnvironmentBaseUrl = null;
+
     HMBTCore core = new HMBTCore();
     BTCoreInterface coreInterface;
     SharedBle ble;
