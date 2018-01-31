@@ -27,6 +27,10 @@ import java.util.TimerTask;
 public class Manager {
     private static final String TAG = "Manager";
 
+    public enum Environment {
+        TEST, STAGING, PRODUCTION
+    }
+
     public enum LoggingLevel {
         NONE(0), DEBUG(1), ALL(2);
 
@@ -61,6 +65,17 @@ public class Manager {
     }
 
     public static LoggingLevel loggingLevel = LoggingLevel.ALL;
+
+    /**
+     * The environment of the Web Service. If initialized, call {@link #terminate()} before
+     * changing it.
+     */
+    public static Environment environment = Environment.PRODUCTION;
+
+    /**
+     * Set a custom environment url.
+     */
+    public static String customEnvironmentBaseUrl = null;
 
     HMBTCore core = new HMBTCore();
     BTCoreInterface coreInterface;
@@ -101,14 +116,14 @@ public class Manager {
      * @param certificate The broadcaster certificate.
      * @param privateKey  32 byte private key with elliptic curve Prime 256v1.
      * @param caPublicKey 64 byte public key of the Certificate Authority.
-     * @param context     the application context
+     * @param ctx     the application context
      * @throws IllegalArgumentException if the parameters are invalid.
      * @throws IllegalStateException if the manager is still initialized and connected to links.
      */
     public void initialize(DeviceCertificate certificate,
                            byte[] privateKey,
                            byte[] caPublicKey,
-                           Context context) throws IllegalArgumentException, IllegalStateException {
+                           Context ctx) throws IllegalArgumentException, IllegalStateException {
         if (this.context != null) {
             terminate();
         }
@@ -121,7 +136,7 @@ public class Manager {
             throw new IllegalArgumentException("HMKit initialization parameters are invalid.");
         }
 
-        this.context = context;
+        this.context = ctx.getApplicationContext();
         ble = new SharedBle(context);
         storage = new Storage(context);
         webService = new WebService(context);
@@ -177,7 +192,7 @@ public class Manager {
      * <p>
      * Stored certificates are not deleted.
      *
-     * @throws IllegalStateException when there are still links connected.
+     * @throws IllegalStateException when there are links still connected.
      */
     public void terminate() throws IllegalStateException {
         if (context == null) return; // already not initialized
