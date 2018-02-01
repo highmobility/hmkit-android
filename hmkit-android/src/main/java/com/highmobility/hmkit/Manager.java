@@ -364,6 +364,15 @@ public class Manager {
     }
 
     /**
+     * @param context The application context
+     * @return All Access Certificates where this device's serial is providing access.
+     */
+    public AccessCertificate[] getCertificates(Context context) {
+        if (storage == null) storage = new Storage(context);
+        return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial());
+    }
+
+    /**
      * Find an Access Certificate with the given serial number.
      *
      * @param serial The serial number of the device that is gaining access.
@@ -372,6 +381,24 @@ public class Manager {
      */
     public AccessCertificate getCertificate(byte[] serial) throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
+        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial);
+
+        if (certificates != null && certificates.length > 0) {
+            return certificates[0];
+        }
+
+        return null;
+    }
+
+    /**
+     * Find a Access Certificate with the given serial number.
+     *
+     * @param serial The serial number of the device that is gaining access.
+     * @param context The application context.
+     * @return An Access Certificate for the given serial if one exists, otherwise null.
+     */
+    public AccessCertificate getCertificate(byte[] serial, Context context) {
+        if (storage == null) storage = new Storage(context);
         AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial);
 
         if (certificates != null && certificates.length > 0) {
@@ -394,12 +421,33 @@ public class Manager {
     }
 
     /**
+     * Delete an access certificate.
+     *
+     * @param serial The serial of the device that is gaining access.
+     * @param context The application context.
+     * @return true if the certificate existed and was deleted successfully, otherwise false
+     */
+    public boolean deleteCertificate(byte[] serial, Context context) {
+        if (storage == null) storage = new Storage(context);
+        return storage.deleteCertificate(serial, certificate.getSerial());
+    }
+
+    /**
      * Deletes all the stored Access Certificates.
      *
      * @throws IllegalStateException when SDK is not initialized
      */
     public void deleteCertificates() throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
+        storage.resetStorage();
+    }
+
+    /**
+     * Deletes all the stored Access Certificates.
+     * @param context The application context.
+     */
+    public void deleteCertificates(Context context) {
+        if (storage == null) storage = new Storage(context);
         storage.resetStorage();
     }
 
