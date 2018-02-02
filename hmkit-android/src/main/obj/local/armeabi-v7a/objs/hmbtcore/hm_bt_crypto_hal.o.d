@@ -3,7 +3,6 @@
   ../../../../high-mobility-bt-core/hm_bt_crypto_hal.h \
   ../../../../high-mobility-bt-core/hm_bt_core.h \
   ../../../../high-mobility-bt-core/hm_api.h \
-  /Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/hm_config.h \
   ../../../../high-mobility-bt-core/hm_bt_persistence_hal.h \
   ../../../../crypto-c/Crypto/Crypto.h \
   /Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/hmbtcore.h \
@@ -15,8 +14,6 @@
 ../../../../high-mobility-bt-core/hm_bt_core.h:
 
 ../../../../high-mobility-bt-core/hm_api.h:
-
-/Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/hm_config.h:
 
 ../../../../high-mobility-bt-core/hm_bt_persistence_hal.h:
 
