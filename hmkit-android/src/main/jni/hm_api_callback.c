@@ -118,7 +118,7 @@ void hm_api_callback_command_incoming(hm_device_t *device, uint8_t *data, uint16
     (*envRef)->CallVoidMethod(envRef, obj, setIsAuthenticated, device->is_authorised);
     (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
 
-    jbyteArray data_ = (*envRef)->NewByteArray(envRef,255);
+    jbyteArray data_ = (*envRef)->NewByteArray(envRef,10024);
     (*envRef)->SetByteArrayRegion(envRef, data_, 0, length, (const jbyte*) data );
 
     (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackCustomCommandIncoming, obj,data_,length);
@@ -149,7 +149,7 @@ void hm_api_callback_command_response(hm_device_t *device, uint8_t *data, uint16
     (*envRef)->CallVoidMethod(envRef, obj, setIsAuthenticated, device->is_authorised);
     (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
 
-    jbyteArray data_ = (*envRef)->NewByteArray(envRef,255);
+    jbyteArray data_ = (*envRef)->NewByteArray(envRef,10024);
     (*envRef)->SetByteArrayRegion(envRef, data_, 0, length, (const jbyte*) data );
 
     (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackCustomCommandResponse, obj,data_,length);
