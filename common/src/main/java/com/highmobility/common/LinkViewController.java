@@ -18,7 +18,6 @@ import com.highmobility.hmkit.Error.LinkError;
 import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -53,11 +52,12 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
         }
 
         // ask for initial state
-//        requestInitialState();
+        requestInitialState();
     }
 
     @Override
-    public void onAuthorizationRequested(ConnectedLink link, AuthorizationCallback approvedCallback) {
+    public void onAuthorizationRequested(ConnectedLink link, AuthorizationCallback
+            approvedCallback) {
 
     }
 
@@ -80,23 +80,32 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
             IncomingCommand command = IncomingCommand.create(bytes);
 
             if (command.is(Command.DoorLocks.LOCK_STATE)) {
-                onLockStateUpdate(((LockState)command).isLocked());
-            }
-            else if (command.is(Command.Diagnostics.DIAGNOSTICS_STATE)) {
-                DiagnosticsState diagnostics = (DiagnosticsState)command;
+                onLockStateUpdate(((LockState) command).isLocked());
+            } else if (command.is(Command.Diagnostics.DIAGNOSTICS_STATE)) {
+                DiagnosticsState diagnostics = (DiagnosticsState) command;
                 Log.d(TAG, "front left: " + diagnostics.getFrontLeftTirePressure());
                 Log.d(TAG, "front right: " + diagnostics.getFrontRightTirePressure());
                 Log.d(TAG, "rear left: " + diagnostics.getRearLeftTirePressure());
                 Log.d(TAG, "rear right: " + diagnostics.getRearRightTirePressure());
-            }
-            else if (command.is(Command.TrunkAccess.TRUNK_STATE)) {
+            } else if (command.is(Command.TrunkAccess.TRUNK_STATE)) {
                 onTrunkStateUpdate(((TrunkState) command).getLockState());
-            }
-            else if (command.is(Command.VehicleStatus.VEHICLE_STATUS)) {
-                onVehicleStatusUpdate((VehicleStatus)command);
-            }
-            else if (command.is(Command.FailureMessage.FAILURE_MESSAGE)) {
-                Failure failure = (Failure)command;
+            } else if (command.is(Command.VehicleStatus.VEHICLE_STATUS)) {
+                onVehicleStatusUpdate((VehicleStatus) command);
+            } else if (command.is(Command.Capabilities.CAPABILITIES)) {
+                link.sendCommand(Command.VehicleStatus.getVehicleStatus(), new Link
+                        .CommandCallback() {
+                    @Override
+                    public void onCommandSent() {
+
+                    }
+
+                    @Override
+                    public void onCommandFailed(LinkError error) {
+                        onInitializeFinished(error.getCode(), "Get vehicle status failed");
+                    }
+                });
+            } else if (command.is(Command.FailureMessage.FAILURE_MESSAGE)) {
+                Failure failure = (Failure) command;
                 Log.d(TAG, "failure " + failure.getFailureReason().toString());
                 // TODO: fix me. Catch initialization error somehow. add initializing boolean
                 /*if (doorsLocked == false) {
@@ -106,8 +115,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
                 }*/
             }
-        }
-        catch (CommandParseException e) {
+        } catch (CommandParseException e) {
             Log.d(TAG, "IncomingCommand parse exception ", e);
         }
     }
@@ -116,7 +124,8 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     public void onLockDoorsClicked() {
         view.showLoadingView(true);
 
-        link.sendCommand(Command.DoorLocks.lockDoors(doorsLocked ? false : true), new Link.CommandCallback() {
+        link.sendCommand(Command.DoorLocks.lockDoors(doorsLocked ? false : true), new Link
+                .CommandCallback() {
             @Override
             public void onCommandSent() {
                 // else wait for command
@@ -138,8 +147,8 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
         byte[] command =
                 Command.TrunkAccess.setTrunkState(trunkLocked ?
-                        TrunkState.LockState.UNLOCKED :
-                        TrunkState.LockState.LOCKED,
+                                TrunkState.LockState.UNLOCKED :
+                                TrunkState.LockState.LOCKED,
                         TrunkState.Position.OPEN);
 
         link.sendCommand(command, new Link.CommandCallback() {
@@ -159,7 +168,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
         view.showLoadingView(true);
         startInitializeTimer();
 
-        link.sendCommand(Command.VehicleStatus.getVehicleStatus(), new Link.CommandCallback() {
+        link.sendCommand(Command.Capabilities.getCapabilities(), new Link.CommandCallback() {
             @Override
             public void onCommandSent() {
 
@@ -167,7 +176,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
             @Override
             public void onCommandFailed(LinkError error) {
-                onInitializeFinished(error.getCode(), "Get vehicle status failed");
+                onInitializeFinished(error.getCode(), "Get capa failed");
             }
         });
     }
@@ -177,8 +186,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
         if (doorsLocked == true) {
             view.onDoorsLocked(true);
-        }
-        else {
+        } else {
             view.onDoorsLocked(false);
         }
 
@@ -192,8 +200,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
         if (trunkLockState == TrunkState.LockState.LOCKED) {
             view.onTrunkLocked(true);
 
-        }
-        else {
+        } else {
             view.onTrunkLocked(false);
         }
 
@@ -209,9 +216,8 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
         for (int i = 0; i < states.length; i++) {
             FeatureState featureState = states[i];
             if (featureState.getIdentifier() == Command.Identifier.DOOR_LOCKS) {
-                doorLocksState = (DoorLocks)featureState;
-            }
-            else if (featureState.getIdentifier() == Command.Identifier.TRUNK_ACCESS) {
+                doorLocksState = (DoorLocks) featureState;
+            } else if (featureState.getIdentifier() == Command.Identifier.TRUNK_ACCESS) {
                 trunkAccessState = (TrunkAccess) featureState;
             }
         }
@@ -236,7 +242,8 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     }
 
     void startCommandTimeout() {
-        timeoutTimer = new CountDownTimer((long)(com.highmobility.hmkit.Constants.commandTimeout * 1000), 15000) {
+        timeoutTimer = new CountDownTimer((long) (com.highmobility.hmkit.Constants.commandTimeout
+                * 1000), 15000) {
             public void onTick(long millisUntilFinished) {
             }
 
@@ -251,17 +258,18 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
         if (errorCode != 0) {
             link.setListener(null);
-            showToast("Initialization failed:" + (reason != null ? " " + reason + " " : " ") + errorCode);
+            showToast("Initialization failed:" + (reason != null ? " " + reason + " " : " ") +
+                    errorCode);
             view.getActivity().finish();
-        }
-        else {
+        } else {
 
         }
     }
 
     void startInitializeTimer() {
         // 30 s
-        timeoutTimer = new CountDownTimer((long)(com.highmobility.hmkit.Constants.commandTimeout * 1000 + 10000), 15000) {
+        timeoutTimer = new CountDownTimer((long) (com.highmobility.hmkit.Constants.commandTimeout
+                * 1000 + 10000), 15000) {
             public void onTick(long millisUntilFinished) {
             }
 
