@@ -16,6 +16,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := hmbtcore
 
 LOCAL_LDLIBS := -llog
+LOCAL_LDLIBS += -lz
 LOCAL_C_INCLUDES += ../../../../high-mobility-bt-core
 LOCAL_C_INCLUDES += ../../../../crypto-c/Crypto
 
