@@ -42,9 +42,9 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
 
         Manager.getInstance().downloadCertificate(token, new Manager.DownloadCallback() {
             @Override
-            public void onDownloaded(byte[] vehicleSerial) {
+            public void onDownloaded(byte[] serial) {
                 byte[] command = Command.DoorLocks.lockDoors(true);
-                Manager.getInstance().getTelematics().sendCommand(command, vehicleSerial, new Telematics.CommandCallback() {
+                Manager.getInstance().getTelematics().sendCommand(command, serial, new Telematics.CommandCallback() {
                     @Override
                     public void onCommandResponse(byte[] bytes) {
                         Log.d(TAG, "onCommandResponse: ");

@@ -52,9 +52,9 @@ public class Manager {
         /**
          * Invoked if the certificate download was successful.
          *
-         * @param vehicleSerial the certificate's gainer serial
+         * @param serial the certificate's gainer serial
          */
-        void onDownloaded(byte[] vehicleSerial);
+        void onDownloaded(byte[] serial);
 
         /**
          * Invoked when there was an error with the certificate download.
