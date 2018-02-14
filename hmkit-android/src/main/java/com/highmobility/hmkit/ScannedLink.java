@@ -226,7 +226,7 @@ class ScannedLink extends Link {
                     return;
                 }
 
-                BluetoothGattDescriptor descriptor = readCharacteristic.getDescriptor(Constants.NOTIFY_DESC_UUID);
+                BluetoothGattDescriptor descriptor = readCharacteristic.getDescriptor(Constants.NOTIFY_DESCRIPTOR_UUID);
                 if (descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE) == false) {
                     // TODO: how to failed connection should be handled
                     // also remove authenticatingMac from scanner

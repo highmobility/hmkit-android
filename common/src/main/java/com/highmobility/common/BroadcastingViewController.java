@@ -183,7 +183,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
             }
             else {
                 this.link = null;
-                view.setStatusText("broadcasting");
+                onStateChanged(broadcaster.getState());
             }
         }
     }

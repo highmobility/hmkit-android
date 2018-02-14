@@ -122,6 +122,8 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
     @Override
     public void onLockDoorsClicked() {
+Manager.getInstance().getBroadcaster().disconnectAllLinks();
+        /*return;
         view.showLoadingView(true);
 
         link.sendCommand(Command.DoorLocks.lockDoors(doorsLocked ? false : true), new Link
@@ -136,7 +138,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
             public void onCommandFailed(LinkError error) {
                 onCommandFinished("lock command send exception " + error.getType());
             }
-        });
+        });*/
     }
 
     @Override

@@ -28,7 +28,6 @@ public class Storage {
     private static final String ACCESS_CERTIFICATE_STORAGE_KEY = "ACCESS_CERTIFICATE_STORAGE_KEY";
     static final String device_certificate_json_object = "device_access_certificate";
 
-
     public enum Result {
         SUCCESS(0), STORAGE_FULL(1), INTERNAL_ERROR(2);
 

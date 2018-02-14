@@ -116,16 +116,16 @@ public class Manager {
      * @param certificate The broadcaster certificate.
      * @param privateKey  32 byte private key with elliptic curve Prime 256v1.
      * @param caPublicKey 64 byte public key of the Certificate Authority.
-     * @param context     the application context
+     * @param ctx     the application context
      * @throws IllegalArgumentException if the parameters are invalid.
+     * @throws IllegalStateException if the manager is still initialized and connected to links.
      */
     public void initialize(DeviceCertificate certificate,
                            byte[] privateKey,
                            byte[] caPublicKey,
-                           Context context) throws IllegalArgumentException {
+                           Context ctx) throws IllegalArgumentException, IllegalStateException {
         if (this.context != null) {
-            throw new IllegalStateException("HMKit is already initialized. Call terminate() first" +
-                    ".");
+            terminate();
         }
 
         if (privateKey == null
@@ -136,7 +136,8 @@ public class Manager {
             throw new IllegalArgumentException("HMKit initialization parameters are invalid.");
         }
 
-        this.context = context;
+        this.context = ctx.getApplicationContext();
+        ble = new SharedBle(context);
         storage = new Storage(context);
         webService = new WebService(context);
 
@@ -183,14 +184,23 @@ public class Manager {
 
     /**
      * Call this function when the SDK is not used anymore - for instance when killing the app.
-     * It clears all the internal processes and unregisters all BroadcastReceivers.
-     *
+     * It clears all the internal processes, unregisters all BroadcastReceivers and enables
+     * re-initializing the SDK with new certificates.
+     * <p>
+     * Terminate will fail if a connected link still exists. Disconnect all the links before
+     * terminating the SDK.
+     * <p>
      * Stored certificates are not deleted.
+     *
+     * @throws IllegalStateException when there are links still connected.
      */
-    public void terminate() {
-        if (context == null) return;
+    public void terminate() throws IllegalStateException {
+        if (context == null) return; // already not initialized
 
-        broadcaster.terminate();
+        if (broadcaster.getLinks().size() > 0) {
+            throw new IllegalStateException("Terminate should not be called if a connected link " +
+                    "exists. Disconnect from all of the links before calling.");
+        }
 
         coreClockTimer.cancel();
         coreClockTimer = null;
@@ -202,10 +212,6 @@ public class Manager {
 
         webService.cancelAllRequests();
         webService = null;
-
-        if (ble != null) {
-            ble.terminate();
-        }
 
         context = null;
     }
@@ -277,7 +283,7 @@ public class Manager {
      *
      * @param accessToken The token that is used to download the certificates
      * @param callback    A {@link DownloadCallback} object that is invoked after the download is
-     *                   finished or failed
+     *                    finished or failed
      * @throws IllegalStateException when SDK is not initialized
      */
     public void downloadCertificate(String accessToken,
@@ -358,6 +364,15 @@ public class Manager {
     }
 
     /**
+     * @param context The application context
+     * @return All Access Certificates where this device's serial is providing access.
+     */
+    public AccessCertificate[] getCertificates(Context context) {
+        if (storage == null) storage = new Storage(context);
+        return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial());
+    }
+
+    /**
      * Find an Access Certificate with the given serial number.
      *
      * @param serial The serial number of the device that is gaining access.
@@ -366,6 +381,24 @@ public class Manager {
      */
     public AccessCertificate getCertificate(byte[] serial) throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
+        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial);
+
+        if (certificates != null && certificates.length > 0) {
+            return certificates[0];
+        }
+
+        return null;
+    }
+
+    /**
+     * Find a Access Certificate with the given serial number.
+     *
+     * @param serial The serial number of the device that is gaining access.
+     * @param context The application context.
+     * @return An Access Certificate for the given serial if one exists, otherwise null.
+     */
+    public AccessCertificate getCertificate(byte[] serial, Context context) {
+        if (storage == null) storage = new Storage(context);
         AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial);
 
         if (certificates != null && certificates.length > 0) {
@@ -388,6 +421,18 @@ public class Manager {
     }
 
     /**
+     * Delete an access certificate.
+     *
+     * @param serial The serial of the device that is gaining access.
+     * @param context The application context.
+     * @return true if the certificate existed and was deleted successfully, otherwise false
+     */
+    public boolean deleteCertificate(byte[] serial, Context context) {
+        if (storage == null) storage = new Storage(context);
+        return storage.deleteCertificate(serial, certificate.getSerial());
+    }
+
+    /**
      * Deletes all the stored Access Certificates.
      *
      * @throws IllegalStateException when SDK is not initialized
@@ -397,18 +442,21 @@ public class Manager {
         storage.resetStorage();
     }
 
+    /**
+     * Deletes all the stored Access Certificates.
+     * @param context The application context.
+     */
+    public void deleteCertificates(Context context) {
+        if (storage == null) storage = new Storage(context);
+        storage.resetStorage();
+    }
+
     void postToMainThread(Runnable runnable) {
         if (Looper.myLooper() != mainHandler.getLooper()) {
             mainHandler.post(runnable);
         } else {
             runnable.run();
         }
-    }
-
-    void initializeBle() throws IllegalStateException {
-        // we only want to initialize ble when we start using it
-        if (context == null) throw new IllegalStateException("SDK not initialized");
-        if (ble == null) ble = new SharedBle(context);
     }
 
     private void startClock() {
