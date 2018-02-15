@@ -5,13 +5,21 @@ import android.os.CountDownTimer;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.highmobility.autoapi.Capabilities;
 import com.highmobility.autoapi.Command;
 import com.highmobility.autoapi.CommandParseException;
-
-import com.highmobility.autoapi.incoming.*;
-import com.highmobility.autoapi.vehiclestatus.DoorLocks;
-import com.highmobility.autoapi.vehiclestatus.FeatureState;
-import com.highmobility.autoapi.vehiclestatus.TrunkAccess;
+import com.highmobility.autoapi.CommandResolver;
+import com.highmobility.autoapi.DiagnosticsState;
+import com.highmobility.autoapi.Failure;
+import com.highmobility.autoapi.GetCapabilities;
+import com.highmobility.autoapi.GetVehicleStatus;
+import com.highmobility.autoapi.LockState;
+import com.highmobility.autoapi.OpenCloseTrunk;
+import com.highmobility.autoapi.TireStateProperty;
+import com.highmobility.autoapi.TrunkState;
+import com.highmobility.autoapi.VehicleStatus;
+import com.highmobility.autoapi.property.TrunkLockState;
+import com.highmobility.autoapi.property.TrunkPosition;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
 import com.highmobility.hmkit.Error.LinkError;
@@ -20,6 +28,9 @@ import com.highmobility.hmkit.Manager;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static com.highmobility.autoapi.property.TrunkLockState.LOCKED;
+import static com.highmobility.autoapi.property.TrunkLockState.UNLOCKED;
 
 
 public class LinkViewController implements ILinkViewController, ConnectedLinkListener {
@@ -31,7 +42,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     ConnectedLink link;
 
     boolean doorsLocked;
-    TrunkState.LockState trunkLockState;
+    TrunkLockState trunkLockState;
 
     CountDownTimer timeoutTimer;
 
@@ -77,22 +88,26 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     @Override
     public void onCommandReceived(Link link, byte[] bytes) {
         try {
-            IncomingCommand command = IncomingCommand.create(bytes);
+            Command command = CommandResolver.resolve(bytes);
 
-            if (command.is(Command.DoorLocks.LOCK_STATE)) {
+            if (command instanceof LockState) {
                 onLockStateUpdate(((LockState) command).isLocked());
-            } else if (command.is(Command.Diagnostics.DIAGNOSTICS_STATE)) {
+            } else if (command instanceof DiagnosticsState) {
                 DiagnosticsState diagnostics = (DiagnosticsState) command;
-                Log.d(TAG, "front left: " + diagnostics.getFrontLeftTirePressure());
-                Log.d(TAG, "front right: " + diagnostics.getFrontRightTirePressure());
-                Log.d(TAG, "rear left: " + diagnostics.getRearLeftTirePressure());
-                Log.d(TAG, "rear right: " + diagnostics.getRearRightTirePressure());
-            } else if (command.is(Command.TrunkAccess.TRUNK_STATE)) {
+                Log.d(TAG, "front left: " + diagnostics.getTireState(TireStateProperty.Location
+                        .FRONT_LEFT).getPressure());
+                Log.d(TAG, "front right: " + diagnostics.getTireState(TireStateProperty.Location
+                        .FRONT_RIGHT).getPressure());
+                Log.d(TAG, "rear left: " + diagnostics.getTireState(TireStateProperty.Location
+                        .REAR_LEFT).getPressure());
+                Log.d(TAG, "rear right: " + diagnostics.getTireState(TireStateProperty.Location
+                        .REAR_RIGHT).getPressure());
+            } else if (command instanceof TrunkState) {
                 onTrunkStateUpdate(((TrunkState) command).getLockState());
-            } else if (command.is(Command.VehicleStatus.VEHICLE_STATUS)) {
+            } else if (command instanceof VehicleStatus) {
                 onVehicleStatusUpdate((VehicleStatus) command);
-            } else if (command.is(Command.Capabilities.CAPABILITIES)) {
-                link.sendCommand(Command.VehicleStatus.getVehicleStatus(), new Link
+            } else if (command instanceof Capabilities) {
+                link.sendCommand(new GetVehicleStatus().getBytes(), new Link
                         .CommandCallback() {
                     @Override
                     public void onCommandSent() {
@@ -104,7 +119,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
                         onInitializeFinished(error.getCode(), "Get vehicle status failed");
                     }
                 });
-            } else if (command.is(Command.FailureMessage.FAILURE_MESSAGE)) {
+            } else if (command instanceof Failure) {
                 Failure failure = (Failure) command;
                 Log.d(TAG, "failure " + failure.getFailureReason().toString());
                 // TODO: fix me. Catch initialization error somehow. add initializing boolean
@@ -122,7 +137,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
     @Override
     public void onLockDoorsClicked() {
-Manager.getInstance().getBroadcaster().disconnectAllLinks();
+        Manager.getInstance().getBroadcaster().disconnectAllLinks();
         /*return;
         view.showLoadingView(true);
 
@@ -145,13 +160,10 @@ Manager.getInstance().getBroadcaster().disconnectAllLinks();
     public void onLockTrunkClicked() {
         view.showLoadingView(true);
 
-        boolean trunkLocked = trunkLockState == TrunkState.LockState.LOCKED;
+        boolean trunkLocked = trunkLockState == LOCKED;
 
-        byte[] command =
-                Command.TrunkAccess.setTrunkState(trunkLocked ?
-                                TrunkState.LockState.UNLOCKED :
-                                TrunkState.LockState.LOCKED,
-                        TrunkState.Position.OPEN);
+        byte[] command = new OpenCloseTrunk(trunkLocked ? UNLOCKED : LOCKED, TrunkPosition
+                .CLOSED).getBytes();
 
         link.sendCommand(command, new Link.CommandCallback() {
             @Override
@@ -170,7 +182,7 @@ Manager.getInstance().getBroadcaster().disconnectAllLinks();
         view.showLoadingView(true);
         startInitializeTimer();
 
-        link.sendCommand(Command.Capabilities.getCapabilities(), new Link.CommandCallback() {
+        link.sendCommand(new GetCapabilities().getBytes(), new Link.CommandCallback() {
             @Override
             public void onCommandSent() {
 
@@ -195,11 +207,11 @@ Manager.getInstance().getBroadcaster().disconnectAllLinks();
         onCommandFinished(null);
     }
 
-    void onTrunkStateUpdate(TrunkState.LockState lockState) {
+    void onTrunkStateUpdate(TrunkLockState lockState) {
         this.trunkLockState = lockState;
         Log.i(TAG, "trunk status changed " + trunkLockState);
 
-        if (trunkLockState == TrunkState.LockState.LOCKED) {
+        if (trunkLockState == LOCKED) {
             view.onTrunkLocked(true);
 
         } else {
@@ -210,19 +222,8 @@ Manager.getInstance().getBroadcaster().disconnectAllLinks();
     }
 
     void onVehicleStatusUpdate(VehicleStatus status) {
-        FeatureState[] states = status.getFeatureStates();
-
-        DoorLocks doorLocksState = null;
-        TrunkAccess trunkAccessState = null;
-
-        for (int i = 0; i < states.length; i++) {
-            FeatureState featureState = states[i];
-            if (featureState.getIdentifier() == Command.Identifier.DOOR_LOCKS) {
-                doorLocksState = (DoorLocks) featureState;
-            } else if (featureState.getIdentifier() == Command.Identifier.TRUNK_ACCESS) {
-                trunkAccessState = (TrunkAccess) featureState;
-            }
-        }
+        LockState doorLocksState = (LockState) status.getState(LockState.TYPE);
+        TrunkState trunkAccessState = (TrunkState) status.getState(TrunkState.TYPE);
 
         view.enableLockButton(doorLocksState != null);
         view.enableTrunkButton(trunkAccessState != null);
@@ -245,7 +246,7 @@ Manager.getInstance().getBroadcaster().disconnectAllLinks();
 
     void startCommandTimeout() {
         timeoutTimer = new CountDownTimer((long) (com.highmobility.hmkit.Constants.commandTimeout
-                * 1000), 15000) {
+                * 10000), 120000) {
             public void onTick(long millisUntilFinished) {
             }
 
@@ -270,8 +271,7 @@ Manager.getInstance().getBroadcaster().disconnectAllLinks();
 
     void startInitializeTimer() {
         // 30 s
-        timeoutTimer = new CountDownTimer((long) (com.highmobility.hmkit.Constants.commandTimeout
-                * 1000 + 10000), 15000) {
+        timeoutTimer = new CountDownTimer((long) (120000), 120000) {
             public void onTick(long millisUntilFinished) {
             }
 

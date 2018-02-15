@@ -3,9 +3,10 @@ package com.highmobility.common;
 import android.content.Intent;
 import android.util.Log;
 
+import com.highmobility.autoapi.LockUnlockDoors;
+import com.highmobility.autoapi.property.DoorLockProperty;
 import com.highmobility.hmkit.Broadcaster;
 import com.highmobility.hmkit.BroadcasterListener;
-import com.highmobility.autoapi.Command;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
 import com.highmobility.hmkit.Error.BroadcastError;
@@ -15,7 +16,8 @@ import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
 import com.highmobility.hmkit.Telematics;
 
-public class BroadcastingViewController implements IBroadcastingViewController, BroadcasterListener, ConnectedLinkListener {
+public class BroadcastingViewController implements IBroadcastingViewController,
+        BroadcasterListener, ConnectedLinkListener {
     private static final String TAG = "BroadcastingVC";
     public static final int LINK_ACTIVITY_RESULT = 1;
     IBroadcastingView view;
@@ -38,13 +40,15 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     }
 
     private void sendTelematicsCommand() {
-        String token = "***REMOVED***";
+        String token =
+                "***REMOVED***";
 
         Manager.getInstance().downloadCertificate(token, new Manager.DownloadCallback() {
             @Override
             public void onDownloaded(byte[] serial) {
-                byte[] command = Command.DoorLocks.lockDoors(true);
-                Manager.getInstance().getTelematics().sendCommand(command, serial, new Telematics.CommandCallback() {
+                byte[] command = new LockUnlockDoors(DoorLockProperty.LockState.LOCKED).getBytes();
+                Manager.getInstance().getTelematics().sendCommand(command, serial, new Telematics
+                        .CommandCallback() {
                     @Override
                     public void onCommandResponse(byte[] bytes) {
                         Log.d(TAG, "onCommandResponse: ");
@@ -79,8 +83,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
         if (approved) {
             authorizationCallback.approve();
             view.showPairingView(false);
-        }
-        else {
+        } else {
             authorizationCallback.decline();
             link.setListener(null);
             view.getActivity().finish();
@@ -157,7 +160,8 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     }
 
     @Override
-    public void onAuthorizationRequested(ConnectedLink connectedLink, AuthorizationCallback authorizationCallback) {
+    public void onAuthorizationRequested(ConnectedLink connectedLink, AuthorizationCallback
+            authorizationCallback) {
         this.authorizationCallback = authorizationCallback;
         view.showPairingView(true);
         Log.d(TAG, "show pairing view " + true);
@@ -171,17 +175,15 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     @Override
     public void onStateChanged(Link link, Link.State state) {
         Log.d(TAG, "link state changed " + link.getState());
-        if (link == this.link ) {
+        if (link == this.link) {
             view.updateLink((ConnectedLink) link);
 
             if (link.getState() == Link.State.AUTHENTICATED) {
                 onLinkClicked();
                 view.setStatusText("authenticated");
-            }
-            else if (link.getState() == Link.State.CONNECTED) {
+            } else if (link.getState() == Link.State.CONNECTED) {
                 view.setStatusText("connected");
-            }
-            else {
+            } else {
                 this.link = null;
                 onStateChanged(broadcaster.getState());
             }
@@ -211,18 +213,36 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     void initializeManager() {
         // prod
 //        Manager.getInstance().initialize(
-//                "***REMOVED******REMOVED******REMOVED***",
+//                "***REMOVED***
+// ***REMOVED***
+// ***REMOVED***",
 //                "***REMOVED***=",
-//                "***REMOVED***+6pXmtkYxynMQm0rfcBU0XFF5A==",
+//                "***REMOVED***
+// +6pXmtkYxynMQm0rfcBU0XFF5A==",
 //                view.getActivity()
 //        );
 
         // staging
+//        Manager.getInstance().initialize(
+//                "***REMOVED***
+// ***REMOVED***",
+//                "***REMOVED***=",
+//
+// "***REMOVED***==",
+//                view.getActivity()
+//        );
+
+        // test
+        // https://limitless-gorge-44605.herokuapp.com/orgs/Akq6/emulators/21#/
         Manager.getInstance().initialize(
-                "***REMOVED***",
+                "***REMOVED***" +
+                        "***REMOVED***" +
+                        "***REMOVED***" +
+                        "***REMOVED***",
                 "***REMOVED***=",
-                "***REMOVED***==",
-                view.getActivity()
+                "***REMOVED***" +
+                        "***REMOVED***==",
+                view.getActivity().getApplicationContext()
         );
     }
 }
