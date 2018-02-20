@@ -52,7 +52,7 @@ public class Manager {
         /**
          * Invoked if the certificate download was successful.
          *
-         * @param serial the certificate's gainer serial
+         * @param serial the vehicle or charger serial.
          */
         void onDownloaded(byte[] serial);
 
