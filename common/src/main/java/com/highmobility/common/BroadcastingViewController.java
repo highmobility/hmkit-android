@@ -222,27 +222,24 @@ public class BroadcastingViewController implements IBroadcastingViewController,
 //                view.getActivity()
 //        );
 
-        // staging
-//        Manager.getInstance().initialize(
-//                "***REMOVED***
-// ***REMOVED***",
-//                "***REMOVED***=",
-//
-// "***REMOVED***==",
-//                view.getActivity()
-//        );
-
-        // test
-        // https://limitless-gorge-44605.herokuapp.com/orgs/Akq6/emulators/21#/
+        // staging - "Auto"
         Manager.getInstance().initialize(
-                "***REMOVED***" +
-                        "***REMOVED***" +
-                        "***REMOVED***" +
-                        "***REMOVED***",
+                "***REMOVED***",
                 "***REMOVED***=",
-                "***REMOVED***" +
-                        "***REMOVED***==",
+                "***REMOVED***==",
                 view.getActivity().getApplicationContext()
         );
+//        // test
+//        // https://limitless-gorge-44605.herokuapp.com/orgs/Akq6/emulators/21#/
+//        Manager.getInstance().initialize(
+//                "***REMOVED***" +
+//                        "***REMOVED***" +
+//                        "***REMOVED***" +
+//                        "***REMOVED***",
+//                "***REMOVED***=",
+//                "***REMOVED***" +
+//                        "***REMOVED***==",
+//                view.getActivity().getApplicationContext()
+//        );
     }
 }

@@ -79,7 +79,7 @@ public class Manager {
 
     HMBTCore core = new HMBTCore();
     BTCoreInterface coreInterface;
-    SharedBle ble;
+    private SharedBle ble;
     Storage storage;
     Context context;
 
@@ -97,6 +97,11 @@ public class Manager {
     Handler workHandler = null;
     private Timer coreClockTimer;
     private HandlerThread workThread = new HandlerThread("BTCoreThread");
+
+    SharedBle getBle() {
+        if (ble == null) ble = new SharedBle(context);
+        return ble;
+    }
 
     /**
      * @return The singleton instance of Manager.
@@ -137,7 +142,7 @@ public class Manager {
         }
 
         this.context = ctx.getApplicationContext();
-        ble = new SharedBle(context);
+
         storage = new Storage(context);
         webService = new WebService(context);
 

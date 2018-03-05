@@ -88,19 +88,19 @@ class Scanner {
         // = new byte[][] { array1, array2, array3, array4, array5 };
         if (getState() == State.SCANNING) return 0;
 
-        if (!manager.ble.isBluetoothSupported()) {
+        if (!manager.getBle().isBluetoothSupported()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
 //            return Link.UNSUPPORTED;
             return 1; // use some descriptive error method
         }
 
-        if (!manager.ble.isBluetoothOn()) {
+        if (!manager.getBle().isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
 //            return Link.BLUETOOTH_OFF;
             return 2; // use some descriptive error method
         }
 
-        if (bleScanner == null) bleScanner = manager.ble.getAdapter().getBluetoothLeScanner();
+        if (bleScanner == null) bleScanner = manager.getBle().getAdapter().getBluetoothLeScanner();
         final ScanSettings settings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .build();
@@ -168,7 +168,7 @@ class Scanner {
         }
 
         addAuthenticatingMac(mac);
-        BluetoothDevice bluetoothDevice = manager.ble.getAdapter().getRemoteDevice(mac);
+        BluetoothDevice bluetoothDevice = manager.getBle().getAdapter().getRemoteDevice(mac);
 
         for (ScannedLink existingDevice : devices) {
             if (existingDevice.btDevice.getAddress().equals(bluetoothDevice.getAddress())) {

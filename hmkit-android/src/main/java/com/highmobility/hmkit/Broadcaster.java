@@ -34,7 +34,7 @@ import java.util.UUID;
 public class Broadcaster implements SharedBleListener {
     static final String TAG = "HMLink";
 
-    public enum State {BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING}
+    public enum State { BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING }
 
     /**
      * Startcallback is used to notify the user about the start broadcasting result
@@ -120,7 +120,7 @@ public class Broadcaster implements SharedBleListener {
      * @return The name of the advertised peripheral
      */
     public String getName() {
-        return manager.ble.getAdapter().getName();
+        return manager.getBle().getAdapter().getName();
     }
 
     /**
@@ -169,8 +169,6 @@ public class Broadcaster implements SharedBleListener {
      *                 onBroadcastingFailed is invoked if something went wrong.
      */
     public void startBroadcasting(StartCallback callback) {
-        manager.ble.addListener(this);
-
         if (state == State.BROADCASTING) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "will not start broadcasting: already broadcasting");
@@ -178,23 +176,25 @@ public class Broadcaster implements SharedBleListener {
             callback.onBroadcastingStarted();
         }
 
-        if (!manager.ble.isBluetoothSupported()) {
+        if (!manager.getBle().isBluetoothSupported()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
             callback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.UNSUPPORTED
                     , 0, "Bluetooth is no supported"));
             return;
         }
 
-        if (!manager.ble.isBluetoothOn()) {
+        if (!manager.getBle().isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
             callback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.BLUETOOTH_OFF
                     , 0, "Bluetooth is turned off"));
             return;
         }
 
+        manager.getBle().addListener(this);
+
         // start advertising
         if (mBluetoothLeAdvertiser == null) {
-            mBluetoothLeAdvertiser = manager.ble.getAdapter().getBluetoothLeAdvertiser();
+            mBluetoothLeAdvertiser = manager.getBle().getAdapter().getBluetoothLeAdvertiser();
 
             if (mBluetoothLeAdvertiser == null) {
                 // for unsupported devices the system does not return an advertiser
@@ -358,7 +358,7 @@ public class Broadcaster implements SharedBleListener {
     public void disconnectAllLinks() {
         if (GATTServer == null) return;
 
-        List<BluetoothDevice> devices = manager.ble.getManager().getConnectedDevices
+        List<BluetoothDevice> devices = manager.getBle().getManager().getConnectedDevices
                 (BluetoothProfile.GATT_SERVER);
 
         for (BluetoothDevice device : devices) {
@@ -451,7 +451,7 @@ public class Broadcaster implements SharedBleListener {
     void setRandomAdapterName() {
         // set new adapter name
         if (links.size() == 0 && getState() != State.BROADCASTING) {
-            manager.ble.setRandomAdapterName();
+            manager.getBle().setRandomAdapterName();
         }
     }
 
@@ -523,7 +523,7 @@ public class Broadcaster implements SharedBleListener {
 
         if (GATTServer == null) {
             gattServerCallback = new GATTServerCallback(this);
-            GATTServer = manager.ble.getManager().openGattServer(manager.context,
+            GATTServer = manager.getBle().getManager().openGattServer(manager.context,
                     gattServerCallback);
 
             if (GATTServer == null) {
@@ -685,7 +685,7 @@ public class Broadcaster implements SharedBleListener {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(TAG, "Start advertise " + Manager.getInstance().ble.getAdapter().getName());
+                Log.d(TAG, "Start advertise " + Manager.getInstance().getBle().getAdapter().getName());
             broadcaster.get().setState(State.BROADCASTING);
             if (broadcaster.get().startCallback != null) {
                 broadcaster.get().startCallback.onBroadcastingStarted();

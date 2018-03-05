@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+
 import com.highmobility.utils.Bytes;
 
 import java.util.ArrayList;
@@ -25,8 +26,6 @@ public class SharedBle {
 
     SharedBle(Context context) {
         this.ctx = context;
-        createAdapter();
-        context.registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
     }
 
     public void addListener(SharedBleListener listener) {
@@ -39,19 +38,21 @@ public class SharedBle {
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
+            String action = intent.getAction();
 
-        if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
-            if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_OFF) {
-                for (SharedBleListener listener : listeners) {
-                    listener.bluetoothChangedToAvailable(false);
-                }
-            } else if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_ON) {
-                for (SharedBleListener listener : listeners) {
-                    listener.bluetoothChangedToAvailable(true);
+            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+                if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter
+                        .STATE_OFF) {
+                    for (SharedBleListener listener : listeners) {
+                        listener.bluetoothChangedToAvailable(false);
+                    }
+                } else if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) ==
+                        BluetoothAdapter.STATE_ON) {
+                    for (SharedBleListener listener : listeners) {
+                        listener.bluetoothChangedToAvailable(true);
+                    }
                 }
             }
-        }
         }
     };
 
@@ -60,6 +61,11 @@ public class SharedBle {
     }
 
     public BluetoothAdapter getAdapter() {
+        if (mBluetoothAdapter == null) {
+            createAdapter();
+            this.ctx.registerReceiver(receiver, new IntentFilter(BluetoothAdapter
+                    .ACTION_STATE_CHANGED));
+        }
         return mBluetoothAdapter;
     }
 
@@ -68,7 +74,8 @@ public class SharedBle {
     }
 
     public boolean isBluetoothOn() {
-        return (getAdapter() != null && getAdapter().isEnabled() && getAdapter().getState() == BluetoothAdapter.STATE_ON);
+        return (getAdapter() != null && getAdapter().isEnabled() && getAdapter().getState() ==
+                BluetoothAdapter.STATE_ON);
     }
 
     void setRandomAdapterName() {
@@ -89,8 +96,10 @@ public class SharedBle {
     }
 
     void terminate() {
-        ctx.unregisterReceiver(receiver);
-        listeners.clear();
+        if (mBluetoothAdapter != null) {
+            ctx.unregisterReceiver(receiver);
+            listeners.clear();
+        }
         ctx = null;
     }
 }
