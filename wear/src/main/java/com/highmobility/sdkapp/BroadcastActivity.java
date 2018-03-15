@@ -29,6 +29,8 @@ public class BroadcastActivity extends WearableActivity implements IBroadcasting
     @BindView(R.id.pairing_view) LinearLayout pairingView;
     @BindView(R.id.confirm_pairing_button) Button confirmPairButton;
     @BindView(R.id.show_button) Button showButton;
+    @BindView(R.id.disconnect_button) Button disconnectButton;
+
 
     void onPairConfirmClick() {
         controller.onPairingApproved(true);
@@ -52,6 +54,12 @@ public class BroadcastActivity extends WearableActivity implements IBroadcasting
             @Override
             public void onClick(View v) {
                 controller.onLinkClicked();
+            }
+        });
+
+        disconnectButton.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                controller.onDisconnectClicked();
             }
         });
     }

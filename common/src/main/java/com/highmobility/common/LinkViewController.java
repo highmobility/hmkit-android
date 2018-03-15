@@ -14,10 +14,12 @@ import com.highmobility.autoapi.Failure;
 import com.highmobility.autoapi.GetCapabilities;
 import com.highmobility.autoapi.GetVehicleStatus;
 import com.highmobility.autoapi.LockState;
+import com.highmobility.autoapi.LockUnlockDoors;
 import com.highmobility.autoapi.OpenCloseTrunk;
 import com.highmobility.autoapi.TireStateProperty;
 import com.highmobility.autoapi.TrunkState;
 import com.highmobility.autoapi.VehicleStatus;
+import com.highmobility.autoapi.property.DoorLockProperty;
 import com.highmobility.autoapi.property.TrunkLockState;
 import com.highmobility.autoapi.property.TrunkPosition;
 import com.highmobility.hmkit.ConnectedLink;
@@ -31,7 +33,6 @@ import java.util.List;
 
 import static com.highmobility.autoapi.property.TrunkLockState.LOCKED;
 import static com.highmobility.autoapi.property.TrunkLockState.UNLOCKED;
-
 
 public class LinkViewController implements ILinkViewController, ConnectedLinkListener {
     static final String LINK_IDENTIFIER_MESSAGE = "com.highmobility.digitalkeydemo.LINKIDENTIFIER";
@@ -87,62 +88,53 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
     @Override
     public void onCommandReceived(Link link, byte[] bytes) {
-        try {
-            Command command = CommandResolver.resolve(bytes);
+        Command command = CommandResolver.resolve(bytes);
 
-            if (command instanceof LockState) {
-                onLockStateUpdate(((LockState) command).isLocked());
-            } else if (command instanceof DiagnosticsState) {
-                DiagnosticsState diagnostics = (DiagnosticsState) command;
-                Log.d(TAG, "front left: " + diagnostics.getTireState(TireStateProperty.Location
-                        .FRONT_LEFT).getPressure());
-                Log.d(TAG, "front right: " + diagnostics.getTireState(TireStateProperty.Location
-                        .FRONT_RIGHT).getPressure());
-                Log.d(TAG, "rear left: " + diagnostics.getTireState(TireStateProperty.Location
-                        .REAR_LEFT).getPressure());
-                Log.d(TAG, "rear right: " + diagnostics.getTireState(TireStateProperty.Location
-                        .REAR_RIGHT).getPressure());
-            } else if (command instanceof TrunkState) {
-                onTrunkStateUpdate(((TrunkState) command).getLockState());
-            } else if (command instanceof VehicleStatus) {
-                onVehicleStatusUpdate((VehicleStatus) command);
-            } else if (command instanceof Capabilities) {
-                link.sendCommand(new GetVehicleStatus().getBytes(), new Link
-                        .CommandCallback() {
-                    @Override
-                    public void onCommandSent() {
+        if (command instanceof LockState) {
+            onLockStateUpdate(((LockState) command).isLocked());
+        } else if (command instanceof DiagnosticsState) {
+            DiagnosticsState diagnostics = (DiagnosticsState) command;
+            Log.d(TAG, "front left: " + diagnostics.getTireState(TireStateProperty.Location
+                    .FRONT_LEFT).getPressure());
+            Log.d(TAG, "front right: " + diagnostics.getTireState(TireStateProperty.Location
+                    .FRONT_RIGHT).getPressure());
+            Log.d(TAG, "rear left: " + diagnostics.getTireState(TireStateProperty.Location
+                    .REAR_LEFT).getPressure());
+            Log.d(TAG, "rear right: " + diagnostics.getTireState(TireStateProperty.Location
+                    .REAR_RIGHT).getPressure());
+        } else if (command instanceof TrunkState) {
+            onTrunkStateUpdate(((TrunkState) command).getLockState());
+        } else if (command instanceof VehicleStatus) {
+            onVehicleStatusUpdate((VehicleStatus) command);
+        } else if (command instanceof Capabilities) {
+            link.sendCommand(new GetVehicleStatus().getBytes(), new Link
+                    .CommandCallback() {
+                @Override
+                public void onCommandSent() {
 
-                    }
-
-                    @Override
-                    public void onCommandFailed(LinkError error) {
-                        onInitializeFinished(error.getCode(), "Get vehicle status failed");
-                    }
-                });
-            } else if (command instanceof Failure) {
-                Failure failure = (Failure) command;
-                Log.d(TAG, "failure " + failure.getFailureReason().toString());
-                // TODO: fix me. Catch initialization error somehow. add initializing boolean
-                /*if (doorsLocked == false) {
-                    onInitializeFinished(-13, failure.getFailureReason().toString());
                 }
-                else {
 
-                }*/
-            }
-        } catch (CommandParseException e) {
-            Log.d(TAG, "IncomingCommand parse exception ", e);
+                @Override
+                public void onCommandFailed(LinkError error) {
+                    onInitializeFinished(error.getCode(), "Get vehicle status failed");
+                }
+            });
+        } else if (command instanceof Failure) {
+            Failure failure = (Failure) command;
+            Log.d(TAG, "failure " + failure.getFailureReason().toString());
+
+            onInitializeFinished(-13, failure.getFailedType() + " failed " + failure.getFailureReason());
         }
     }
 
     @Override
     public void onLockDoorsClicked() {
-        Manager.getInstance().getBroadcaster().disconnectAllLinks();
-        /*return;
-        view.showLoadingView(true);
+//        Manager.getInstance().getBroadcaster().disconnectAllLinks();
 
-        link.sendCommand(Command.DoorLocks.lockDoors(doorsLocked ? false : true), new Link
-                .CommandCallback() {
+        view.showLoadingView(true);
+        byte[] bytes = new LockUnlockDoors(doorsLocked ? DoorLockProperty.LockState.UNLOCKED :
+                DoorLockProperty.LockState.LOCKED).getBytes();
+        link.sendCommand(bytes, new Link.CommandCallback() {
             @Override
             public void onCommandSent() {
                 // else wait for command
@@ -153,7 +145,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
             public void onCommandFailed(LinkError error) {
                 onCommandFinished("lock command send exception " + error.getType());
             }
-        });*/
+        });
     }
 
     @Override
@@ -197,6 +189,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
     void onLockStateUpdate(boolean locked) {
         Log.i(TAG, "Lock status changed " + locked);
+        doorsLocked = locked;
 
         if (doorsLocked == true) {
             view.onDoorsLocked(true);

@@ -26,7 +26,6 @@ public class BroadcastingViewController implements IBroadcastingViewController,
     Broadcaster broadcaster;
     ConnectedLink link;
 
-
     public BroadcastingViewController(IBroadcastingView view) {
         this.view = view;
 
@@ -112,6 +111,10 @@ public class BroadcastingViewController implements IBroadcastingViewController,
         broadcaster.setListener(this);
         startBroadcasting();
 
+    }
+
+    @Override public void onDisconnectClicked() {
+        broadcaster.stopBroadcasting();
     }
 
     // Broadcasterlistener
@@ -211,35 +214,30 @@ public class BroadcastingViewController implements IBroadcastingViewController,
     }
 
     void initializeManager() {
-        // prod
+        // prod - "Maidu 1"
 //        Manager.getInstance().initialize(
-//                "***REMOVED***
-// ***REMOVED***
-// ***REMOVED***",
+//                "***REMOVED***",
 //                "***REMOVED***=",
-//                "***REMOVED***
-// +6pXmtkYxynMQm0rfcBU0XFF5A==",
+//                "***REMOVED***+6pXmtkYxynMQm0rfcBU0XFF5A==",
 //                view.getActivity()
 //        );
 
+
+
         // staging - "Auto"
-        Manager.getInstance().initialize(
-                "***REMOVED***",
-                "***REMOVED***=",
-                "***REMOVED***==",
-                view.getActivity().getApplicationContext()
-        );
-//        // test
-//        // https://limitless-gorge-44605.herokuapp.com/orgs/Akq6/emulators/21#/
 //        Manager.getInstance().initialize(
-//                "***REMOVED***" +
-//                        "***REMOVED***" +
-//                        "***REMOVED***" +
-//                        "***REMOVED***",
+//                "***REMOVED***",
 //                "***REMOVED***=",
-//                "***REMOVED***" +
-//                        "***REMOVED***==",
+//                "***REMOVED***==",
 //                view.getActivity().getApplicationContext()
 //        );
+//        // test
+//        // https://limitless-gorge-44605.herokuapp.com/orgs/Akq6/***REMOVED***#/
+        Manager.getInstance().initialize(
+                "***REMOVED******REMOVED******REMOVED******REMOVED***",
+                "***REMOVED***=",
+                "***REMOVED******REMOVED***==",
+                view.getActivity().getApplicationContext()
+        );
     }
 }
