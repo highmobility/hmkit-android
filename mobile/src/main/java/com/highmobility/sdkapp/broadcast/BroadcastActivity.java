@@ -47,12 +47,7 @@ public class BroadcastActivity extends Activity implements IBroadcastingView {
         confirmPairButton.setOnClickListener(v -> onPairConfirmClick());
         showButton.setOnClickListener(v -> controller.onLinkClicked());
 
-        disconnectButton.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) {
-                Log.d("hm", "onClick: disconnect");
-                Manager.getInstance().getBroadcaster().disconnectAllLinks();
-            }
-        });
+        disconnectButton.setOnClickListener(view -> controller.onDisconnectClicked());
     }
 
     @Override
