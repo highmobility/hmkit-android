@@ -12,7 +12,8 @@ properties.load(new FileInputStream("hmkit-android/deploy.properties"))
 publishing {
     publications {
         aar(MavenPublication) {
-            from components.android
+//            from components.android
+            artifact("$buildDir/outputs/aar/hmkit-android-release.aar")
             // for bintray: https://github.com/bintray/gradle-bintray-plugin
         }
     }
