@@ -204,7 +204,7 @@ public class Manager {
 
         if (broadcaster.getLinks().size() > 0) {
             throw new IllegalStateException("Terminate should not be called if a connected link " +
-                    "exists. Disconnect from all of the links before calling.");
+                    "exists. Disconnect from all of the links.");
         }
 
         coreClockTimer.cancel();
