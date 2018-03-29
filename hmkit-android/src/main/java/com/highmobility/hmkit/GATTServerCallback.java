@@ -151,6 +151,9 @@ class GATTServerCallback extends BluetoothGattServerCallback {
             if (descriptor.getCharacteristic().getUuid().equals(Constants.READ_CHAR_UUID)) {
                 // if notifications don't start, try restarting bluetooth on android / other device
                 final Broadcaster broadcaster = this.broadcaster;
+
+                if (broadcaster.getLinkForMac(Bytes.bytesFromMacString(device.getAddress())) != null) return;
+
                 broadcaster.manager.workHandler.post(new Runnable() {
                     @Override
                     public void run() {
