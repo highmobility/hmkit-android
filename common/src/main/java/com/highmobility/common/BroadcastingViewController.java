@@ -199,45 +199,64 @@ public class BroadcastingViewController implements IBroadcastingViewController,
     }
 
     void startBroadcasting() {
-        broadcaster.startBroadcasting(new Broadcaster.StartCallback() {
-            @Override
-            public void onBroadcastingStarted() {
+        Manager.getInstance().downloadCertificate
+                ("Rp1wTWvW79qKE6iwGpYBimM12y" +
+                        "***REMOVED***", new Manager.DownloadCallback() {
+                    @Override
+                    public void onDownloaded(byte[] serial) {
+                        broadcaster.startBroadcasting(new Broadcaster.StartCallback() {
+                            @Override
+                            public void onBroadcastingStarted() {
 
-            }
+                            }
 
-            @Override
-            public void onBroadcastingFailed(BroadcastError error) {
-                Log.e(TAG, "cant start broadcasting " + error.getType());
-                view.setStatusText("Start broadcasting error " + error.getType());
-            }
-        });
+                            @Override
+                            public void onBroadcastingFailed(BroadcastError error) {
+                                Log.e(TAG, "cant start broadcasting " + error.getType());
+                                view.setStatusText("Start broadcasting error " + error.getType());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onDownloadFailed(DownloadAccessCertificateError error) {
+                        Log.e(TAG, "cant start broadcasting " + error.getType());
+                        view.setStatusText("Start broadcasting error " + error.getType());
+                    }
+                });
+
     }
 
     void initializeManager() {
         // prod - "Nexus 5"
         Manager.getInstance().initialize(
+                "dGVzdLnVeFXsIJTMMDWwwF7qX" +
+                        "***REMOVED***",
                 "***REMOVED***",
-                "***REMOVED***",
-                "***REMOVED***+z2sxxdwWNaItdBUWg==",
+                "***REMOVED***" +
+                        "+z2sxxdwWNaItdBUWg==",
                 view.getActivity()
         );
 
-
-
         // staging - "Auto"
 //        Manager.getInstance().initialize(
-//                "***REMOVED***",
+//                "***REMOVED***
+// ***REMOVED***",
 //                "***REMOVED***=",
-//                "***REMOVED***==",
+//
+// "***REMOVED***==",
 //                view.getActivity().getApplicationContext()
 //        );
 //        // test
 //        // https://limitless-gorge-44605.herokuapp.com/orgs/Akq6/***REMOVED***#/
-        Manager.getInstance().initialize(
-                "***REMOVED******REMOVED******REMOVED******REMOVED***",
-                "***REMOVED***=",
-                "***REMOVED******REMOVED***==",
-                view.getActivity().getApplicationContext()
-        );
+//        Manager.getInstance().initialize(
+//                "***REMOVED***
+// ***REMOVED***
+// ***REMOVED******REMOVED***",
+//                "***REMOVED***=",
+//                "***REMOVED***
+// ***REMOVED***==",
+//                view.getActivity().getApplicationContext()
+//        );
     }
 }
