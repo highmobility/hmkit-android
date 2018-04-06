@@ -68,6 +68,8 @@ public class Broadcaster implements SharedBleListener {
     BluetoothGattCharacteristic sensingWriteCharacteristic;
 
     boolean isAlivePinging;
+    long alivePingInterval = 500;
+
     State state = State.IDLE;
 
     ArrayList<ConnectedLink> links = new ArrayList<>();
@@ -248,17 +250,21 @@ public class Broadcaster implements SharedBleListener {
     /**
      * Activate or disable the alive ping mode.
      *
-     * @param alivePinging a boolean indicating whether the alive ping mode should be actived or
-     *                     stopped.
+     * @param interval Interval of the ping, in ms.
      */
-    public void setIsAlivePinging(boolean alivePinging) {
-        if (alivePinging == isAlivePinging) return;
-        isAlivePinging = alivePinging;
-        if (isAlivePinging) {
-            sendAlivePing();
-        } else {
-            manager.workHandler.removeCallbacks(clockRunnable);
-        }
+    public void startAlivePinging(long interval) {
+        alivePingInterval = interval;
+        if (isAlivePinging == true) return;
+        isAlivePinging = true;
+        sendAlivePing();
+    }
+
+    /**
+     * Stop the alive pinging.
+     */
+    public void stopAlivePinging() {
+        isAlivePinging = false;
+        manager.workHandler.removeCallbacks(clockRunnable);
     }
 
     /**
@@ -340,7 +346,7 @@ public class Broadcaster implements SharedBleListener {
         }
 
         stopBroadcasting();
-        setIsAlivePinging(false);
+        stopAlivePinging();
 
         // cant close service here, we wont get disconnect callback
     }
@@ -616,7 +622,7 @@ public class Broadcaster implements SharedBleListener {
         }
 
         if (isAlivePinging) {
-            manager.workHandler.postDelayed(clockRunnable, 55);
+            manager.workHandler.postDelayed(clockRunnable, alivePingInterval);
         }
     }
 
