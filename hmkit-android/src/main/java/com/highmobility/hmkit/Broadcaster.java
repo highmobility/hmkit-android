@@ -13,7 +13,6 @@ import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.os.ParcelUuid;
 import android.util.Log;
 
-
 import com.highmobility.utils.Bytes;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.btcore.HMDevice;
@@ -34,7 +33,7 @@ import java.util.UUID;
 public class Broadcaster implements SharedBleListener {
     static final String TAG = "HMLink";
 
-    public enum State { BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING }
+    public enum State {BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING}
 
     /**
      * Startcallback is used to notify the user about the start broadcasting result
@@ -52,9 +51,6 @@ public class Broadcaster implements SharedBleListener {
          */
         void onBroadcastingFailed(BroadcastError error);
     }
-
-    static int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
-    static int txPowerLevel = AdvertiseSettings.ADVERTISE_TX_POWER_HIGH;
 
     BroadcasterListener listener;
     Manager manager;
@@ -78,33 +74,8 @@ public class Broadcaster implements SharedBleListener {
 
     byte[] issuer; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
     byte[] appId;
-    byte[] advertisedSerial;
 
-    /**
-     * Sets the advertise mode for the Bluetooth's AdvertiseSettings. Default is
-     * ADVERTISE_MODE_BALANCED.
-     *
-     * @param advertiseMode the advertise mode
-     * @see AdvertiseSettings
-     */
-    public static void setAdvertiseMode(int advertiseMode) {
-        if (advertiseMode > AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY
-                || advertiseMode < AdvertiseSettings.ADVERTISE_MODE_LOW_POWER) return;
-        Broadcaster.advertiseMode = advertiseMode;
-    }
-
-    /**
-     * Sets the TX power level for the Bluetooth's AdvertiseSettings. Default is
-     * ADVERTISE_TX_POWER_HIGH.
-     *
-     * @param txPowerLevel the advertise mode
-     * @see AdvertiseSettings
-     */
-    public static void setTxPowerLevel(int txPowerLevel) {
-        if (txPowerLevel > AdvertiseSettings.ADVERTISE_TX_POWER_HIGH
-                || txPowerLevel < AdvertiseSettings.ADVERTISE_TX_POWER_ULTRA_LOW) return;
-        Broadcaster.txPowerLevel = txPowerLevel;
-    }
+    BroadcastConfiguration configuration;
 
     /**
      * The possible states of the local broadcaster are represented by the enum Broadcaster.State.
@@ -164,9 +135,22 @@ public class Broadcaster implements SharedBleListener {
     /**
      * Start broadcasting the Broadcaster via BLE advertising.
      *
-     * @param callback is invoked with the start broadcasting result
-     *                 onBroadcastingStarted is invoked if the broadcasting started
-     *                 onBroadcastingFailed is invoked if something went wrong.
+     * @param callback      This is invoked with the start broadcasting result onBroadcastingStarted
+     *                      is invoked if the broadcasting started onBroadcastingFailed is invoked
+     *                      if something went wrong.
+     * @param configuration The broadcast configuration.
+     */
+    public void startBroadcasting(StartCallback callback, BroadcastConfiguration configuration) {
+        this.configuration = configuration;
+        startBroadcasting(callback);
+    }
+
+    /**
+     * Start broadcasting the Broadcaster via BLE advertising.
+     *
+     * @param callback is invoked with the start broadcasting result onBroadcastingStarted is
+     *                 invoked if the broadcasting started onBroadcastingFailed is invoked if
+     *                 something went wrong.
      */
     public void startBroadcasting(StartCallback callback) {
         if (state == State.BROADCASTING) {
@@ -191,6 +175,8 @@ public class Broadcaster implements SharedBleListener {
         }
 
         manager.getBle().addListener(this);
+        if (this.configuration == null) this.configuration = new BroadcastConfiguration();
+        manager.getBle().setRandomAdapterName(configuration.isOverridingAdvertisementName());
 
         // start advertising
         if (mBluetoothLeAdvertiser == null) {
@@ -213,19 +199,20 @@ public class Broadcaster implements SharedBleListener {
         }
 
         final AdvertiseSettings settings = new AdvertiseSettings.Builder()
-                .setAdvertiseMode(advertiseMode)
+                .setAdvertiseMode(configuration.getAdvertiseMode())
                 .setConnectable(true)
                 .setTimeout(0)
-                .setTxPowerLevel(txPowerLevel)
+                .setTxPowerLevel(configuration.getTxPowerLevel())
                 .build();
 
         UUID advertiseUUID;
         byte[] uuidBytes;
 
-        if (advertisedSerial == null) {
+        if (configuration.getBroadcastTarget() == null) {
             uuidBytes = Bytes.concatBytes(issuer, appId);
         } else {
-            uuidBytes = Bytes.concatBytes(new byte[]{0x00, 0x00, 0x00, 0x00}, advertisedSerial);
+            uuidBytes = Bytes.concatBytes(new byte[]{0x00, 0x00, 0x00, 0x00}, configuration
+                    .getBroadcastTarget());
             uuidBytes = Bytes.concatBytes(uuidBytes, new byte[]{0x00, 0x00, 0x00});
         }
 
@@ -254,20 +241,8 @@ public class Broadcaster implements SharedBleListener {
             mBluetoothLeAdvertiser = null;
         }
 
+        this.configuration = null;
         setState(State.IDLE);
-    }
-
-    /**
-     * Sets the given serial number in the broadcast info, so other devices know before connecting
-     * if this device is interesting to them or not.
-     * <p>
-     * Set this before calling startBroadcasting. Set this to null to use regular broadcast info.
-     * It is not required to set this before starting broadcasting.
-     *
-     * @param serial the serial set in the broadcast info
-     */
-    public void setBroadcastingTarget(byte[] serial) {
-        advertisedSerial = serial;
     }
 
     /**
@@ -287,15 +262,13 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Registers the AccessCertificate for the broadcaster, enabling authenticated
-     * connection to other devices.
+     * Registers the AccessCertificate for the broadcaster, enabling authenticated connection to
+     * other devices.
      *
      * @param certificate The certificate that can be used by the Device to authorised Links
-     * @return {@link Storage.Result#SUCCESS} on success or
-     * {@link Storage.Result#INTERNAL_ERROR} if the given certificates providing serial doesn't
-     * match with
-     * broadcaster's serial or the certificate is null.
-     * {@link Storage.Result#STORAGE_FULL} if the storage is full.
+     * @return {@link Storage.Result#SUCCESS} on success or {@link Storage.Result#INTERNAL_ERROR} if
+     * the given certificates providing serial doesn't match with broadcaster's serial or the
+     * certificate is null. {@link Storage.Result#STORAGE_FULL} if the storage is full.
      */
     public Storage.Result registerCertificate(AccessCertificate certificate) {
         if (manager.certificate == null) {
@@ -314,9 +287,8 @@ public class Broadcaster implements SharedBleListener {
      * Stores a Certificate to Device's storage. This certificate is usually read by other Devices.
      *
      * @param certificate The certificate that will be saved to the database
-     * @return {@link Storage.Result#SUCCESS} on success or
-     * {@link Storage.Result#STORAGE_FULL} if the storage is full.
-     * {@link Storage.Result#INTERNAL_ERROR} if certificate is null.
+     * @return {@link Storage.Result#SUCCESS} on success or {@link Storage.Result#STORAGE_FULL} if
+     * the storage is full. {@link Storage.Result#INTERNAL_ERROR} if certificate is null.
      */
     public Storage.Result storeCertificate(AccessCertificate certificate) {
         return manager.storage.storeCertificate(certificate);
@@ -327,9 +299,8 @@ public class Broadcaster implements SharedBleListener {
      * accompanying registered certificate are deleted from the storage.
      *
      * @param serial The 9-byte serial number of the access providing broadcaster
-     * @return {@link Storage.Result#SUCCESS} on success or
-     * {@link Storage.Result#INTERNAL_ERROR } if there are no matching certificate pairs for this
-     * serial.
+     * @return {@link Storage.Result#SUCCESS} on success or {@link Storage.Result#INTERNAL_ERROR }
+     * if there are no matching certificate pairs for this serial.
      */
     public Storage.Result revokeCertificate(byte[] serial) {
         if (manager.storage.certWithGainingSerial(serial) == null
@@ -346,12 +317,12 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Tries to cancel all Bluetooth connections, stop broadcasting and clear the Bluetooth
-     * service. This has proven being slow or not working at all. Success may be related to the
-     * specific device or it's Android version.
+     * Tries to cancel all Bluetooth connections, stop broadcasting and clear the Bluetooth service.
+     * This has proven being slow or not working at all. Success may be related to the specific
+     * device or it's Android version.
      * <p>
-     * If successful, the link's state will change to disconnected and
-     * {@link com.highmobility.hmkit.BroadcasterListener#onLinkLost(ConnectedLink)}} will be called.
+     * If successful, the link's state will change to disconnected and {@link
+     * com.highmobility.hmkit.BroadcasterListener#onLinkLost(ConnectedLink)}} will be called.
      * <p>
      * The user is responsible for releasing the Link's BroadcasterListener.
      */
@@ -438,21 +409,14 @@ public class Broadcaster implements SharedBleListener {
                     if (listener == null) return;
                     listener.onLinkLost(link);
                     link.listener = null; // nothing to do with the link anymore
-                    setRandomAdapterName();
+                    // pointless to set random adapter name here because if already broadcasting
+                    // android will not change the name and if not broadcasting then startBroadcast
+                    // will change the name
                 }
             });
-        } else {
-            setRandomAdapterName();
         }
 
         return true;
-    }
-
-    void setRandomAdapterName() {
-        // set new adapter name
-        if (links.size() == 0 && getState() != State.BROADCASTING) {
-            manager.getBle().setRandomAdapterName();
-        }
     }
 
     boolean onCommandResponseReceived(HMDevice device, byte[] data) {
@@ -551,7 +515,6 @@ public class Broadcaster implements SharedBleListener {
                         .PROPERTY_NOTIFY,
                 BluetoothGattCharacteristic.PERMISSION_READ);
 
-
         writeCharacteristic =
                 new BluetoothGattCharacteristic(Constants.WRITE_CHAR_UUID,
                         BluetoothGattCharacteristic.PROPERTY_WRITE,
@@ -585,7 +548,6 @@ public class Broadcaster implements SharedBleListener {
             Log.e(TAG, "Cannot add sensing read descriptor");
             return false;
         }
-
 
         if (aliveCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants
                 .NOTIFY_DESCRIPTOR_UUID,
@@ -685,7 +647,8 @@ public class Broadcaster implements SharedBleListener {
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(TAG, "Start advertise " + Manager.getInstance().getBle().getAdapter().getName());
+                Log.d(TAG, "Start advertise " + Manager.getInstance().getBle().getAdapter()
+                        .getName());
             broadcaster.get().setState(State.BROADCASTING);
             if (broadcaster.get().startCallback != null) {
                 broadcaster.get().startCallback.onBroadcastingStarted();
@@ -729,7 +692,6 @@ public class Broadcaster implements SharedBleListener {
         if (this.state != state) {
             final State oldState = this.state;
             this.state = state;
-
 
             if (listener != null) {
                 manager.postToMainThread(new Runnable() {

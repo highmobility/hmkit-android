@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.highmobility.autoapi.LockUnlockDoors;
 import com.highmobility.autoapi.property.DoorLockProperty;
+import com.highmobility.hmkit.BroadcastConfiguration;
 import com.highmobility.hmkit.Broadcaster;
 import com.highmobility.hmkit.BroadcasterListener;
 import com.highmobility.hmkit.ConnectedLink;
@@ -115,6 +116,7 @@ public class BroadcastingViewController implements IBroadcastingViewController,
 
     @Override public void onDisconnectClicked() {
         broadcaster.stopBroadcasting();
+        startBroadcasting();
     }
 
     // Broadcasterlistener
@@ -199,43 +201,33 @@ public class BroadcastingViewController implements IBroadcastingViewController,
     }
 
     void startBroadcasting() {
-        Manager.getInstance().downloadCertificate
-                ("Rp1wTWvW79qKE6iwGpYBimM12y" +
-                        "***REMOVED***", new Manager.DownloadCallback() {
-                    @Override
-                    public void onDownloaded(byte[] serial) {
-                        broadcaster.startBroadcasting(new Broadcaster.StartCallback() {
-                            @Override
-                            public void onBroadcastingStarted() {
+        BroadcastConfiguration conf = new BroadcastConfiguration.Builder()
+                .setOverridesAdvertisementName(false).build();
 
-                            }
+        broadcaster.startBroadcasting(new Broadcaster.StartCallback() {
 
-                            @Override
-                            public void onBroadcastingFailed(BroadcastError error) {
-                                Log.e(TAG, "cant start broadcasting " + error.getType());
-                                view.setStatusText("Start broadcasting error " + error.getType());
-                            }
-                        });
-                    }
+            @Override public void onBroadcastingStarted() {
+                Log.d(TAG, "onBroadcastingStarted: ");
+            }
 
-                    @Override
-                    public void onDownloadFailed(DownloadAccessCertificateError error) {
-                        Log.e(TAG, "cant start broadcasting " + error.getType());
-                        view.setStatusText("Start broadcasting error " + error.getType());
-                    }
-                });
-
+            @Override public void onBroadcastingFailed(BroadcastError error) {
+                Log.d(TAG, "onBroadcastingFailed: ");
+            }
+        }, conf);
     }
 
     void initializeManager() {
-        // prod - "Nexus 5"
+        // prod nexus 5
+
         Manager.getInstance().initialize(
                 "dGVzdLnVeFXsIJTMMDWwwF7qX" +
                         "***REMOVED***",
                 "***REMOVED***",
                 "***REMOVED***" +
                         "+z2sxxdwWNaItdBUWg==",
-                view.getActivity()
+
+                view.getActivity().getApplicationContext()
+
         );
 
         // staging - "Auto"
@@ -245,17 +237,6 @@ public class BroadcastingViewController implements IBroadcastingViewController,
 //                "***REMOVED***=",
 //
 // "***REMOVED***==",
-//                view.getActivity().getApplicationContext()
-//        );
-//        // test
-//        // https://limitless-gorge-44605.herokuapp.com/orgs/Akq6/***REMOVED***#/
-//        Manager.getInstance().initialize(
-//                "***REMOVED***
-// ***REMOVED***
-// ***REMOVED******REMOVED***",
-//                "***REMOVED***=",
-//                "***REMOVED***
-// ***REMOVED***==",
 //                view.getActivity().getApplicationContext()
 //        );
     }

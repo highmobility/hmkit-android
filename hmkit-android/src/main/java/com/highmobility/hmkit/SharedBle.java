@@ -78,7 +78,8 @@ public class SharedBle {
                 BluetoothAdapter.STATE_ON);
     }
 
-    void setRandomAdapterName() {
+    void setRandomAdapterName(boolean overrideLocalName) {
+        if (overrideLocalName == false) return;
         String name = "HM ";
         byte[] serialBytes = new byte[3];
         new Random().nextBytes(serialBytes);
@@ -91,7 +92,6 @@ public class SharedBle {
         if (mBluetoothManager == null) {
             mBluetoothManager = (BluetoothManager) ctx.getSystemService(Context.BLUETOOTH_SERVICE);
             mBluetoothAdapter = mBluetoothManager.getAdapter();
-            setRandomAdapterName();
         }
     }
 
