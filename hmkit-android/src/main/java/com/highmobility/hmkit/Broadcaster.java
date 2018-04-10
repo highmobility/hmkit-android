@@ -137,8 +137,8 @@ public class Broadcaster implements SharedBleListener {
     /**
      * Start broadcasting the Broadcaster via BLE advertising.
      *
-     * @param callback      This is invoked with the start broadcasting result onBroadcastingStarted
-     *                      is invoked if the broadcasting started onBroadcastingFailed is invoked
+     * @param callback      This is invoked with the start broadcasting result. onBroadcastingStarted
+     *                      is invoked if the broadcasting started. onBroadcastingFailed is invoked
      *                      if something went wrong.
      * @param configuration The broadcast configuration.
      */
@@ -150,8 +150,8 @@ public class Broadcaster implements SharedBleListener {
     /**
      * Start broadcasting the Broadcaster via BLE advertising.
      *
-     * @param callback is invoked with the start broadcasting result onBroadcastingStarted is
-     *                 invoked if the broadcasting started onBroadcastingFailed is invoked if
+     * @param callback is invoked with the start broadcasting result. onBroadcastingStarted is
+     *                 invoked if the broadcasting started. onBroadcastingFailed is invoked if
      *                 something went wrong.
      */
     public void startBroadcasting(StartCallback callback) {
@@ -323,7 +323,7 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Tries to cancel all Bluetooth connections, stop broadcasting and clear the Bluetooth service.
+     * Tries to cancel all Bluetooth connections and stop broadcasting.
      * This has proven being slow or not working at all. Success may be related to the specific
      * device or it's Android version.
      * <p>
