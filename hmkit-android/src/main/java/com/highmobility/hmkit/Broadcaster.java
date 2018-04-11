@@ -222,7 +222,7 @@ public class Broadcaster implements SharedBleListener {
         advertiseUUID = Bytes.UUIDFromByteArray(uuidBytes);
 
         final AdvertiseData data = new AdvertiseData.Builder()
-                .setIncludeDeviceName(true)
+                .setIncludeDeviceName(configuration.isOverridingAdvertisementName() == true)
                 .addServiceUuid(new ParcelUuid(advertiseUUID))
                 .build();
 

@@ -212,7 +212,7 @@ public class BroadcastingViewController implements IBroadcastingViewController,
             }
 
             @Override public void onBroadcastingFailed(BroadcastError error) {
-                Log.d(TAG, "onBroadcastingFailed: ");
+                Log.d(TAG, "onBroadcastingFailed: " + error.getMessage());
             }
         }, conf);
     }

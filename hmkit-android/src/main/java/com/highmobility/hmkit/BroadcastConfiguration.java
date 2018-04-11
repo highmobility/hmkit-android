@@ -95,7 +95,7 @@ public class BroadcastConfiguration {
 
         /**
          * Indicates whether HMKit will overwrite the phone's bluetooth name. By default this
-         * behaviour is on.
+         * behaviour is on. If this is false the Chrome emulator will not recognize the device.
          *
          * @param overridesAdvertisementName Indication on whether to overwrite the phone's bluetooth name
          */
