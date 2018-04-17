@@ -451,7 +451,7 @@ public class Broadcaster implements SharedBleListener {
 
     boolean writeData(byte[] mac, byte[] value, int characteristicId) {
         ConnectedLink link = getLinkForMac(mac);
-        if (link == null) return false;
+        if (link == null || link.btDevice == null) return false;
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(TAG, "write " + Bytes.hexFromBytes(value) + " to " + Bytes.hexFromBytes(link
