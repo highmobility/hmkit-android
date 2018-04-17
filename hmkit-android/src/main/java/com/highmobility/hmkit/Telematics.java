@@ -186,9 +186,11 @@ public class Telematics {
         manager.postToMainThread(new Runnable() {
             @Override
             public void run() {
-                final TelematicsError error = new TelematicsError(type, code, message);
                 sendingCommand = false;
-                callback.onCommandFailed(error);
+                if (callback != null) {
+                    final TelematicsError error = new TelematicsError(type, code, message);
+                    callback.onCommandFailed(error);
+                }
             }
         });
     }
