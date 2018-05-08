@@ -61,4 +61,6 @@ public class HMBTCore {
     //Telematics
     public native void HMBTCoreTelematicsReceiveData(HMBTCoreInterface coreInterface, int length, byte[] data);
     public native void HMBTCoreSendTelematicsCommand(HMBTCoreInterface coreInterface, byte[] serial, byte[] nonce, int length, byte[] data);
+
+    public native void HMBTCoreSendRevoke(HMBTCoreInterface coreInterface, byte[] serial);
 }

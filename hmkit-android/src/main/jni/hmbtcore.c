@@ -343,3 +343,15 @@ Java_com_highmobility_btcore_HMBTCore_HMBTCoreSendTelematicsCommand(JNIEnv *env,
     (*env)->ReleaseByteArrayElements(env, nonce_, nonce, 0);
     (*env)->ReleaseByteArrayElements(env, serial_, serial, 0);
 }
+
+JNIEXPORT void JNICALL
+Java_com_highmobility_btcore_HMBTCore_HMBTCoreSendRevoke(JNIEnv *env, jobject instance,jobject coreInterface,
+                                                                      jbyteArray serial_) {
+    prepareCallbackFunctions(env,instance,coreInterface);
+
+    jbyte *serial = (*env)->GetByteArrayElements(env, serial_, NULL);
+
+    sendRevoke(serial);
+
+    (*env)->ReleaseByteArrayElements(env, serial_, serial, 0);
+}
