@@ -123,6 +123,7 @@ public class BroadcastingViewController implements IBroadcastingViewController,
 
     @Override
     public void onStateChanged(Broadcaster.State state) {
+
         switch (broadcaster.getState()) {
             case IDLE:
                 view.setStatusText("Idle");

@@ -16,7 +16,6 @@ import com.highmobility.common.IBroadcastingView;
 import com.highmobility.common.IBroadcastingViewController;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.Link;
-import com.highmobility.hmkit.Manager;
 
 /**
  * Created by ttiganik on 02/06/16.
