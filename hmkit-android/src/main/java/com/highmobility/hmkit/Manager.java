@@ -13,7 +13,7 @@ import com.android.volley.VolleyError;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.DeviceCertificate;
 import com.highmobility.btcore.HMBTCore;
-import com.highmobility.hmkit.Error.DownloadAccessCertificateError;
+import com.highmobility.hmkit.error.DownloadAccessCertificateError;
 
 import org.json.JSONException;
 import org.json.JSONObject;

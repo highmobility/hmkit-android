@@ -1,4 +1,4 @@
-package com.highmobility.hmkit.Error;
+package com.highmobility.hmkit.error;
 
 /**
  * Created by ttiganik on 6/22/17.

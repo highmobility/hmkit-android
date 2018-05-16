@@ -15,7 +15,7 @@ import android.util.Log;
 
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.crypto.AccessCertificate;
-import com.highmobility.hmkit.Error.BroadcastError;
+import com.highmobility.hmkit.error.BroadcastError;
 import com.highmobility.utils.Bytes;
 
 import java.lang.ref.WeakReference;

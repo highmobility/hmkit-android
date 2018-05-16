@@ -7,7 +7,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.highmobility.utils.Bytes;
 import com.highmobility.crypto.AccessCertificate;
-import com.highmobility.hmkit.Error.TelematicsError;
+import com.highmobility.hmkit.error.TelematicsError;
 
 import org.json.JSONException;
 import org.json.JSONObject;
