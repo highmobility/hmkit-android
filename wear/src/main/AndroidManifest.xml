@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.highmobility.digitalkey">
+    package="com.highmobility.sdkapp">
 
     <uses-feature android:name="android.hardware.type.watch" />
 
@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault">
         <activity
-            android:name="com.highmobility.digitalkey.BroadcastActivity"
+            android:name="com.highmobility.sdkapp.BroadcastActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,11 +27,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="LinkView"
-            android:parentActivityName="BroadcastActivity">
+            android:name="com.highmobility.sdkapp.LinkView"
+            android:parentActivityName="com.highmobility.sdkapp.BroadcastActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.highmobility.digitalkey.BroadcastActivity" />
+                android:value="com.highmobility.sdkapp.BroadcastActivity" />
         </activity>
 
 

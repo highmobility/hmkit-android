@@ -5,4 +5,6 @@ public interface IBroadcastingViewController {
     void onPairingApproved(boolean approved);
     void onLinkClicked();
     void onLinkViewResult(int result);
+
+    void onDisconnectClicked();
 }

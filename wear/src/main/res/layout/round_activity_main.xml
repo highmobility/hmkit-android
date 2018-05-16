@@ -46,7 +46,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="20dp" />
 
-        <com.high_mobility.digitalkey.PairingView
+        <com.highmobility.sdkapp.PairingView
             android:id="@+id/pairing_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -54,7 +54,7 @@
             android:gravity="center"
             android:background="@color/dark_red">
 
-        </com.high_mobility.digitalkey.PairingView>
+        </com.highmobility.sdkapp.PairingView>
 
     </RelativeLayout>
 

@@ -3,13 +3,13 @@ package com.highmobility.common;
 import android.content.Intent;
 import android.util.Log;
 
+import com.highmobility.autoapi.LockUnlockDoors;
+import com.highmobility.autoapi.property.DoorLockProperty;
+import com.highmobility.hmkit.BroadcastConfiguration;
 import com.highmobility.hmkit.Broadcaster;
 import com.highmobility.hmkit.BroadcasterListener;
-import com.highmobility.hmkit.ByteUtils;
-import com.highmobility.hmkit.Command.Command;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
-import com.highmobility.hmkit.Constants;
 import com.highmobility.hmkit.Error.BroadcastError;
 import com.highmobility.hmkit.Error.DownloadAccessCertificateError;
 import com.highmobility.hmkit.Error.TelematicsError;
@@ -17,7 +17,8 @@ import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
 import com.highmobility.hmkit.Telematics;
 
-public class BroadcastingViewController implements IBroadcastingViewController, BroadcasterListener, ConnectedLinkListener {
+public class BroadcastingViewController implements IBroadcastingViewController,
+        BroadcasterListener, ConnectedLinkListener {
     private static final String TAG = "BroadcastingVC";
     public static final int LINK_ACTIVITY_RESULT = 1;
     IBroadcastingView view;
@@ -25,29 +26,25 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     AuthorizationCallback authorizationCallback;
     Broadcaster broadcaster;
     ConnectedLink link;
-    Cloud cloud;
 
     public BroadcastingViewController(IBroadcastingView view) {
         this.view = view;
-        cloud = new Cloud(view.getActivity());
-        initializeManager();
-        broadcaster = Manager.getInstance().getBroadcaster();
-        // set the broadcaster listener
-        broadcaster.setListener(this);
-        startBroadcasting();
+
+        downloadAccessCertificates(() -> startBroadcasting(), null);
+
 //        sendTelematicsCommand();
     }
 
     private void sendTelematicsCommand() {
-        String token = "***REMOVED***";
-
-        //ByteUtils.bytesFromHex("***REMOVED***")
+        String token =
+                "***REMOVED***";
 
         Manager.getInstance().downloadCertificate(token, new Manager.DownloadCallback() {
             @Override
-            public void onDownloaded(byte[] vehicleSerial) {
-                byte[] command = Command.DoorLocks.lockDoors(true);
-                Manager.getInstance().getTelematics().sendCommand(command, vehicleSerial, new Telematics.CommandCallback() {
+            public void onDownloaded(byte[] serial) {
+                byte[] command = new LockUnlockDoors(DoorLockProperty.LockState.LOCKED).getBytes();
+                Manager.getInstance().getTelematics().sendCommand(command, serial, new Telematics
+                        .CommandCallback() {
                     @Override
                     public void onCommandResponse(byte[] bytes) {
                         Log.d(TAG, "onCommandResponse: ");
@@ -70,6 +67,11 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     @Override
     public void onDestroy() {
         Manager.getInstance().terminate();
+        // clear the references
+        broadcaster.setListener(null);
+        broadcaster = null;
+        link.setListener(null);
+        link = null;
     }
 
     @Override
@@ -77,8 +79,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
         if (approved) {
             authorizationCallback.approve();
             view.showPairingView(false);
-        }
-        else {
+        } else {
             authorizationCallback.decline();
             link.setListener(null);
             view.getActivity().finish();
@@ -101,7 +102,6 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     public void onLinkViewResult(int result) {
         Manager.getInstance().terminate();
         broadcaster = null;
-        initializeManager();
         broadcaster = Manager.getInstance().getBroadcaster();
         // set the broadcaster listener
         broadcaster.setListener(this);
@@ -109,10 +109,16 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
 
     }
 
+    @Override public void onDisconnectClicked() {
+        broadcaster.stopBroadcasting();
+        startBroadcasting();
+    }
+
     // Broadcasterlistener
 
     @Override
     public void onStateChanged(Broadcaster.State state) {
+
         switch (broadcaster.getState()) {
             case IDLE:
                 view.setStatusText("Idle");
@@ -126,7 +132,7 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
                 break;
             case BROADCASTING:
                 if (link == null) {
-                    view.setStatusText("Looking for links...");
+                    view.setStatusText("Looking for links: " + broadcaster.getName());
                 }
         }
     }
@@ -150,14 +156,13 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
             link.setListener(null);
             this.link = null;
             view.updateLink(link);
-
-            if (broadcaster.getState() == Broadcaster.State.BROADCASTING)
-                view.setStatusText("Looking for links...");
+            onStateChanged(broadcaster.getState());
         }
     }
 
     @Override
-    public void onAuthorizationRequested(ConnectedLink connectedLink, AuthorizationCallback authorizationCallback) {
+    public void onAuthorizationRequested(ConnectedLink connectedLink, AuthorizationCallback
+            authorizationCallback) {
         this.authorizationCallback = authorizationCallback;
         view.showPairingView(true);
         Log.d(TAG, "show pairing view " + true);
@@ -171,19 +176,17 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
     @Override
     public void onStateChanged(Link link, Link.State state) {
         Log.d(TAG, "link state changed " + link.getState());
-        if (link == this.link ) {
+        if (link == this.link) {
             view.updateLink((ConnectedLink) link);
 
             if (link.getState() == Link.State.AUTHENTICATED) {
                 onLinkClicked();
                 view.setStatusText("authenticated");
-            }
-            else if (link.getState() == Link.State.CONNECTED) {
+            } else if (link.getState() == Link.State.CONNECTED) {
                 view.setStatusText("connected");
-            }
-            else {
+            } else {
                 this.link = null;
-                view.setStatusText("broadcasting");
+                onStateChanged(broadcaster.getState());
             }
         }
     }
@@ -193,27 +196,54 @@ public class BroadcastingViewController implements IBroadcastingViewController, 
 
     }
 
-    void startBroadcasting() {
-        broadcaster.startBroadcasting(new Broadcaster.StartCallback() {
-            @Override
-            public void onBroadcastingStarted() {
+    void downloadAccessCertificates(Runnable success, Runnable failed) {
+// prod nexus 5
+        Manager.getInstance().initialize(
+                "dGVzdLnVeFXsIJTMMDWwwF7qX" +
+                        "***REMOVED***",
+                "***REMOVED***",
+                "***REMOVED***" +
+                        "+z2sxxdwWNaItdBUWg==",
+                view.getActivity()
+        );
 
+        broadcaster = Manager.getInstance().getBroadcaster();
+        // set the broadcaster listener
+        broadcaster.setListener(this);
+
+        // PASTE ACCESS TOKEN HERE
+        String accessToken =
+                "Rp1wTWvW79qKE6iwGpYBimM12y" +
+                        "***REMOVED***";
+
+        Manager.getInstance().downloadCertificate(accessToken, new Manager.DownloadCallback() {
+            @Override
+            public void onDownloaded(byte[] serial) {
+                if (success != null) success.run();
             }
 
             @Override
-            public void onBroadcastingFailed(BroadcastError error) {
-                Log.e(TAG, "cant start broadcasting " + error.getType());
-                view.setStatusText("Start broadcasting error " + error.getType());
+            public void onDownloadFailed(DownloadAccessCertificateError error) {
+                Log.e(TAG, "Could not download a certificate with token: " + error
+                        .getMessage());
+                if (failed != null) failed.run();
             }
         });
     }
 
-    void initializeManager() {
-        Manager.getInstance().initialize(
-                "***REMOVED***",
-                "***REMOVED***=",
-                "***REMOVED***==",
-                view.getActivity()
-        );
+    void startBroadcasting() {
+        BroadcastConfiguration conf = new BroadcastConfiguration.Builder()
+                .setOverridesAdvertisementName(true).build(); // true is default anyway
+
+        broadcaster.startBroadcasting(new Broadcaster.StartCallback() {
+            @Override public void onBroadcastingStarted() {
+                Log.d(TAG, "onBroadcastingStarted: ");
+                // broadcaster.startAlivePinging(1000);
+            }
+
+            @Override public void onBroadcastingFailed(BroadcastError error) {
+                Log.d(TAG, "onBroadcastingFailed: " + error.getMessage());
+            }
+        }, conf);
     }
 }
