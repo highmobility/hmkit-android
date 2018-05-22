@@ -7,7 +7,6 @@ import com.highmobility.btcore.HMDevice;
 import com.highmobility.hmkit.error.LinkError;
 import com.highmobility.hmkit.error.RevokeError;
 import com.highmobility.utils.Bytes;
-import com.highmobility.value.DeviceSerial;
 
 import java.util.Calendar;
 
@@ -128,7 +127,7 @@ public class Link {
      *
      * @param serial The serial of the revoked device.
      */
-    public void revoke(final DeviceSerial serial, RevokeCallback callback) {
+    public void revoke(final byte[] serial, RevokeCallback callback) {
         if (state != State.AUTHENTICATED) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "not authenticated");
@@ -154,7 +153,7 @@ public class Link {
         manager.workHandler.post(new Runnable() {
             @Override
             public void run() {
-                manager.core.HMBTCoreSendRevoke(manager.coreInterface, serial.getBytes());
+                manager.core.HMBTCoreSendRevoke(manager.coreInterface, serial);
             }
         });
     }

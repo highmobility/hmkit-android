@@ -23,12 +23,10 @@ import com.highmobility.autoapi.property.TrunkLockState;
 import com.highmobility.autoapi.property.TrunkPosition;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
-
 import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
 import com.highmobility.hmkit.error.LinkError;
 import com.highmobility.hmkit.error.RevokeError;
-import com.highmobility.value.DeviceSerial;
 
 import java.util.Arrays;
 import java.util.List;
@@ -131,21 +129,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
     @Override
     public void onLockDoorsClicked() {
-//        Manager.getInstance().getBroadcaster().disconnectAllLinks();
-
-        link.revoke(new DeviceSerial(Manager.getInstance().getDeviceCertificate().getSerial()), new Link.RevokeCallback() {
-            @Override public void onRevokeSuccess() {
-                Log.d(TAG, "onRevokeSuccess() called");
-            }
-
-            @Override public void onRevokeFailed(RevokeError error) {
-                Log.d(TAG, "onRevokeFailed() called with: error = [" + error.getType() + "]");
-            }
-        });
-
-        // TODO: 16/05/2018 use below
-
-        /*view.showLoadingView(true);
+        view.showLoadingView(true);
         byte[] bytes = new LockUnlockDoors(doorsLocked ? DoorLockProperty.LockState.UNLOCKED :
                 DoorLockProperty.LockState.LOCKED).getBytes();
         link.sendCommand(bytes, new Link.CommandCallback() {
@@ -159,7 +143,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
             public void onCommandFailed(LinkError error) {
                 onCommandFinished("lock command send exception " + error.getType());
             }
-        });*/
+        });
     }
 
     @Override
