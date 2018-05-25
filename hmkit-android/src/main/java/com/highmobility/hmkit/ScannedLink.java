@@ -9,8 +9,9 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.util.Log;
 
-import com.highmobility.utils.Bytes;
 import com.highmobility.crypto.AccessCertificate;
+import com.highmobility.utils.ByteUtils;
+import com.highmobility.value.DeviceSerial;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,10 +19,10 @@ import java.util.UUID;
 /**
  * The ScannedLink is a representation of the connection between the Scanner and a device that the
  * Scanner has connected to and validated as a High-Mobility broadcaster.
- *
- * The ScannedLinks's interface provides the ability
- * to send commands and handle incoming requests from the ConnectedLink.
- *
+ * <p>
+ * The ScannedLinks's interface provides the ability to send commands and handle incoming requests
+ * from the ConnectedLink.
+ * <p>
  * Created by ttiganik on 01/06/16.
  */
 class ScannedLink extends Link {
@@ -41,7 +42,6 @@ class ScannedLink extends Link {
 
     Constants.ResponseCallback infoCallback;
     String info;
-
 
     /**
      * Read the RSSI of the Link's underlying Bluetooth device.
@@ -77,7 +77,6 @@ class ScannedLink extends Link {
         this.listener = listener;
     }
 
-
     void registerCertificate(AccessCertificate certificate, Constants.ResponseCallback callback) {
         // TODO:
     }
@@ -90,7 +89,7 @@ class ScannedLink extends Link {
         // TODO:
     }
 
-    void revokeCertificate(byte[] serial, Constants.ResponseCallback callback) {
+    void revokeCertificate(DeviceSerial serial, Constants.ResponseCallback callback) {
         // TODO:
     }
 
@@ -105,11 +104,12 @@ class ScannedLink extends Link {
     }
 
     void writeValue(byte[] value) {
-        if (writeCharacteristic != null){
+        if (writeCharacteristic != null) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "write value " + Bytes.hexFromBytes(value));
+                Log.d(TAG, "write value " + ByteUtils.hexFromBytes(value));
 
-            if (writeCharacteristic.setValue(value) == false || gatt.writeCharacteristic(writeCharacteristic) == false) {
+            if (writeCharacteristic.setValue(value) == false || gatt.writeCharacteristic
+                    (writeCharacteristic) == false) {
                 // TODO: fail auth or command
             }
         }
@@ -156,7 +156,8 @@ class ScannedLink extends Link {
                     scanner.manager.workHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            scanner.manager.core.HMBTCoreSensingConnect(scanner.manager.coreInterface, getAddressBytes());
+                            scanner.manager.core.HMBTCoreSensingConnect(scanner.manager
+                                    .coreInterface, getAddressBytes());
                         }
                     });
                     break;
@@ -167,7 +168,8 @@ class ScannedLink extends Link {
                     scanner.manager.workHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            scanner.manager.core.HMBTCoreSensingDisconnect(scanner.manager.coreInterface, getAddressBytes());
+                            scanner.manager.core.HMBTCoreSensingDisconnect(scanner.manager
+                                    .coreInterface, getAddressBytes());
                         }
                     });
                     break;
@@ -194,12 +196,13 @@ class ScannedLink extends Link {
                 byte[] msb = longToBytes(uuid.getMostSignificantBits());
                 byte[] lsb = longToBytes(uuid.getLeastSignificantBits());
 
-                Bytes.reverse(msb);
-                Bytes.reverse(lsb);
+                ByteUtils.reverse(msb);
+                ByteUtils.reverse(lsb);
                 UUID reverseUUID = new UUID(getLong(lsb), getLong(msb));
 
                 if (reverseUUID.equals(Constants.SERVICE_UUID)) {
-                    for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
+                    for (BluetoothGattCharacteristic characteristic : service.getCharacteristics
+                            ()) {
                         if (characteristic.getUuid().equals(Constants.READ_CHAR_UUID)) {
                             readCharacteristic = characteristic;
                         } else if (characteristic.getUuid().equals(Constants.WRITE_CHAR_UUID)) {
@@ -214,7 +217,8 @@ class ScannedLink extends Link {
                 }
             }
 
-            Log.i(TAG, "onServicesDiscovered " + (readCharacteristic != null && writeCharacteristic != null));
+            Log.i(TAG, "onServicesDiscovered " + (readCharacteristic != null &&
+                    writeCharacteristic != null));
 
             if (readCharacteristic != null && writeCharacteristic != null) {
                 if (gatt.setCharacteristicNotification(readCharacteristic, true) == false) {
@@ -226,8 +230,10 @@ class ScannedLink extends Link {
                     return;
                 }
 
-                BluetoothGattDescriptor descriptor = readCharacteristic.getDescriptor(Constants.NOTIFY_DESCRIPTOR_UUID);
-                if (descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE) == false) {
+                BluetoothGattDescriptor descriptor = readCharacteristic.getDescriptor(Constants
+                        .NOTIFY_DESCRIPTOR_UUID);
+                if (descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE) ==
+                        false) {
                     // TODO: how to failed connection should be handled
                     // also remove authenticatingMac from scanner
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
@@ -250,71 +256,79 @@ class ScannedLink extends Link {
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt,
-                                         final BluetoothGattCharacteristic characteristic, int status) {
+                                         final BluetoothGattCharacteristic characteristic, int
+                                                 status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                    Log.d(TAG, "onCharacteristicRead " + Bytes.hexFromBytes(characteristic.getValue()));
+                    Log.d(TAG, "onCharacteristicRead " + ByteUtils.hexFromBytes(characteristic
+                            .getValue()));
                 if (characteristic.getUuid().equals(Constants.READ_CHAR_UUID)) {
                     scanner.manager.workHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             //TODO add proper characteristic
-                            scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes(), 0);
+                            scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager
+                                    .coreInterface, characteristic.getValue(), characteristic
+                                    .getValue().length, 0, getAddressBytes(), 0);
                         }
                     });
-                }
-                else if (characteristic.getUuid().equals(Constants.INFO_CHAR_UUID)) {
+                } else if (characteristic.getUuid().equals(Constants.INFO_CHAR_UUID)) {
                     info = characteristic.getStringValue(0);
                     Log.v(TAG, "read info " + info);
                 }
-            }
-            else {
+            } else {
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                     Log.d(TAG, "onCharacteristicRead failed " + status);
             }
         }
 
         @Override
-        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic
+                characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 scanner.manager.workHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         //TODO add proper characteristic
-                        scanner.manager.core.HMBTCoreSensingWriteResponse(scanner.manager.coreInterface, getAddressBytes(),0);
+                        scanner.manager.core.HMBTCoreSensingWriteResponse(scanner.manager
+                                .coreInterface, getAddressBytes(), 0);
                     }
                 });
-            }
-            else {
+            } else {
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                     Log.d(TAG, "onCharacteristicWrite failure " + status);
             }
         }
 
         @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt, final BluetoothGattCharacteristic characteristic) {
+        public void onCharacteristicChanged(BluetoothGatt gatt, final BluetoothGattCharacteristic
+                characteristic) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "onCharacteristicChanged " + Bytes.hexFromBytes(characteristic.getValue()));
+                Log.d(TAG, "onCharacteristicChanged " + ByteUtils.hexFromBytes(characteristic
+                        .getValue()));
             scanner.manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     //TODO add proper characteristic
-                    scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager.coreInterface, characteristic.getValue(), characteristic.getValue().length, 0, getAddressBytes(),0);
+                    scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager
+                            .coreInterface, characteristic.getValue(), characteristic.getValue()
+                            .length, 0, getAddressBytes(), 0);
                 }
             });
         }
 
         @Override
-        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int
+                status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 scanner.manager.workHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        scanner.manager.core.HMBTCoreSensingDiscoveryEvent(scanner.manager.coreInterface, getAddressBytes());
+                        scanner.manager.core.HMBTCoreSensingDiscoveryEvent(scanner.manager
+                                .coreInterface, getAddressBytes());
                     }
                 });
-            }
-            else {
+            } else {
                 // TODO: fail connection
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                     Log.d(TAG, "onDescriptorWrite failure " + status);
@@ -327,8 +341,7 @@ class ScannedLink extends Link {
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (rssiCallback != null) rssiCallback.response(0);
-            }
-            else {
+            } else {
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                     Log.d(TAG, "read rssi failure " + status);
                 if (rssiCallback != null) rssiCallback.response(1); // TODO: use correct error code
@@ -348,7 +361,7 @@ class ScannedLink extends Link {
     static byte[] longToBytes(long l) {
         byte[] result = new byte[8];
         for (int i = 7; i >= 0; i--) {
-            result[i] = (byte)(l & 0xFF);
+            result[i] = (byte) (l & 0xFF);
             l >>= 8;
         }
         return result;

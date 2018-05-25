@@ -5,16 +5,18 @@ import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.highmobility.utils.Bytes;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.hmkit.Error.TelematicsError;
+import com.highmobility.value.Bytes;
+import com.highmobility.value.DeviceSerial;
+import com.highmobility.value.Issuer;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
  * Created by ttiganik on 03/05/2017.
- *
+ * <p>
  * Telematics provides the option to send commands via telematics.
  */
 public class Telematics {
@@ -30,12 +32,14 @@ public class Telematics {
     public interface CommandCallback {
         /**
          * Invoked if the command was sent successfully and a response was received.
+         *
          * @param bytes the response bytes
          */
-        void onCommandResponse(byte[] bytes);
+        void onCommandResponse(Bytes bytes);
 
         /**
          * Invoked if something went wrong.
+         *
          * @param error The error
          */
         void onCommandFailed(TelematicsError error);
@@ -48,13 +52,12 @@ public class Telematics {
     /**
      * Send a command to a device via telematics.
      *
-     * @param command the bytes to send to the device
-     * @param serial serial of the device
+     * @param command  the bytes to send to the device
+     * @param serial   serial of the device
      * @param callback A {@link CommandCallback} object that is invoked with the command result.
-     *
      */
-    public void sendCommand(final byte[] command, byte[] serial, final CommandCallback callback) {
-        if (command.length > Constants.MAX_COMMAND_LENGTH) {
+    public void sendCommand(final Bytes command, DeviceSerial serial, final CommandCallback callback) {
+        if (command.getLength() > Constants.MAX_COMMAND_LENGTH) {
             TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_TOO_BIG, 0,
                     "Command size is bigger than " + Constants.MAX_COMMAND_LENGTH + " bytes");
             callback.onCommandFailed(error);
@@ -62,7 +65,8 @@ public class Telematics {
         }
 
         if (sendingCommand == true) {
-            TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_IN_PROGRESS, 0, "Already sending a command");
+            TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_IN_PROGRESS,
+                    0, "Already sending a command");
             callback.onCommandFailed(error);
             return;
         }
@@ -77,41 +81,48 @@ public class Telematics {
         }
 
         if (manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "sendTelematicsCommand: " + Bytes.hexFromBytes(command));
+            Log.d(TAG, "sendTelematicsCommand: " + command);
 
         sendingCommand = true;
 
-        manager.webService.getNonce(certificate.getProviderSerial(), new Response.Listener<JSONObject>() {
+        manager.webService.getNonce(certificate.getProviderSerial(), new Response
+                .Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonResponse) {
                 try {
-                    final byte[] nonce = Base64.decode(jsonResponse.getString("nonce"), Base64.DEFAULT);
+                    final byte[] nonce = Base64.decode(jsonResponse.getString("nonce"),
+                            Base64.DEFAULT);
                     Telematics.this.callback = callback;
                     manager.workHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            manager.core.HMBTCoreSendTelematicsCommand(manager.coreInterface, certificate.getGainerSerial(), nonce, command.length, command);
+                            manager.core.HMBTCoreSendTelematicsCommand(manager.coreInterface,
+                                    certificate.getGainerSerial().getByteArray(), nonce, command
+                                            .getLength(), command.getByteArray());
                         }
                     });
                 } catch (JSONException e) {
-                    dispatchError(TelematicsError.Type.INVALID_SERVER_RESPONSE, 0, "Invalid nonce response from server.");
+                    dispatchError(TelematicsError.Type.INVALID_SERVER_RESPONSE, 0, "Invalid nonce" +
+                            " response from server.");
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 if (error.networkResponse != null) {
-                    dispatchError(TelematicsError.Type.HTTP_ERROR, error.networkResponse.statusCode, new String(error.networkResponse.data));
-                }
-                else {
-                    dispatchError(TelematicsError.Type.NO_CONNECTION, 0, "Cannot connect to the web service. Check your internet connection");
+                    dispatchError(TelematicsError.Type.HTTP_ERROR, error.networkResponse
+                            .statusCode, new String(error.networkResponse.data));
+                } else {
+                    dispatchError(TelematicsError.Type.NO_CONNECTION, 0, "Cannot connect to the " +
+                            "web service. Check your internet connection");
                 }
             }
         });
     }
 
     void onTelematicsCommandEncrypted(byte[] serial, byte[] issuer, byte[] command) {
-        manager.webService.sendTelematicsCommand(command, serial, issuer,
+        manager.webService.sendTelematicsCommand(new Bytes(command), new DeviceSerial(serial),
+                new Issuer(issuer),
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
@@ -120,23 +131,26 @@ public class Telematics {
 
                             if (status.equals("ok")) {
                                 // decrypt the data
-                                final byte[] data = Base64.decode(jsonObject.getString("response_data"), Base64.NO_WRAP);
+                                final byte[] data = Base64.decode(jsonObject.getString
+                                        ("response_data"), Base64.NO_WRAP);
 
                                 manager.workHandler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        manager.core.HMBTCoreTelematicsReceiveData(manager.coreInterface, data.length, data);
+                                        manager.core.HMBTCoreTelematicsReceiveData(manager
+                                                .coreInterface, data.length, data);
                                     }
                                 });
-                            }
-                            else if (status.equals("timeout")) {
-                                dispatchError(TelematicsError.Type.TIMEOUT, 0, jsonObject.getString("message"));
-                            }
-                            else if (status.equals("error")) {
-                                dispatchError(TelematicsError.Type.SERVER_ERROR, 0, jsonObject.getString("message"));
+                            } else if (status.equals("timeout")) {
+                                dispatchError(TelematicsError.Type.TIMEOUT, 0, jsonObject
+                                        .getString("message"));
+                            } else if (status.equals("error")) {
+                                dispatchError(TelematicsError.Type.SERVER_ERROR, 0, jsonObject
+                                        .getString("message"));
                             }
                         } catch (JSONException e) {
-                            dispatchError(TelematicsError.Type.INVALID_SERVER_RESPONSE, 0, "Invalid response from server.");
+                            dispatchError(TelematicsError.Type.INVALID_SERVER_RESPONSE, 0,
+                                    "Invalid response from server.");
                         }
                     }
                 },
@@ -145,38 +159,43 @@ public class Telematics {
                     public void onErrorResponse(VolleyError error) {
                         if (error.networkResponse != null) {
                             try {
-                                JSONObject json = new JSONObject(new String(error.networkResponse.data));
+                                JSONObject json = new JSONObject(new String(error.networkResponse
+                                        .data));
                                 if (json.has("message")) {
-                                    dispatchError(TelematicsError.Type.HTTP_ERROR, error.networkResponse.statusCode, json.getString("message"));
-                                }
-                                else {
-                                    dispatchError(TelematicsError.Type.HTTP_ERROR, error.networkResponse.statusCode, new String(error.networkResponse.data));
+                                    dispatchError(TelematicsError.Type.HTTP_ERROR, error
+                                            .networkResponse.statusCode, json.getString("message"));
+                                } else {
+                                    dispatchError(TelematicsError.Type.HTTP_ERROR, error
+                                            .networkResponse.statusCode, new String(error
+                                            .networkResponse.data));
                                 }
                             } catch (JSONException e) {
-                                dispatchError(TelematicsError.Type.HTTP_ERROR, error.networkResponse.statusCode, "");
+                                dispatchError(TelematicsError.Type.HTTP_ERROR, error
+                                        .networkResponse.statusCode, "");
                             }
-                        }
-                        else {
-                            dispatchError(TelematicsError.Type.NO_CONNECTION, 0, "Cannot connect to the web service. Check your internet connection");
+                        } else {
+                            dispatchError(TelematicsError.Type.NO_CONNECTION, 0, "Cannot connect " +
+                                    "to the web service. Check your internet connection");
                         }
                     }
                 });
     }
 
-    void onTelematicsResponseDecrypted(byte[] serial, byte id, final byte[] data) {
+    void onTelematicsResponseDecrypted(byte[] serial, byte id, byte[] data) {
         if (id == 0x02) {
-            dispatchError(TelematicsError.Type.INTERNAL_ERROR, 0, "Failed to decrypt web service response.");
-        }
-        else {
+            dispatchError(TelematicsError.Type.INTERNAL_ERROR, 0, "Failed to decrypt web service " +
+                    "response.");
+        } else {
+            final Bytes response = new Bytes(data);
             if (manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "onTelematicsResponseDecrypted: " + Bytes.hexFromBytes(data));
+                Log.d(TAG, "onTelematicsResponseDecrypted: " + response);
 
             sendingCommand = false;
 
             manager.postToMainThread(new Runnable() {
                 @Override
                 public void run() {
-                    callback.onCommandResponse(data);
+                    callback.onCommandResponse(response);
                 }
             });
         }

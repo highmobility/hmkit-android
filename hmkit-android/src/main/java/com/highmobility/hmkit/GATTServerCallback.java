@@ -8,7 +8,7 @@ import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothProfile;
 import android.util.Log;
 
-import com.highmobility.utils.Bytes;
+import com.highmobility.utils.ByteUtils;
 
 import java.util.Arrays;
 
@@ -39,7 +39,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                 @Override
                 public void run() {
                     broadcaster.manager.core.HMBTCorelinkDisconnect(broadcaster.manager
-                            .coreInterface, Bytes.bytesFromMacString(device.getAddress()));
+                            .coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
                 }
             });
         }
@@ -56,7 +56,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         final int characteristicId = getCharacteristicIdForCharacteristic(characteristic);
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "onCharacteristicReadRequest " + characteristicId + ": "
-                    + Bytes.hexFromBytes(offsetBytes));
+                    + ByteUtils.hexFromBytes(offsetBytes));
         boolean result = broadcaster.GATTServer.sendResponse(device,
                 requestId,
                 BluetoothGatt.GATT_SUCCESS,
@@ -73,7 +73,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                     public void run() {
                         broadcaster.manager.core.HMBTCorelinkWriteResponse(broadcaster.manager
                                         .coreInterface,
-                                Bytes.bytesFromMacString(device.getAddress()),
+                                ByteUtils.bytesFromMacString(device.getAddress()),
                                 characteristicId);
                     }
                 }, 1);
@@ -94,9 +94,9 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         }
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(TAG, "incoming data " + characteristicId + ": " + Bytes.hexFromBytes(value) + "" +
+            Log.d(TAG, "incoming data " + characteristicId + ": " + ByteUtils.hexFromBytes(value) + "" +
                     " from "
-                    + Bytes.hexFromBytes(Bytes.bytesFromMacString(device.getAddress())));
+                    + ByteUtils.hexFromBytes(ByteUtils.bytesFromMacString(device.getAddress())));
 
         if (responseNeeded) {
             boolean result = broadcaster.GATTServer.sendResponse(
@@ -118,7 +118,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                             devicePointer.manager.coreInterface,
                             value,
                             value.length,
-                            Bytes.bytesFromMacString(device.getAddress()),
+                            ByteUtils.bytesFromMacString(device.getAddress()),
                             characteristicId);
                 }
             });
@@ -167,7 +167,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
 
                 // check if we already have this device as a link because according to BLE spec a
                 // new descriptor write can come in any time and this would create a duplicate link
-                if (broadcaster.getLinkForMac(Bytes.bytesFromMacString(device.getAddress())) !=
+                if (broadcaster.getLinkForMac(ByteUtils.bytesFromMacString(device.getAddress())) !=
                         null) {
                     return;
                 }
@@ -176,7 +176,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                     public void run() {
                         broadcaster.linkDidConnect(device);
                         broadcaster.manager.core.HMBTCorelinkConnect(broadcaster.manager
-                                .coreInterface, Bytes.bytesFromMacString(device.getAddress()));
+                                .coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
                     }
                 });
             }

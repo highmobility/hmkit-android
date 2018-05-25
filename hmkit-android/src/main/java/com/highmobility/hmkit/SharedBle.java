@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 
-import com.highmobility.utils.Bytes;
+import com.highmobility.utils.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -83,7 +83,7 @@ public class SharedBle {
         String name = "HM ";
         byte[] serialBytes = new byte[3];
         new Random().nextBytes(serialBytes);
-        String randomBytesString = Bytes.hexFromBytes(serialBytes);
+        String randomBytesString = ByteUtils.hexFromBytes(serialBytes);
         name += randomBytesString.substring(1);
         getAdapter().setName(name);
     }
