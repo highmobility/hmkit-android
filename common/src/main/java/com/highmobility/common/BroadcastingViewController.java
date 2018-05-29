@@ -188,7 +188,7 @@ public class BroadcastingViewController implements IBroadcastingViewController,
     }
 
     @Override
-    public void onCommandReceived(Link link, byte[] bytes) {
+    public void onCommandReceived(Link link, Bytes bytes) {
 
     }
 

@@ -171,7 +171,7 @@ public class Link {
         manager.postToMainThread(new Runnable() {
             @Override public void run() {
                 if (listener == null) return;
-                listener.onCommandReceived(Link.this, bytes);
+                listener.onCommandReceived(Link.this, new Bytes(bytes));
             }
         });
     }

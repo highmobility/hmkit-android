@@ -28,7 +28,6 @@ import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
 import com.highmobility.value.Bytes;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static com.highmobility.autoapi.property.TrunkLockState.LOCKED;
@@ -88,7 +87,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     }
 
     @Override
-    public void onCommandReceived(Link link, byte[] bytes) {
+    public void onCommandReceived(Link link, Bytes bytes) {
         Command command = CommandResolver.resolve(bytes);
 
         if (command instanceof LockState) {
