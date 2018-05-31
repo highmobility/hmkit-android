@@ -61,10 +61,11 @@ public class Storage {
 
         // providing device, gaining vehicle
         deviceAccessCertificateBase64 = response.getString(device_certificate_json_object);
+
         try {
-            deviceAccessCertificate = new AccessCertificate(deviceAccessCertificateBase64);
+            deviceAccessCertificate = new AccessCertificate(new Bytes(deviceAccessCertificateBase64));
         } catch (IllegalArgumentException e) {
-            throw new Exception("response's " + device_certificate_json_object + " bytes could " +
+            throw new Exception("response's " + deviceAccessCertificateBase64 + " bytes could " +
                     "not be parsed to an Access Certificate");
         }
 
@@ -82,7 +83,7 @@ public class Storage {
             vehicleAccessCertificateBase64 = response.getString("vehicle_access_certificate");
             if (vehicleAccessCertificateBase64 != null && vehicleAccessCertificateBase64.equals
                     ("null") == false) {
-                vehicleAccessCertificate = new AccessCertificate(vehicleAccessCertificateBase64);
+                vehicleAccessCertificate = new AccessCertificate(new Bytes(vehicleAccessCertificateBase64));
 
                 if (storeCertificate(vehicleAccessCertificate) != Result.SUCCESS) {
                     throw new Exception("cannot store vehicle access cert");
