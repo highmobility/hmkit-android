@@ -63,10 +63,11 @@ public class Storage {
         deviceAccessCertificateBase64 = response.getString(device_certificate_json_object);
 
         try {
-            deviceAccessCertificate = new AccessCertificate(new Bytes(deviceAccessCertificateBase64));
+            Bytes bytes = new Bytes(deviceAccessCertificateBase64);
+            deviceAccessCertificate = new AccessCertificate(bytes);
         } catch (IllegalArgumentException e) {
             throw new Exception("response's " + deviceAccessCertificateBase64 + " bytes could " +
-                    "not be parsed to an Access Certificate");
+                    "not be parsed to an Access Certificate. " + e.getMessage());
         }
 
         Result result = storeCertificate(deviceAccessCertificate);
