@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 def artifactProperties = new Properties()
-artifactProperties.load(new FileInputStream("hmkit-android/deploy.settings"))
+artifactProperties.load(new FileInputStream("$project.projectDir/deploy.settings"))
 
 version artifactProperties.version
 
@@ -51,7 +51,7 @@ android {
 }
 
 dependencies {
-    implementation('com.highmobility:hmkit-crypto:1.2.0-dev')
+    implementation("com.highmobility:hmkit-crypto:${project.properties['crypto.version']}")
     implementation('com.android.volley:volley:1.1.0')
 }
 
