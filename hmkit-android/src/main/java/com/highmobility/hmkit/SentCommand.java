@@ -1,10 +1,9 @@
 package com.highmobility.hmkit;
 
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 
-import com.highmobility.hmkit.Error.LinkError;
+import com.highmobility.hmkit.error.LinkError;
 
 import java.util.Calendar;
 import java.util.Timer;

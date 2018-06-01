@@ -7,7 +7,6 @@ import android.widget.Toast;
 
 import com.highmobility.autoapi.Capabilities;
 import com.highmobility.autoapi.Command;
-import com.highmobility.autoapi.CommandParseException;
 import com.highmobility.autoapi.CommandResolver;
 import com.highmobility.autoapi.DiagnosticsState;
 import com.highmobility.autoapi.Failure;
@@ -16,19 +15,19 @@ import com.highmobility.autoapi.GetVehicleStatus;
 import com.highmobility.autoapi.LockState;
 import com.highmobility.autoapi.LockUnlockDoors;
 import com.highmobility.autoapi.OpenCloseTrunk;
-import com.highmobility.autoapi.TireStateProperty;
 import com.highmobility.autoapi.TrunkState;
 import com.highmobility.autoapi.VehicleStatus;
-import com.highmobility.autoapi.property.DoorLockProperty;
 import com.highmobility.autoapi.property.TrunkLockState;
 import com.highmobility.autoapi.property.TrunkPosition;
+import com.highmobility.autoapi.property.diagnostics.TireStateProperty;
+import com.highmobility.autoapi.property.doors.DoorLock;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
-import com.highmobility.hmkit.Error.LinkError;
+import com.highmobility.hmkit.error.LinkError;
 import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
+import com.highmobility.value.Bytes;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static com.highmobility.autoapi.property.TrunkLockState.LOCKED;
@@ -51,12 +50,13 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
     public LinkViewController(ILinkView view) {
         this.view = view;
+
         Intent intent = view.getActivity().getIntent();
         byte[] serial = intent.getByteArrayExtra(LINK_IDENTIFIER_MESSAGE);
         List<ConnectedLink> links = Manager.getInstance().getBroadcaster().getLinks();
 
         for (ConnectedLink link : links) {
-            if (Arrays.equals(link.getSerial(), serial)) {
+            if (link.getSerial().equals(serial)) {
                 this.link = link;
                 this.link.setListener(this);
                 break;
@@ -87,15 +87,14 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     }
 
     @Override
-    public void onCommandReceived(Link link, byte[] bytes) {
+    public void onCommandReceived(Link link, Bytes bytes) {
         Command command = CommandResolver.resolve(bytes);
 
         if (command instanceof LockState) {
             onLockStateUpdate(((LockState) command).isLocked());
         } else if (command instanceof DiagnosticsState) {
             DiagnosticsState diagnostics = (DiagnosticsState) command;
-            Log.d(TAG, "front left: " + diagnostics.getTireState(TireStateProperty.Location
-                    .FRONT_LEFT).getPressure());
+            Log.d(TAG, "front left: " + diagnostics.getTireState(TireStateProperty.Location.FRONT_LEFT).getPressure());
             Log.d(TAG, "front right: " + diagnostics.getTireState(TireStateProperty.Location
                     .FRONT_RIGHT).getPressure());
             Log.d(TAG, "rear left: " + diagnostics.getTireState(TireStateProperty.Location
@@ -107,7 +106,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
         } else if (command instanceof VehicleStatus) {
             onVehicleStatusUpdate((VehicleStatus) command);
         } else if (command instanceof Capabilities) {
-            link.sendCommand(new GetVehicleStatus().getBytes(), new Link
+            link.sendCommand(new GetVehicleStatus(), new Link
                     .CommandCallback() {
                 @Override
                 public void onCommandSent() {
@@ -132,8 +131,8 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 //        Manager.getInstance().getBroadcaster().disconnectAllLinks();
 
         view.showLoadingView(true);
-        byte[] bytes = new LockUnlockDoors(doorsLocked ? DoorLockProperty.LockState.UNLOCKED :
-                DoorLockProperty.LockState.LOCKED).getBytes();
+        Bytes bytes = new LockUnlockDoors(doorsLocked ? DoorLock.UNLOCKED :
+                DoorLock.LOCKED);
         link.sendCommand(bytes, new Link.CommandCallback() {
             @Override
             public void onCommandSent() {
@@ -154,8 +153,8 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
         boolean trunkLocked = trunkLockState == LOCKED;
 
-        byte[] command = new OpenCloseTrunk(trunkLocked ? UNLOCKED : LOCKED, TrunkPosition
-                .CLOSED).getBytes();
+        Bytes command = new OpenCloseTrunk(trunkLocked ? UNLOCKED : LOCKED, TrunkPosition
+                .CLOSED);
 
         link.sendCommand(command, new Link.CommandCallback() {
             @Override
@@ -174,7 +173,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
         view.showLoadingView(true);
         startInitializeTimer();
 
-        link.sendCommand(new GetCapabilities().getBytes(), new Link.CommandCallback() {
+        link.sendCommand(new GetCapabilities(), new Link.CommandCallback() {
             @Override
             public void onCommandSent() {
 

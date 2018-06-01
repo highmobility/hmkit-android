@@ -1,5 +1,7 @@
 package com.highmobility.hmkit;
 
+import com.highmobility.value.Bytes;
+
 /**
  * Created by ttiganik on 13/04/16.
  */
@@ -21,5 +23,5 @@ public interface LinkListener {
      * @param link The link that received the command.
      * @param bytes The command bytes
      */
-    void onCommandReceived(Link link, byte[] bytes);
+    void onCommandReceived(Link link, Bytes bytes);
 }

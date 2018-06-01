@@ -2,10 +2,12 @@ package com.highmobility.hmkit;
 
 import android.bluetooth.le.AdvertiseSettings;
 
+import com.highmobility.value.DeviceSerial;
+
 public class BroadcastConfiguration {
     private int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
     private int txPowerLevel = AdvertiseSettings.ADVERTISE_TX_POWER_HIGH;
-    private byte[] broadcastTarget = null;
+    private DeviceSerial broadcastTarget = null;
     private boolean overrideAdvertisementName = true;
 
     public BroadcastConfiguration() {
@@ -29,7 +31,7 @@ public class BroadcastConfiguration {
     /**
      * @return The broadcasters targets serial number
      */
-    public byte[] getBroadcastTarget() {
+    public DeviceSerial getBroadcastTarget() {
         return broadcastTarget;
     }
 
@@ -50,7 +52,7 @@ public class BroadcastConfiguration {
     public static final class Builder {
         private int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
         private int txPowerLevel = AdvertiseSettings.ADVERTISE_TX_POWER_HIGH;
-        private byte[] broadcastTarget = null;
+        private DeviceSerial broadcastTarget = null;
         private boolean overridesAdvertisementName = true;
 
         /**
@@ -88,7 +90,7 @@ public class BroadcastConfiguration {
          *
          * @param serial the serial set in the broadcast info
          */
-        public Builder setBroadcastingTarget(byte[] serial) {
+        public Builder setBroadcastingTarget(DeviceSerial serial) {
             this.broadcastTarget = serial;
             return this;
         }

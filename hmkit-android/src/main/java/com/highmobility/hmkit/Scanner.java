@@ -7,7 +7,7 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 
 import com.highmobility.btcore.HMDevice;
-import com.highmobility.utils.Bytes;
+import com.highmobility.utils.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -155,7 +155,7 @@ class Scanner {
                 @Override
                 public void run() {
             manager.core.HMBTCoreSensingProcessAdvertisement(manager.coreInterface,
-                    Bytes.bytesFromMacString(device.getAddress()),
+                    ByteUtils.bytesFromMacString(device.getAddress()),
                     advBytes, advBytes.length);
                 }
             });
@@ -269,7 +269,7 @@ class Scanner {
 
     private ScannedLink getLinkForMac(byte[] mac) {
         for (ScannedLink existingDevice : devices) {
-            if (Arrays.equals(Bytes.bytesFromMacString(existingDevice.btDevice.getAddress()), mac)) {
+            if (Arrays.equals(ByteUtils.bytesFromMacString(existingDevice.btDevice.getAddress()), mac)) {
                 return existingDevice;
             }
         }
