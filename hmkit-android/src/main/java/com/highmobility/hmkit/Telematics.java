@@ -6,7 +6,7 @@ import android.util.Log;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.highmobility.crypto.AccessCertificate;
-import com.highmobility.hmkit.Error.TelematicsError;
+import com.highmobility.hmkit.error.TelematicsError;
 import com.highmobility.value.Bytes;
 import com.highmobility.value.DeviceSerial;
 import com.highmobility.value.Issuer;

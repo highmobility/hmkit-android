@@ -23,7 +23,7 @@ import com.highmobility.autoapi.property.diagnostics.TireStateProperty;
 import com.highmobility.autoapi.property.doors.DoorLock;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
-import com.highmobility.hmkit.Error.LinkError;
+import com.highmobility.hmkit.error.LinkError;
 import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
 import com.highmobility.value.Bytes;

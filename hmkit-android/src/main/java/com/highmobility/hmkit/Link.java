@@ -4,7 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
 import com.highmobility.btcore.HMDevice;
-import com.highmobility.hmkit.Error.LinkError;
+import com.highmobility.hmkit.error.LinkError;
 import com.highmobility.utils.ByteUtils;
 import com.highmobility.value.Bytes;
 import com.highmobility.value.DeviceSerial;

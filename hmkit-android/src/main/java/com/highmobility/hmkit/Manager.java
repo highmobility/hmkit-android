@@ -12,7 +12,7 @@ import com.android.volley.VolleyError;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.DeviceCertificate;
 import com.highmobility.btcore.HMBTCore;
-import com.highmobility.hmkit.Error.DownloadAccessCertificateError;
+import com.highmobility.hmkit.error.DownloadAccessCertificateError;
 import com.highmobility.utils.Base64;
 import com.highmobility.value.Bytes;
 import com.highmobility.value.DeviceSerial;
