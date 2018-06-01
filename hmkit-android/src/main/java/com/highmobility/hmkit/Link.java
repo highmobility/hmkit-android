@@ -131,7 +131,7 @@ public class Link {
      *
      * @param serial The serial of the revoked device.
      */
-    public void revoke(final byte[] serial, RevokeCallback callback) {
+    public void revoke(final Bytes serial, RevokeCallback callback) {
         if (state != State.AUTHENTICATED) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "not authenticated");
@@ -157,7 +157,7 @@ public class Link {
         manager.workHandler.post(new Runnable() {
             @Override
             public void run() {
-                manager.core.HMBTCoreSendRevoke(manager.coreInterface, serial);
+                manager.core.HMBTCoreSendRevoke(manager.coreInterface, serial.getByteArray());
             }
         });
     }
