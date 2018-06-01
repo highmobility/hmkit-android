@@ -29,8 +29,8 @@ android {
 
 dependencies {
     implementation project(':hmkit-android')
-    implementation('com.highmobility:hmkit-auto-api:1.6.5')
-    implementation('com.highmobility:hmkit-crypto:1.1.10')
+    implementation('com.highmobility:hmkit-auto-api:1.7.1-dev')
+    implementation("com.highmobility:hmkit-crypto:${project.properties['crypto.version']}")
 
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'

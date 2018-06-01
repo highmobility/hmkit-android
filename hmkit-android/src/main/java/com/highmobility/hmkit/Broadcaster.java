@@ -16,7 +16,8 @@ import android.util.Log;
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.hmkit.error.BroadcastError;
-import com.highmobility.utils.Bytes;
+import com.highmobility.utils.ByteUtils;
+import com.highmobility.value.DeviceSerial;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -107,7 +108,8 @@ public class Broadcaster implements SharedBleListener {
      * @return The certificates that are registered on the Broadcaster.
      */
     public AccessCertificate[] getRegisteredCertificates() {
-        return manager.storage.getCertificatesWithProvidingSerial(manager.certificate.getSerial());
+        return manager.storage.getCertificatesWithProvidingSerial(manager.certificate.getSerial()
+                .getByteArray());
     }
 
     /**
@@ -115,7 +117,7 @@ public class Broadcaster implements SharedBleListener {
      */
     public AccessCertificate[] getStoredCertificates() {
         return manager.storage.getCertificatesWithoutProvidingSerial(manager.certificate
-                .getSerial());
+                .getSerial().getByteArray());
     }
 
     /**
@@ -211,15 +213,15 @@ public class Broadcaster implements SharedBleListener {
         byte[] uuidBytes;
 
         if (configuration.getBroadcastTarget() == null) {
-            uuidBytes = Bytes.concatBytes(issuer, appId);
+            uuidBytes = ByteUtils.concatBytes(issuer, appId);
         } else {
-            uuidBytes = Bytes.concatBytes(new byte[]{0x00, 0x00, 0x00, 0x00}, configuration
-                    .getBroadcastTarget());
-            uuidBytes = Bytes.concatBytes(uuidBytes, new byte[]{0x00, 0x00, 0x00});
+            uuidBytes = ByteUtils.concatBytes(new byte[]{0x00, 0x00, 0x00, 0x00}, configuration
+                    .getBroadcastTarget().getByteArray());
+            uuidBytes = ByteUtils.concatBytes(uuidBytes, new byte[]{0x00, 0x00, 0x00});
         }
 
-        Bytes.reverse(uuidBytes);
-        advertiseUUID = Bytes.UUIDFromByteArray(uuidBytes);
+        ByteUtils.reverse(uuidBytes);
+        advertiseUUID = ByteUtils.UUIDFromByteArray(uuidBytes);
 
         final AdvertiseData data = new AdvertiseData.Builder()
                 .setIncludeDeviceName(configuration.isOverridingAdvertisementName() == true)
@@ -282,8 +284,7 @@ public class Broadcaster implements SharedBleListener {
             return Storage.Result.INTERNAL_ERROR;
         }
 
-        if (Arrays.equals(manager.certificate.getSerial(), certificate.getProviderSerial()) ==
-                false) {
+        if (manager.certificate.getSerial().equals(certificate.getProviderSerial()) == false) {
             return Storage.Result.INTERNAL_ERROR;
         }
 
@@ -309,15 +310,15 @@ public class Broadcaster implements SharedBleListener {
      * @return {@link Storage.Result#SUCCESS} on success or {@link Storage.Result#INTERNAL_ERROR }
      * if there are no matching certificate pairs for this serial.
      */
-    public Storage.Result revokeCertificate(byte[] serial) {
-        if (manager.storage.certWithGainingSerial(serial) == null
-                || manager.storage.certWithProvidingSerial(serial) == null) {
+    public Storage.Result revokeCertificate(DeviceSerial serial) {
+        if (manager.storage.certWithGainingSerial(serial.getByteArray()) == null
+                || manager.storage.certWithProvidingSerial(serial.getByteArray()) == null) {
             return Storage.Result.INTERNAL_ERROR;
         }
 
-        if (manager.storage.deleteCertificateWithGainingSerial(serial) == false)
+        if (manager.storage.deleteCertificateWithGainingSerial(serial.getByteArray()) == false)
             return Storage.Result.INTERNAL_ERROR;
-        if (manager.storage.deleteCertificateWithProvidingSerial(serial) == false)
+        if (manager.storage.deleteCertificateWithProvidingSerial(serial.getByteArray()) == false)
             return Storage.Result.INTERNAL_ERROR;
 
         return Storage.Result.SUCCESS;
@@ -401,7 +402,7 @@ public class Broadcaster implements SharedBleListener {
 
     boolean deviceExitedProximity(HMDevice device) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(TAG, "lose link " + Bytes.hexFromBytes(device.getMac()));
+            Log.d(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
         final ConnectedLink link = getLinkForMac(device.getMac());
         if (link == null) return false;
@@ -455,7 +456,8 @@ public class Broadcaster implements SharedBleListener {
         if (link == null || link.btDevice == null) return false;
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "write " + Bytes.hexFromBytes(value) + " to " + Bytes.hexFromBytes(link
+            Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes
+                    (link
                     .getAddressBytes()) + " char: " + characteristicId);
 
         BluetoothGattCharacteristic characteristic = getCharacteristicForId(characteristicId);

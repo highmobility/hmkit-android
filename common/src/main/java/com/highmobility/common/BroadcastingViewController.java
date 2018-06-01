@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.highmobility.autoapi.LockUnlockDoors;
-import com.highmobility.autoapi.property.DoorLockProperty;
+import com.highmobility.autoapi.property.doors.DoorLock;
 import com.highmobility.hmkit.BroadcastConfiguration;
 import com.highmobility.hmkit.Broadcaster;
 import com.highmobility.hmkit.BroadcasterListener;
@@ -16,6 +16,8 @@ import com.highmobility.hmkit.error.TelematicsError;
 import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
 import com.highmobility.hmkit.Telematics;
+import com.highmobility.value.Bytes;
+import com.highmobility.value.DeviceSerial;
 
 public class BroadcastingViewController implements IBroadcastingViewController,
         BroadcasterListener, ConnectedLinkListener {
@@ -31,8 +33,12 @@ public class BroadcastingViewController implements IBroadcastingViewController,
         this.view = view;
 
         downloadAccessCertificates(() -> startBroadcasting(), null);
-
 //        sendTelematicsCommand();
+    }
+
+    @Override
+    public void onLinkViewResult(int result) {
+        startBroadcasting();
     }
 
     private void sendTelematicsCommand() {
@@ -41,13 +47,13 @@ public class BroadcastingViewController implements IBroadcastingViewController,
 
         Manager.getInstance().downloadCertificate(token, new Manager.DownloadCallback() {
             @Override
-            public void onDownloaded(byte[] serial) {
-                byte[] command = new LockUnlockDoors(DoorLockProperty.LockState.LOCKED).getBytes();
+            public void onDownloaded(DeviceSerial serial) {
+                Bytes command = new LockUnlockDoors(DoorLock.LOCKED);
                 Manager.getInstance().getTelematics().sendCommand(command, serial, new Telematics
                         .CommandCallback() {
                     @Override
-                    public void onCommandResponse(byte[] bytes) {
-                        Log.d(TAG, "onCommandResponse: ");
+                    public void onCommandResponse(Bytes bytes) {
+                        Log.d(TAG, "onCommandResponse: " + bytes);
                     }
 
                     @Override
@@ -94,19 +100,9 @@ public class BroadcastingViewController implements IBroadcastingViewController,
         }
 
         Intent intent = new Intent(view.getActivity(), view.getLinkActivityClass());
-        intent.putExtra(LinkViewController.LINK_IDENTIFIER_MESSAGE, link.getSerial());
+        intent.putExtra(LinkViewController.LINK_IDENTIFIER_MESSAGE, link.getSerial().getByteArray
+                ());
         view.getActivity().startActivityForResult(intent, LINK_ACTIVITY_RESULT);
-    }
-
-    @Override
-    public void onLinkViewResult(int result) {
-        Manager.getInstance().terminate();
-        broadcaster = null;
-        broadcaster = Manager.getInstance().getBroadcaster();
-        // set the broadcaster listener
-        broadcaster.setListener(this);
-        startBroadcasting();
-
     }
 
     @Override public void onDisconnectClicked() {
@@ -192,7 +188,7 @@ public class BroadcastingViewController implements IBroadcastingViewController,
     }
 
     @Override
-    public void onCommandReceived(Link link, byte[] bytes) {
+    public void onCommandReceived(Link link, Bytes bytes) {
 
     }
 
@@ -218,7 +214,7 @@ public class BroadcastingViewController implements IBroadcastingViewController,
 
         Manager.getInstance().downloadCertificate(accessToken, new Manager.DownloadCallback() {
             @Override
-            public void onDownloaded(byte[] serial) {
+            public void onDownloaded(DeviceSerial serial) {
                 if (success != null) success.run();
             }
 

@@ -1,7 +1,6 @@
 package com.highmobility.hmkit;
 
 import android.content.Context;
-import android.util.Base64;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
@@ -11,8 +10,11 @@ import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
-import com.highmobility.utils.Bytes;
 import com.highmobility.crypto.Crypto;
+import com.highmobility.value.Bytes;
+import com.highmobility.value.DeviceSerial;
+import com.highmobility.value.Issuer;
+import com.highmobility.value.PrivateKey;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,7 +38,8 @@ class WebService {
     private static final String TAG = "WebService";
 
     private static final String testBaseUrl = "https://limitless-gorge-44605.herokuapp.com"; // test
-    private static final String productionBaseUrl = "https://developers.high-mobility.com"; // production
+    private static final String productionBaseUrl = "https://developers.high-mobility.com"; //
+    // production
     private static final String stagingBaseUrl = "https://developers.h-m.space"; // staging
     private static final String apiUrl = "/hm_cloud/api/v1";
 
@@ -49,8 +52,7 @@ class WebService {
         queue = Volley.newRequestQueue(context);
         if (Manager.customEnvironmentBaseUrl != null) {
             telematicsUrl = Manager.customEnvironmentBaseUrl + apiUrl;
-        }
-        else {
+        } else {
             switch (Manager.environment) {
                 case TEST:
                     telematicsUrl = testBaseUrl + apiUrl;
@@ -66,8 +68,8 @@ class WebService {
     }
 
     void requestAccessCertificate(String accessToken,
-                                  byte[] privateKey,
-                                  byte[] serialNumber,
+                                  PrivateKey privateKey,
+                                  DeviceSerial serialNumber,
                                   final Response.Listener<JSONObject> response,
                                   Response.ErrorListener error) throws IllegalArgumentException {
         String url = telematicsUrl + "/access_certificates";
@@ -79,16 +81,16 @@ class WebService {
         // payload
         JSONObject payload = new JSONObject();
         try {
-            byte[] accessTokenBytes = accessToken.getBytes("UTF-8");
-            payload.put("serial_number", Bytes.hexFromBytes(serialNumber));
+            Bytes accessTokenBytes = new Bytes(accessToken.getBytes("UTF-8"));
+            payload.put("serial_number", serialNumber.getHex());
             payload.put("access_token", accessToken);
-            payload.put("signature", new String(Base64.encode(Crypto.sign(accessTokenBytes, privateKey), Base64.NO_WRAP)));
-        }
-        catch (Exception e) {
+            payload.put("signature", Crypto.sign(accessTokenBytes, privateKey).getBase64());
+        } catch (Exception e) {
             throw new IllegalArgumentException();
         }
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new Response.Listener<JSONObject>() {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new
+                Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
@@ -110,7 +112,8 @@ class WebService {
         queueRequest(request);
     }
 
-    void sendTelematicsCommand(byte[] command, byte[] serial, byte[] issuer, final Response.Listener<JSONObject> response, Response.ErrorListener error) {
+    void sendTelematicsCommand(Bytes command, DeviceSerial serial, Issuer issuer, final Response
+            .Listener<JSONObject> response, Response.ErrorListener error) {
         String url = telematicsUrl + "/telematics_commands";
         // headers
         final Map<String, String> headers = new HashMap<>(1);
@@ -119,14 +122,15 @@ class WebService {
         // payload
         JSONObject payload = new JSONObject();
         try {
-            payload.put("serial_number", Bytes.hexFromBytes(serial));
-            payload.put("issuer", Bytes.hexFromBytes(issuer));
-            payload.put("data", new String(Base64.encode(command, Base64.NO_WRAP)));
+            payload.put("serial_number", serial.getHex());
+            payload.put("issuer", issuer.getHex());
+            payload.put("data", command.getBase64());
         } catch (JSONException e) {
             throw new IllegalArgumentException();
         }
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new Response.Listener<JSONObject>() {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new
+                Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
@@ -149,7 +153,8 @@ class WebService {
         queueRequest(request);
     }
 
-    void getNonce(byte[] serial, final Response.Listener<JSONObject> response, Response.ErrorListener error) {
+    void getNonce(DeviceSerial serial, final Response.Listener<JSONObject> response, Response
+            .ErrorListener error) {
         String url = telematicsUrl + "/nonces";
 
         // headers
@@ -159,12 +164,13 @@ class WebService {
         // payload
         JSONObject payload = new JSONObject();
         try {
-            payload.put("serial_number", Bytes.hexFromBytes(serial));
+            payload.put("serial_number", serial.getHex());
         } catch (JSONException e) {
             throw new IllegalArgumentException();
         }
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new Response.Listener<JSONObject>() {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new
+                Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
@@ -199,7 +205,7 @@ class WebService {
 
     private static void ignoreSslErrors() {
         try {
-            TrustManager[] trustAllCerts = new TrustManager[] {
+            TrustManager[] trustAllCerts = new TrustManager[]{
                     new X509TrustManager() {
                         public X509Certificate[] getAcceptedIssuers() {
                             X509Certificate[] myTrustedAnchors = new X509Certificate[0];
@@ -207,10 +213,12 @@ class WebService {
                         }
 
                         @Override
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        }
 
                         @Override
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        }
                     }
             };
 
@@ -231,7 +239,7 @@ class WebService {
         if (Manager.loggingLevel.getValue() < Manager.LoggingLevel.DEBUG.getValue()) return;
         try {
             byte[] body = request.getBody();
-            String bodyString = body != null ? "\n" + new String(request.getBody()): "";
+            String bodyString = body != null ? "\n" + new String(request.getBody()) : "";
             JSONObject headers = new JSONObject(request.getHeaders());
 
             try {

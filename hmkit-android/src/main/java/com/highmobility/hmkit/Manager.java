@@ -5,7 +5,6 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
-import android.util.Base64;
 import android.util.Log;
 
 import com.android.volley.Response;
@@ -14,6 +13,12 @@ import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.DeviceCertificate;
 import com.highmobility.btcore.HMBTCore;
 import com.highmobility.hmkit.error.DownloadAccessCertificateError;
+import com.highmobility.utils.Base64;
+import com.highmobility.value.Bytes;
+import com.highmobility.value.DeviceSerial;
+import com.highmobility.value.PrivateKey;
+import com.highmobility.value.PublicKey;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,7 +59,7 @@ public class Manager {
          *
          * @param serial the vehicle or charger serial.
          */
-        void onDownloaded(byte[] serial);
+        void onDownloaded(DeviceSerial serial);
 
         /**
          * Invoked when there was an error with the certificate download.
@@ -85,8 +90,8 @@ public class Manager {
 
     private static Manager instance;
     DeviceCertificate certificate;
-    byte[] privateKey;
-    byte[] caPublicKey;
+    PrivateKey privateKey;
+    PublicKey caPublicKey;
 
     private Scanner scanner;
     private Broadcaster broadcaster;
@@ -126,19 +131,11 @@ public class Manager {
      * @throws IllegalStateException if the manager is still initialized and connected to links.
      */
     public void initialize(DeviceCertificate certificate,
-                           byte[] privateKey,
-                           byte[] caPublicKey,
+                           PrivateKey privateKey,
+                           PublicKey caPublicKey,
                            Context ctx) throws IllegalArgumentException, IllegalStateException {
         if (this.context != null) {
             terminate();
-        }
-
-        if (privateKey == null
-                || privateKey.length != 32
-                || caPublicKey == null
-                || caPublicKey.length != 64
-                || certificate == null) {
-            throw new IllegalArgumentException("HMKit initialization parameters are invalid.");
         }
 
         this.context = ctx.getApplicationContext();
@@ -179,12 +176,10 @@ public class Manager {
      */
     public void initialize(String certificate, String privateKey, String issuerPublicKey, Context
             context) throws IllegalArgumentException {
-        DeviceCertificate decodedCert = new DeviceCertificate(Base64.decode(certificate,
-                Base64.DEFAULT));
-
-        byte[] decodedPrivateKey = Base64.decode(privateKey, Base64.DEFAULT);
-        byte[] decodedIssuer = Base64.decode(issuerPublicKey, Base64.DEFAULT);
-        initialize(decodedCert, decodedPrivateKey, decodedIssuer, context);
+        DeviceCertificate decodedCert = new DeviceCertificate(new Bytes(Base64.decode(certificate)));
+        PrivateKey decodedPrivateKey = new PrivateKey(Base64.decode(privateKey));
+        PublicKey decodedIssuerPublicKey = new PublicKey(Base64.decode(issuerPublicKey));
+        initialize(decodedCert, decodedPrivateKey, decodedIssuerPublicKey, context);
     }
 
     /**
@@ -365,7 +360,7 @@ public class Manager {
      */
     public AccessCertificate[] getCertificates() throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
-        return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial());
+        return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial().getByteArray());
     }
 
     /**
@@ -374,7 +369,7 @@ public class Manager {
      */
     public AccessCertificate[] getCertificates(Context context) {
         if (storage == null) storage = new Storage(context);
-        return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial());
+        return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial().getByteArray());
     }
 
     /**
@@ -384,9 +379,9 @@ public class Manager {
      * @return An Access Certificate for the given serial if one exists, otherwise null.
      * @throws IllegalStateException when SDK is not initialized
      */
-    public AccessCertificate getCertificate(byte[] serial) throws IllegalStateException {
+    public AccessCertificate getCertificate(DeviceSerial serial) throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
-        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial);
+        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial.getByteArray());
 
         if (certificates != null && certificates.length > 0) {
             return certificates[0];
@@ -402,9 +397,9 @@ public class Manager {
      * @param context The application context.
      * @return An Access Certificate for the given serial if one exists, otherwise null.
      */
-    public AccessCertificate getCertificate(byte[] serial, Context context) {
+    public AccessCertificate getCertificate(DeviceSerial serial, Context context) {
         if (storage == null) storage = new Storage(context);
-        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial);
+        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial.getByteArray());
 
         if (certificates != null && certificates.length > 0) {
             return certificates[0];
@@ -420,9 +415,9 @@ public class Manager {
      * @return true if the certificate existed and was deleted successfully, otherwise false
      * @throws IllegalStateException when SDK is not initialized
      */
-    public boolean deleteCertificate(byte[] serial) throws IllegalStateException {
+    public boolean deleteCertificate(DeviceSerial serial) throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
-        return storage.deleteCertificate(serial, certificate.getSerial());
+        return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial().getByteArray());
     }
 
     /**
@@ -432,9 +427,9 @@ public class Manager {
      * @param context The application context.
      * @return true if the certificate existed and was deleted successfully, otherwise false
      */
-    public boolean deleteCertificate(byte[] serial, Context context) {
+    public boolean deleteCertificate(DeviceSerial serial, Context context) {
         if (storage == null) storage = new Storage(context);
-        return storage.deleteCertificate(serial, certificate.getSerial());
+        return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial().getByteArray());
     }
 
     /**

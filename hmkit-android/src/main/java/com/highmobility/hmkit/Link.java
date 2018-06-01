@@ -6,7 +6,9 @@ import android.util.Log;
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.hmkit.error.LinkError;
 import com.highmobility.hmkit.error.RevokeError;
-import com.highmobility.utils.Bytes;
+import com.highmobility.utils.ByteUtils;
+import com.highmobility.value.Bytes;
+import com.highmobility.value.DeviceSerial;
 
 import java.util.Calendar;
 
@@ -18,12 +20,14 @@ import static com.highmobility.hmkit.Broadcaster.TAG;
 public class Link {
     BluetoothDevice btDevice;
     HMDevice hmDevice;
+
     State state = State.CONNECTED;
+    DeviceSerial serial;
+
     SentCommand sentCommand;
     LinkListener listener;
     long connectionTime;
     RevokeCallback revokeCallback;
-
     Manager manager;
 
     Link(Manager manager, BluetoothDevice btDevice) {
@@ -33,7 +37,7 @@ public class Link {
     }
 
     /**
-     * @return the Link's state
+     * @return The Links state.
      */
     public State getState() {
         return state;
@@ -63,17 +67,17 @@ public class Link {
     }
 
     /**
-     * @return the name of the Link's bluetooth peripheral
+     * @return the name of the Links bluetooth peripheral.
      */
     public String getName() {
         return btDevice.getName();
     }
 
     /**
-     * @return Link's serial
+     * @return The links serial
      */
-    public byte[] getSerial() {
-        return hmDevice != null ? hmDevice.getSerial() : null;
+    public DeviceSerial getSerial() {
+        return serial;
     }
 
     /**
@@ -82,8 +86,8 @@ public class Link {
      * @param bytes    The command bytes that will be sent to the link.
      * @param callback A {@link CommandCallback} object that is invoked with the command result.
      */
-    public void sendCommand(final byte[] bytes, CommandCallback callback) {
-        if (bytes.length > Constants.MAX_COMMAND_LENGTH) {
+    public void sendCommand(final Bytes bytes, CommandCallback callback) {
+        if (bytes.getLength() > Constants.MAX_COMMAND_LENGTH) {
             LinkError error = new LinkError(LinkError.Type.COMMAND_TOO_BIG, 0,
                     "Command size is bigger than " + Constants.MAX_COMMAND_LENGTH + " bytes");
             callback.onCommandFailed(error);
@@ -108,16 +112,16 @@ public class Link {
         }
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "send command " + Bytes.hexFromBytes(bytes)
-                    + " to " + Bytes.hexFromBytes(hmDevice.getMac()));
+            Log.d(TAG, "send command " + bytes
+                    + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
         sentCommand = new SentCommand(callback, manager.mainHandler);
 
         manager.workHandler.post(new Runnable() {
             @Override
             public void run() {
-                manager.core.HMBTCoreSendCustomCommand(manager.coreInterface, bytes, bytes
-                        .length, getAddressBytes());
+                manager.core.HMBTCoreSendCustomCommand(manager.coreInterface, bytes.getByteArray
+                        (), bytes.getLength(), getAddressBytes());
             }
         });
     }
@@ -160,6 +164,9 @@ public class Link {
 
     void setHmDevice(HMDevice hmDevice) {
         this.hmDevice = hmDevice;
+        if (serial == null || serial.equals(hmDevice.getSerial()) == false) {
+            serial = new DeviceSerial(hmDevice.getSerial());
+        }
 
         if (hmDevice.getIsAuthenticated() == 0) {
             setState(State.CONNECTED);
@@ -170,8 +177,8 @@ public class Link {
 
     void onCommandReceived(final byte[] bytes) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "did receive command " + Bytes.hexFromBytes(bytes)
-                    + " from " + Bytes.hexFromBytes(hmDevice.getMac()));
+            Log.d(TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
+                    + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
         if (listener == null) {
             Log.d(TAG, "can't dispatch notification: no listener set");
@@ -181,15 +188,16 @@ public class Link {
         manager.postToMainThread(new Runnable() {
             @Override public void run() {
                 if (listener == null) return;
-                listener.onCommandReceived(Link.this, bytes);
+                listener.onCommandReceived(Link.this, new Bytes(bytes));
             }
         });
     }
 
     void onCommandResponseReceived(final byte[] data) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "did receive command response " + Bytes.hexFromBytes(data)
-                    + " from " + Bytes.hexFromBytes(hmDevice.getMac()) + " in " +
+
+            Log.d(TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
+                    + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()) + " in " +
                     (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime) +
                     "ms");
 
@@ -203,7 +211,7 @@ public class Link {
     }
 
     byte[] getAddressBytes() {
-        return Bytes.bytesFromMacString(btDevice.getAddress());
+        return ByteUtils.bytesFromMacString(btDevice.getAddress());
     }
 
     public enum State {
