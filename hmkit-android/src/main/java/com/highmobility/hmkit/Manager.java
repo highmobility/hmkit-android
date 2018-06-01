@@ -16,7 +16,6 @@ import com.highmobility.hmkit.Error.DownloadAccessCertificateError;
 import com.highmobility.utils.Base64;
 import com.highmobility.value.Bytes;
 import com.highmobility.value.DeviceSerial;
-import com.highmobility.value.Issuer;
 import com.highmobility.value.PrivateKey;
 import com.highmobility.value.PublicKey;
 
