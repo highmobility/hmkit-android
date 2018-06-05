@@ -127,11 +127,16 @@ public class Link {
     }
 
     /**
-     * Revoke access to a device.
+     * Revoke the link authorisation for this device. On success {@link
+     * LinkListener.#onStateChanged(Link, State)} will be called with the Connected state. The
+     * RevokeCallback will be called if there is an error.
+     * <p>
+     * After this has succeeded it is up to the user to finish the flow related to this link -
+     * disconnect, stop broadcasting or something else.
      *
-     * @param serial The serial of the revoked device.
+     * @param callback Callback invoked in case of an error.
      */
-    public void revoke(final Bytes serial, RevokeCallback callback) {
+    public void revoke(RevokeCallback callback) {
         if (state != State.AUTHENTICATED) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "not authenticated");
@@ -169,6 +174,11 @@ public class Link {
         }
 
         if (hmDevice.getIsAuthenticated() == 0) {
+            if (getState() == State.AUTHENTICATED) {
+                // TODO: this is the revoke callback.
+                // TODO: get the custom data.
+                revokeCallback.onRevokeSuccess(null);
+            }
             setState(State.CONNECTED);
         } else {
             setState(State.AUTHENTICATED);
@@ -236,20 +246,21 @@ public class Link {
     }
 
     /**
-     * CommandCallback is used to notify the user about the command result.
+     * RevokeCallback is used to notify the user if the revoke failed.
      */
     public interface RevokeCallback {
-        /**
-         * Invoked when the revoke succeeded.
-         */
-        void onRevokeSuccess();
-
         /**
          * Invoked when there was an issue with the revoke.
          *
          * @param error The revoke error.
          */
         void onRevokeFailed(RevokeError error);
-    }
 
+        /**
+         * Invoked when the revoke succeeded.
+         *
+         * @param customData The customer specific data, if exists.
+         */
+        void onRevokeSuccess(Bytes customData);
+    }
 }

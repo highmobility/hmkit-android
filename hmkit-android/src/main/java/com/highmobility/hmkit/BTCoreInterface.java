@@ -324,7 +324,7 @@ class BTCoreInterface implements HMBTCoreInterface {
         // should ask for CA sig for the nonce
         // if ret false getting the sig start failed
         // if ret true started acquiring signature
-
+        // TODO: 05/06/2018 remove the static key (merge master)
         byte[] CaPrivKey = new byte[]{0x1B, (byte) 0x85, (byte) 0x93, (byte) 0xD0, 0x47, (byte)
                 0x8B, (byte) 0x90, 0x17, (byte) 0xC2, 0x42, 0x72, 0x56, (byte) 0xAA, (byte) 0xEE,
                 0x25, (byte) 0xFF, (byte) 0x8A, 0x4E, 0x20, (byte) 0xEC, 0x66, 0x11, (byte) 0xAF,
