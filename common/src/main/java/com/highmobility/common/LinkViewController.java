@@ -129,10 +129,8 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
     @Override
     public void onLockDoorsClicked() {
-        link.revoke(Manager.getInstance().getDeviceCertificate().getSerial(), new Link
-                .RevokeCallback() {
-
-            @Override public void onRevokeSuccess() {
+        link.revoke(new Link.RevokeCallback() {
+            @Override public void onRevokeSuccess(Bytes data) {
                 Log.d(TAG, "onRevokeSuccess() called");
             }
 
