@@ -94,8 +94,8 @@ class GATTServerCallback extends BluetoothGattServerCallback {
         }
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(TAG, "incoming data " + characteristicId + ": " + ByteUtils.hexFromBytes(value) + "" +
-                    " from "
+            Log.d(TAG, "incoming data " + characteristicId + ": " + ByteUtils.hexFromBytes(value)
+                    + " from "
                     + ByteUtils.hexFromBytes(ByteUtils.bytesFromMacString(device.getAddress())));
 
         if (responseNeeded) {
@@ -164,19 +164,17 @@ class GATTServerCallback extends BluetoothGattServerCallback {
             if (descriptor.getCharacteristic().getUuid().equals(Constants.READ_CHAR_UUID)) {
                 // if notifications don't start, try restarting bluetooth on android / other device
                 final Broadcaster broadcaster = this.broadcaster;
-
+                final byte[] deviceMac = ByteUtils.bytesFromMacString(device.getAddress());
                 // check if we already have this device as a link because according to BLE spec a
                 // new descriptor write can come in any time and this would create a duplicate link
-                if (broadcaster.getLinkForMac(ByteUtils.bytesFromMacString(device.getAddress())) !=
-                        null) {
-                    return;
-                }
+                if (broadcaster.getLinkForMac(deviceMac) != null) return;
+
                 broadcaster.manager.workHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         broadcaster.linkDidConnect(device);
                         broadcaster.manager.core.HMBTCorelinkConnect(broadcaster.manager
-                                .coreInterface, ByteUtils.bytesFromMacString(device.getAddress()));
+                                .coreInterface, deviceMac);
                     }
                 });
             }
