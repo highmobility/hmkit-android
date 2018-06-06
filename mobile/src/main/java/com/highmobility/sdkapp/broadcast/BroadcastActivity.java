@@ -3,21 +3,21 @@ package com.highmobility.sdkapp.broadcast;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import com.highmobility.common.BroadcastingViewController;
 import com.highmobility.common.IBroadcastingView;
 import com.highmobility.common.IBroadcastingViewController;
-import com.highmobility.hmkit.Manager;
-import com.highmobility.sdkapp.R;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
 import com.highmobility.hmkit.Link;
+import com.highmobility.sdkapp.R;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by ttiganik on 02/06/16.
