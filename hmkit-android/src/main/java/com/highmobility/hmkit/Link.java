@@ -128,7 +128,7 @@ public class Link {
 
     /**
      * Revoke the link authorisation for this device. On success {@link
-     * LinkListener.#onStateChanged(Link, State)} will be called with the Connected state. The
+     * LinkListener#onStateChanged(Link, State)} will be called with the Connected state. The
      * RevokeCallback will be called if there is an error.
      * <p>
      * After this has succeeded it is up to the user to finish the flow related to this link -
@@ -249,12 +249,6 @@ public class Link {
      * RevokeCallback is used to notify the user if the revoke failed.
      */
     public interface RevokeCallback {
-        /**
-         * Invoked when there was an issue with the revoke.
-         *
-         * @param error The revoke error.
-         */
-        void onRevokeFailed(RevokeError error);
 
         /**
          * Invoked when the revoke succeeded.
@@ -262,5 +256,12 @@ public class Link {
          * @param customData The customer specific data, if exists.
          */
         void onRevokeSuccess(Bytes customData);
+
+        /**
+         * Invoked when there was an issue with the revoke.
+         *
+         * @param error The revoke error.
+         */
+        void onRevokeFailed(RevokeError error);
     }
 }
