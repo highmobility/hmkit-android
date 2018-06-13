@@ -345,6 +345,11 @@ class BTCoreInterface implements HMBTCoreInterface {
         random.nextBytes(nonce);
     }
 
+    @Override
+    public void HMApiCallbackRevokeResponse(HMDevice device, byte[] data, int length, int status) {
+        //TODO Tõnis
+    }
+
     void copyBytes(byte[] from, byte[] to) {
         for (int i = 0; i < from.length; i++) {
             to[i] = from[i];
