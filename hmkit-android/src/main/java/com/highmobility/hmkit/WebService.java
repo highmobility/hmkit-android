@@ -35,7 +35,7 @@ import javax.net.ssl.X509TrustManager;
  * Created by ttiganik on 24/03/2017.
  */
 class WebService {
-    private static final String TAG = "WebService";
+    private static final String TAG = "HMKit-WebService";
 
     private static final String testBaseUrl = "https://limitless-gorge-44605.herokuapp.com"; // test
     private static final String productionBaseUrl = "https://developers.high-mobility.com"; //

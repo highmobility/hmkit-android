@@ -131,7 +131,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     public void onLockDoorsClicked() {
         link.revoke(new Link.RevokeCallback() {
             @Override public void onRevokeSuccess(Bytes data) {
-                Log.d(TAG, "onRevokeSuccess() called");
+                Log.d(TAG, "onRevokeSuccess() called " + data);
             }
 
             @Override public void onRevokeFailed(RevokeError error) {

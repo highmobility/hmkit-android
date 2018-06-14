@@ -38,6 +38,7 @@ public class BroadcastingViewController implements IBroadcastingViewController,
 
     @Override
     public void onLinkViewResult(int result) {
+        if (link != null) onStateChanged(link, link.getState());
         startBroadcasting();
     }
 
@@ -234,7 +235,6 @@ public class BroadcastingViewController implements IBroadcastingViewController,
         broadcaster.startBroadcasting(new Broadcaster.StartCallback() {
             @Override public void onBroadcastingStarted() {
                 Log.d(TAG, "onBroadcastingStarted: ");
-                // broadcaster.startAlivePinging(1000);
             }
 
             @Override public void onBroadcastingFailed(BroadcastError error) {

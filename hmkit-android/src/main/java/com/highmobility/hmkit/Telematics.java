@@ -20,7 +20,7 @@ import org.json.JSONObject;
  * Telematics provides the option to send commands via telematics.
  */
 public class Telematics {
-    static final String TAG = "Telematics";
+    static final String TAG = "HMKit-Telematics";
 
     Manager manager;
     CommandCallback callback;

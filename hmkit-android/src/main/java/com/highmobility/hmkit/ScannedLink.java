@@ -26,7 +26,7 @@ import java.util.UUID;
  * Created by ttiganik on 01/06/16.
  */
 class ScannedLink extends Link {
-    private static final String TAG = "ScannedLink";
+    private static final String TAG = "HMKit-ScannedLink";
 
     Scanner scanner;
 

@@ -5,10 +5,12 @@ public class RevokeError {
         NONE,
         /// Bluetooth is off
         BLUETOOTH_OFF,
-        /// Framework encountered an internal error (commonly releated to invalid data received)
+        /// Framework encountered an internal error
         INTERNAL_ERROR,
         /// Bluetooth failed to act as expected
         BLUETOOTH_FAILURE,
+        /// Revoke failed on the device side
+        FAILED,
         /// The signature was invalid
         INVALID_SIGNATURE,
         /// Command timed out

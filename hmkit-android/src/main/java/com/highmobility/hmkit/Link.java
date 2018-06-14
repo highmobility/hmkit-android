@@ -127,9 +127,9 @@ public class Link {
     }
 
     /**
-     * Revoke the link authorisation for this device. On success {@link
-     * LinkListener#onStateChanged(Link, State)} will be called with the Connected state. The
-     * RevokeCallback will be called if there is an error.
+     * Revoke authorisation for this device. {@link RevokeCallback} will be called with the result.
+     * If successful, the {@link LinkListener#onStateChanged(Link, State)} will be called with the
+     * {@link State#CONNECTED} state.
      * <p>
      * After this has succeeded it is up to the user to finish the flow related to this link -
      * disconnect, stop broadcasting or something else.
@@ -174,11 +174,6 @@ public class Link {
         }
 
         if (hmDevice.getIsAuthenticated() == 0) {
-            if (getState() == State.AUTHENTICATED) {
-                // TODO: this is the revoke callback.
-                // TODO: get the custom data.
-                revokeCallback.onRevokeSuccess(null);
-            }
             setState(State.CONNECTED);
         } else {
             setState(State.AUTHENTICATED);
@@ -220,6 +215,17 @@ public class Link {
         sentCommand.dispatchResult(data);
     }
 
+    void onRevokeResponse(final byte[] data, int result) {
+        if (revokeCallback != null) {
+            if (result == 0) {
+                revokeCallback.onRevokeSuccess(new Bytes(data));
+            } else {
+                revokeCallback.onRevokeFailed(new RevokeError(RevokeError.Type.FAILED, 0, "Revoke" +
+                        " failed."));
+            }
+        }
+    }
+
     byte[] getAddressBytes() {
         return ByteUtils.bytesFromMacString(btDevice.getAddress());
     }
@@ -251,7 +257,8 @@ public class Link {
     public interface RevokeCallback {
 
         /**
-         * Invoked when the revoke succeeded.
+         * Invoked when the revoke succeeded. After this the link will go to {@link State#CONNECTED}
+         * state.
          *
          * @param customData The customer specific data, if exists.
          */

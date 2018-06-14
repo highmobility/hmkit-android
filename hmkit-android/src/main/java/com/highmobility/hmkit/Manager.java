@@ -30,7 +30,7 @@ import java.util.TimerTask;
  * Created by ttiganik on 03/08/16.
  */
 public class Manager {
-    private static final String TAG = "Manager";
+    private static final String TAG = "HMKit-Manager";
 
     public enum Environment {
         TEST, STAGING, PRODUCTION

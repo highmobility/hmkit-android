@@ -32,7 +32,7 @@ import java.util.UUID;
  * ConnectedLink connectivity.
  */
 public class Broadcaster implements SharedBleListener {
-    static final String TAG = "HMLink";
+    static final String TAG = "HMKit-Broadcaster";
 
     public enum State {BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING}
 
@@ -439,6 +439,13 @@ public class Broadcaster implements SharedBleListener {
         Link link = getLinkForMac(device.getMac());
         if (link == null) return false;
         link.onCommandReceived(data);
+        return true;
+    }
+
+    boolean onRevokeResult(HMDevice device, byte[] data, int result) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onRevokeResponse(data, result);
         return true;
     }
 

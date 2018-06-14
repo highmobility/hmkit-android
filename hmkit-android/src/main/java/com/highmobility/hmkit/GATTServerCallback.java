@@ -16,7 +16,7 @@ import java.util.Arrays;
  * Created by ttiganik on 15/04/16.
  */
 class GATTServerCallback extends BluetoothGattServerCallback {
-    static final String TAG = "GATTServerCallback";
+    static final String TAG = "HMKit-GATTServer";
     Broadcaster broadcaster;
 
     GATTServerCallback(Broadcaster broadcaster) {

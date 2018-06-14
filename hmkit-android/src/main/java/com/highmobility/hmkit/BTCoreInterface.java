@@ -5,10 +5,8 @@ import android.util.Log;
 import com.highmobility.btcore.HMBTCoreInterface;
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.crypto.AccessCertificate;
-import com.highmobility.crypto.Crypto;
 import com.highmobility.utils.ByteUtils;
 import com.highmobility.value.Bytes;
-import com.highmobility.value.Signature;
 
 import java.security.SecureRandom;
 
@@ -16,7 +14,7 @@ import java.security.SecureRandom;
  * Created by ttiganik on 03/08/16.
  */
 class BTCoreInterface implements HMBTCoreInterface {
-    static final String TAG = "HMBTCoreInterface";
+    static final String TAG = "HMKit-CoreInterface";
     Manager manager;
 
     BTCoreInterface(Manager manager) {
@@ -347,7 +345,17 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public void HMApiCallbackRevokeResponse(HMDevice device, byte[] data, int length, int status) {
-        //TODO Tõnis
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) {
+            Log.d(TAG, "HMApiCallbackRevokeResponse() called with: device = [" + ByteUtils
+                    .hexFromBytes(device.getSerial()) + "], " + "data = " +
+                    "[" + ByteUtils.hexFromBytes(data) + "], length = [" + length + "], status = " +
+                    "[" + status + "]");
+        }
+        byte[] trimmedBytes = trimmedBytes(data, length);
+
+        if (manager.getBroadcaster().onRevokeResult(device, trimmedBytes, status) == false) {
+            manager.getScanner().onRevokeResult(device, trimmedBytes, status);
+        }
     }
 
     void copyBytes(byte[] from, byte[] to) {
