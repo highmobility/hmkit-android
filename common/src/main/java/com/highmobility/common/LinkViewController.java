@@ -13,12 +13,14 @@ import com.highmobility.autoapi.Failure;
 import com.highmobility.autoapi.GetCapabilities;
 import com.highmobility.autoapi.GetVehicleStatus;
 import com.highmobility.autoapi.LockState;
+import com.highmobility.autoapi.LockUnlockDoors;
 import com.highmobility.autoapi.OpenCloseTrunk;
 import com.highmobility.autoapi.TrunkState;
 import com.highmobility.autoapi.VehicleStatus;
 import com.highmobility.autoapi.property.TrunkLockState;
 import com.highmobility.autoapi.property.TrunkPosition;
 import com.highmobility.autoapi.property.diagnostics.TireStateProperty;
+import com.highmobility.autoapi.property.doors.DoorLock;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
 import com.highmobility.hmkit.Link;
@@ -129,19 +131,9 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
 
     @Override
     public void onLockDoorsClicked() {
-        link.revoke(new Link.RevokeCallback() {
-            @Override public void onRevokeSuccess(Bytes data) {
-                Log.d(TAG, "onRevokeSuccess() called " + data);
-            }
+        view.showLoadingView(true);
+        Bytes bytes = new LockUnlockDoors(doorsLocked ? DoorLock.UNLOCKED : DoorLock.LOCKED);
 
-            @Override public void onRevokeFailed(RevokeError error) {
-                Log.d(TAG, "onRevokeFailed() called with: error = [" + error + "]");
-            }
-        });
-
-        /*view.showLoadingView(true);
-        Bytes bytes = new LockUnlockDoors(doorsLocked ? DoorLock.UNLOCKED :
-                DoorLock.LOCKED);
         link.sendCommand(bytes, new Link.CommandCallback() {
             @Override
             public void onCommandSent() {
@@ -153,7 +145,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
             public void onCommandFailed(LinkError error) {
                 onCommandFinished("lock command send exception " + error.getType());
             }
-        });*/
+        });
     }
 
     @Override
@@ -174,6 +166,22 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
             @Override
             public void onCommandFailed(LinkError error) {
                 onCommandFinished("trunk command send exception " + error.getType());
+            }
+        });
+    }
+
+    @Override
+    public void onRevokeClicked() {
+        view.showLoadingView(true);
+        link.revoke(new Link.RevokeCallback() {
+            @Override public void onRevokeSuccess(Bytes data) {
+                view.showLoadingView(false);
+                Log.d(TAG, "onRevokeSuccess() called " + data);
+            }
+
+            @Override public void onRevokeFailed(RevokeError error) {
+                view.showLoadingView(false);
+                Log.d(TAG, "onRevokeFailed() called with: error = [" + error + "]");
             }
         });
     }

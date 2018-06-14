@@ -215,15 +215,19 @@ public class Link {
         sentCommand.dispatchResult(data);
     }
 
-    void onRevokeResponse(final byte[] data, int result) {
-        if (revokeCallback != null) {
-            if (result == 0) {
-                revokeCallback.onRevokeSuccess(new Bytes(data));
-            } else {
-                revokeCallback.onRevokeFailed(new RevokeError(RevokeError.Type.FAILED, 0, "Revoke" +
-                        " failed."));
+    void onRevokeResponse(final byte[] data, final int result) {
+        manager.postToMainThread(new Runnable() {
+            @Override public void run() {
+                if (revokeCallback == null) return;
+
+                if (result == 0) {
+                    revokeCallback.onRevokeSuccess(new Bytes(data));
+                } else {
+                    revokeCallback.onRevokeFailed(new RevokeError(RevokeError.Type.FAILED, 0,
+                            "Revoke failed."));
+                }
             }
-        }
+        });
     }
 
     byte[] getAddressBytes() {
