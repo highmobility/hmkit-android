@@ -72,7 +72,7 @@ class SentCommand {
             public void run() {
                 dispatchError(LinkError.Type.TIME_OUT, 0, "command timeout");
             }
-        }, (long)(Constants.commandTimeout * 1000));
+        }, Link.commandTimeout);
     }
 
     void cancelTimeoutTimer() {

@@ -254,8 +254,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     }
 
     void startCommandTimeout() {
-        timeoutTimer = new CountDownTimer((long) (com.highmobility.hmkit.Constants.commandTimeout
-                * 10000), 120000) {
+        timeoutTimer = new CountDownTimer(Link.commandTimeout, 120000) {
             public void onTick(long millisUntilFinished) {
             }
 

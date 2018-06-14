@@ -18,6 +18,11 @@ import static com.highmobility.hmkit.Broadcaster.TAG;
  * Created by ttiganik on 17/08/16.
  */
 public class Link {
+    /**
+     * The time after which HMKit will fail the command if there has been no ack. In ms.
+     */
+    public static int commandTimeout = 10000;
+
     BluetoothDevice btDevice;
     HMDevice hmDevice;
 
