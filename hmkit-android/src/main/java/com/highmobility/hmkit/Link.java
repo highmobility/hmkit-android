@@ -79,7 +79,7 @@ public class Link {
     }
 
     /**
-     * @return The links serial
+     * @return The links serial.
      */
     public DeviceSerial getSerial() {
         return serial;
