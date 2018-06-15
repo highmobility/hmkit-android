@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import butterknife.BindView;
@@ -17,7 +18,9 @@ public class LinkView extends Activity implements ILinkView {
     static final String TAG = "LinkView";
 
     private ILinkViewController controller;
+    @BindView (R.id.buttons_view) LinearLayout buttonsView;
     @BindView (R.id.lock_button) Button lockButton;
+    @BindView (R.id.revoke_button) Button revokeButton;
     @BindView (R.id.progress_bar) ProgressBar progressBar;
     @BindView (R.id.link_status_text) TextView statusText;
 
@@ -28,23 +31,19 @@ public class LinkView extends Activity implements ILinkView {
         ButterKnife.bind(this);
         controller = new LinkViewController(this);
 
-        lockButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                controller.onLockDoorsClicked();
-            }
-        });
+        lockButton.setOnClickListener(v -> controller.onLockDoorsClicked());
+        revokeButton.setOnClickListener(view -> controller.onRevokeClicked());
     }
 
     @Override
     public void showLoadingView(boolean show) {
         if (show) {
             progressBar.setVisibility(View.VISIBLE);
-            lockButton.setVisibility(View.GONE);
+            buttonsView.setVisibility(View.GONE);
         }
         else {
             progressBar.setVisibility(View.GONE);
-            lockButton.setVisibility(View.VISIBLE);
+            buttonsView.setVisibility(View.VISIBLE);
             statusText.setText(null);
         }
     }

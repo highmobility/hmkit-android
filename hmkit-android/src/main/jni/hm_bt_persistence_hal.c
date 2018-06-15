@@ -157,13 +157,18 @@ uint32_t hm_bt_persistence_hal_get_access_certificate_by_index(uint8_t index, ui
   return ret;
 }
 
-uint32_t hm_bt_persistence_hal_remove_access_certificate(uint8_t *serial){
+uint32_t hm_bt_persistence_hal_remove_access_certificate(hm_certificate_t *certificate){
 
   jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
-  (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jbyte*) serial );
+  (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jbyte*) certificate->gaining_serial );
   jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMPersistenceHalremovePublicKey, serial_);
 
   return ret;
+}
+
+uint32_t hm_bt_persistence_hal_erase_access_certificate(hm_certificate_t *certificate){
+
+    return 0;
 }
 
 uint32_t hm_bt_persistence_hal_add_stored_certificate(uint8_t *cert, uint16_t size){

@@ -12,12 +12,16 @@ public class Constants {
     static UUID SENSING_WRITE_CHAR_UUID = UUID.fromString("713D0107-503E-4C75-BA94-3148F18D941E");
     static int MAX_COMMAND_LENGTH = 253; // this is without commandId, requiresHMAC and size
 
-
     static UUID NOTIFY_DESCRIPTOR_UUID = UUID.fromString("00002902-0000-1000-8000-00805F9B34FB");
 
-    public static final float registerTimeout           = 10.0f;
-    public static final float commandTimeout            = 10.0f;
-    public static final int certificateStorageCount     = 30;
+    public static final float registerTimeout = 10.0f;
+
+    /**
+     * @deprecated use {@link Link#commandTimeout} instead
+     */
+    @Deprecated public static final float commandTimeout = 10.0f;
+
+    public static final int certificateStorageCount = 30;
 
     public interface ResponseCallback {
         void response(int errorCode);

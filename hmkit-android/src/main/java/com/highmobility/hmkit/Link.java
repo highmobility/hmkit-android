@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.hmkit.error.LinkError;
+import com.highmobility.hmkit.error.RevokeError;
 import com.highmobility.utils.ByteUtils;
 import com.highmobility.value.Bytes;
 import com.highmobility.value.DeviceSerial;
@@ -17,36 +18,21 @@ import static com.highmobility.hmkit.Broadcaster.TAG;
  * Created by ttiganik on 17/08/16.
  */
 public class Link {
+    /**
+     * The time after which HMKit will fail the command if there has been no ack. In ms.
+     */
+    public static int commandTimeout = 10000;
+
     BluetoothDevice btDevice;
     HMDevice hmDevice;
-    DeviceSerial serial;
-
-    public enum State {
-        DISCONNECTED, CONNECTED, AUTHENTICATED
-    }
-
-    /**
-     * CommandCallback is used to notify the user about the command result.
-     */
-    public interface CommandCallback {
-        /**
-         * Invoked when the command was successfully sent.
-         */
-        void onCommandSent();
-
-        /**
-         * Invoked when there was an issue with the command.
-         *
-         * @param error The command error.
-         */
-        void onCommandFailed(LinkError error);
-    }
 
     State state = State.CONNECTED;
+    DeviceSerial serial;
+
     SentCommand sentCommand;
     LinkListener listener;
     long connectionTime;
-
+    RevokeCallback revokeCallback;
     Manager manager;
 
     Link(Manager manager, BluetoothDevice btDevice) {
@@ -86,14 +72,14 @@ public class Link {
     }
 
     /**
-     * @return the name of the Link's bluetooth peripheral.
+     * @return the name of the Links bluetooth peripheral.
      */
     public String getName() {
         return btDevice.getName();
     }
 
     /**
-     * @return Link's serial.
+     * @return The links serial.
      */
     public DeviceSerial getSerial() {
         return serial;
@@ -145,6 +131,47 @@ public class Link {
         });
     }
 
+    /**
+     * Revoke authorisation for this device. {@link RevokeCallback} will be called with the result.
+     * If successful, the {@link LinkListener#onStateChanged(Link, State)} will be called with the
+     * {@link State#CONNECTED} state.
+     * <p>
+     * After this has succeeded it is up to the user to finish the flow related to this link -
+     * disconnect, stop broadcasting or something else.
+     *
+     * @param callback Callback invoked in case of an error.
+     */
+    public void revoke(RevokeCallback callback) {
+        if (state != State.AUTHENTICATED) {
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+                Log.d(TAG, "not authenticated");
+            callback.onRevokeFailed(new RevokeError(RevokeError.Type.UNAUTHORIZED, 0, "not " +
+                    "authenticated"));
+            return;
+        }
+
+        if (sentCommand != null && sentCommand.finished == false) {
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+                Log.d(TAG, "custom command in progress");
+
+            callback.onRevokeFailed(new RevokeError(RevokeError.Type.COMMAND_IN_PROGRESS, 0, "a " +
+                    " command is in progress"));
+            return;
+        }
+
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+            Log.d(TAG, "revoke " + serial);
+
+        this.revokeCallback = callback;
+
+        manager.workHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                manager.core.HMBTCoreSendRevoke(manager.coreInterface, serial.getByteArray());
+            }
+        });
+    }
+
     void setHmDevice(HMDevice hmDevice) {
         this.hmDevice = hmDevice;
         if (serial == null || serial.equals(hmDevice.getSerial()) == false) {
@@ -178,21 +205,79 @@ public class Link {
 
     void onCommandResponseReceived(final byte[] data) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+
             Log.d(TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
                     + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()) + " in " +
                     (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime) +
                     "ms");
 
-        if (sentCommand == null) {
+        if (sentCommand == null || sentCommand.finished) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "can't dispatch command response: sentCommand = null");
+                Log.d(TAG, "can't dispatch command response: sentCommand = null || finished");
             return;
         }
 
         sentCommand.dispatchResult(data);
     }
 
+    void onRevokeResponse(final byte[] data, final int result) {
+        manager.postToMainThread(new Runnable() {
+            @Override public void run() {
+                if (revokeCallback == null) return;
+
+                if (result == 0) {
+                    revokeCallback.onRevokeSuccess(new Bytes(data));
+                } else {
+                    revokeCallback.onRevokeFailed(new RevokeError(RevokeError.Type.FAILED, 0,
+                            "Revoke failed."));
+                }
+            }
+        });
+    }
+
     byte[] getAddressBytes() {
         return ByteUtils.bytesFromMacString(btDevice.getAddress());
+    }
+
+    public enum State {
+        DISCONNECTED, CONNECTED, AUTHENTICATED
+    }
+
+    /**
+     * CommandCallback is used to notify the user about the command result.
+     */
+    public interface CommandCallback {
+        /**
+         * Invoked when the command was successfully sent.
+         */
+        void onCommandSent();
+
+        /**
+         * Invoked when there was an issue with the command.
+         *
+         * @param error The command error.
+         */
+        void onCommandFailed(LinkError error);
+    }
+
+    /**
+     * RevokeCallback is used to notify the user if the revoke failed.
+     */
+    public interface RevokeCallback {
+
+        /**
+         * Invoked when the revoke succeeded. After this the link will go to {@link State#CONNECTED}
+         * state.
+         *
+         * @param customData The customer specific data, if exists.
+         */
+        void onRevokeSuccess(Bytes customData);
+
+        /**
+         * Invoked when there was an issue with the revoke.
+         *
+         * @param error The revoke error.
+         */
+        void onRevokeFailed(RevokeError error);
     }
 }

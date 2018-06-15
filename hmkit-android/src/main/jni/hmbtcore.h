@@ -47,4 +47,6 @@ jmethodID *interfaceMethodHMApiCallbackTelematicsCommandIncoming;
 
 jmethodID *interfaceMethodHMCryptoHalGenerateNonce;
 
+jmethodID *interfaceMethodHMApiCallbackRevokeResponse;
+
 #endif //ANDROID_WEAR_DIGITAL_KEY_HMBTCORE_H

@@ -26,16 +26,24 @@
         </activity>
         <activity
             android:name="com.highmobility.sdkapp.broadcast.LinkView"
+            android:screenOrientation="portrait"
             android:parentActivityName="com.highmobility.sdkapp.broadcast.BroadcastActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.highmobility.sdkapp.broadcast.BroadcastActivity"/>
         </activity>
 
-        <activity android:name="com.highmobility.sdkapp.broadcast.BroadcastActivity"></activity>
+        <activity
+            android:name="com.highmobility.sdkapp.broadcast.BroadcastActivity"
+            android:screenOrientation="portrait"></activity>
 
-        <activity android:name="com.highmobility.sdkapp.scan.ScanActivity"></activity>
-        <activity android:name="com.highmobility.sdkapp.scan.ScannedLinkActivity"></activity>
+        <activity
+            android:name="com.highmobility.sdkapp.scan.ScanActivity"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
+            android:name="com.highmobility.sdkapp.scan.ScannedLinkActivity"
+            android:screenOrientation="portrait"></activity>
 
     </application>
 

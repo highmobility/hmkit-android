@@ -1,41 +1,33 @@
 package com.highmobility.hmkit.error;
 
-/**
- * Created by ttiganik on 6/22/17.
- *
- */
-public class LinkError {
+public class RevokeError {
     public enum Type {
         NONE,
         /// Bluetooth is off
         BLUETOOTH_OFF,
-        /// A custom command has not yet received a response
-        COMMAND_IN_PROGRESS,
-        /// Framework encountered an internal error (commonly releated to invalid data received)
+        /// Framework encountered an internal error
         INTERNAL_ERROR,
         /// Bluetooth failed to act as expected
         BLUETOOTH_FAILURE,
-        /// The signature for the command was invalid
+        /// Revoke failed on the device side
+        FAILED,
+        /// The signature was invalid
         INVALID_SIGNATURE,
-        /// The Certificates storage database is full
-        STORAGE_FULL,
         /// Command timed out
         TIME_OUT,
         /// The Link is not connected
         NOT_CONNECTED,
         /// The app is not authorised with the connected link to perform the action
         UNAUTHORIZED,
-        /// Bluetooth Low Energy is unavailable for this device
-        UNSUPPORTED,
-        /// The command is too big. Max size is defined in Constants
-        COMMAND_TOO_BIG
+        /// Custom command is in progress. Wait for this to complete.
+        COMMAND_IN_PROGRESS
     }
 
     Type errorType;
     int errorCode;
     String message;
 
-    public LinkError(Type type, int errorCode, String message) {
+    public RevokeError(Type type, int errorCode, String message) {
         this.errorCode = errorCode;
         this.errorType = type;
         this.message = message;

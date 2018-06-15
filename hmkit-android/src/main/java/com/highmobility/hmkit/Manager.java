@@ -19,6 +19,7 @@ import com.highmobility.value.DeviceSerial;
 import com.highmobility.value.PrivateKey;
 import com.highmobility.value.PublicKey;
 
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,7 +30,7 @@ import java.util.TimerTask;
  * Created by ttiganik on 03/08/16.
  */
 public class Manager {
-    private static final String TAG = "Manager";
+    private static final String TAG = "HMKit-Manager";
 
     public enum Environment {
         TEST, STAGING, PRODUCTION

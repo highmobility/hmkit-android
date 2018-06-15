@@ -19,7 +19,7 @@ import java.util.Map;
  * Created by ttiganik on 01/06/16.
  */
 class Scanner {
-    static final String TAG = "Scanner";
+    static final String TAG = "HMKit-Scanner";
 
     public enum State {
         BLUETOOTH_UNAVAILABLE, IDLE, SCANNING
@@ -247,6 +247,13 @@ class Scanner {
         ScannedLink scannedLink = getLinkForMac(device.getMac());
         if (scannedLink == null) return false;
         scannedLink.onCommandResponseReceived(data);
+        return true;
+    }
+
+    boolean onRevokeResult(HMDevice device, byte[] data, int result) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onRevokeResponse(data, result);
         return true;
     }
 

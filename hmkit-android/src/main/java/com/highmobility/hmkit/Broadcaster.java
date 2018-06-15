@@ -32,7 +32,7 @@ import java.util.UUID;
  * ConnectedLink connectivity.
  */
 public class Broadcaster implements SharedBleListener {
-    static final String TAG = "HMLink";
+    static final String TAG = "HMKit-Broadcaster";
 
     public enum State {BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING}
 
@@ -108,7 +108,8 @@ public class Broadcaster implements SharedBleListener {
      * @return The certificates that are registered on the Broadcaster.
      */
     public AccessCertificate[] getRegisteredCertificates() {
-        return manager.storage.getCertificatesWithProvidingSerial(manager.certificate.getSerial().getByteArray());
+        return manager.storage.getCertificatesWithProvidingSerial(manager.certificate.getSerial()
+                .getByteArray());
     }
 
     /**
@@ -441,6 +442,13 @@ public class Broadcaster implements SharedBleListener {
         return true;
     }
 
+    boolean onRevokeResult(HMDevice device, byte[] data, int result) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onRevokeResponse(data, result);
+        return true;
+    }
+
     int didReceivePairingRequest(HMDevice device) {
         ConnectedLink link = getLinkForMac(device.getMac());
         if (link != null) {
@@ -455,7 +463,8 @@ public class Broadcaster implements SharedBleListener {
         if (link == null || link.btDevice == null) return false;
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes(link
+            Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes
+                    (link
                     .getAddressBytes()) + " char: " + characteristicId);
 
         BluetoothGattCharacteristic characteristic = getCharacteristicForId(characteristicId);

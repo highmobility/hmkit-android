@@ -23,9 +23,10 @@ import com.highmobility.autoapi.property.diagnostics.TireStateProperty;
 import com.highmobility.autoapi.property.doors.DoorLock;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
-import com.highmobility.hmkit.error.LinkError;
 import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
+import com.highmobility.hmkit.error.LinkError;
+import com.highmobility.hmkit.error.RevokeError;
 import com.highmobility.value.Bytes;
 
 import java.util.List;
@@ -64,7 +65,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
         }
 
         // ask for initial state
-        requestInitialState();
+//        requestInitialState();
     }
 
     @Override
@@ -94,7 +95,8 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
             onLockStateUpdate(((LockState) command).isLocked());
         } else if (command instanceof DiagnosticsState) {
             DiagnosticsState diagnostics = (DiagnosticsState) command;
-            Log.d(TAG, "front left: " + diagnostics.getTireState(TireStateProperty.Location.FRONT_LEFT).getPressure());
+            Log.d(TAG, "front left: " + diagnostics.getTireState(TireStateProperty.Location
+                    .FRONT_LEFT).getPressure());
             Log.d(TAG, "front right: " + diagnostics.getTireState(TireStateProperty.Location
                     .FRONT_RIGHT).getPressure());
             Log.d(TAG, "rear left: " + diagnostics.getTireState(TireStateProperty.Location
@@ -122,17 +124,16 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
             Failure failure = (Failure) command;
             Log.d(TAG, "failure " + failure.getFailureReason().toString());
 
-            onInitializeFinished(-13, failure.getFailedType() + " failed " + failure.getFailureReason());
+            onInitializeFinished(-13, failure.getFailedType() + " failed " + failure
+                    .getFailureReason());
         }
     }
 
     @Override
     public void onLockDoorsClicked() {
-//        Manager.getInstance().getBroadcaster().disconnectAllLinks();
-
         view.showLoadingView(true);
-        Bytes bytes = new LockUnlockDoors(doorsLocked ? DoorLock.UNLOCKED :
-                DoorLock.LOCKED);
+        Bytes bytes = new LockUnlockDoors(doorsLocked ? DoorLock.UNLOCKED : DoorLock.LOCKED);
+
         link.sendCommand(bytes, new Link.CommandCallback() {
             @Override
             public void onCommandSent() {
@@ -165,6 +166,22 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
             @Override
             public void onCommandFailed(LinkError error) {
                 onCommandFinished("trunk command send exception " + error.getType());
+            }
+        });
+    }
+
+    @Override
+    public void onRevokeClicked() {
+        view.showLoadingView(true);
+        link.revoke(new Link.RevokeCallback() {
+            @Override public void onRevokeSuccess(Bytes data) {
+                view.showLoadingView(false);
+                Log.d(TAG, "onRevokeSuccess() called " + data);
+            }
+
+            @Override public void onRevokeFailed(RevokeError error) {
+                view.showLoadingView(false);
+                Log.d(TAG, "onRevokeFailed() called with: error = [" + error + "]");
             }
         });
     }
@@ -237,8 +254,7 @@ public class LinkViewController implements ILinkViewController, ConnectedLinkLis
     }
 
     void startCommandTimeout() {
-        timeoutTimer = new CountDownTimer((long) (com.highmobility.hmkit.Constants.commandTimeout
-                * 10000), 120000) {
+        timeoutTimer = new CountDownTimer(Link.commandTimeout, 120000) {
             public void onTick(long millisUntilFinished) {
             }
 
