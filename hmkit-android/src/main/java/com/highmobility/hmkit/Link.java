@@ -211,9 +211,9 @@ public class Link {
                     (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime) +
                     "ms");
 
-        if (sentCommand == null) {
+        if (sentCommand == null || sentCommand.finished) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "can't dispatch command response: sentCommand = null");
+                Log.d(TAG, "can't dispatch command response: sentCommand = null || finished");
             return;
         }
 
