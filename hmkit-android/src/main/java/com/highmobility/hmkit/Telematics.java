@@ -6,10 +6,10 @@ import android.util.Log;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.highmobility.crypto.AccessCertificate;
+import com.highmobility.crypto.value.DeviceSerial;
+import com.highmobility.crypto.value.Issuer;
 import com.highmobility.hmkit.error.TelematicsError;
 import com.highmobility.value.Bytes;
-import com.highmobility.value.DeviceSerial;
-import com.highmobility.value.Issuer;
 
 import org.json.JSONException;
 import org.json.JSONObject;

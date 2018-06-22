@@ -29,7 +29,7 @@ android {
 
 dependencies {
     implementation project(':hmkit-android')
-    implementation('com.highmobility:hmkit-auto-api:1.7.1')
+    implementation('com.highmobility:hmkit-auto-api:1.8.0')
     implementation("com.highmobility:hmkit-crypto:${project.properties['crypto.version']}")
 
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {

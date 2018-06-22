@@ -17,7 +17,7 @@ import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
 import com.highmobility.hmkit.Telematics;
 import com.highmobility.value.Bytes;
-import com.highmobility.value.DeviceSerial;
+import com.highmobility.crypto.value.DeviceSerial;
 
 public class BroadcastingViewController implements IBroadcastingViewController,
         BroadcasterListener, ConnectedLinkListener {

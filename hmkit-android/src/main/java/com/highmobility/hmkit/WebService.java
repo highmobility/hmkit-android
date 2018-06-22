@@ -11,10 +11,10 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 import com.highmobility.crypto.Crypto;
+import com.highmobility.crypto.value.DeviceSerial;
+import com.highmobility.crypto.value.Issuer;
+import com.highmobility.crypto.value.PrivateKey;
 import com.highmobility.value.Bytes;
-import com.highmobility.value.DeviceSerial;
-import com.highmobility.value.Issuer;
-import com.highmobility.value.PrivateKey;
 
 import org.json.JSONException;
 import org.json.JSONObject;

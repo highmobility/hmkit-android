@@ -19,7 +19,7 @@ import static com.highmobility.hmkit.Broadcaster.TAG;
  */
 public class Link {
     /**
-     * The time after which HMKit will fail the command if there has been no ack. In ms.
+     * The time after which HMKit will fail the command if there has been no response. In ms.
      */
     public static int commandTimeout = 10000;
 
