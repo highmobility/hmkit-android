@@ -2,7 +2,7 @@ package com.highmobility.hmkit;
 
 import android.bluetooth.le.AdvertiseSettings;
 
-import com.highmobility.value.DeviceSerial;
+import com.highmobility.crypto.value.DeviceSerial;
 
 public class BroadcastConfiguration {
     private int advertiseMode = AdvertiseSettings.ADVERTISE_MODE_BALANCED;
