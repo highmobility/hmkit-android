@@ -1,1 +1,1 @@
-include ':mobile', ':wear', ':hmkit-android', ':common'
+include ':mobile', ':wear', ':hmkit-android', ':common', 'hm-java-crypto'

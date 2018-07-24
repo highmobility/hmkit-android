@@ -4,3 +4,6 @@
 [submodule "crypto-c"]
 	path = crypto-c
 	url = https://bitbucket.org/highmobility/crypto-c.git
+[submodule "hm-java-crypto"]
+	path = hm-java-crypto
+	url = git@github.com:highmobility/hm-java-crypto.git
