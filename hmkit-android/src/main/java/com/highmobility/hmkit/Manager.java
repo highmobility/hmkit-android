@@ -168,17 +168,17 @@ public class Manager {
      * Initialize the SDK with the necessary properties. Call this before using any other
      * functionality.
      *
-     * @param certificate     The broadcaster certificate, in Base64.
-     * @param privateKey      32 byte private key with elliptic curve Prime 256v1 in Base64.
-     * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64.
+     * @param certificate     The broadcaster certificate in Base64 or hex.
+     * @param privateKey      32 byte private key with elliptic curve Prime 256v1 in Base64 or hex.
+     * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64 or hex.
      * @param context         the application context
      * @throws IllegalArgumentException if the parameters are invalid.
      */
     public void initialize(String certificate, String privateKey, String issuerPublicKey, Context
             context) throws IllegalArgumentException {
         DeviceCertificate decodedCert = new DeviceCertificate(new Bytes(Base64.decode(certificate)));
-        PrivateKey decodedPrivateKey = new PrivateKey(Base64.decode(privateKey));
-        PublicKey decodedIssuerPublicKey = new PublicKey(Base64.decode(issuerPublicKey));
+        PrivateKey decodedPrivateKey = new PrivateKey(privateKey);
+        PublicKey decodedIssuerPublicKey = new PublicKey(issuerPublicKey);
         initialize(decodedCert, decodedPrivateKey, decodedIssuerPublicKey, context);
     }
 

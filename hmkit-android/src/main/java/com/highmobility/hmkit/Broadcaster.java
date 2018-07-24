@@ -342,8 +342,7 @@ public class Broadcaster implements SharedBleListener {
 
         for (BluetoothDevice device : devices) {
             // just to make sure all of the devices are tried to be disconnected. disconnect
-            // callback
-            // should find the one in this.links if it exists.
+            // callback should find the one in this.links if it exists.
             GATTServer.cancelConnection(device);
         }
 
