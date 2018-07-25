@@ -55,8 +55,7 @@ android {
 dependencies {
     implementation project(':common')
     implementation project(':hmkit-android')
-
-//    compile 'com.android.support:wear:25.0.0'
+    
     implementation 'com.google.android.support:wearable:2.1.0'
     compileOnly 'com.google.android.wearable:wearable:2.1.0'
 

@@ -11,7 +11,7 @@ import android.util.Log;
 
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.utils.ByteUtils;
-import com.highmobility.value.DeviceSerial;
+import com.highmobility.crypto.value.DeviceSerial;
 
 import java.util.List;
 import java.util.UUID;

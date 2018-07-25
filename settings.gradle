@@ -1,1 +1,2 @@
-include ':mobile', ':wear', ':hmkit-android', ':common', 'hm-java-utils', 'hm-java-crypto'
+include ':mobile', ':wear', ':hmkit-android', ':common', 'hm-java-crypto', 'hm-java-utils'
+project(':hm-java-utils').projectDir = new File('hm-java-crypto/hm-java-utils')
