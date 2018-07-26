@@ -328,10 +328,11 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Tries to cancel all Bluetooth connections and stop broadcasting. This has proven being slow
-     * or not working at all. Success may be related to the specific device or it's Android
-     * version.
-     * <p>
+     * Tries to disconnect all Bluetooth connections. This has proven being slow or not working at
+     * all. Success may be related to the specific device or it's Android version.
+     * <p><p>
+     * {@link #stopBroadcasting()} should also be called to improve the chance of disconnecting.
+     * <p><p>
      * If successful, the link's state will change to disconnected and {@link
      * com.highmobility.hmkit.BroadcasterListener#onLinkLost(ConnectedLink)}} will be called.
      * <p>
@@ -348,9 +349,6 @@ public class Broadcaster implements SharedBleListener {
             // callback should find the one in this.links if it exists.
             GATTServer.cancelConnection(device);
         }
-
-        stopBroadcasting();
-        stopAlivePinging();
 
         // cant close service here, we wont get disconnect callback
     }

@@ -207,6 +207,8 @@ public class Manager {
             } else {
                 broadcaster.stopBroadcasting();
             }
+
+            broadcaster.stopAlivePinging();
         }
 
         coreClockTimer.cancel();
