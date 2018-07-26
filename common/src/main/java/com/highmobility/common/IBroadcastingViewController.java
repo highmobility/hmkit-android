@@ -6,4 +6,5 @@ public interface IBroadcastingViewController {
     void onLinkClicked();
     void onLinkViewResult(int result);
     void onDisconnectClicked();
+    void onPause(boolean pause);
 }

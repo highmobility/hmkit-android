@@ -35,6 +35,14 @@ public class LinkView extends Activity implements ILinkView {
         revokeButton.setOnClickListener(view -> controller.onRevokeClicked());
     }
 
+    @Override protected void onPause() {
+        super.onPause();
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+    }
+
     @Override
     public void showLoadingView(boolean show) {
         if (show) {

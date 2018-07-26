@@ -57,6 +57,16 @@ public class BroadcastActivity extends Activity implements IBroadcastingView {
         }
     }
 
+    @Override protected void onPause() {
+        super.onPause();
+        controller.onPause(true);
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        controller.onPause(false);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -80,7 +90,8 @@ public class BroadcastActivity extends Activity implements IBroadcastingView {
 
     @Override
     public void updateLink(ConnectedLink link) {
-        showButton.setVisibility(link.getState() == Link.State.AUTHENTICATED ? View.VISIBLE : View.GONE);
+        showButton.setVisibility(link.getState() == Link.State.AUTHENTICATED ? View.VISIBLE :
+                View.GONE);
     }
 
     @Override
