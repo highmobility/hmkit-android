@@ -6,7 +6,7 @@ artifactProperties.load(new FileInputStream("$project.projectDir/deploy.settings
 version artifactProperties.version
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
         minSdkVersion 21
@@ -19,6 +19,8 @@ android {
             moduleName = "hmbtcore"
             ldLibs "log"
         }
+
+
     }
 
     buildTypes {
@@ -53,7 +55,7 @@ android {
 dependencies {
     implementation project(':hm-java-crypto')
     implementation project(':hm-java-utils')
-//    implementation("com.highmobility:hmkit-crypto:${project.properties['crypto.version']}")
+//    implementation("com.highmobility:hmkit-crypto:$rootProject.ext.cryptoVersion")
     implementation('com.android.volley:volley:1.1.0')
 }
 
