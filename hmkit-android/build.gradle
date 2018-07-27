@@ -53,9 +53,9 @@ android {
 }
 
 dependencies {
-    implementation project(':hm-java-crypto')
-    implementation project(':hm-java-utils')
-//    implementation("com.highmobility:hmkit-crypto:$rootProject.ext.cryptoVersion")
+//    implementation project(':hm-java-crypto')
+//    implementation project(':hm-java-utils')
+    implementation("com.highmobility:hmkit-crypto:$rootProject.ext.cryptoVersion")
     implementation('com.android.volley:volley:1.1.0')
 }
 
