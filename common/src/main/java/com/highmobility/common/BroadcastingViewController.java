@@ -5,19 +5,19 @@ import android.util.Log;
 
 import com.highmobility.autoapi.LockUnlockDoors;
 import com.highmobility.autoapi.property.doors.DoorLock;
+import com.highmobility.crypto.value.DeviceSerial;
 import com.highmobility.hmkit.BroadcastConfiguration;
 import com.highmobility.hmkit.Broadcaster;
 import com.highmobility.hmkit.BroadcasterListener;
 import com.highmobility.hmkit.ConnectedLink;
 import com.highmobility.hmkit.ConnectedLinkListener;
-import com.highmobility.hmkit.error.BroadcastError;
-import com.highmobility.hmkit.error.DownloadAccessCertificateError;
-import com.highmobility.hmkit.error.TelematicsError;
 import com.highmobility.hmkit.Link;
 import com.highmobility.hmkit.Manager;
 import com.highmobility.hmkit.Telematics;
+import com.highmobility.hmkit.error.BroadcastError;
+import com.highmobility.hmkit.error.DownloadAccessCertificateError;
+import com.highmobility.hmkit.error.TelematicsError;
 import com.highmobility.value.Bytes;
-import com.highmobility.crypto.value.DeviceSerial;
 
 public class BroadcastingViewController implements IBroadcastingViewController,
         BroadcasterListener, ConnectedLinkListener {
@@ -79,6 +79,21 @@ public class BroadcastingViewController implements IBroadcastingViewController,
         broadcaster = null;
         link.setListener(null);
         link = null;
+    }
+    
+    @Override public void onPause(boolean pause) {
+        Log.d(TAG, "onPause() called with: pause = [" + pause + "]");
+        if (pause) {
+            try {
+                Manager.getInstance().terminate();
+            }
+            catch (Exception e) {
+                Log.e(TAG, "onPause: ", e);
+            }
+        }
+        else {
+            downloadAccessCertificates(() -> startBroadcasting(), null);
+        }
     }
 
     @Override
@@ -194,7 +209,8 @@ public class BroadcastingViewController implements IBroadcastingViewController,
     }
 
     void downloadAccessCertificates(Runnable success, Runnable failed) {
-// prod nexus 5
+        // prod nexus 5
+
         Manager.getInstance().initialize(
                 "dGVzdLnVeFXsIJTMMDWwwF7qX" +
                         "***REMOVED***",

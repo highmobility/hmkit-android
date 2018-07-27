@@ -4,11 +4,11 @@ import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
 import com.highmobility.btcore.HMDevice;
+import com.highmobility.crypto.value.DeviceSerial;
 import com.highmobility.hmkit.error.LinkError;
 import com.highmobility.hmkit.error.RevokeError;
 import com.highmobility.utils.ByteUtils;
 import com.highmobility.value.Bytes;
-import com.highmobility.value.DeviceSerial;
 
 import java.util.Calendar;
 

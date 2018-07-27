@@ -9,16 +9,15 @@ import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.highmobility.btcore.HMBTCore;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.DeviceCertificate;
-import com.highmobility.btcore.HMBTCore;
 import com.highmobility.crypto.value.DeviceSerial;
 import com.highmobility.crypto.value.PrivateKey;
 import com.highmobility.crypto.value.PublicKey;
 import com.highmobility.hmkit.error.DownloadAccessCertificateError;
 import com.highmobility.utils.Base64;
 import com.highmobility.value.Bytes;
-
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,8 +71,8 @@ public class Manager {
     public static LoggingLevel loggingLevel = LoggingLevel.ALL;
 
     /**
-     * The environment of the Web Service. If initialized, call {@link #terminate()} before
-     * changing it.
+     * The environment of the Web Service. If initialized, call {@link #terminate()} before changing
+     * it.
      */
     public static Environment environment = Environment.PRODUCTION;
 
@@ -92,6 +91,7 @@ public class Manager {
     DeviceCertificate certificate;
     PrivateKey privateKey;
     PublicKey caPublicKey;
+    byte[] issuer, appId; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
 
     private Scanner scanner;
     private Broadcaster broadcaster;
@@ -126,17 +126,15 @@ public class Manager {
      * @param certificate The broadcaster certificate.
      * @param privateKey  32 byte private key with elliptic curve Prime 256v1.
      * @param caPublicKey 64 byte public key of the Certificate Authority.
-     * @param ctx     the application context
+     * @param ctx         the application context
      * @throws IllegalArgumentException if the parameters are invalid.
-     * @throws IllegalStateException if the manager is still initialized and connected to links.
+     * @throws IllegalStateException    if the manager is still initialized and connected to links.
      */
     public void initialize(DeviceCertificate certificate,
                            PrivateKey privateKey,
                            PublicKey caPublicKey,
                            Context ctx) throws IllegalArgumentException, IllegalStateException {
-        if (this.context != null) {
-            terminate();
-        }
+        if (this.context != null) terminate(); // will throw if there are connected links
 
         this.context = ctx.getApplicationContext();
 
@@ -155,6 +153,7 @@ public class Manager {
         }
 
         if (coreInterface == null) {
+            // core init needs to be done once, only initialises structs
             coreInterface = new BTCoreInterface(this);
             core.HMBTCoreInit(coreInterface);
         }
@@ -176,16 +175,17 @@ public class Manager {
      */
     public void initialize(String certificate, String privateKey, String issuerPublicKey, Context
             context) throws IllegalArgumentException {
-        DeviceCertificate decodedCert = new DeviceCertificate(new Bytes(Base64.decode(certificate)));
+        DeviceCertificate decodedCert = new DeviceCertificate(new Bytes(Base64.decode
+                (certificate)));
         PrivateKey decodedPrivateKey = new PrivateKey(privateKey);
         PublicKey decodedIssuerPublicKey = new PublicKey(issuerPublicKey);
         initialize(decodedCert, decodedPrivateKey, decodedIssuerPublicKey, context);
     }
 
     /**
-     * Call this function when the SDK is not used anymore - for instance when killing the app.
-     * It clears all the internal processes, unregisters all BroadcastReceivers and enables
-     * re-initializing the SDK with new certificates.
+     * Call this function when the SDK is not used anymore - for instance when killing the app. It
+     * clears all the internal processes, stops broadcasting, unregisters BroadcastReceivers and
+     * enables re-initializing the SDK with new certificates.
      * <p>
      * Terminate will fail if a connected link still exists. Disconnect all the links before
      * terminating the SDK.
@@ -197,9 +197,18 @@ public class Manager {
     public void terminate() throws IllegalStateException {
         if (context == null) return; // already not initialized
 
-        if (broadcaster.getLinks().size() > 0) {
-            throw new IllegalStateException("Terminate should not be called if a connected link " +
-                    "exists. Disconnect from all of the links.");
+        if (broadcaster != null) {
+            if (broadcaster.getLinks().size() > 0) {
+                // re initialise would mess up communication with previous links
+                throw new IllegalStateException("Terminate should not be called if a connected " +
+                        "link " +
+
+                        "exists. Disconnect from all of the links.");
+            } else {
+                broadcaster.stopBroadcasting();
+            }
+
+            broadcaster.stopAlivePinging();
         }
 
         coreClockTimer.cancel();
@@ -360,7 +369,8 @@ public class Manager {
      */
     public AccessCertificate[] getCertificates() throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
-        return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial().getByteArray());
+        return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial()
+                .getByteArray());
     }
 
     /**
@@ -369,7 +379,8 @@ public class Manager {
      */
     public AccessCertificate[] getCertificates(Context context) {
         if (storage == null) storage = new Storage(context);
-        return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial().getByteArray());
+        return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial()
+                .getByteArray());
     }
 
     /**
@@ -381,7 +392,8 @@ public class Manager {
      */
     public AccessCertificate getCertificate(DeviceSerial serial) throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
-        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial.getByteArray());
+        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial
+                .getByteArray());
 
         if (certificates != null && certificates.length > 0) {
             return certificates[0];
@@ -393,13 +405,14 @@ public class Manager {
     /**
      * Find a Access Certificate with the given serial number.
      *
-     * @param serial The serial number of the device that is gaining access.
+     * @param serial  The serial number of the device that is gaining access.
      * @param context The application context.
      * @return An Access Certificate for the given serial if one exists, otherwise null.
      */
     public AccessCertificate getCertificate(DeviceSerial serial, Context context) {
         if (storage == null) storage = new Storage(context);
-        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial.getByteArray());
+        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial
+                .getByteArray());
 
         if (certificates != null && certificates.length > 0) {
             return certificates[0];
@@ -417,19 +430,21 @@ public class Manager {
      */
     public boolean deleteCertificate(DeviceSerial serial) throws IllegalStateException {
         if (context == null) throw new IllegalStateException("SDK not initialized");
-        return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial().getByteArray());
+        return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial()
+                .getByteArray());
     }
 
     /**
      * Delete an access certificate.
      *
-     * @param serial The serial of the device that is gaining access.
+     * @param serial  The serial of the device that is gaining access.
      * @param context The application context.
      * @return true if the certificate existed and was deleted successfully, otherwise false
      */
     public boolean deleteCertificate(DeviceSerial serial, Context context) {
         if (storage == null) storage = new Storage(context);
-        return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial().getByteArray());
+        return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial()
+                .getByteArray());
     }
 
     /**
@@ -444,6 +459,7 @@ public class Manager {
 
     /**
      * Deletes all the stored Access Certificates.
+     *
      * @param context The application context.
      */
     public void deleteCertificates(Context context) {

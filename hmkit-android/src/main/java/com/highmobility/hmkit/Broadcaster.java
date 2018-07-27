@@ -15,9 +15,9 @@ import android.util.Log;
 
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.crypto.AccessCertificate;
+import com.highmobility.crypto.value.DeviceSerial;
 import com.highmobility.hmkit.error.BroadcastError;
 import com.highmobility.utils.ByteUtils;
-import com.highmobility.value.DeviceSerial;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -74,10 +74,6 @@ public class Broadcaster implements SharedBleListener {
     State state = State.IDLE;
 
     ArrayList<ConnectedLink> links = new ArrayList<>();
-
-    byte[] issuer; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
-    byte[] appId;
-
     BroadcastConfiguration configuration;
 
     /**
@@ -164,10 +160,16 @@ public class Broadcaster implements SharedBleListener {
             callback.onBroadcastingStarted();
         }
 
+        if (manager.context == null) {
+            callback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.UNINITIALIZED
+                    , 0, "Manager is not initialized"));
+            return;
+        }
+
         if (!manager.getBle().isBluetoothSupported()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
             callback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.UNSUPPORTED
-                    , 0, "Bluetooth is no supported"));
+                    , 0, "Bluetooth is not supported"));
             return;
         }
 
@@ -213,7 +215,7 @@ public class Broadcaster implements SharedBleListener {
         byte[] uuidBytes;
 
         if (configuration.getBroadcastTarget() == null) {
-            uuidBytes = ByteUtils.concatBytes(issuer, appId);
+            uuidBytes = ByteUtils.concatBytes(manager.issuer, manager.appId);
         } else {
             uuidBytes = ByteUtils.concatBytes(new byte[]{0x00, 0x00, 0x00, 0x00}, configuration
                     .getBroadcastTarget().getByteArray());
@@ -233,7 +235,8 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Stops the advertisements and disconnects all the links.
+     * Stops the BLE advertisements. This will also and disconnect all of the BLE connections and
+     * thus could be used as a method for disconnecting all of the links.
      */
     public void stopBroadcasting() {
         if (getState() != State.BROADCASTING) return; // we are not broadcasting
@@ -325,10 +328,11 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Tries to cancel all Bluetooth connections and stop broadcasting. This has proven being slow
-     * or not working at all. Success may be related to the specific device or it's Android
-     * version.
-     * <p>
+     * Tries to disconnect all Bluetooth connections. This has proven being slow or not working at
+     * all. Success may be related to the specific device or it's Android version.
+     * <p><p>
+     * {@link #stopBroadcasting()} should also be called to improve the chance of disconnecting.
+     * <p><p>
      * If successful, the link's state will change to disconnected and {@link
      * com.highmobility.hmkit.BroadcasterListener#onLinkLost(ConnectedLink)}} will be called.
      * <p>
@@ -345,9 +349,6 @@ public class Broadcaster implements SharedBleListener {
             // callback should find the one in this.links if it exists.
             GATTServer.cancelConnection(device);
         }
-
-        stopBroadcasting();
-        stopAlivePinging();
 
         // cant close service here, we wont get disconnect callback
     }
@@ -464,7 +465,7 @@ public class Broadcaster implements SharedBleListener {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes
                     (link
-                    .getAddressBytes()) + " char: " + characteristicId);
+                            .getAddressBytes()) + " char: " + characteristicId);
 
         BluetoothGattCharacteristic characteristic = getCharacteristicForId(characteristicId);
         if (characteristic == null) {
