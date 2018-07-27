@@ -21,7 +21,19 @@ ndk-build
 
 This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypto and hmkit-utils.
 
-Before a release, update the "version = 1.4.0" in all of the deploy.settings files.
+Before a release:
+
+* Update the "version = 1.4.0" in all of the deploy.settings files.
+* Update the dependencies from local to remote for all of the packages:
+
+>in hmkit-crypto replace 
+>`//implementation project(':hm-java-utils')` with `implementation('com.highmobility:hmkit-utils:1.4.0')`
+
+>in hmkit-android replace 
+```implementation project(':hm-java-crypto')
+implementation project(':hm-java-utils')``` with
+`implementation("com.highmobility:hmkit-crypto:$rootProject.ext.cryptoVersion")`
+
 
 By default, releases will be pushed to our dev jfrog repo. Call `./gradlew artifactoryPublish` to release all of
 the packages.
