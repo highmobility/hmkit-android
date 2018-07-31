@@ -21,14 +21,25 @@ ndk-build
 
 This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypto and hmkit-utils.
 
-For a release, update the "version = 1.4.0" in all of the deploy.settings files.
+Before a release:
 
-By default, release is set to dev environment. call ./gradlew artifactoryPublish to release all of
-the packages to jfrog development repo. Test the packages if needed.
+* Update the "version = 1.4.0" in all of the deploy.settings files.
+* Update the dependencies from local to remote for all of the packages:
 
-To release to release repo and bintray, replace
+>in hmkit-crypto replace 
+>`//implementation project(':hm-java-utils')` with `implementation('com.highmobility:hmkit-utils:1.4.0')`
 
-"repo = gradle-dev-local" with "repo = gradle-release-local" in all of the deploy.settings files.
+>in hmkit-android replace 
+```implementation project(':hm-java-crypto')
+implementation project(':hm-java-utils')``` with
+`implementation("com.highmobility:hmkit-crypto:$rootProject.ext.cryptoVersion")`
 
-Call "./gradlew artifactoryPublish && ./gradlew bintrayUpload". Revert the repo to gradle-dev-local
-to not accidentally push to release at a later time.
+
+By default, releases will be pushed to our dev jfrog repo. Call `./gradlew artifactoryPublish` to release all of
+the packages.
+
+To release to the release jfrog repo and bintray, replace
+
+`repo = gradle-dev-local` with `repo = gradle-release-local` in all of the deploy.settings files.
+
+Call `./gradlew artifactoryPublish && ./gradlew bintrayUpload`. Revert the repo to gradle-dev-local.
