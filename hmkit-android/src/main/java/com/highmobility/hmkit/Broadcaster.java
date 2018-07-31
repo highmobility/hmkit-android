@@ -153,6 +153,7 @@ public class Broadcaster implements SharedBleListener {
      *                 something went wrong.
      */
     public void startBroadcasting(StartCallback callback) {
+        Log.d(TAG, "startBroadcasting() called with: callback = [" + callback + "]");
         if (state == State.BROADCASTING) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "will not start broadcasting: already broadcasting");
@@ -197,41 +198,26 @@ public class Broadcaster implements SharedBleListener {
             }
         }
 
-        if (createGATTServer() == false) {
-            setState(State.BLUETOOTH_UNAVAILABLE);
-            callback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.BLUETOOTH_FAILURE
-                    , 0, "Bluetooth failed to start"));
-            return;
-        }
-
-        final AdvertiseSettings settings = new AdvertiseSettings.Builder()
-                .setAdvertiseMode(configuration.getAdvertiseMode())
-                .setConnectable(true)
-                .setTimeout(0)
-                .setTxPowerLevel(configuration.getTxPowerLevel())
-                .build();
-
-        UUID advertiseUUID;
-        byte[] uuidBytes;
-
-        if (configuration.getBroadcastTarget() == null) {
-            uuidBytes = ByteUtils.concatBytes(manager.issuer, manager.appId);
+        if (GATTServer != null && GATTServer.getServices().size() > 0) {
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+                Log.d(TAG, "gatt service already exists");
+            onServiceAdded(true);
         } else {
-            uuidBytes = ByteUtils.concatBytes(new byte[]{0x00, 0x00, 0x00, 0x00}, configuration
-                    .getBroadcastTarget().getByteArray());
-            uuidBytes = ByteUtils.concatBytes(uuidBytes, new byte[]{0x00, 0x00, 0x00});
+            BluetoothGattService service = createGattServer();
+
+            if (service != null) {
+                if (GATTServer.addService(service)) {
+                    // gatt server started adding the service and will call onServiceAdded.
+                    startCallback = callback;
+                } else {
+                    Log.e(TAG, "Cannot add service to GATT server");
+                    onServiceAdded(false);
+                }
+            } else {
+                // failed to create the gatt service
+                onServiceAdded(false);
+            }
         }
-
-        ByteUtils.reverse(uuidBytes);
-        advertiseUUID = ByteUtils.UUIDFromByteArray(uuidBytes);
-
-        final AdvertiseData data = new AdvertiseData.Builder()
-                .setIncludeDeviceName(configuration.isOverridingAdvertisementName() == true)
-                .addServiceUuid(new ParcelUuid(advertiseUUID))
-                .build();
-
-        startCallback = callback;
-        mBluetoothLeAdvertiser.startAdvertising(settings, data, advertiseCallback);
     }
 
     /**
@@ -351,6 +337,46 @@ public class Broadcaster implements SharedBleListener {
         }
 
         // cant close service here, we wont get disconnect callback
+    }
+
+    void onServiceAdded(boolean success) {
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+            Log.d(TAG, "onServiceAdded() called with: success = [" + success + "]");
+
+        if (success) {
+            final AdvertiseSettings settings = new AdvertiseSettings.Builder()
+                    .setAdvertiseMode(configuration.getAdvertiseMode())
+                    .setConnectable(true)
+                    .setTimeout(0)
+                    .setTxPowerLevel(configuration.getTxPowerLevel())
+                    .build();
+
+            UUID advertiseUUID;
+            byte[] uuidBytes;
+
+            if (configuration.getBroadcastTarget() == null) {
+                uuidBytes = ByteUtils.concatBytes(manager.issuer, manager.appId);
+            } else {
+                uuidBytes = ByteUtils.concatBytes(new byte[]{0x00, 0x00, 0x00, 0x00}, configuration
+                        .getBroadcastTarget().getByteArray());
+                uuidBytes = ByteUtils.concatBytes(uuidBytes, new byte[]{0x00, 0x00, 0x00});
+            }
+
+            ByteUtils.reverse(uuidBytes);
+            advertiseUUID = ByteUtils.UUIDFromByteArray(uuidBytes);
+
+            final AdvertiseData data = new AdvertiseData.Builder()
+                    .setIncludeDeviceName(configuration.isOverridingAdvertisementName() == true)
+                    .addServiceUuid(new ParcelUuid(advertiseUUID))
+                    .build();
+
+            mBluetoothLeAdvertiser.startAdvertising(settings, data, advertiseCallback);
+        } else {
+            setState(State.BLUETOOTH_UNAVAILABLE);
+            startCallback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type
+                    .BLUETOOTH_FAILURE
+                    , 0, "Failed to create gatt server."));
+        }
     }
 
     void closeService() {
@@ -498,9 +524,10 @@ public class Broadcaster implements SharedBleListener {
         return null;
     }
 
-    private boolean createGATTServer() {
-        if (GATTServer != null && GATTServer.getServices().size() > 0) return true;
-
+    /**
+     * @return true if created the service and added characteristics.
+     */
+    private BluetoothGattService createGattServer() {
         if (GATTServer == null) {
             gattServerCallback = new GATTServerCallback(this);
             GATTServer = manager.getBle().getManager().openGattServer(manager.context,
@@ -508,12 +535,12 @@ public class Broadcaster implements SharedBleListener {
 
             if (GATTServer == null) {
                 Log.e(TAG, "Cannot create gatt server");
-                return false;
+                return null;
             }
         }
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(TAG, "createGATTServer");
+            Log.d(TAG, "createGattServer()");
 
         // create the service
         BluetoothGattService service = new BluetoothGattService(Constants.SERVICE_UUID,
@@ -554,7 +581,7 @@ public class Broadcaster implements SharedBleListener {
                 BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor
                         .PERMISSION_READ)) == false) {
             Log.e(TAG, "Cannot add read descriptor");
-            return false;
+            return null;
         }
 
         if (sensingReadCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants
@@ -562,7 +589,7 @@ public class Broadcaster implements SharedBleListener {
                 BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor
                         .PERMISSION_READ)) == false) {
             Log.e(TAG, "Cannot add sensing read descriptor");
-            return false;
+            return null;
         }
 
         if (aliveCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants
@@ -570,55 +597,50 @@ public class Broadcaster implements SharedBleListener {
                 BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor
                         .PERMISSION_READ)) == false) {
             Log.e(TAG, "Cannot add alive descriptor");
-            return false;
+            return null;
         }
 
         if (aliveCharacteristic.setValue(new byte[]{}) == false) {
             Log.e(TAG, "Cannot set alive char value");
-            return false;
+            return null;
         }
 
         if (infoCharacteristic.setValue(manager.getInfoString()) == false) {
             Log.e(TAG, "Cannot set info char value");
-            return false;
+            return null;
         }
 
         if (service.addCharacteristic(readCharacteristic) == false) {
             Log.e(TAG, "Cannot add read char");
-            return false;
+            return null;
         }
 
         if (service.addCharacteristic(sensingReadCharacteristic) == false) {
             Log.e(TAG, "Cannot add sensing read char");
-            return false;
+            return null;
         }
 
         if (service.addCharacteristic(writeCharacteristic) == false) {
             Log.e(TAG, "Cannot add write char");
-            return false;
+            return null;
         }
 
         if (service.addCharacteristic(sensingWriteCharacteristic) == false) {
             Log.e(TAG, "Cannot add sensing write char");
-            return false;
+            return null;
         }
 
         if (service.addCharacteristic(aliveCharacteristic) == false) {
             Log.e(TAG, "Cannot add alive char");
-            return false;
+            return null;
         }
 
         if (service.addCharacteristic(infoCharacteristic) == false) {
             Log.e(TAG, "Cannot add info char");
-            return false;
+            return null;
         }
 
-        if (GATTServer.addService(service) == false) {
-            Log.e(TAG, "Cannot add service to GATT server");
-            return false;
-        }
-
-        return true;
+        return service;
     }
 
     private void sendAlivePing() {

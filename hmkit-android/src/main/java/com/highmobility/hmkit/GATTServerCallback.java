@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServerCallback;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.util.Log;
 
@@ -43,6 +44,11 @@ class GATTServerCallback extends BluetoothGattServerCallback {
                 }
             });
         }
+    }
+
+    @Override public void onServiceAdded(int status, BluetoothGattService service) {
+        // continue start broadcast after this
+        broadcaster.onServiceAdded(status == BluetoothGatt.GATT_SUCCESS ? true : false);
     }
 
     @Override

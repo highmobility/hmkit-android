@@ -32,7 +32,8 @@ public class BroadcastingViewController implements IBroadcastingViewController,
     public BroadcastingViewController(IBroadcastingView view) {
         this.view = view;
 
-        downloadAccessCertificates(() -> startBroadcasting(), null);
+        // onPause starts the download
+//        downloadAccessCertificates(() -> startBroadcasting(), null);
 //        sendTelematicsCommand();
     }
 
@@ -80,18 +81,16 @@ public class BroadcastingViewController implements IBroadcastingViewController,
         link.setListener(null);
         link = null;
     }
-    
+
     @Override public void onPause(boolean pause) {
         Log.d(TAG, "onPause() called with: pause = [" + pause + "]");
         if (pause) {
             try {
                 Manager.getInstance().terminate();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.e(TAG, "onPause: ", e);
             }
-        }
-        else {
+        } else {
             downloadAccessCertificates(() -> startBroadcasting(), null);
         }
     }
@@ -210,38 +209,41 @@ public class BroadcastingViewController implements IBroadcastingViewController,
 
     void downloadAccessCertificates(Runnable success, Runnable failed) {
         // prod nexus 5
+        try {
+            Manager.getInstance().initialize(
+                    "dGVzdLnVeFXsIJTMMDWwwF7qX" +
+                            "***REMOVED***",
 
-        Manager.getInstance().initialize(
-                "dGVzdLnVeFXsIJTMMDWwwF7qX" +
-                        "***REMOVED***",
-                "***REMOVED***",
-                "***REMOVED***" +
-                        "+z2sxxdwWNaItdBUWg==",
-                view.getActivity()
-        );
+                    "***REMOVED***",
+                    "***REMOVED***" +
+                            "+z2sxxdwWNaItdBUWg==",
+                    view.getActivity()
+            );
+            broadcaster = Manager.getInstance().getBroadcaster();
+            // set the broadcaster listener
+            broadcaster.setListener(this);
 
-        broadcaster = Manager.getInstance().getBroadcaster();
-        // set the broadcaster listener
-        broadcaster.setListener(this);
+            // PASTE ACCESS TOKEN HERE
+            String accessToken =
+                    "Rp1wTWvW79qKE6iwGpYBimM12y" +
+                            "***REMOVED***";
 
-        // PASTE ACCESS TOKEN HERE
-        String accessToken =
-                "Rp1wTWvW79qKE6iwGpYBimM12y" +
-                        "***REMOVED***";
+            Manager.getInstance().downloadCertificate(accessToken, new Manager.DownloadCallback() {
+                @Override
+                public void onDownloaded(DeviceSerial serial) {
+                    if (success != null) success.run();
+                }
 
-        Manager.getInstance().downloadCertificate(accessToken, new Manager.DownloadCallback() {
-            @Override
-            public void onDownloaded(DeviceSerial serial) {
-                if (success != null) success.run();
-            }
-
-            @Override
-            public void onDownloadFailed(DownloadAccessCertificateError error) {
-                Log.e(TAG, "Could not download a certificate with token: " + error
-                        .getMessage());
-                if (failed != null) failed.run();
-            }
-        });
+                @Override
+                public void onDownloadFailed(DownloadAccessCertificateError error) {
+                    Log.e(TAG, "Could not download a certificate with token: " + error
+                            .getMessage());
+                    if (failed != null) failed.run();
+                }
+            });
+        } catch (Exception e) {
+            if (failed != null) failed.run();
+        }
     }
 
     void startBroadcasting() {
