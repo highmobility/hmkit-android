@@ -39,7 +39,7 @@ public class BroadcastingViewController implements IBroadcastingViewController,
 
     @Override
     public void onLinkViewResult(int result) {
-        if (link != null) onStateChanged(link, link.getState());
+        if (link != null) onStateChanged(link, link.getState(), true);
         startBroadcasting();
     }
 
@@ -88,10 +88,12 @@ public class BroadcastingViewController implements IBroadcastingViewController,
             try {
                 Manager.getInstance().terminate();
             } catch (Exception e) {
-                Log.e(TAG, "onPause: ", e);
+                Log.d(TAG, "terminate failed");
             }
         } else {
-            downloadAccessCertificates(() -> startBroadcasting(), null);
+            downloadAccessCertificates(() -> startBroadcasting(), () -> {
+                Log.d(TAG, "download certs failed");
+            });
         }
     }
 
@@ -187,11 +189,15 @@ public class BroadcastingViewController implements IBroadcastingViewController,
     @Override
     public void onStateChanged(Link link, Link.State state) {
         Log.d(TAG, "link state changed " + link.getState());
+        onStateChanged(link, state, false);
+    }
+
+    public void onStateChanged(Link link, Link.State state, boolean fromLinkViewResult) {
         if (link == this.link) {
             view.updateLink((ConnectedLink) link);
 
             if (link.getState() == Link.State.AUTHENTICATED) {
-                onLinkClicked();
+                if (fromLinkViewResult == false) onLinkClicked();
                 view.setStatusText("authenticated");
             } else if (link.getState() == Link.State.CONNECTED) {
                 view.setStatusText("connected");
