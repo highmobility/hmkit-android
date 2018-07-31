@@ -204,10 +204,9 @@ public class Manager {
                         "link " +
 
                         "exists. Disconnect from all of the links.");
-            } else {
-                broadcaster.stopBroadcasting();
             }
-
+            
+            broadcaster.stopBroadcasting();
             broadcaster.stopAlivePinging();
         }
 
