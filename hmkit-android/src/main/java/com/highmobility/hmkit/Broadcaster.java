@@ -159,6 +159,7 @@ public class Broadcaster implements SharedBleListener {
                 Log.d(TAG, "will not start broadcasting: already broadcasting");
 
             callback.onBroadcastingStarted();
+            return;
         }
 
         if (manager.context == null) {
@@ -525,7 +526,7 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * @return true if created the service and added characteristics.
+     * @return true if created the server with the service and characteristics.
      */
     private BluetoothGattService createGattServer() {
         if (GATTServer == null) {
