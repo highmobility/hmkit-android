@@ -104,7 +104,7 @@ class WebService {
             }
         }, error) {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
+            public Map<String, String> getHeaders() {
                 return headers;
             }
         };

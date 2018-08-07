@@ -21,7 +21,7 @@ public class Link {
     /**
      * The time after which HMKit will fail the command if there has been no response. In ms.
      */
-    public static int commandTimeout = 10000;
+    public static long commandTimeout = 10000;
 
     BluetoothDevice btDevice;
     HMDevice hmDevice;

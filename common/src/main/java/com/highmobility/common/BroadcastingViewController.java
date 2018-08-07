@@ -137,6 +137,7 @@ public class BroadcastingViewController implements IBroadcastingViewController,
                 view.setStatusText("Idle");
 
                 if (state == Broadcaster.State.BLUETOOTH_UNAVAILABLE) {
+                    Log.d(TAG, "start broadcasting after unavailable state");
                     startBroadcasting();
                 }
                 break;
@@ -215,24 +216,26 @@ public class BroadcastingViewController implements IBroadcastingViewController,
 
     void downloadAccessCertificates(Runnable success, Runnable failed) {
         // prod nexus 5
+
         try {
             Manager.getInstance().initialize(
-                    "dGVzdLnVeFXsIJTMMDWwwF7qX" +
+                    "***REMOVED***" +
+                            "***REMOVED***" +
                             "***REMOVED***",
-
                     "***REMOVED***",
                     "***REMOVED***" +
-                            "+z2sxxdwWNaItdBUWg==",
+                            "+6pXmtkYxynMQm0rfcBU0XFF5A==",
                     view.getActivity()
             );
+
             broadcaster = Manager.getInstance().getBroadcaster();
             // set the broadcaster listener
             broadcaster.setListener(this);
 
             // PASTE ACCESS TOKEN HERE
             String accessToken =
-                    "Rp1wTWvW79qKE6iwGpYBimM12y" +
-                            "***REMOVED***";
+                    "***REMOVED***" +
+                            "-***REMOVED***";
 
             Manager.getInstance().downloadCertificate(accessToken, new Manager.DownloadCallback() {
                 @Override
