@@ -80,18 +80,16 @@ public class BroadcastingViewController implements IBroadcastingViewController,
         link.setListener(null);
         link = null;
     }
-    
+
     @Override public void onPause(boolean pause) {
         Log.d(TAG, "onPause() called with: pause = [" + pause + "]");
         if (pause) {
             try {
                 Manager.getInstance().terminate();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.e(TAG, "onPause: ", e);
             }
-        }
-        else {
+        } else {
             downloadAccessCertificates(() -> startBroadcasting(), null);
         }
     }
@@ -136,6 +134,7 @@ public class BroadcastingViewController implements IBroadcastingViewController,
                 view.setStatusText("Idle");
 
                 if (state == Broadcaster.State.BLUETOOTH_UNAVAILABLE) {
+                    Log.d(TAG, "start broadcasting after unavailable state");
                     startBroadcasting();
                 }
                 break;
@@ -210,13 +209,13 @@ public class BroadcastingViewController implements IBroadcastingViewController,
 
     void downloadAccessCertificates(Runnable success, Runnable failed) {
         // prod nexus 5
-
         Manager.getInstance().initialize(
-                "dGVzdLnVeFXsIJTMMDWwwF7qX" +
+                "***REMOVED***" +
+                        "***REMOVED***" +
                         "***REMOVED***",
                 "***REMOVED***",
                 "***REMOVED***" +
-                        "+z2sxxdwWNaItdBUWg==",
+                        "+6pXmtkYxynMQm0rfcBU0XFF5A==",
                 view.getActivity()
         );
 
@@ -226,8 +225,8 @@ public class BroadcastingViewController implements IBroadcastingViewController,
 
         // PASTE ACCESS TOKEN HERE
         String accessToken =
-                "Rp1wTWvW79qKE6iwGpYBimM12y" +
-                        "***REMOVED***";
+                "***REMOVED***" +
+                        "-***REMOVED***";
 
         Manager.getInstance().downloadCertificate(accessToken, new Manager.DownloadCallback() {
             @Override

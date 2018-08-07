@@ -16,11 +16,6 @@ public class Constants {
 
     public static final float registerTimeout = 10.0f;
 
-    /**
-     * @deprecated use {@link Link#commandTimeout} instead
-     */
-    @Deprecated public static final float commandTimeout = 10.0f;
-
     public static final int certificateStorageCount = 30;
 
     public interface ResponseCallback {

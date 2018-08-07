@@ -153,6 +153,7 @@ public class Broadcaster implements SharedBleListener {
      *                 something went wrong.
      */
     public void startBroadcasting(StartCallback callback) {
+        Log.d(TAG, "startBroadcasting() called");
         if (state == State.BROADCASTING) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "will not start broadcasting: already broadcasting");
@@ -243,7 +244,7 @@ public class Broadcaster implements SharedBleListener {
 
         // stopAdvertising cancels all the BT connections as well.
         if (mBluetoothLeAdvertiser != null) {
-            Log.d(TAG, "stopBroadcasting: ");
+            Log.d(TAG, "stopBroadcasting() called");
             mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
             mBluetoothLeAdvertiser = null;
         }
@@ -331,7 +332,7 @@ public class Broadcaster implements SharedBleListener {
      * Tries to disconnect all Bluetooth connections. This has proven being slow or not working at
      * all. Success may be related to the specific device or it's Android version.
      * <p><p>
-     * {@link #stopBroadcasting()} should also be called to improve the chance of disconnecting.
+     * {@link #stopBroadcasting()} can be called to improve the chance of disconnecting.
      * <p><p>
      * If successful, the link's state will change to disconnected and {@link
      * com.highmobility.hmkit.BroadcasterListener#onLinkLost(ConnectedLink)}} will be called.
