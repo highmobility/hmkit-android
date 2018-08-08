@@ -197,18 +197,7 @@ public class Manager {
     public void terminate() throws IllegalStateException {
         if (context == null) return; // already not initialized
 
-        if (broadcaster != null) {
-            if (broadcaster.getLinks().size() > 0) {
-                // re initialise would mess up communication with previous links
-                throw new IllegalStateException("Terminate should not be called if a connected " +
-                        "link " +
-
-                        "exists. Disconnect from all of the links.");
-            }
-            
-            broadcaster.stopBroadcasting();
-            broadcaster.stopAlivePinging();
-        }
+        if (broadcaster != null) broadcaster.terminate();
 
         coreClockTimer.cancel();
         coreClockTimer = null;

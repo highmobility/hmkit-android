@@ -182,11 +182,7 @@ public class Broadcaster implements SharedBleListener {
             return;
         }
 
-        manager.getBle().addListener(this);
-        if (this.configuration == null) this.configuration = new BroadcastConfiguration();
-        manager.getBle().setRandomAdapterName(configuration.isOverridingAdvertisementName());
-
-        // start advertising
+        // get the advertiser
         if (mBluetoothLeAdvertiser == null) {
             mBluetoothLeAdvertiser = manager.getBle().getAdapter().getBluetoothLeAdvertiser();
 
@@ -198,6 +194,10 @@ public class Broadcaster implements SharedBleListener {
                 return;
             }
         }
+
+        manager.getBle().addListener(this);
+        if (this.configuration == null) this.configuration = new BroadcastConfiguration();
+        manager.getBle().setRandomAdapterName(configuration.isOverridingAdvertisementName());
 
         if (GATTServer != null && GATTServer.getServices().size() > 0) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
@@ -222,8 +222,7 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Stops the BLE advertisements. This will also and disconnect all of the BLE connections and
-     * thus could be used as a method for disconnecting all of the links.
+     * Stops the BLE advertisements. This will also disconnect all of the BLE connections.
      */
     public void stopBroadcasting() {
         if (getState() != State.BROADCASTING) return; // we are not broadcasting
@@ -236,6 +235,7 @@ public class Broadcaster implements SharedBleListener {
         }
 
         this.configuration = null;
+
         setState(State.IDLE);
     }
 
@@ -380,14 +380,23 @@ public class Broadcaster implements SharedBleListener {
         }
     }
 
-    void closeService() {
-        // this should never be called. Once you create a service it should not be changed. All
-        // communication should finish or be cancelled
+    void terminate() throws IllegalStateException {
+        if (getLinks().size() > 0) {
+            // re initialise would mess up communication with previous links
+            throw new IllegalStateException("Broadcaster cannot terminate if a connected " +
+                    "link exists. Disconnect from all of the links.");
+        }
+
+        stopBroadcasting();
+        stopAlivePinging();
+
+        // TODO: 08/08/2018 test terminate / init with this
+        // need to reset service because context could be new next time.
+        // this should not be called if there is a connected link.
         if (GATTServer == null) return;
         GATTServer.clearServices();
         GATTServer.close();
-        GATTServer = null; // but with this we wont get link callbacks
-        setListener(null); // there are no more callbacks coming
+        GATTServer = null;
     }
 
     Broadcaster(Manager manager) {
@@ -396,9 +405,26 @@ public class Broadcaster implements SharedBleListener {
 
     @Override
     public void bluetoothChangedToAvailable(boolean available) {
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+            Log.d(TAG, "bluetoothChangedToAvailable(): available = [" + available + "]");
+
         if (available && getState() == State.BLUETOOTH_UNAVAILABLE) {
             setState(State.IDLE);
         } else if (!available && getState() != State.BLUETOOTH_UNAVAILABLE) {
+            // manually clear the links because there is no connection state change callback
+            // after turning ble off.
+            if (links.size() > 0) {
+                for (ConnectedLink link : links) {
+                    manager.core.HMBTCorelinkDisconnect(manager
+                            .coreInterface, ByteUtils.bytesFromMacString(link.btDevice.getAddress
+                            ()));
+                }
+            }
+
+            // Need to reset the service after bluetooth reset because otherwise
+            // startBroadcasting will not include the service. Maybe internally the services are
+            // reset and we keep the invalid pointer here.
+            terminate();
             setState(State.BLUETOOTH_UNAVAILABLE);
         }
     }
@@ -645,7 +671,7 @@ public class Broadcaster implements SharedBleListener {
     }
 
     private void sendAlivePing() {
-        if (aliveCharacteristic != null) {
+        if (GATTServer != null) {
             for (Link link : links) {
                 GATTServer.notifyCharacteristicChanged(link.btDevice, aliveCharacteristic, false);
             }
