@@ -137,15 +137,13 @@ public class Manager {
         if (this.context != null) terminate(); // will throw if there are connected links
 
         this.context = ctx.getApplicationContext();
-
-        storage = new Storage(context);
-        webService = new WebService(context);
-
         this.caPublicKey = caPublicKey;
         this.certificate = certificate;
         this.privateKey = privateKey;
 
-        mainHandler = new Handler(context.getMainLooper());
+        if (storage == null) storage = new Storage(context);
+        if (webService == null) webService = new WebService(context);
+        if (mainHandler == null) mainHandler = new Handler(context.getMainLooper());
 
         if (workThread.getState() == Thread.State.NEW) {
             workThread.start();
@@ -158,7 +156,11 @@ public class Manager {
             core.HMBTCoreInit(coreInterface);
         }
 
-        startClock();
+        startCoreClock();
+
+        // initialise after terminate
+        if (ble != null) ble.initialise();
+        if (broadcaster != null) broadcaster.initialise();
 
         Log.i(TAG, "Initialized High-Mobility " + getInfoString() + certificate.toString());
     }
@@ -198,14 +200,10 @@ public class Manager {
         if (context == null) return; // already not initialized
 
         if (broadcaster != null) broadcaster.terminate();
+        if (ble != null) ble.terminate();
 
         coreClockTimer.cancel();
         coreClockTimer = null;
-
-        if (ble != null) {
-            ble.terminate();
-            ble = null;
-        }
 
         webService.cancelAllRequests();
         webService = null;
@@ -466,7 +464,7 @@ public class Manager {
         if (context == null) throw new IllegalStateException("SDK not initialized");
     }
 
-    private void startClock() {
+    private void startCoreClock() {
         if (coreClockTimer != null) return;
 
         coreClockTimer = new Timer();

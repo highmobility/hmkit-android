@@ -197,7 +197,6 @@ public class Broadcaster implements SharedBleListener {
             }
         }
 
-        manager.getBle().addListener(this);
         if (this.configuration == null) this.configuration = new BroadcastConfiguration();
         manager.getBle().setRandomAdapterName(configuration.isOverridingAdvertisementName());
 
@@ -342,6 +341,28 @@ public class Broadcaster implements SharedBleListener {
         // cant close service here, we wont get disconnect callback
     }
 
+    void initialise() {
+        manager.getBle().addListener(this);
+    }
+
+    /**
+     * Called with {@link Manager#terminate()}. Broadcasting and alive pinging will be stopped
+     * because there is no device cert.
+     *
+     * @throws IllegalStateException
+     */
+    void terminate() throws IllegalStateException {
+        if (getLinks().size() > 0) {
+            // re initialise would mess up communication with previous links
+            throw new IllegalStateException("Broadcaster cannot terminate if a connected " +
+                    "link exists. Disconnect from all of the links.");
+        }
+
+        stopBroadcasting();
+        stopAlivePinging();
+        manager.getBle().removeListener(this);
+    }
+
     void onServiceAdded(boolean success) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "onServiceAdded() called with: success = [" + success + "]");
@@ -382,27 +403,9 @@ public class Broadcaster implements SharedBleListener {
         }
     }
 
-    void terminate() throws IllegalStateException {
-        if (getLinks().size() > 0) {
-            // re initialise would mess up communication with previous links
-            throw new IllegalStateException("Broadcaster cannot terminate if a connected " +
-                    "link exists. Disconnect from all of the links.");
-        }
-
-        stopBroadcasting();
-        stopAlivePinging();
-
-        // TODO: 08/08/2018 test terminate / init with this
-        // need to reset service because context could be new next time.
-        // this should not be called if there is a connected link.
-        if (GATTServer == null) return;
-        GATTServer.clearServices();
-        GATTServer.close();
-        GATTServer = null;
-    }
-
     Broadcaster(Manager manager) {
         this.manager = manager;
+        initialise();
     }
 
     @Override
@@ -426,7 +429,7 @@ public class Broadcaster implements SharedBleListener {
             // Need to reset the service after bluetooth reset because otherwise
             // startBroadcasting will not include the service. Maybe internally the services are
             // reset and we keep the invalid pointer here.
-            terminate();
+            closeGattServer();
             setState(State.BLUETOOTH_UNAVAILABLE);
         }
     }
@@ -670,6 +673,13 @@ public class Broadcaster implements SharedBleListener {
         }
 
         return service;
+    }
+
+    private void closeGattServer() {
+        if (GATTServer == null) return;
+        GATTServer.clearServices();
+        GATTServer.close();
+        GATTServer = null;
     }
 
     private void sendAlivePing() {
