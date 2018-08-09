@@ -199,6 +199,7 @@ public class Broadcaster implements SharedBleListener {
 
         if (this.configuration == null) this.configuration = new BroadcastConfiguration();
         manager.getBle().setRandomAdapterName(configuration.isOverridingAdvertisementName());
+        startCallback = callback;
 
         if (GATTServer != null && GATTServer.getServices().size() > 0) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
@@ -208,13 +209,11 @@ public class Broadcaster implements SharedBleListener {
             BluetoothGattService service = createGattServer();
 
             if (service != null) {
-                if (GATTServer.addService(service)) {
-                    // gatt server started adding the service and will call onServiceAdded.
-                    startCallback = callback;
-                } else {
+                if (GATTServer.addService(service) == false) {
                     Log.e(TAG, "Cannot add service to GATT server");
                     onServiceAdded(false);
                 }
+                // else gatt server started adding the service and will call onServiceAdded.
             } else {
                 // failed to create the gatt service
                 onServiceAdded(false);
@@ -236,7 +235,6 @@ public class Broadcaster implements SharedBleListener {
         }
 
         this.configuration = null;
-
         setState(State.IDLE);
     }
 
@@ -365,7 +363,7 @@ public class Broadcaster implements SharedBleListener {
 
     void onServiceAdded(boolean success) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(TAG, "onServiceAdded() called with: success = [" + success + "]");
+            Log.d(TAG, "onServiceAdded() [" + success + "]");
 
         if (success) {
             final AdvertiseSettings settings = new AdvertiseSettings.Builder()
