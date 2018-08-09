@@ -218,7 +218,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public Broadcaster getBroadcaster() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         if (broadcaster == null) broadcaster = new Broadcaster(this);
 
         return broadcaster;
@@ -229,7 +229,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public Telematics getTelematics() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         if (telematics == null) telematics = new Telematics(this);
 
         return telematics;
@@ -239,9 +239,8 @@ public class Manager {
      * @return The Scanner Instance
      * @throws IllegalStateException when SDK is not initialized
      */
-
     Scanner getScanner() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         if (scanner == null) scanner = new Scanner(this);
         return scanner;
     }
@@ -251,7 +250,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public DeviceCertificate getDeviceCertificate() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         return certificate;
     }
 
@@ -260,7 +259,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public String getInfoString() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
 
         String infoString = "Android ";
         infoString += BuildConfig.VERSION_NAME;
@@ -285,7 +284,7 @@ public class Manager {
      */
     public void downloadCertificate(String accessToken,
                                     final DownloadCallback callback) throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         webService.requestAccessCertificate(accessToken,
                 privateKey,
                 getDeviceCertificate().getSerial(),
@@ -356,7 +355,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public AccessCertificate[] getCertificates() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial()
                 .getByteArray());
     }
@@ -379,7 +378,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public AccessCertificate getCertificate(DeviceSerial serial) throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial
                 .getByteArray());
 
@@ -417,7 +416,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public boolean deleteCertificate(DeviceSerial serial) throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial()
                 .getByteArray());
     }
@@ -441,7 +440,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public void deleteCertificates() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         storage.resetStorage();
     }
 
@@ -461,6 +460,10 @@ public class Manager {
         } else {
             runnable.run();
         }
+    }
+
+    private void checkInitialised() throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
     }
 
     private void startClock() {
