@@ -26,10 +26,11 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Created by ttiganik on 12/04/16.
- * <p>
  * Broadcaster acts as a gateway to the application's capability to broadcast itself and handle
  * ConnectedLink connectivity.
+ * <p>
+ * Access the broadcaster from {@link Manager#getBroadcaster()}. Broadcaster is created once and
+ * then bound to Manager instance.
  */
 public class Broadcaster implements SharedBleListener {
     static final String TAG = "HMKit-Broadcaster";
@@ -77,7 +78,7 @@ public class Broadcaster implements SharedBleListener {
     BroadcastConfiguration configuration;
 
     /**
-     * The possible states of the local broadcaster are represented by the enum Broadcaster.State.
+     * The possible states of the broadcaster are represented by the enum {@link State}.
      *
      * @return The current state of the Broadcaster.
      * @see Broadcaster.State
@@ -87,14 +88,14 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * @return The name of the advertised peripheral
+     * @return The name of the advertised peripheral.
      */
     public String getName() {
         return manager.getBle().getAdapter().getName();
     }
 
     /**
-     * @return indiation of whether the alive pinging is active or not
+     * @return indiation of whether the alive pinging is active or not.
      */
     public boolean isAlivePinging() {
         return isAlivePinging;
@@ -133,7 +134,7 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Start broadcasting the Broadcaster via BLE advertising.
+     * Start broadcasting via BLE advertising.
      *
      * @param callback      This is invoked with the start broadcasting result.
      *                      onBroadcastingStarted is invoked if the broadcasting started.
@@ -146,7 +147,7 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Start broadcasting the Broadcaster via BLE advertising.
+     * Start broadcasting via BLE advertising.
      *
      * @param callback is invoked with the start broadcasting result. onBroadcastingStarted is
      *                 invoked if the broadcasting started. onBroadcastingFailed is invoked if
@@ -154,6 +155,7 @@ public class Broadcaster implements SharedBleListener {
      */
     public void startBroadcasting(StartCallback callback) {
         Log.d(TAG, "startBroadcasting() called");
+
         if (state == State.BROADCASTING) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "will not start broadcasting: already broadcasting");

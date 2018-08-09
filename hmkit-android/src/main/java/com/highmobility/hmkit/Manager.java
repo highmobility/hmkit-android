@@ -26,7 +26,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Created by ttiganik on 03/08/16.
+ * Manager is the entry point to the HMKit.
  */
 public class Manager {
     private static final String TAG = "HMKit-Manager";
