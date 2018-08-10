@@ -218,24 +218,19 @@ public class BroadcastingViewController implements IBroadcastingViewController,
         // prod nexus 5
 
         try {
+            // mission e
             Manager.getInstance().initialize(
-                    "***REMOVED***" +
-                            "***REMOVED***" +
-                            "***REMOVED***",
+                    "***REMOVED***",
                     "***REMOVED***",
                     "***REMOVED***" +
-                            "+6pXmtkYxynMQm0rfcBU0XFF5A==",
+                            "+z2sxxdwWNaItdBUWg==",
                     view.getActivity()
             );
 
-            broadcaster = Manager.getInstance().getBroadcaster();
-            // set the broadcaster listener
-            broadcaster.setListener(this);
 
             // PASTE ACCESS TOKEN HERE
             String accessToken =
-                    "***REMOVED***" +
-                            "-***REMOVED***";
+                    "***REMOVED***";
 
             Manager.getInstance().downloadCertificate(accessToken, new Manager.DownloadCallback() {
                 @Override
@@ -256,6 +251,10 @@ public class BroadcastingViewController implements IBroadcastingViewController,
     }
 
     void startBroadcasting() {
+        broadcaster = Manager.getInstance().getBroadcaster();
+        // set the broadcaster listener
+        broadcaster.setListener(this);
+
         BroadcastConfiguration conf = new BroadcastConfiguration.Builder()
                 .setOverridesAdvertisementName(true).build(); // true is default anyway
 

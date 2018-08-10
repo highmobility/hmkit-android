@@ -1,9 +1,9 @@
 apply plugin: 'com.android.library'
 
-def artifactProperties = new Properties()
-artifactProperties.load(new FileInputStream("$project.projectDir/deploy.settings"))
+def artifact = new Properties()
+artifact.load(new FileInputStream("$projectDir/deploy.settings"))
 
-version artifactProperties.version
+version artifact.version
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -53,14 +53,22 @@ android {
 }
 
 dependencies {
-//    implementation project(':hm-java-crypto')
-//    implementation project(':hm-java-utils')
-    implementation("com.highmobility:hmkit-crypto:$rootProject.ext.cryptoVersion")
+    if (project.property('release') == false) {
+        implementation project(':hm-java-crypto')
+        implementation project(':hm-java-utils')
+    } else {
+        implementation("com.highmobility:hmkit-crypto:$rootProject.ext.cryptoVersion")
+    }
+    
     implementation('com.android.volley:volley:1.1.0')
 }
 
+// deploy
+
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'digital.wup.android-maven-publish'
+
+def repo = project.hasProperty("repo") ? project.property("repo") : artifact.repo
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'
@@ -71,7 +79,7 @@ publishing {
     publications {
         aar(MavenPublication) {
             from components.android
-            groupId artifactProperties.groupId
+            groupId artifact.groupId
             // for bintray: https://github.com/bintray/gradle-bintray-plugin
         }
     }
@@ -83,7 +91,7 @@ artifactory {
 
     publish {
         repository {
-            repoKey = artifactProperties.repo
+            repoKey = repo
             username = System.properties['hmArtifactoryPublishUser']
             password = System.properties['hmArtifactoryPublishPassword']
             maven = true

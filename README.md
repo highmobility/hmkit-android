@@ -21,14 +21,12 @@ ndk-build
 
 This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypto and hmkit-utils.
 
-For a release, update the "version = 1.4.0" in all of the deploy.settings files.
+For a release, update the "version = 1.5.0" in all of the deploy.settings files(if needed).
 
-By default, release is set to dev environment. call ./gradlew artifactoryPublish to release all of
-the packages to jfrog development repo. Test the packages if needed.
+Set the release environment in project's build.gradle.
+call ./gradlew artifactoryPublish to release all of the packages.
+call ./gradlew :hmkit-android:artifactoryPublish to release specific packages.
 
-To release to release repo and bintray, replace
+If pushing the same version number, in dev package will be overwritten, in release rejected.
 
-"repo = gradle-dev-local" with "repo = gradle-release-local" in all of the deploy.settings files.
-
-Call "./gradlew artifactoryPublish && ./gradlew bintrayUpload". Revert the repo to gradle-dev-local
-to not accidentally push to release at a later time.
+If releasing to prod, also call "./gradlew bintrayUpload".
