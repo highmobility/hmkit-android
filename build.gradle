@@ -24,9 +24,22 @@ allprojects {
             }
         }
     }
-}
 
-ext {
-    compileSdkVersion = 26
-    cryptoVersion = "1.4.0"
+    ext {
+        compileSdkVersion = 26
+        cryptoVersion = "1.4.0"
+
+        masterProject = true // this is for child projects to know their context
+        // 0 no release, dependencies are local projects
+        // 1 dev release, dependencies are remote
+        // 2 prod release, dependencies are remote
+        release = 0
+
+        if (release == 1) {
+            // this overrides child project's repos.
+            repo = "gradle-dev-local"
+        } else if (release == 2) {
+            repo = "gradle-release-local"
+        }
+    }
 }

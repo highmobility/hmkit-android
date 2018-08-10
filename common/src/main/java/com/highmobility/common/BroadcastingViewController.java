@@ -32,13 +32,14 @@ public class BroadcastingViewController implements IBroadcastingViewController,
     public BroadcastingViewController(IBroadcastingView view) {
         this.view = view;
 
-        downloadAccessCertificates(() -> startBroadcasting(), null);
+        // onPause starts the download
+//        downloadAccessCertificates(() -> startBroadcasting(), null);
 //        sendTelematicsCommand();
     }
 
     @Override
     public void onLinkViewResult(int result) {
-        if (link != null) onStateChanged(link, link.getState());
+        if (link != null) onStateChanged(link, link.getState(), true);
         startBroadcasting();
     }
 
@@ -87,10 +88,12 @@ public class BroadcastingViewController implements IBroadcastingViewController,
             try {
                 Manager.getInstance().terminate();
             } catch (Exception e) {
-                Log.e(TAG, "onPause: ", e);
+                Log.d(TAG, "terminate failed");
             }
         } else {
-            downloadAccessCertificates(() -> startBroadcasting(), null);
+            downloadAccessCertificates(() -> startBroadcasting(), () -> {
+                Log.d(TAG, "download certs failed");
+            });
         }
     }
 
@@ -187,11 +190,15 @@ public class BroadcastingViewController implements IBroadcastingViewController,
     @Override
     public void onStateChanged(Link link, Link.State state) {
         Log.d(TAG, "link state changed " + link.getState());
+        onStateChanged(link, state, false);
+    }
+
+    public void onStateChanged(Link link, Link.State state, boolean fromLinkViewResult) {
         if (link == this.link) {
             view.updateLink((ConnectedLink) link);
 
             if (link.getState() == Link.State.AUTHENTICATED) {
-                onLinkClicked();
+                if (fromLinkViewResult == false) onLinkClicked();
                 view.setStatusText("authenticated");
             } else if (link.getState() == Link.State.CONNECTED) {
                 view.setStatusText("connected");
@@ -209,41 +216,43 @@ public class BroadcastingViewController implements IBroadcastingViewController,
 
     void downloadAccessCertificates(Runnable success, Runnable failed) {
         // prod nexus 5
-        Manager.getInstance().initialize(
-                "***REMOVED***" +
-                        "***REMOVED***" +
-                        "***REMOVED***",
-                "***REMOVED***",
-                "***REMOVED***" +
-                        "+6pXmtkYxynMQm0rfcBU0XFF5A==",
-                view.getActivity()
-        );
+        try {
+            // mission e
+            Manager.getInstance().initialize(
+                    "***REMOVED***",
+                    "***REMOVED***",
+                    "***REMOVED***" +
+                            "+z2sxxdwWNaItdBUWg==",
+                    view.getActivity()
+            );
 
+            // PASTE ACCESS TOKEN HERE
+            String accessToken =
+                    "***REMOVED***";
+
+            Manager.getInstance().downloadCertificate(accessToken, new Manager.DownloadCallback() {
+                @Override
+                public void onDownloaded(DeviceSerial serial) {
+                    if (success != null) success.run();
+                }
+
+                @Override
+                public void onDownloadFailed(DownloadAccessCertificateError error) {
+                    Log.e(TAG, "Could not download a certificate with token: " + error
+                            .getMessage());
+                    if (failed != null) failed.run();
+                }
+            });
+        } catch (Exception e) {
+            if (failed != null) failed.run();
+        }
+    }
+
+    void startBroadcasting() {
         broadcaster = Manager.getInstance().getBroadcaster();
         // set the broadcaster listener
         broadcaster.setListener(this);
 
-        // PASTE ACCESS TOKEN HERE
-        String accessToken =
-                "***REMOVED***" +
-                        "-***REMOVED***";
-
-        Manager.getInstance().downloadCertificate(accessToken, new Manager.DownloadCallback() {
-            @Override
-            public void onDownloaded(DeviceSerial serial) {
-                if (success != null) success.run();
-            }
-
-            @Override
-            public void onDownloadFailed(DownloadAccessCertificateError error) {
-                Log.e(TAG, "Could not download a certificate with token: " + error
-                        .getMessage());
-                if (failed != null) failed.run();
-            }
-        });
-    }
-
-    void startBroadcasting() {
         BroadcastConfiguration conf = new BroadcastConfiguration.Builder()
                 .setOverridesAdvertisementName(true).build(); // true is default anyway
 

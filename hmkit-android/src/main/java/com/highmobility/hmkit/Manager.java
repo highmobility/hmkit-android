@@ -26,7 +26,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Created by ttiganik on 03/08/16.
+ * Manager is the entry point to the HMKit.
  */
 public class Manager {
     private static final String TAG = "HMKit-Manager";
@@ -137,15 +137,13 @@ public class Manager {
         if (this.context != null) terminate(); // will throw if there are connected links
 
         this.context = ctx.getApplicationContext();
-
-        storage = new Storage(context);
-        webService = new WebService(context);
-
         this.caPublicKey = caPublicKey;
         this.certificate = certificate;
         this.privateKey = privateKey;
 
-        mainHandler = new Handler(context.getMainLooper());
+        if (storage == null) storage = new Storage(context);
+        if (webService == null) webService = new WebService(context);
+        if (mainHandler == null) mainHandler = new Handler(context.getMainLooper());
 
         if (workThread.getState() == Thread.State.NEW) {
             workThread.start();
@@ -158,7 +156,11 @@ public class Manager {
             core.HMBTCoreInit(coreInterface);
         }
 
-        startClock();
+        startCoreClock();
+
+        // initialise after terminate
+        if (ble != null) ble.initialise();
+        if (broadcaster != null) broadcaster.initialise();
 
         Log.i(TAG, "Initialized High-Mobility " + getInfoString() + certificate.toString());
     }
@@ -197,27 +199,11 @@ public class Manager {
     public void terminate() throws IllegalStateException {
         if (context == null) return; // already not initialized
 
-        if (broadcaster != null) {
-            if (broadcaster.getLinks().size() > 0) {
-                // re initialise would mess up communication with previous links
-                throw new IllegalStateException("Terminate should not be called if a connected " +
-                        "link " +
-
-                        "exists. Disconnect from all of the links.");
-            } else {
-                broadcaster.stopBroadcasting();
-            }
-
-            broadcaster.stopAlivePinging();
-        }
+        if (broadcaster != null) broadcaster.terminate();
+        if (ble != null) ble.terminate();
 
         coreClockTimer.cancel();
         coreClockTimer = null;
-
-        if (ble != null) {
-            ble.terminate();
-            ble = null;
-        }
 
         webService.cancelAllRequests();
         webService = null;
@@ -230,7 +216,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public Broadcaster getBroadcaster() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         if (broadcaster == null) broadcaster = new Broadcaster(this);
 
         return broadcaster;
@@ -241,7 +227,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public Telematics getTelematics() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         if (telematics == null) telematics = new Telematics(this);
 
         return telematics;
@@ -251,9 +237,8 @@ public class Manager {
      * @return The Scanner Instance
      * @throws IllegalStateException when SDK is not initialized
      */
-
     Scanner getScanner() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         if (scanner == null) scanner = new Scanner(this);
         return scanner;
     }
@@ -263,7 +248,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public DeviceCertificate getDeviceCertificate() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         return certificate;
     }
 
@@ -272,7 +257,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public String getInfoString() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
 
         String infoString = "Android ";
         infoString += BuildConfig.VERSION_NAME;
@@ -297,7 +282,7 @@ public class Manager {
      */
     public void downloadCertificate(String accessToken,
                                     final DownloadCallback callback) throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         webService.requestAccessCertificate(accessToken,
                 privateKey,
                 getDeviceCertificate().getSerial(),
@@ -368,7 +353,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public AccessCertificate[] getCertificates() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial()
                 .getByteArray());
     }
@@ -391,7 +376,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public AccessCertificate getCertificate(DeviceSerial serial) throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial
                 .getByteArray());
 
@@ -429,7 +414,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public boolean deleteCertificate(DeviceSerial serial) throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial()
                 .getByteArray());
     }
@@ -453,7 +438,7 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialized
      */
     public void deleteCertificates() throws IllegalStateException {
-        if (context == null) throw new IllegalStateException("SDK not initialized");
+        checkInitialised();
         storage.resetStorage();
     }
 
@@ -475,7 +460,11 @@ public class Manager {
         }
     }
 
-    private void startClock() {
+    private void checkInitialised() throws IllegalStateException {
+        if (context == null) throw new IllegalStateException("SDK not initialized");
+    }
+
+    private void startCoreClock() {
         if (coreClockTimer != null) return;
 
         coreClockTimer = new Timer();

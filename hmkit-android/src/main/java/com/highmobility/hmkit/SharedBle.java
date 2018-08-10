@@ -17,16 +17,12 @@ import java.util.Random;
  * Created by ttiganik on 01/06/16.
  */
 public class SharedBle {
-    Context ctx;
+    Context context;
 
     BluetoothManager mBluetoothManager;
     BluetoothAdapter mBluetoothAdapter;
 
     private ArrayList<SharedBleListener> listeners = new ArrayList<>();
-
-    SharedBle(Context context) {
-        this.ctx = context;
-    }
 
     public void addListener(SharedBleListener listener) {
         if (listeners.contains(listener) == false) listeners.add(listener);
@@ -34,6 +30,62 @@ public class SharedBle {
 
     public void removeListener(SharedBleListener listener) {
         listeners.remove(listener);
+    }
+
+    public BluetoothManager getManager() {
+        return mBluetoothManager;
+    }
+
+    public BluetoothAdapter getAdapter() {
+        if (mBluetoothAdapter == null) {
+            createAdapter();
+        }
+
+        return mBluetoothAdapter;
+    }
+
+    public boolean isBluetoothSupported() {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+    }
+
+    public boolean isBluetoothOn() {
+        return (getAdapter() != null && getAdapter().isEnabled() && getAdapter().getState() ==
+                BluetoothAdapter.STATE_ON);
+    }
+
+    SharedBle(Context context) {
+        this.context = context;
+        initialise();
+    }
+
+    void initialise() {
+        context.registerReceiver(receiver, new IntentFilter(BluetoothAdapter
+                .ACTION_STATE_CHANGED));
+    }
+
+    void setRandomAdapterName(boolean overrideLocalName) {
+        if (overrideLocalName == false) return;
+        String name = "HM ";
+        byte[] serialBytes = new byte[3];
+        new Random().nextBytes(serialBytes);
+        String randomBytesString = ByteUtils.hexFromBytes(serialBytes);
+        name += randomBytesString.substring(1);
+        getAdapter().setName(name);
+    }
+
+    void createAdapter() {
+        if (mBluetoothManager == null) {
+            mBluetoothManager = (BluetoothManager) context.getSystemService(Context
+                    .BLUETOOTH_SERVICE);
+            mBluetoothAdapter = mBluetoothManager.getAdapter();
+        }
+    }
+
+    void terminate() {
+        if (mBluetoothAdapter != null) {
+            context.unregisterReceiver(receiver);
+            // dont clear listeners here because broadcaster is never nulled.
+        }
     }
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -55,51 +107,4 @@ public class SharedBle {
             }
         }
     };
-
-    public BluetoothManager getManager() {
-        return mBluetoothManager;
-    }
-
-    public BluetoothAdapter getAdapter() {
-        if (mBluetoothAdapter == null) {
-            createAdapter();
-            this.ctx.registerReceiver(receiver, new IntentFilter(BluetoothAdapter
-                    .ACTION_STATE_CHANGED));
-        }
-        return mBluetoothAdapter;
-    }
-
-    public boolean isBluetoothSupported() {
-        return ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
-    }
-
-    public boolean isBluetoothOn() {
-        return (getAdapter() != null && getAdapter().isEnabled() && getAdapter().getState() ==
-                BluetoothAdapter.STATE_ON);
-    }
-
-    void setRandomAdapterName(boolean overrideLocalName) {
-        if (overrideLocalName == false) return;
-        String name = "HM ";
-        byte[] serialBytes = new byte[3];
-        new Random().nextBytes(serialBytes);
-        String randomBytesString = ByteUtils.hexFromBytes(serialBytes);
-        name += randomBytesString.substring(1);
-        getAdapter().setName(name);
-    }
-
-    void createAdapter() {
-        if (mBluetoothManager == null) {
-            mBluetoothManager = (BluetoothManager) ctx.getSystemService(Context.BLUETOOTH_SERVICE);
-            mBluetoothAdapter = mBluetoothManager.getAdapter();
-        }
-    }
-
-    void terminate() {
-        if (mBluetoothAdapter != null) {
-            ctx.unregisterReceiver(receiver);
-            listeners.clear();
-        }
-        ctx = null;
-    }
 }
