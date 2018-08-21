@@ -5,6 +5,8 @@ import android.util.Log;
 
 import java.util.Calendar;
 
+import javax.annotation.Nullable;
+
 /**
  * The ConnectedLink is a representation of the connection between the Broadcaster and a Device
  * that has connected to it. The ConnectedLink is created by the other Device via discovering
@@ -28,7 +30,7 @@ public class ConnectedLink extends Link {
      *
      * @param listener The listener instance to receive ConnectedLink events.
      */
-    public void setListener(ConnectedLinkListener listener) {
+    public void setListener(@Nullable ConnectedLinkListener listener) {
         this.listener = listener;
     }
 

@@ -15,9 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Created by ttiganik on 03/05/2017.
- * <p>
- * Telematics provides the option to send commands via telematics.
+ * Telematics provides the option to send commands via Telematics.
  */
 public class Telematics {
     static final String TAG = "HMKit-Telematics";
@@ -25,25 +23,6 @@ public class Telematics {
     Manager manager;
     CommandCallback callback;
     boolean sendingCommand;
-
-    /**
-     * CommandCallback is used to notify the user about telematics command result.
-     */
-    public interface CommandCallback {
-        /**
-         * Invoked if the command was sent successfully and a response was received.
-         *
-         * @param bytes the response bytes
-         */
-        void onCommandResponse(Bytes bytes);
-
-        /**
-         * Invoked if something went wrong.
-         *
-         * @param error The error
-         */
-        void onCommandFailed(TelematicsError error);
-    }
 
     Telematics(Manager manager) {
         this.manager = manager;
@@ -56,7 +35,8 @@ public class Telematics {
      * @param serial   serial of the device
      * @param callback A {@link CommandCallback} object that is invoked with the command result.
      */
-    public void sendCommand(final Bytes command, DeviceSerial serial, final CommandCallback callback) {
+    public void sendCommand(final Bytes command, DeviceSerial serial, final CommandCallback
+            callback) {
         if (command.getLength() > Constants.MAX_COMMAND_LENGTH) {
             TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_TOO_BIG, 0,
                     "Command size is bigger than " + Constants.MAX_COMMAND_LENGTH + " bytes");
@@ -213,4 +193,24 @@ public class Telematics {
             }
         });
     }
+
+    /**
+     * CommandCallback is used to notify the user about telematics command result.
+     */
+    public interface CommandCallback {
+        /**
+         * Invoked if the command was sent successfully and a response was received.
+         *
+         * @param bytes the response bytes
+         */
+        void onCommandResponse(Bytes bytes);
+
+        /**
+         * Invoked if something went wrong.
+         *
+         * @param error The error
+         */
+        void onCommandFailed(TelematicsError error);
+    }
+
 }
