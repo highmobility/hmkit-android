@@ -79,14 +79,14 @@ public class Link {
     }
 
     /**
-     * @return The links serial.
+     * @return The link's serial.
      */
     public DeviceSerial getSerial() {
         return serial;
     }
 
     /**
-     * Send command to the Link.
+     * Send a command to the Link.
      *
      * @param bytes    The command bytes that will be sent to the link.
      * @param callback A {@link CommandCallback} object that is invoked with the command result.

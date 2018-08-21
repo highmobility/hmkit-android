@@ -23,7 +23,7 @@ import static com.highmobility.hmkit.Broadcaster.TAG;
  * <p>
  * Uses Android SharedPreferences.
  */
-public class Storage {
+class Storage {
     private static final String ACCESS_CERTIFICATE_STORAGE_KEY = "ACCESS_CERTIFICATE_STORAGE_KEY";
     static final String device_certificate_json_object = "device_access_certificate";
 

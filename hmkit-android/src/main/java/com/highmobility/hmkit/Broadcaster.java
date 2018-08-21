@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 /**
  * Broadcaster acts as a gateway to the application's capability to broadcast itself and handle
  * ConnectedLink connectivity.
@@ -34,25 +36,6 @@ import java.util.UUID;
  */
 public class Broadcaster implements SharedBleListener {
     static final String TAG = "HMKit-Broadcaster";
-
-    public enum State {BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING}
-
-    /**
-     * Startcallback is used to notify the user about the start broadcasting result
-     */
-    public interface StartCallback {
-        /**
-         * Invoked when the broadcasting was started.
-         */
-        void onBroadcastingStarted();
-
-        /**
-         * Invoked when there was an error with starting the broadcast.
-         *
-         * @param error The error
-         */
-        void onBroadcastingFailed(BroadcastError error);
-    }
 
     BroadcasterListener listener;
     Manager manager;
@@ -81,7 +64,6 @@ public class Broadcaster implements SharedBleListener {
      * The possible states of the broadcaster are represented by the enum {@link State}.
      *
      * @return The current state of the Broadcaster.
-     * @see Broadcaster.State
      */
     public State getState() {
         return state;
@@ -95,14 +77,14 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * @return indiation of whether the alive pinging is active or not.
+     * @return indication of whether the alive pinging is active or not.
      */
     public boolean isAlivePinging() {
         return isAlivePinging;
     }
 
     /**
-     * @return The certificates that are registered on the Broadcaster.
+     * @return The certificates that are registered for the Broadcaster.
      */
     public AccessCertificate[] getRegisteredCertificates() {
         return manager.storage.getCertificatesWithProvidingSerial(manager.certificate.getSerial()
@@ -141,7 +123,7 @@ public class Broadcaster implements SharedBleListener {
      *                      onBroadcastingFailed is invoked if something went wrong.
      * @param configuration The broadcast configuration.
      */
-    public void startBroadcasting(StartCallback callback, BroadcastConfiguration configuration) {
+    public void startBroadcasting(StartCallback callback, @Nullable BroadcastConfiguration configuration) {
         this.configuration = configuration;
         startBroadcasting(callback);
     }
@@ -288,6 +270,7 @@ public class Broadcaster implements SharedBleListener {
      * the storage is full. {@link Storage.Result#INTERNAL_ERROR} if certificate is null.
      */
     public Storage.Result storeCertificate(AccessCertificate certificate) {
+        // storage is always there.
         return manager.storage.storeCertificate(certificate);
     }
 
@@ -347,7 +330,7 @@ public class Broadcaster implements SharedBleListener {
      * Called with {@link Manager#terminate()}. Broadcasting and alive pinging will be stopped
      * because there is no device cert.
      *
-     * @throws IllegalStateException
+     * @throws IllegalStateException when there are still connected links.
      */
     void terminate() throws IllegalStateException {
         if (getLinks().size() > 0) {
@@ -809,5 +792,29 @@ public class Broadcaster implements SharedBleListener {
             default:
                 return null;
         }
+    }
+
+    /**
+     * The Broadcaster state.
+     */
+    public enum State {
+        BLUETOOTH_UNAVAILABLE, IDLE, BROADCASTING
+    }
+
+    /**
+     * Startcallback is used to notify the user about the start broadcasting result
+     */
+    public interface StartCallback {
+        /**
+         * Invoked when the broadcasting was started.
+         */
+        void onBroadcastingStarted();
+
+        /**
+         * Invoked when there was an error with starting the broadcast.
+         *
+         * @param error The error
+         */
+        void onBroadcastingFailed(BroadcastError error);
     }
 }

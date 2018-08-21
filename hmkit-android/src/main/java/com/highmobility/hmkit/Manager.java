@@ -31,43 +31,9 @@ import java.util.TimerTask;
 public class Manager {
     private static final String TAG = "HMKit-Manager";
 
-    public enum Environment {
-        TEST, STAGING, PRODUCTION
-    }
-
-    public enum LoggingLevel {
-        NONE(0), DEBUG(1), ALL(2);
-
-        private Integer level;
-
-        LoggingLevel(int level) {
-            this.level = level;
-        }
-
-        public int getValue() {
-            return level;
-        }
-    }
-
     /**
-     * DownloadCallback is used to notify the user about the certificate download result.
+     * The logging level of HMKit.
      */
-    public interface DownloadCallback {
-        /**
-         * Invoked if the certificate download was successful.
-         *
-         * @param serial the vehicle or charger serial.
-         */
-        void onDownloaded(DeviceSerial serial);
-
-        /**
-         * Invoked when there was an error with the certificate download.
-         *
-         * @param error The error
-         */
-        void onDownloadFailed(DownloadAccessCertificateError error);
-    }
-
     public static LoggingLevel loggingLevel = LoggingLevel.ALL;
 
     /**
@@ -77,7 +43,7 @@ public class Manager {
     public static Environment environment = Environment.PRODUCTION;
 
     /**
-     * Set a custom environment url.
+     * Custom web environment url. Will override { @link {@link #environment} }
      */
     public static String customEnvironmentBaseUrl = null;
 
@@ -199,6 +165,11 @@ public class Manager {
     public void terminate() throws IllegalStateException {
         if (context == null) return; // already not initialized
 
+        /**
+         * Broadcaster and ble are initialised once and then reused after other terminate/init-s.
+         * This will keep access to some of their properties and prevent NPE-s between init-s,
+         * like {@link Broadcaster#getName()} or ConnectedLink broadcaster reference.
+         */
         if (broadcaster != null) broadcaster.terminate();
         if (ble != null) ble.terminate();
 
@@ -212,8 +183,8 @@ public class Manager {
     }
 
     /**
-     * @return The Broadcaster instance
-     * @throws IllegalStateException when SDK is not initialized
+     * @return The Broadcaster instance.
+     * @throws IllegalStateException when SDK is not initialized.
      */
     public Broadcaster getBroadcaster() throws IllegalStateException {
         checkInitialised();
@@ -223,8 +194,8 @@ public class Manager {
     }
 
     /**
-     * @return The Telematics instance
-     * @throws IllegalStateException when SDK is not initialized
+     * @return The Telematics instance.
+     * @throws IllegalStateException when SDK is not initialized.
      */
     public Telematics getTelematics() throws IllegalStateException {
         checkInitialised();
@@ -234,8 +205,8 @@ public class Manager {
     }
 
     /**
-     * @return The Scanner Instance
-     * @throws IllegalStateException when SDK is not initialized
+     * @return The Scanner Instance.
+     * @throws IllegalStateException when SDK is not initialized.
      */
     Scanner getScanner() throws IllegalStateException {
         checkInitialised();
@@ -245,7 +216,7 @@ public class Manager {
 
     /**
      * @return The device certificate that is used by the SDK to identify itself.
-     * @throws IllegalStateException when SDK is not initialized
+     * @throws IllegalStateException when SDK is not initialized.
      */
     public DeviceCertificate getDeviceCertificate() throws IllegalStateException {
         checkInitialised();
@@ -254,7 +225,7 @@ public class Manager {
 
     /**
      * @return An SDK description string containing version name and type(mobile or wear).
-     * @throws IllegalStateException when SDK is not initialized
+     * @throws IllegalStateException when SDK is not initialized.
      */
     public String getInfoString() throws IllegalStateException {
         checkInitialised();
@@ -275,10 +246,10 @@ public class Manager {
      * Download and store a access certificate for the given access token. The access token needs to
      * be provided by the certificate provider.
      *
-     * @param accessToken The token that is used to download the certificates
+     * @param accessToken The token that is used to download the certificates.
      * @param callback    A {@link DownloadCallback} object that is invoked after the download is
-     *                    finished or failed
-     * @throws IllegalStateException when SDK is not initialized
+     *                    finished or failed.
+     * @throws IllegalStateException when SDK is not initialized.
      */
     public void downloadCertificate(String accessToken,
                                     final DownloadCallback callback) throws IllegalStateException {
@@ -350,7 +321,7 @@ public class Manager {
 
     /**
      * @return All Access Certificates where this device is providing access.
-     * @throws IllegalStateException when SDK is not initialized
+     * @throws IllegalStateException when SDK is not initialized.
      */
     public AccessCertificate[] getCertificates() throws IllegalStateException {
         checkInitialised();
@@ -374,7 +345,7 @@ public class Manager {
      *
      * @param serial The serial number of the device that is gaining access.
      * @return An Access Certificate for the given serial if one exists, otherwise null.
-     * @throws IllegalStateException when SDK is not initialized
+     * @throws IllegalStateException when SDK is not initialized.
      */
     public AccessCertificate getCertificate(DeviceSerial serial) throws IllegalStateException {
         checkInitialised();
@@ -412,7 +383,7 @@ public class Manager {
      *
      * @param serial The serial of the device that is gaining access.
      * @return true if the certificate existed and was deleted successfully, otherwise false
-     * @throws IllegalStateException when SDK is not initialized
+     * @throws IllegalStateException when SDK is not initialized.
      */
     public boolean deleteCertificate(DeviceSerial serial) throws IllegalStateException {
         checkInitialised();
@@ -425,7 +396,7 @@ public class Manager {
      *
      * @param serial  The serial of the device that is gaining access.
      * @param context The application context.
-     * @return true if the certificate existed and was deleted successfully, otherwise false
+     * @return true if the certificate existed and was deleted successfully, otherwise false.
      */
     public boolean deleteCertificate(DeviceSerial serial, Context context) {
         if (storage == null) storage = new Storage(context);
@@ -436,7 +407,7 @@ public class Manager {
     /**
      * Deletes all the stored Access Certificates.
      *
-     * @throws IllegalStateException when SDK is not initialized
+     * @throws IllegalStateException when SDK is not initialized.
      */
     public void deleteCertificates() throws IllegalStateException {
         checkInitialised();
@@ -480,5 +451,48 @@ public class Manager {
                 });
             }
         }, 0, 1000);
+    }
+
+    /**
+     * The possible web environments.
+     */
+    public enum Environment {
+        TEST, STAGING, PRODUCTION
+    }
+
+    /**
+     * The possible logging levels.
+     */
+    public enum LoggingLevel {
+        NONE(0), DEBUG(1), ALL(2);
+
+        private Integer level;
+
+        LoggingLevel(int level) {
+            this.level = level;
+        }
+
+        public int getValue() {
+            return level;
+        }
+    }
+
+    /**
+     * {@link #downloadCertificate(String, DownloadCallback)} result.
+     */
+    public interface DownloadCallback {
+        /**
+         * Invoked if the certificate download was successful.
+         *
+         * @param serial the vehicle or charger serial.
+         */
+        void onDownloaded(DeviceSerial serial);
+
+        /**
+         * Invoked when there was an error with the certificate download.
+         *
+         * @param error The error
+         */
+        void onDownloadFailed(DownloadAccessCertificateError error);
     }
 }
