@@ -10,9 +10,6 @@ import com.highmobility.value.Bytes;
 
 import java.security.SecureRandom;
 
-/**
- * Created by ttiganik on 03/08/16.
- */
 class BTCoreInterface implements HMBTCoreInterface {
     static final String TAG = "HMKit-CoreInterface";
     Manager manager;
@@ -239,13 +236,13 @@ class BTCoreInterface implements HMBTCoreInterface {
                 copyBytes(storedCert.getBytes(), cert);
                 size[0] = storedCert.getBytes().getLength();
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                    Log.d(Broadcaster.TAG, "Returned stored cert for serial " + serial);
+                    Log.d(Broadcaster.TAG, "Returned stored cert for serial " + ByteUtils.hexFromBytes(serial));
                 return 0;
             }
         }
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(Broadcaster.TAG, "No stored cert for serial " + serial);
+            Log.d(Broadcaster.TAG, "No stored cert for serial " + ByteUtils.hexFromBytes(serial));
 
         return 1;
     }
@@ -361,9 +358,7 @@ class BTCoreInterface implements HMBTCoreInterface {
     }
 
     void copyBytes(byte[] from, byte[] to) {
-        for (int i = 0; i < from.length; i++) {
-            to[i] = from[i];
-        }
+        System.arraycopy(from, 0, to, 0, from.length);
     }
 
     void copyBytes(Bytes fromBytes, byte[] to) {

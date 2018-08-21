@@ -1,8 +1,5 @@
 package com.highmobility.hmkit;
 
-/**
- * Created by ttiganik on 18/08/16.
- */
 public interface ConnectedLinkListener extends LinkListener {
     /**
      * This interface is used by the user to either approve or decline the authorization request.

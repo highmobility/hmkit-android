@@ -14,9 +14,6 @@ import java.util.Calendar;
 
 import static com.highmobility.hmkit.Broadcaster.TAG;
 
-/**
- * Created by ttiganik on 17/08/16.
- */
 public class Link {
     /**
      * The time after which HMKit will fail the command if there has been no response. In ms.

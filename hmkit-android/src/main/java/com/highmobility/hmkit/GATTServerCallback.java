@@ -13,9 +13,6 @@ import com.highmobility.utils.ByteUtils;
 
 import java.util.Arrays;
 
-/**
- * Created by ttiganik on 15/04/16.
- */
 class GATTServerCallback extends BluetoothGattServerCallback {
     static final String TAG = "HMKit-GATTServer";
     Broadcaster broadcaster;
@@ -48,7 +45,7 @@ class GATTServerCallback extends BluetoothGattServerCallback {
 
     @Override public void onServiceAdded(int status, BluetoothGattService service) {
         // continue start broadcast after this
-        broadcaster.onServiceAdded(status == BluetoothGatt.GATT_SUCCESS ? true : false);
+        broadcaster.onServiceAdded(status == BluetoothGatt.GATT_SUCCESS);
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.Certificate;
+import com.highmobility.utils.ByteUtils;
 import com.highmobility.value.Bytes;
 
 import org.json.JSONObject;
@@ -75,7 +76,7 @@ class Storage {
             throw new Exception("certificate storage failed " + result);
         }
 
-        if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(TAG, "storeDownloadedCertificates: deviceCert " + deviceAccessCertificate
                     .toString());
 
@@ -84,13 +85,14 @@ class Storage {
             vehicleAccessCertificateBase64 = response.getString("vehicle_access_certificate");
             if (vehicleAccessCertificateBase64 != null && vehicleAccessCertificateBase64.equals
                     ("null") == false) {
-                vehicleAccessCertificate = new AccessCertificate(new Bytes(vehicleAccessCertificateBase64));
+                vehicleAccessCertificate = new AccessCertificate(new Bytes
+                        (vehicleAccessCertificateBase64));
 
                 if (storeCertificate(vehicleAccessCertificate) != Result.SUCCESS) {
                     throw new Exception("cannot store vehicle access cert");
                 }
 
-                if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
+                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
                         .getValue())
                     Log.d(TAG, "storeDownloadedCertificates: vehicleCert " +
                             vehicleAccessCertificate.toString());
@@ -197,7 +199,7 @@ class Storage {
                     cert.getProviderSerial().equals(providingSerial)) {
                 removedIndex = i;
 
-                if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
+                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
                         .getValue()) {
                     Log.d(TAG, "deleteCertificate success: " + cert.toString());
                 }
@@ -211,10 +213,11 @@ class Storage {
             if (writeCertificates(newCerts) == true) return true;
         }
 
-        if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue
                 ()) {
-            Log.d(TAG, "deleteCertificate: failed for gaining: " + gainingSerial
-                    + " providing: " + providingSerial);
+            Log.d(TAG, "deleteCertificate: failed for gaining: " + ByteUtils.hexFromBytes
+                    (gainingSerial)
+                    + " providing: " + ByteUtils.hexFromBytes(providingSerial));
         }
 
         return false;
@@ -228,7 +231,7 @@ class Storage {
             AccessCertificate cert = certs[i];
             if (cert.getGainerSerial().equals(serial)) {
                 removedIndex = i;
-                if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
+                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
                         .getValue()) {
                     Log.d(TAG, "deleteCertificateWithGainingSerial success:" + cert.toString());
                 }
@@ -241,9 +244,10 @@ class Storage {
             if (writeCertificates(newCerts) == true) return true;
         }
 
-        if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue
                 ()) {
-            Log.d(TAG, "deleteCertificateWithGainingSerial failed: " + serial);
+            Log.d(TAG, "deleteCertificateWithGainingSerial failed: " + ByteUtils.hexFromBytes
+                    (serial));
         }
 
         return false;
@@ -257,7 +261,7 @@ class Storage {
             AccessCertificate cert = certs[i];
             if (cert.getProviderSerial().equals(serial)) {
                 removedIndex = i;
-                if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
+                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
                         .getValue()) {
                     Log.d(TAG, "deleteCertificateWithProvidingSerial success: " + cert.toString());
                 }
@@ -267,7 +271,7 @@ class Storage {
 
         if (removedIndex != -1) {
             AccessCertificate[] newCerts = removeAtIndex(removedIndex, certs);
-            if (writeCertificates(newCerts) == true) return true;
+            return writeCertificates(newCerts) == true;
         }
 
         return false;
@@ -314,7 +318,8 @@ class Storage {
                     && cert.getProviderSerial().equals(certificate.getProviderSerial())
                     && cert.getGainerPublicKey().equals(certificate.getGainerPublicKey())) {
 
-                if (!deleteCertificateWithGainingSerial(certificate.getGainerSerial().getByteArray())) {
+                if (!deleteCertificateWithGainingSerial(certificate.getGainerSerial()
+                        .getByteArray())) {
                     Log.e(TAG, "failed to delete existing cert");
                 }
             }
@@ -322,11 +327,7 @@ class Storage {
 
         certs = getCertificates();
         AccessCertificate[] newCerts = new AccessCertificate[certs.length + 1];
-
-        for (int i = 0; i < certs.length; i++) {
-            newCerts[i] = certs[i];
-        }
-
+        System.arraycopy(certs, 0, newCerts, 0, certs.length);
         newCerts[newCerts.length - 1] = certificate;
 
         if (writeCertificates(newCerts) == true) return Result.SUCCESS;

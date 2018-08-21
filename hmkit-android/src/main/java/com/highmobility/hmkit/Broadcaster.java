@@ -802,7 +802,7 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * Startcallback is used to notify the user about the start broadcasting result
+     * StartCallback is used to notify the user about the start broadcasting result
      */
     public interface StartCallback {
         /**

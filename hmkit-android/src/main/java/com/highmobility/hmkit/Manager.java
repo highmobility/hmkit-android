@@ -165,7 +165,7 @@ public class Manager {
     public void terminate() throws IllegalStateException {
         if (context == null) return; // already not initialized
 
-        /**
+        /*
          * Broadcaster and ble are initialised once and then reused after other terminate/init-s.
          * This will keep access to some of their properties and prevent NPE-s between init-s,
          * like {@link Broadcaster#getName()} or ConnectedLink broadcaster reference.
@@ -264,7 +264,7 @@ public class Manager {
                         try {
                             certificate = storage.storeDownloadedCertificates(response);
                         } catch (Exception e) {
-                            if (Manager.getInstance().loggingLevel.getValue() >= Manager
+                            if (Manager.loggingLevel.getValue() >= Manager
                                     .LoggingLevel.DEBUG.getValue()) {
                                 Log.d(TAG, "storeDownloadedCertificates error: " + e.getMessage());
                             }

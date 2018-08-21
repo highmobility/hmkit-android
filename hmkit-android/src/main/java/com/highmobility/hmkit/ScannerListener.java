@@ -1,8 +1,5 @@
 package com.highmobility.hmkit;
 
-/**
- * Created by ttiganik on 01/06/16.
- */
 interface ScannerListener {
     /***
      * Callback for when the Scanner's state has changed.

@@ -13,9 +13,6 @@ import com.highmobility.utils.ByteUtils;
 import java.util.ArrayList;
 import java.util.Random;
 
-/**
- * Created by ttiganik on 01/06/16.
- */
 public class SharedBle {
     Context context;
 
@@ -84,7 +81,7 @@ public class SharedBle {
     void terminate() {
         if (mBluetoothAdapter != null) {
             context.unregisterReceiver(receiver);
-            // dont clear listeners here because broadcaster is never nulled.
+            // don't clear listeners here because broadcaster is never nulled.
         }
     }
 

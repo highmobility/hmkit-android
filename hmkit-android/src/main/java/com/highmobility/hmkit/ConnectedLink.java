@@ -8,14 +8,12 @@ import java.util.Calendar;
 import javax.annotation.Nullable;
 
 /**
- * The ConnectedLink is a representation of the connection between the Broadcaster and a Device
- * that has connected to it. The ConnectedLink is created by the other Device via discovering
- * and connecting to the Broadcaster.
- *
- * The ConnectedLink inherits fron Link, which provides the ability to send and receive commands.
+ * The ConnectedLink is a representation of the connection between the Broadcaster and a Device that
+ * has connected to it. The ConnectedLink is created by the other Device via discovering and
+ * connecting to the Broadcaster.
+ * <p>
+ * The ConnectedLink inherits from Link, which provides the ability to send and receive commands.
  * ConnectedLink is used to provide the authorization callbacks.
- *
- * Created by ttiganik on 13/04/16.
  */
 public class ConnectedLink extends Link {
     Broadcaster broadcaster;
@@ -35,6 +33,7 @@ public class ConnectedLink extends Link {
     }
 
     int pairingResponse = -1;
+
     int didReceivePairingRequest() {
         if (listener == null) {
             Log.e(Broadcaster.TAG, "link listener not set");
@@ -51,7 +50,8 @@ public class ConnectedLink extends Link {
                     return;
                 }
 
-                ((ConnectedLinkListener) listener).onAuthorizationRequested(reference, new ConnectedLinkListener.AuthorizationCallback() {
+                ((ConnectedLinkListener) listener).onAuthorizationRequested(reference, new
+                        ConnectedLinkListener.AuthorizationCallback() {
                     @Override
                     public void approve() {
                         pairingResponse = 0;

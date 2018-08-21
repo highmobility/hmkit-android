@@ -60,7 +60,7 @@ public class Telematics {
             return;
         }
 
-        if (manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(TAG, "sendTelematicsCommand: " + command);
 
         sendingCommand = true;
@@ -167,7 +167,7 @@ public class Telematics {
                     "response.");
         } else {
             final Bytes response = new Bytes(data);
-            if (manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(TAG, "onTelematicsResponseDecrypted: " + response);
 
             sendingCommand = false;

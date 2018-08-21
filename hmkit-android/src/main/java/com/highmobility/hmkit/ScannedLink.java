@@ -10,8 +10,8 @@ import android.bluetooth.BluetoothProfile;
 import android.util.Log;
 
 import com.highmobility.crypto.AccessCertificate;
-import com.highmobility.utils.ByteUtils;
 import com.highmobility.crypto.value.DeviceSerial;
+import com.highmobility.utils.ByteUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,7 +23,6 @@ import java.util.UUID;
  * The ScannedLinks's interface provides the ability to send commands and handle incoming requests
  * from the ConnectedLink.
  * <p>
- * Created by ttiganik on 01/06/16.
  */
 class ScannedLink extends Link {
     private static final String TAG = "HMKit-ScannedLink";

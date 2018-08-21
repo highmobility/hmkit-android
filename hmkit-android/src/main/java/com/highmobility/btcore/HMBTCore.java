@@ -1,8 +1,5 @@
 package com.highmobility.btcore;
 
-/**
- * Created by ttiganik on 13/04/16.
- */
 public class HMBTCore {
 
     static {

@@ -11,10 +11,6 @@ import java.util.TimerTask;
 
 import static com.highmobility.hmkit.Broadcaster.TAG;
 
-
-/**
- * Created by ttiganik on 09/08/16.
- */
 class SentCommand {
     boolean finished;
     Link.CommandCallback commandCallback;
@@ -42,8 +38,7 @@ class SentCommand {
                     commandCallback.onCommandSent();
                 }
             });
-        }
-        else {
+        } else {
             dispatchError(errorCode, 0, "");
         }
     }

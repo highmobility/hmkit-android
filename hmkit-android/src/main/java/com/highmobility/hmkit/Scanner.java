@@ -15,9 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by ttiganik on 01/06/16.
- */
 class Scanner {
     static final String TAG = "HMKit-Scanner";
 

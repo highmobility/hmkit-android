@@ -3,12 +3,12 @@ package com.highmobility.btcore;
 public interface HMBTCoreInterface {
 
     //Characteristics id's
-    public static final int hm_characteristic_link_read     =   0x02;
-    public static final int hm_characteristic_link_write    =   0x03;
-    public static final int hm_characteristic_alive         =   0x04;
-    public static final int hm_characteristic_info          =   0x05;
-    public static final int hm_characteristic_sensing_read  =   0x06;
-    public static final int hm_characteristic_sensing_write =   0x07;
+    int hm_characteristic_link_read     =   0x02;
+    int hm_characteristic_link_write    =   0x03;
+    int hm_characteristic_alive         =   0x04;
+    int hm_characteristic_info          =   0x05;
+    int hm_characteristic_sensing_read  =   0x06;
+    int hm_characteristic_sensing_write =   0x07;
 
     //BT HAL
 
