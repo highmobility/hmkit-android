@@ -349,7 +349,7 @@ public class Manager {
     }
 
     /**
-     * @return All Access Certificates where this device's serial is providing access.
+     * @return All Access Certificates where this device is providing access.
      * @throws IllegalStateException when SDK is not initialized
      */
     public AccessCertificate[] getCertificates() throws IllegalStateException {
@@ -359,13 +359,14 @@ public class Manager {
     }
 
     /**
-     * @param context The application context
-     * @return All Access Certificates where this device's serial is providing access.
+     * @param context The application context.
+     * @param serial  The serial of the device that is providing access (eg this device).
+     * @return All stored Access Certificates where the device with the given serial is providing
+     * access.
      */
-    public AccessCertificate[] getCertificates(Context context) {
+    public AccessCertificate[] getCertificates(DeviceSerial serial, Context context) {
         if (storage == null) storage = new Storage(context);
-        return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial()
-                .getByteArray());
+        return storage.getCertificatesWithProvidingSerial(serial.getByteArray());
     }
 
     /**
