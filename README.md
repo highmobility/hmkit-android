@@ -23,7 +23,7 @@ This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypt
 
 For a release, update the "version = 1.5.0" in all of the deploy.settings files(if needed).
 
-Set the release environment in project's build.gradle.
+Set the release environment in project's build.gradle (ext property release = 0/1/2).
 call ./gradlew artifactoryPublish to release all of the packages.
 call ./gradlew :hmkit-android:artifactoryPublish to release specific packages.
 
