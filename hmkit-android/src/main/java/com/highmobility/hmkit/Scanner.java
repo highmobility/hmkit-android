@@ -7,6 +7,7 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 
 import com.highmobility.btcore.HMDevice;
+import com.highmobility.hmkit.error.BleNotSupportedException;
 import com.highmobility.utils.ByteUtils;
 
 import java.util.ArrayList;
@@ -15,8 +16,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class Scanner {
+class Scanner implements SharedBleListener {
     static final String TAG = "HMKit-Scanner";
+
+    /**
+     * Called when ble state has changed to available or not. Not available state can be called
+     * multiple times.
+     *
+     * @param available true if bluetooth is available
+     */
+    @Override public void bluetoothChangedToAvailable(boolean available) {
+
+    }
 
     public enum State {
         BLUETOOTH_UNAVAILABLE, IDLE, SCANNING
@@ -34,12 +45,19 @@ class Scanner {
 
     ArrayList<byte[]> authenticatingMacs = new ArrayList<>();
 
-    Scanner(Manager manager) {
+    Scanner(Manager manager) throws BleNotSupportedException {
+        if (initialise() == false) throw new BleNotSupportedException();
         this.manager = manager;
     }
 
+    boolean initialise() {
+        SharedBle ble = manager.getBle();
+        if (ble == null) return false;
+        ble.addListener(this);
+        return true;
+    }
+
     /**
-     *
      * @return The links currently in proximity
      */
     public List<ScannedLink> getLinks() {
@@ -47,7 +65,6 @@ class Scanner {
     }
 
     /**
-     *
      * @return The Scanner state
      * @see State
      */
@@ -65,10 +82,10 @@ class Scanner {
     }
 
     /**
-     * Add a trusted Certificate Authority to the scan list. This is used to recognize
-     * Link-enabled devices when scanning.
+     * Add a trusted Certificate Authority to the scan list. This is used to recognize Link-enabled
+     * devices when scanning.
      *
-     * @param issuer The CA issuer identifier
+     * @param issuer    The CA issuer identifier
      * @param publicKey The CA public key
      */
     public void addTrustedCertificateAuthority(byte[] issuer, byte[] publicKey) {
@@ -78,18 +95,11 @@ class Scanner {
     /**
      * Start scanning for nearby links.
      *
-     * @return 0 if succeeded or    Link.UNSUPPORTED if BLE is not supported with this device
-     *                              Link.BLUETOOTH_OFF if BLE is turned off
+     * @return 0 if succeeded or Link.BLUETOOTH_OFF if BLE is turned off
      */
     public int startScanning() {
         // = new byte[][] { array1, array2, array3, array4, array5 };
         if (getState() == State.SCANNING) return 0;
-
-        if (!manager.getBle().isBluetoothSupported()) {
-            setState(State.BLUETOOTH_UNAVAILABLE);
-//            return Link.UNSUPPORTED;
-            return 1; // use some descriptive error method
-        }
 
         if (!manager.getBle().isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
@@ -151,9 +161,9 @@ class Scanner {
             manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
-            manager.core.HMBTCoreSensingProcessAdvertisement(manager.coreInterface,
-                    ByteUtils.bytesFromMacString(device.getAddress()),
-                    advBytes, advBytes.length);
+                    manager.core.HMBTCoreSensingProcessAdvertisement(manager.coreInterface,
+                            ByteUtils.bytesFromMacString(device.getAddress()),
+                            advBytes, advBytes.length);
                 }
             });
         }
@@ -273,7 +283,8 @@ class Scanner {
 
     private ScannedLink getLinkForMac(byte[] mac) {
         for (ScannedLink existingDevice : devices) {
-            if (Arrays.equals(ByteUtils.bytesFromMacString(existingDevice.btDevice.getAddress()), mac)) {
+            if (Arrays.equals(ByteUtils.bytesFromMacString(existingDevice.btDevice.getAddress()),
+                    mac)) {
                 return existingDevice;
             }
         }

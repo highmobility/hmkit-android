@@ -37,6 +37,8 @@ public class Telematics {
      */
     public void sendCommand(final Bytes command, DeviceSerial serial, final CommandCallback
             callback) {
+        manager.checkInitialised();
+
         if (command.getLength() > Constants.MAX_COMMAND_LENGTH) {
             TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_TOO_BIG, 0,
                     "Command size is bigger than " + Constants.MAX_COMMAND_LENGTH + " bytes");

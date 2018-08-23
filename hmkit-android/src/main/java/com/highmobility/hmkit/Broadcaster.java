@@ -16,6 +16,7 @@ import android.util.Log;
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.value.DeviceSerial;
+import com.highmobility.hmkit.error.BleNotSupportedException;
 import com.highmobility.hmkit.error.BroadcastError;
 import com.highmobility.utils.ByteUtils;
 
@@ -87,6 +88,7 @@ public class Broadcaster implements SharedBleListener {
      * @return The certificates that are registered for the Broadcaster.
      */
     public AccessCertificate[] getRegisteredCertificates() {
+        manager.checkInitialised();
         return manager.storage.getCertificatesWithProvidingSerial(manager.certificate.getSerial()
                 .getByteArray());
     }
@@ -95,6 +97,7 @@ public class Broadcaster implements SharedBleListener {
      * @return The certificates that are stored in the broadcaster's database for other devices.
      */
     public AccessCertificate[] getStoredCertificates() {
+        manager.checkInitialised();
         return manager.storage.getCertificatesWithoutProvidingSerial(manager.certificate
                 .getSerial().getByteArray());
     }
@@ -123,7 +126,8 @@ public class Broadcaster implements SharedBleListener {
      *                      onBroadcastingFailed is invoked if something went wrong.
      * @param configuration The broadcast configuration.
      */
-    public void startBroadcasting(StartCallback callback, @Nullable BroadcastConfiguration configuration) {
+    public void startBroadcasting(StartCallback callback, @Nullable BroadcastConfiguration
+            configuration) {
         this.configuration = configuration;
         startBroadcasting(callback);
     }
@@ -136,6 +140,7 @@ public class Broadcaster implements SharedBleListener {
      *                 something went wrong.
      */
     public void startBroadcasting(StartCallback callback) {
+        manager.checkInitialised();
         Log.d(TAG, "startBroadcasting() called");
 
         if (state == State.BROADCASTING) {
@@ -146,20 +151,10 @@ public class Broadcaster implements SharedBleListener {
             return;
         }
 
-        if (manager.context == null) {
-            callback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.UNINITIALIZED
-                    , 0, "Manager is not initialized"));
-            return;
-        }
+        if (manager.getBle().isBluetoothOn() == false) {
+            // TODO: 22/08/2018 this check should check broadcaster state, not ble. Broadcaster
+            // state should always be up to date
 
-        if (!manager.getBle().isBluetoothSupported()) {
-            setState(State.BLUETOOTH_UNAVAILABLE);
-            callback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.UNSUPPORTED
-                    , 0, "Bluetooth is not supported"));
-            return;
-        }
-
-        if (!manager.getBle().isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
             callback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.BLUETOOTH_OFF
                     , 0, "Bluetooth is turned off"));
@@ -237,6 +232,7 @@ public class Broadcaster implements SharedBleListener {
      * Stop the alive pinging.
      */
     public void stopAlivePinging() {
+        // TODO: 23/08/2018 try to call if hasnt started alive pinging before
         isAlivePinging = false;
         manager.workHandler.removeCallbacks(clockRunnable);
     }
@@ -247,13 +243,11 @@ public class Broadcaster implements SharedBleListener {
      *
      * @param certificate The certificate that can be used by the Device to authorised Links
      * @return {@link Storage.Result#SUCCESS} on success or {@link Storage.Result#INTERNAL_ERROR} if
-     * the given certificates providing serial doesn't match with broadcaster's serial or the
-     * certificate is null. {@link Storage.Result#STORAGE_FULL} if the storage is full.
+     * the given certificates providing serial doesn't match with broadcaster's serial. {@link
+     * Storage.Result#STORAGE_FULL} if the storage is full.
      */
     public Storage.Result registerCertificate(AccessCertificate certificate) {
-        if (manager.certificate == null) {
-            return Storage.Result.INTERNAL_ERROR;
-        }
+        manager.checkInitialised();
 
         if (manager.certificate.getSerial().equals(certificate.getProviderSerial()) == false) {
             return Storage.Result.INTERNAL_ERROR;
@@ -270,7 +264,6 @@ public class Broadcaster implements SharedBleListener {
      * the storage is full. {@link Storage.Result#INTERNAL_ERROR} if certificate is null.
      */
     public Storage.Result storeCertificate(AccessCertificate certificate) {
-        // storage is always there.
         return manager.storage.storeCertificate(certificate);
     }
 
@@ -322,8 +315,20 @@ public class Broadcaster implements SharedBleListener {
         // cant close service here, we wont get disconnect callback
     }
 
-    void initialise() {
-        manager.getBle().addListener(this);
+    /**
+     * @return false if BLE is not available.
+     */
+    boolean initialise() {
+        // we need ble on initialise to listen to state change from IDLE to BLE_UNAVAILABLE.
+        // we reset the listener after terminate() because ble ctx receiver is unregistered anyway.
+        SharedBle ble = manager.getBle();
+        if (ble == null) return false;
+        ble.addListener(this);
+
+        // TODO: 22/08/2018 if ble went off while terminated, should start with BLE_UNAVAILABLE.
+        // eg check for initial state
+
+        return true;
     }
 
     /**
@@ -384,9 +389,9 @@ public class Broadcaster implements SharedBleListener {
         }
     }
 
-    Broadcaster(Manager manager) {
+    Broadcaster(Manager manager) throws IllegalStateException, BleNotSupportedException {
+        if (initialise() == false) throw new BleNotSupportedException();
         this.manager = manager;
-        initialise();
     }
 
     @Override

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 
+import com.highmobility.hmkit.error.BleNotSupportedException;
 import com.highmobility.utils.ByteUtils;
 
 import java.util.ArrayList;
@@ -34,15 +35,7 @@ public class SharedBle {
     }
 
     public BluetoothAdapter getAdapter() {
-        if (mBluetoothAdapter == null) {
-            createAdapter();
-        }
-
         return mBluetoothAdapter;
-    }
-
-    public boolean isBluetoothSupported() {
-        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
     public boolean isBluetoothOn() {
@@ -50,8 +43,18 @@ public class SharedBle {
                 BluetoothAdapter.STATE_ON);
     }
 
-    SharedBle(Context context) {
+    SharedBle(Context context) throws BleNotSupportedException {
         this.context = context;
+        
+        Object bleService = context.getSystemService(Context.BLUETOOTH_SERVICE);
+        if (bleService == null ||
+                context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
+                        == false)
+            throw new BleNotSupportedException();
+
+        mBluetoothManager = (BluetoothManager) bleService;
+        mBluetoothAdapter = mBluetoothManager.getAdapter();
+
         initialise();
     }
 
@@ -68,14 +71,6 @@ public class SharedBle {
         String randomBytesString = ByteUtils.hexFromBytes(serialBytes);
         name += randomBytesString.substring(1);
         getAdapter().setName(name);
-    }
-
-    void createAdapter() {
-        if (mBluetoothManager == null) {
-            mBluetoothManager = (BluetoothManager) context.getSystemService(Context
-                    .BLUETOOTH_SERVICE);
-            mBluetoothAdapter = mBluetoothManager.getAdapter();
-        }
     }
 
     void terminate() {
