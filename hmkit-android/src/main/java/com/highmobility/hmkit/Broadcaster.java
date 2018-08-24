@@ -157,11 +157,7 @@ public class Broadcaster implements SharedBleListener {
             return;
         }
 
-        if (manager.getBle().isBluetoothOn() == false) {
-            // TODO: 22/08/2018 this check should check broadcaster state, not ble. Broadcaster
-            // state should always be up to date
-
-            setState(State.BLUETOOTH_UNAVAILABLE);
+        if (state == State.BLUETOOTH_UNAVAILABLE) {
             callback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.BLUETOOTH_OFF
                     , 0, "Bluetooth is turned off"));
             return;
@@ -323,17 +319,15 @@ public class Broadcaster implements SharedBleListener {
     }
 
     /**
-     * @return false if BLE is not available.
+     * @return false if BLE is not supported for this device.
      */
     boolean initialise() {
         // we need ble on initialise to listen to state change from IDLE to BLE_UNAVAILABLE.
-        // we reset the listener after terminate() because ble ctx receiver is unregistered anyway.
+        // we reset the listener after terminate().
         SharedBle ble = manager.getBle();
         if (ble == null) return false;
         ble.addListener(this);
-
-        // TODO: 22/08/2018 if ble went off while terminated, should start with BLE_UNAVAILABLE.
-        // eg check for initial state
+        if (ble.isBluetoothOn() == false) setState(State.BLUETOOTH_UNAVAILABLE);
 
         return true;
     }
