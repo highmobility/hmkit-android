@@ -91,9 +91,8 @@ public class BroadcastingViewController implements IBroadcastingViewController,
                 Log.d(TAG, "terminate failed");
             }
         } else {
-            downloadAccessCertificates(() -> startBroadcasting(), () -> {
-                Log.d(TAG, "download certs failed");
-            });
+            downloadAccessCertificates(() -> startBroadcasting(), () -> Log.d(TAG, "download " +
+                    "certs failed"));
         }
     }
 
@@ -218,12 +217,11 @@ public class BroadcastingViewController implements IBroadcastingViewController,
         // prod nexus 5
         try {
             // mission e
-            Manager.getInstance().initialize(
+            Manager.createInstance(view.getActivity().getApplicationContext()).initialise(
                     "***REMOVED***",
                     "***REMOVED***",
                     "***REMOVED***" +
-                            "+z2sxxdwWNaItdBUWg==",
-                    view.getActivity()
+                            "+z2sxxdwWNaItdBUWg=="
             );
 
             // PASTE ACCESS TOKEN HERE
@@ -244,6 +242,7 @@ public class BroadcastingViewController implements IBroadcastingViewController,
                 }
             });
         } catch (Exception e) {
+            Log.e(TAG, "downloadAccessCertificates: ", e);
             if (failed != null) failed.run();
         }
     }

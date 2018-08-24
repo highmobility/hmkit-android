@@ -119,6 +119,11 @@ public class Broadcaster implements SharedBleListener {
         this.listener = listener;
     }
 
+    Broadcaster(Manager manager) throws IllegalStateException, BleNotSupportedException {
+        this.manager = manager;
+        if (initialise() == false) throw new BleNotSupportedException();
+    }
+
     /**
      * Start broadcasting via BLE advertising.
      *
@@ -389,11 +394,6 @@ public class Broadcaster implements SharedBleListener {
                     .BLUETOOTH_FAILURE
                     , 0, "Failed to create gatt server."));
         }
-    }
-
-    Broadcaster(Manager manager) throws IllegalStateException, BleNotSupportedException {
-        if (initialise() == false) throw new BleNotSupportedException();
-        this.manager = manager;
     }
 
     @Override

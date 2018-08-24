@@ -286,7 +286,7 @@ public class Manager {
          */
         if (broadcaster != null) broadcaster.terminate();
         if (ble != null) ble.terminate();
-        webService.cancelAllRequests();
+        if (webService != null) webService.cancelAllRequests();
 
         coreClockTimer.cancel();
         coreClockTimer = null;
@@ -308,7 +308,7 @@ public class Manager {
     public void downloadCertificate(String accessToken,
                                     final DownloadCallback callback) throws IllegalStateException {
         checkInitialised();
-        webService.requestAccessCertificate(accessToken,
+        getWebService().requestAccessCertificate(accessToken,
                 privateKey,
                 getDeviceCertificate().getSerial(),
                 new Response.Listener<JSONObject>() {
