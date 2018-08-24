@@ -67,7 +67,7 @@ public class Telematics {
 
         sendingCommand = true;
 
-        manager.webService.getNonce(certificate.getProviderSerial(), new Response
+        manager.getWebService().getNonce(certificate.getProviderSerial(), new Response
                 .Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonResponse) {
@@ -103,7 +103,7 @@ public class Telematics {
     }
 
     void onTelematicsCommandEncrypted(byte[] serial, byte[] issuer, byte[] command) {
-        manager.webService.sendTelematicsCommand(new Bytes(command), new DeviceSerial(serial),
+        manager.getWebService().sendTelematicsCommand(new Bytes(command), new DeviceSerial(serial),
                 new Issuer(issuer),
                 new Response.Listener<JSONObject>() {
                     @Override

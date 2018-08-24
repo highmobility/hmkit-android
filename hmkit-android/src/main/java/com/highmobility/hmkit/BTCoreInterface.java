@@ -35,7 +35,6 @@ class BTCoreInterface implements HMBTCoreInterface {
         return 0;
     }
 
-
     @Override
     public int HMBTHalAdvertisementStart(byte[] issuer, byte[] appID) {
         // Called straight after init. Has issuer and app id parsed from the device cert.
@@ -89,7 +88,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMBTHalTelematicsSendData(byte[] issuer, byte[] serial, int length, byte[] data) {
-        manager.telematics.onTelematicsCommandEncrypted(serial, issuer, data);
+        manager.getTelematics().onTelematicsCommandEncrypted(serial, issuer, data);
         return 0;
     }
 
@@ -236,7 +235,8 @@ class BTCoreInterface implements HMBTCoreInterface {
                 copyBytes(storedCert.getBytes(), cert);
                 size[0] = storedCert.getBytes().getLength();
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                    Log.d(Broadcaster.TAG, "Returned stored cert for serial " + ByteUtils.hexFromBytes(serial));
+                    Log.d(Broadcaster.TAG, "Returned stored cert for serial " + ByteUtils
+                            .hexFromBytes(serial));
                 return 0;
             }
         }
@@ -332,7 +332,7 @@ class BTCoreInterface implements HMBTCoreInterface {
     @Override
     public void HMApiCallbackTelematicsCommandIncoming(HMDevice device, int id, int length,
                                                        byte[] data) {
-        manager.telematics.onTelematicsResponseDecrypted(device.getSerial(), (byte) id,
+        manager.getTelematics().onTelematicsResponseDecrypted(device.getSerial(), (byte) id,
                 trimmedBytes(data, length));
     }
 
@@ -377,6 +377,3 @@ class BTCoreInterface implements HMBTCoreInterface {
         return trimmedBytes;
     }
 }
-
-
-

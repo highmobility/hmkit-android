@@ -89,7 +89,8 @@ public class Broadcaster implements SharedBleListener {
      */
     public AccessCertificate[] getRegisteredCertificates() {
         manager.checkInitialised();
-        return manager.storage.getCertificatesWithProvidingSerial(manager.certificate.getSerial()
+        return manager.storage.getCertificatesWithProvidingSerial(manager.getDeviceCertificate()
+                .getSerial()
                 .getByteArray());
     }
 
@@ -98,7 +99,7 @@ public class Broadcaster implements SharedBleListener {
      */
     public AccessCertificate[] getStoredCertificates() {
         manager.checkInitialised();
-        return manager.storage.getCertificatesWithoutProvidingSerial(manager.certificate
+        return manager.storage.getCertificatesWithoutProvidingSerial(manager.getDeviceCertificate()
                 .getSerial().getByteArray());
     }
 
@@ -249,7 +250,8 @@ public class Broadcaster implements SharedBleListener {
     public Storage.Result registerCertificate(AccessCertificate certificate) {
         manager.checkInitialised();
 
-        if (manager.certificate.getSerial().equals(certificate.getProviderSerial()) == false) {
+        if (manager.getDeviceCertificate().getSerial().equals(certificate.getProviderSerial()) ==
+                false) {
             return Storage.Result.INTERNAL_ERROR;
         }
 

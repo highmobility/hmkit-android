@@ -57,15 +57,15 @@ public class Manager {
     Context context;
 
     private static Manager instance;
-    DeviceCertificate certificate;
+    private DeviceCertificate certificate;
     PrivateKey privateKey;
     PublicKey caPublicKey;
     byte[] issuer, appId; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
 
     private Scanner scanner;
     private Broadcaster broadcaster;
-    WebService webService;
-    Telematics telematics;
+    private Telematics telematics;
+    private WebService webService;
 
     Handler mainHandler, workHandler;
     private HandlerThread workThread = new HandlerThread("BTCoreThread");
@@ -83,22 +83,85 @@ public class Manager {
     }
 
     /**
-     * Set the Application context before using any of the other methods.
+     * @return The Broadcaster instance. Null if BLE is not supported.
+     */
+    @Nullable public Broadcaster getBroadcaster() {
+        if (broadcaster == null) {
+            try {
+                broadcaster = new Broadcaster(this);
+            } catch (BleNotSupportedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return broadcaster;
+    }
+
+    /**
+     * @return The Telematics instance.
+     */
+    public Telematics getTelematics() {
+        if (telematics == null) telematics = new Telematics(this);
+
+        return telematics;
+    }
+
+    /**
+     * @return The Scanner Instance. Null if BLE is not supported.
+     * @throws IllegalStateException when SDK is not initialized.
+     */
+    @Nullable Scanner getScanner() throws IllegalStateException {
+        if (scanner == null) {
+            try {
+                scanner = new Scanner(this);
+            } catch (BleNotSupportedException e) {
+                e.printStackTrace();
+            }
+        }
+        return scanner;
+    }
+
+    /**
+     * @return The device certificate that is used by the SDK to identify itself. Null if {@link
+     * #initialise(DeviceCertificate, PrivateKey, PublicKey)} has not been called.
+     */
+    @Nullable public DeviceCertificate getDeviceCertificate() {
+        return certificate;
+    }
+
+    /**
+     * @return An SDK description string containing version name and type(mobile or wear).
+     * @throws IllegalStateException when SDK is not initialized.
+     */
+    public String getInfoString() {
+        String infoString = "Android ";
+        infoString += BuildConfig.VERSION_NAME;
+
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            infoString += " w";
+        } else {
+            infoString += " m";
+        }
+
+        return infoString;
+    }
+
+    WebService getWebService() {
+        if (webService == null) webService = new WebService(context);
+        return webService;
+    }
+
+    /**
+     * Create the Manager instance with Application Context before accessing it.
      *
      * @param context The application context.
      */
-    public static void setContext(Context context) {
+    public static Manager createInstance(Context context) {
         if (instance == null) {
             instance = new Manager(context);
         }
-    }
 
-    Manager(Context context) {
-        this.context = context.getApplicationContext();
-        storage = new Storage(this.context);
-        mainHandler = new Handler(context.getMainLooper());
-        workThread.start();
-        workHandler = new Handler(workThread.getLooper());
+        return instance;
     }
 
     /**
@@ -106,11 +169,19 @@ public class Manager {
      */
     public static Manager getInstance() {
         if (instance == null) {
-            throw new IllegalStateException("Call setContext() before accessing the Manager " +
+            throw new IllegalStateException("Call createInstance() before accessing the Manager " +
                     "instance.");
         }
 
         return instance;
+    }
+
+    Manager(Context context) {
+        this.context = context.getApplicationContext();
+        storage = new Storage(this.context);
+        mainHandler = new Handler(this.context.getMainLooper());
+        workThread.start();
+        workHandler = new Handler(workThread.getLooper());
     }
 
     /**
@@ -146,9 +217,6 @@ public class Manager {
         this.caPublicKey = caPublicKey;
         this.certificate = certificate;
         this.privateKey = privateKey;
-
-        if (webService == null)
-            webService = new WebService(context); // TODO: 23/08/2018 init this only if accessed.
 
         if (coreInterface == null) {
             // core init needs to be done once, only initialises structs
@@ -229,70 +297,6 @@ public class Manager {
         this.caPublicKey = null;
         this.certificate = null;
         this.privateKey = null;
-    }
-
-    /**
-     * @return The Broadcaster instance. Null if BLE is not supported.
-     */
-    @Nullable public Broadcaster getBroadcaster() {
-        if (broadcaster == null) {
-            try {
-                broadcaster = new Broadcaster(this);
-            } catch (BleNotSupportedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return broadcaster;
-    }
-
-    /**
-     * @return The Telematics instance.
-     */
-    public Telematics getTelematics() {
-        if (telematics == null) telematics = new Telematics(this);
-
-        return telematics;
-    }
-
-    /**
-     * @return The Scanner Instance. Null if BLE is not supported.
-     * @throws IllegalStateException when SDK is not initialized.
-     */
-    @Nullable Scanner getScanner() throws IllegalStateException {
-        if (scanner == null) {
-            try {
-                scanner = new Scanner(this);
-            } catch (BleNotSupportedException e) {
-                e.printStackTrace();
-            }
-        }
-        return scanner;
-    }
-
-    /**
-     * @return The device certificate that is used by the SDK to identify itself. Null if
-     * #initialise() has not been called.
-     */
-    @Nullable public DeviceCertificate getDeviceCertificate() {
-        return certificate;
-    }
-
-    /**
-     * @return An SDK description string containing version name and type(mobile or wear).
-     * @throws IllegalStateException when SDK is not initialized.
-     */
-    public String getInfoString() {
-        String infoString = "Android ";
-        infoString += BuildConfig.VERSION_NAME;
-
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
-            infoString += " w";
-        } else {
-            infoString += " m";
-        }
-
-        return infoString;
     }
 
     /**
