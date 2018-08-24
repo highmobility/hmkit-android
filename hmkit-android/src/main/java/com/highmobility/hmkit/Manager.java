@@ -50,22 +50,21 @@ public class Manager {
      */
     public static String customEnvironmentBaseUrl = null;
 
-    HMBTCore core = new HMBTCore();
-    BTCoreInterface coreInterface;
-    private SharedBle ble;
-    Storage storage;
-    Context context;
-
     private static Manager instance;
     private DeviceCertificate certificate;
     PrivateKey privateKey;
     PublicKey caPublicKey;
     byte[] issuer, appId; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
+    HMBTCore core = new HMBTCore();
+    BTCoreInterface coreInterface;
+    Storage storage;
+    Context context;
 
     private Scanner scanner;
     private Broadcaster broadcaster;
     private Telematics telematics;
     private WebService webService;
+    private SharedBle ble;
 
     Handler mainHandler, workHandler;
     private HandlerThread workThread = new HandlerThread("BTCoreThread");
@@ -287,12 +286,10 @@ public class Manager {
          */
         if (broadcaster != null) broadcaster.terminate();
         if (ble != null) ble.terminate();
+        webService.cancelAllRequests();
 
         coreClockTimer.cancel();
         coreClockTimer = null;
-
-        webService.cancelAllRequests(); // TODO: 23/08/2018 don't re create webservice
-        webService = null;
 
         this.caPublicKey = null;
         this.certificate = null;
