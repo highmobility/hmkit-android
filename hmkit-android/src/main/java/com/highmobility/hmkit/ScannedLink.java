@@ -77,23 +77,23 @@ class ScannedLink extends Link {
     }
 
     void registerCertificate(AccessCertificate certificate, Constants.ResponseCallback callback) {
-        // TODO:
+        // TSODO:
     }
 
     void storeCertificate(AccessCertificate certificate, Constants.ResponseCallback callback) {
-        // TODO:
+        // TSODO:
     }
 
     void getAccessCertificate(AccessCertificate certificate, Constants.ResponseCallback callback) {
-        // TODO:
+        // TSODO:
     }
 
     void revokeCertificate(DeviceSerial serial, Constants.ResponseCallback callback) {
-        // TODO:
+        // TSODO:
     }
 
     void reset(Constants.ResponseCallback callback) {
-        // TODO:
+        // TSODO:
     }
 
     ScannedLink(Scanner scanner, BluetoothDevice btDevice) {
@@ -109,14 +109,14 @@ class ScannedLink extends Link {
 
             if (writeCharacteristic.setValue(value) == false || gatt.writeCharacteristic
                     (writeCharacteristic) == false) {
-                // TODO: fail auth or command
+                // TSODO: fail auth or command
             }
         }
     }
 
     void readValue() {
         if (gatt.readCharacteristic(readCharacteristic) == false) {
-            // TODO: fail auth or command
+            // TSODO: fail auth or command
         }
     }
 
@@ -136,7 +136,7 @@ class ScannedLink extends Link {
 
     void discoverServices() {
         if (gatt.discoverServices() == false) {
-            // TODO: how to failed connection should be handled
+            // TSODO: how to failed connection should be handled
             // also remove authenticatingMac from scanner
 
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
@@ -147,7 +147,7 @@ class ScannedLink extends Link {
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            // TODO: handle status.. 
+            // TSODO: handle status.. 
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
@@ -180,7 +180,7 @@ class ScannedLink extends Link {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status != BluetoothGatt.GATT_SUCCESS) {
-                // TODO: how failed service discovery/connection should be handled
+                // TSODO: how failed service discovery/connection should be handled
                 // also remove authenticatingMac from scanner
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                     Log.d(TAG, "onServicesDiscovered failure " + status);
@@ -221,7 +221,7 @@ class ScannedLink extends Link {
 
             if (readCharacteristic != null && writeCharacteristic != null) {
                 if (gatt.setCharacteristicNotification(readCharacteristic, true) == false) {
-                    // TODO: how to failed connection should be handled
+                    // TSODO: how to failed connection should be handled
                     // also remove authenticatingMac from scanner
 
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
@@ -233,7 +233,7 @@ class ScannedLink extends Link {
                         .NOTIFY_DESCRIPTOR_UUID);
                 if (descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE) ==
                         false) {
-                    // TODO: how to failed connection should be handled
+                    // TSODO: how to failed connection should be handled
                     // also remove authenticatingMac from scanner
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                         Log.d(TAG, "cannot initiate descriptor.setValue");
@@ -241,14 +241,14 @@ class ScannedLink extends Link {
                 }
 
                 if (gatt.writeDescriptor(descriptor) == false) {
-                    // TODO: how to failed connection should be handled
+                    // TSODO: how to failed connection should be handled
                     // also remove authenticatingMac from scanner
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                         Log.d(TAG, "cannot initiate writeDescriptor");
                 }
-                // TODO: What to do with ping here?
+                // TSODO: What to do with ping here?
             } else {
-                // TODO: how failed service discovery/connection should be handled
+                // TSODO: how failed service discovery/connection should be handled
                 // also remove authenticatingMac from scanner
             }
         }
@@ -265,7 +265,7 @@ class ScannedLink extends Link {
                     scanner.manager.workHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            //TODO add proper characteristic
+                            //TSODO add proper characteristic
                             scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager
                                     .coreInterface, characteristic.getValue(), characteristic
                                     .getValue().length, 0, getAddressBytes(), 0);
@@ -288,7 +288,7 @@ class ScannedLink extends Link {
                 scanner.manager.workHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        //TODO add proper characteristic
+                        //TSODO add proper characteristic
                         scanner.manager.core.HMBTCoreSensingWriteResponse(scanner.manager
                                 .coreInterface, getAddressBytes(), 0);
                     }
@@ -308,7 +308,7 @@ class ScannedLink extends Link {
             scanner.manager.workHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    //TODO add proper characteristic
+                    //TSODO add proper characteristic
                     scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager
                             .coreInterface, characteristic.getValue(), characteristic.getValue()
                             .length, 0, getAddressBytes(), 0);
@@ -328,7 +328,7 @@ class ScannedLink extends Link {
                     }
                 });
             } else {
-                // TODO: fail connection
+                // TSODO: fail connection
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                     Log.d(TAG, "onDescriptorWrite failure " + status);
             }
@@ -343,7 +343,7 @@ class ScannedLink extends Link {
             } else {
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                     Log.d(TAG, "read rssi failure " + status);
-                if (rssiCallback != null) rssiCallback.response(1); // TODO: use correct error code
+                if (rssiCallback != null) rssiCallback.response(1); // TSODO: use correct error code
             }
         }
     };

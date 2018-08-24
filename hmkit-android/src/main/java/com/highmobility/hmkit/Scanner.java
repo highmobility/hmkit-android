@@ -267,7 +267,7 @@ class Scanner implements SharedBleListener {
     boolean writeData(byte[] mac, byte[] value, int characteristic) {
         ScannedLink link = getLinkForMac(mac);
         if (link == null) return false;
-        // TODO: use characteristic from id
+        // TSODO: use characteristic from id
         link.writeValue(value);
 
         return true;
@@ -276,7 +276,7 @@ class Scanner implements SharedBleListener {
     boolean readValue(byte[] mac, int characteristic) {
         ScannedLink link = getLinkForMac(mac);
         if (link == null) return false;
-        // TODO: use the characteristic id
+        // TSODO: use the characteristic id
         link.readValue();
         return true;
     }
