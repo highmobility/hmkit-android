@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.Certificate;
+import com.highmobility.crypto.value.DeviceSerial;
 import com.highmobility.utils.ByteUtils;
 import com.highmobility.value.Bytes;
 
@@ -15,16 +16,16 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import static com.highmobility.hmkit.Broadcaster.TAG;
 
 /**
- * Created by ttiganik on 14/04/16.
- * <p>
- * Storage is used to access broadcaster's storage, where certificates are stored.
+ * Access for stored Access Certificates.
  * <p>
  * Uses Android SharedPreferences.
  */
-class Storage {
+public class Storage {
     private static final String ACCESS_CERTIFICATE_STORAGE_KEY = "ACCESS_CERTIFICATE_STORAGE_KEY";
     static final String device_certificate_json_object = "device_access_certificate";
 
@@ -49,6 +50,40 @@ class Storage {
         settings = ctx.getSharedPreferences("com.hm.wearable.UserPrefs",
                 Context.MODE_PRIVATE);
         editor = settings.edit();
+    }
+
+    /**
+     * @param serial The serial of the device that is providing access (eg this device).
+     * @return All stored Access Certificates where the device with the given serial is providing
+     * access.
+     */
+    public AccessCertificate[] getCertificates(DeviceSerial serial) {
+        return getCertificatesWithProvidingSerial(serial.getByteArray());
+    }
+
+    /**
+     * Find an Access Certificate with the given serial number.
+     *
+     * @param serial The serial number of the device that is gaining access.
+     * @return An Access Certificate for the given serial if one exists, otherwise null.
+     */
+    @Nullable public AccessCertificate getCertificate(DeviceSerial serial) {
+        AccessCertificate[] certificates = getCertificatesWithGainingSerial(serial
+                .getByteArray());
+
+        if (certificates != null && certificates.length > 0) {
+            return certificates[0];
+        }
+
+        return null;
+    }
+
+    /**
+     * Deletes all of the stored Access Certificates.
+     */
+    public void deleteCertificates() {
+        // TODO: 29/08/2018 remove resetStorage method (duplicates)
+        resetStorage();
     }
 
     AccessCertificate storeDownloadedCertificates(JSONObject response) throws Exception {

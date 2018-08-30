@@ -1,7 +1,9 @@
 package com.highmobility.hmkit;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +14,7 @@ import com.highmobility.hmkit.error.BleNotSupportedException;
 import com.highmobility.utils.ByteUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class SharedBle {
@@ -38,6 +41,11 @@ public class SharedBle {
         return mBluetoothAdapter;
     }
 
+    // devices connected to the Broadcaster
+    List<BluetoothDevice> getConnectedDevices() {
+        return getManager().getConnectedDevices(BluetoothProfile.GATT_SERVER);
+    }
+
     public boolean isBluetoothOn() {
         return (getAdapter() != null && getAdapter().isEnabled() && getAdapter().getState() ==
                 BluetoothAdapter.STATE_ON);
@@ -45,7 +53,7 @@ public class SharedBle {
 
     SharedBle(Context context) throws BleNotSupportedException {
         this.context = context;
-        
+
         Object bleService = context.getSystemService(Context.BLUETOOTH_SERVICE);
         if (bleService == null ||
                 context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
@@ -59,8 +67,14 @@ public class SharedBle {
     }
 
     void initialise() {
-        context.registerReceiver(receiver, new IntentFilter(BluetoothAdapter
-                .ACTION_STATE_CHANGED));
+        context.registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+    }
+
+    void terminate() {
+        if (mBluetoothAdapter != null) {
+            context.unregisterReceiver(receiver);
+            // don't clear listeners here because broadcaster is never nulled.
+        }
     }
 
     void setRandomAdapterName(boolean overrideLocalName) {
@@ -71,13 +85,6 @@ public class SharedBle {
         String randomBytesString = ByteUtils.hexFromBytes(serialBytes);
         name += randomBytesString.substring(1);
         getAdapter().setName(name);
-    }
-
-    void terminate() {
-        if (mBluetoothAdapter != null) {
-            context.unregisterReceiver(receiver);
-            // don't clear listeners here because broadcaster is never nulled.
-        }
     }
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {

@@ -53,7 +53,7 @@ android {
 }
 
 dependencies {
-    if (project.property('release') == false) {
+    if (project.property('release') == 0) {
         implementation project(':hm-java-crypto')
         implementation project(':hm-java-utils')
     } else {

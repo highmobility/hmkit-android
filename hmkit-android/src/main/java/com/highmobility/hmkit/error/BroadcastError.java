@@ -9,7 +9,7 @@ public class BroadcastError {
         BLUETOOTH_FAILURE,
         /// Bluetooth Low Energy is unavailable for this device
         UNSUPPORTED,
-        /// SDK is not initialized
+        /// SDK is not initialised
         UNINITIALIZED
     }
 

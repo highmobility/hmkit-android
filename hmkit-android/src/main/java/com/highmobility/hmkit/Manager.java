@@ -51,14 +51,14 @@ public class Manager {
     public static String customEnvironmentBaseUrl = null;
 
     private static Manager instance;
+    private Context context;
     private DeviceCertificate certificate;
     PrivateKey privateKey;
     PublicKey caPublicKey;
     byte[] issuer, appId; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
     HMBTCore core = new HMBTCore();
     BTCoreInterface coreInterface;
-    Storage storage;
-    Context context;
+    static Storage storage;
 
     private Scanner scanner;
     private Broadcaster broadcaster;
@@ -66,25 +66,26 @@ public class Manager {
     private WebService webService;
     private SharedBle ble;
 
-    Handler mainHandler, workHandler;
-    private HandlerThread workThread = new HandlerThread("BTCoreThread");
+    Handler mainHandler;
+    Handler workHandler;
+    private final HandlerThread workThread = new HandlerThread("BTCoreThread");
     private Timer coreClockTimer;
 
-    @Nullable SharedBle getBle() {
-        if (ble == null) {
-            try {
-                ble = new SharedBle(context); // could be that phone has no bluetooth.
-            } catch (BleNotSupportedException e) {
-                e.printStackTrace();
-            }
-        }
-        return ble;
+    /**
+     * @return The Application Context set in {@link #initialise(DeviceCertificate, PrivateKey,
+     * PublicKey, Context)}.
+     */
+    public Context getContext() {
+        checkInitialised();
+        return context;
     }
 
     /**
      * @return The Broadcaster instance. Null if BLE is not supported.
      */
     @Nullable public Broadcaster getBroadcaster() {
+        checkInitialised();
+
         if (broadcaster == null) {
             try {
                 broadcaster = new Broadcaster(this);
@@ -100,6 +101,8 @@ public class Manager {
      * @return The Telematics instance.
      */
     public Telematics getTelematics() {
+        checkInitialised();
+
         if (telematics == null) telematics = new Telematics(this);
 
         return telematics;
@@ -107,9 +110,10 @@ public class Manager {
 
     /**
      * @return The Scanner Instance. Null if BLE is not supported.
-     * @throws IllegalStateException when SDK is not initialized.
      */
-    @Nullable Scanner getScanner() throws IllegalStateException {
+    @Nullable Scanner getScanner() {
+        checkInitialised();
+
         if (scanner == null) {
             try {
                 scanner = new Scanner(this);
@@ -121,18 +125,19 @@ public class Manager {
     }
 
     /**
-     * @return The device certificate that is used by the SDK to identify itself. Null if {@link
-     * #initialise(DeviceCertificate, PrivateKey, PublicKey)} has not been called.
+     * @return The device certificate that is used by the SDK to identify itself.
      */
-    @Nullable public DeviceCertificate getDeviceCertificate() {
+    public DeviceCertificate getDeviceCertificate() {
+        checkInitialised();
         return certificate;
     }
 
     /**
      * @return An SDK description string containing version name and type(mobile or wear).
-     * @throws IllegalStateException when SDK is not initialized.
+     * @throws IllegalStateException when SDK is not initialised.
      */
     public String getInfoString() {
+        checkInitialised();
         String infoString = "Android ";
         infoString += BuildConfig.VERSION_NAME;
 
@@ -145,140 +150,167 @@ public class Manager {
         return infoString;
     }
 
+    // protected ivars are accessed when ctx is already checked
+    @Nullable SharedBle getBle() {
+        if (ble == null) {
+            try {
+                ble = new SharedBle(context); // could be that the device has no bluetooth.
+            } catch (BleNotSupportedException e) {
+                e.printStackTrace();
+            }
+        }
+        return ble;
+    }
+
     WebService getWebService() {
         if (webService == null) webService = new WebService(context);
         return webService;
     }
 
     /**
-     * Create the Manager instance with Application Context before accessing it.
-     *
-     * @param context The application context.
-     */
-    public static Manager createInstance(Context context) {
-        if (instance == null) {
-            instance = new Manager(context);
-        }
-
-        return instance;
-    }
-
-    /**
-     * @return The singleton instance of Manager.
+     * @return The instance of the Manager.
      */
     public static Manager getInstance() {
-        if (instance == null) {
-            throw new IllegalStateException("Call createInstance() before accessing the Manager " +
-                    "instance.");
-        }
+        if (instance == null) instance = new Manager();
 
         return instance;
     }
 
-    Manager(Context context) {
-        this.context = context.getApplicationContext();
-        storage = new Storage(this.context);
-        mainHandler = new Handler(this.context.getMainLooper());
-        workThread.start();
-        workHandler = new Handler(workThread.getLooper());
+    /**
+     * The Storage can be accessed before initialise.
+     *
+     * @param context The application context.
+     * @return The storage for Access Certificates.
+     */
+    public static Storage getStorage(Context context) {
+        createStorage(context);
+        return storage;
     }
 
     /**
-     * Initialise the SDK with a certificate. Call this before using Broadcaster or Telematics.
+     * Initialise the SDK with a Device Certificate. Call this before using the Manager.
      *
      * @param certificate The broadcaster certificate.
      * @param privateKey  32 byte private key with elliptic curve Prime 256v1.
      * @param caPublicKey 64 byte public key of the Certificate Authority.
-     * @throws IllegalStateException if there are connected links with Bluetooth.
-     * @deprecated Use {@link #initialise(DeviceCertificate, PrivateKey, PublicKey)} instead.
+     * @param context     The Application Context.
+     * @deprecated Use {@link #initialise(DeviceCertificate, PrivateKey, PublicKey, Context)}
+     * instead.
      */
     @Deprecated
     public void initialize(DeviceCertificate certificate,
                            PrivateKey privateKey,
                            PublicKey caPublicKey,
-                           Context context) throws IllegalStateException {
-        initialise(certificate, privateKey, caPublicKey);
+                           Context context) {
+        initialise(certificate, privateKey, caPublicKey, context);
     }
 
     /**
-     * Initialise the SDK with a certificate. Call this before using Broadcaster or Telematics.
+     * Initialise the SDK with a Device Certificate. Call this before using the Manager.
      *
      * @param certificate The broadcaster certificate.
      * @param privateKey  32 byte private key with elliptic curve Prime 256v1.
      * @param caPublicKey 64 byte public key of the Certificate Authority.
-     * @throws IllegalStateException if there are connected links with Bluetooth.
+     * @param context     The Application Context.
+     * @return The Manager instance.
      */
-    public void initialise(DeviceCertificate certificate,
-                           PrivateKey privateKey,
-                           PublicKey caPublicKey) throws IllegalStateException {
-        if (this.certificate != null) terminate(); // will throw if there are connected links
+    public Manager initialise(DeviceCertificate certificate, PrivateKey privateKey, PublicKey
+            caPublicKey, Context context) {
+        if (this.certificate != null) {
+            // context could be set if Storage was accessed before. Need to check for certificate.
+            throw new IllegalStateException("Manager can be initialised once. Call " +
+                    "setDeviceCertificate() to set new Device Certificate.");
+        }
+
+        this.context = context.getApplicationContext();
+        createStorage(this.context);
 
         this.caPublicKey = caPublicKey;
         this.certificate = certificate;
         this.privateKey = privateKey;
 
-        if (coreInterface == null) {
-            // core init needs to be done once, only initialises structs
-            coreInterface = new BTCoreInterface(this);
-            core.HMBTCoreInit(coreInterface);
-        }
+        // TODO: 29/08/2018 start core/broadcaster/telematics logic in telematics / broadcaster
+        startCore();
 
-        startCoreClock();
-
-        // initialise after terminate
+        // initialise after terminate.
+        // TODO: 29/08/2018 init never called after terminate
         if (ble != null) ble.initialise();
         if (broadcaster != null) broadcaster.initialise();
 
         Log.i(TAG, "Initialized High-Mobility " + getInfoString() + certificate.toString());
+
+        return this;
     }
 
     /**
-     * Initialise the SDK with a certificate. Call this before using Broadcaster or Telematics.
+     * Initialise the SDK with a Device Certificate. Call this before using the Manager.
      *
      * @param certificate     The device certificate in Base64 or hex.
      * @param privateKey      32 byte private key with elliptic curve Prime 256v1 in Base64 or hex.
      * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64 or hex.
      * @param context         the application context
      * @throws IllegalArgumentException if the parameters are invalid.
-     * @deprecated Use {@link #initialise(String, String, String)} instead.
+     * @deprecated Use {@link #initialise(String, String, String, Context)} instead.
      */
     @Deprecated
     public void initialize(String certificate, String privateKey, String issuerPublicKey, Context
             context) throws IllegalArgumentException {
-        initialise(certificate, privateKey, issuerPublicKey);
+        initialise(certificate, privateKey, issuerPublicKey, context);
     }
 
     /**
-     * Initialise the SDK with a certificate. Call this before using Broadcaster or Telematics.
+     * Initialise the SDK with a Device Certificate. Call this before using the Manager.
      *
      * @param certificate     The device certificate in Base64 or hex.
      * @param privateKey      32 byte private key with elliptic curve Prime 256v1 in Base64 or hex.
      * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64 or hex.
+     * @param context         The Application Context.
+     * @return The Manager instance.
      * @throws IllegalArgumentException if the parameters are invalid.
      */
-    public void initialise(String certificate, String privateKey, String issuerPublicKey) throws
+    public Manager initialise(String certificate, String privateKey, String
+            issuerPublicKey, Context context) throws
             IllegalArgumentException {
         DeviceCertificate decodedCert = new DeviceCertificate(new Bytes(Base64.decode
                 (certificate)));
         PrivateKey decodedPrivateKey = new PrivateKey(privateKey);
         PublicKey decodedIssuerPublicKey = new PublicKey(issuerPublicKey);
-        initialise(decodedCert, decodedPrivateKey, decodedIssuerPublicKey);
+        initialise(decodedCert, decodedPrivateKey, decodedIssuerPublicKey, context);
+        return this;
     }
 
     /**
-     * Call this function when the SDK is not used anymore - for instance when killing the app. It
-     * clears all the internal processes, stops broadcasting, unregisters BroadcastReceivers and
-     * enables re-initializing the SDK with new certificates.
+     * @param certificate
+     * @param privateKey
+     * @param issuerPublicKey
+     * @throws IllegalStateException if there are connected links with the Broadcaster or an ongoing
+     *                               Telematics command.
+     */
+    public void setDeviceCertificate(String certificate, String privateKey, String
+            issuerPublicKey) throws IllegalStateException {
+        // TODO: 29/08/2018 implement and comment
+    }
+
+    public void setDeviceCertificate(DeviceCertificate certificate, PrivateKey privateKey,
+                                     PublicKey caPublicKey) throws IllegalStateException {
+        // TODO: 29/08/2018 implement and comment
+
+    }
+
+    /**
+     * Terminate is meant to be called when the SDK is not used anymore(on app kill for example). It
+     * stops internal processes, unregisters BroadcastReceivers, stops broadcasting, cancels
+     * Telematics commands.
      * <p>
-     * Terminate will fail if a connected link still exists. Disconnect all the links before
-     * terminating the SDK.
+     * You can re use Broadcaster and Telematics after terminate without re initialise(Device
+     * Certificate reference is retained).
      * <p>
      * Stored certificates are not deleted.
      *
      * @throws IllegalStateException when there are links still connected.
      */
     public void terminate() throws IllegalStateException {
-        if (certificate == null) return; // already not initialized
+        // TODO: use something to check that does not terminate twice. or check inside the methods
 
         /**
          * Broadcaster and ble are initialised once and then reused after other terminate/init-s.
@@ -286,14 +318,10 @@ public class Manager {
          */
         if (broadcaster != null) broadcaster.terminate();
         if (ble != null) ble.terminate();
+        // this terminates telematics as well because that uses the same web service.
         if (webService != null) webService.cancelAllRequests();
 
-        coreClockTimer.cancel();
-        coreClockTimer = null;
-
-        this.caPublicKey = null;
-        this.certificate = null;
-        this.privateKey = null;
+        stopCore();
     }
 
     /**
@@ -303,10 +331,8 @@ public class Manager {
      * @param accessToken The token that is used to download the certificates.
      * @param callback    A {@link DownloadCallback} object that is invoked after the download is
      *                    finished or failed.
-     * @throws IllegalStateException when SDK is not initialized.
      */
-    public void downloadCertificate(String accessToken,
-                                    final DownloadCallback callback) throws IllegalStateException {
+    public void downloadCertificate(String accessToken, final DownloadCallback callback) {
         checkInitialised();
         getWebService().requestAccessCertificate(accessToken,
                 privateKey,
@@ -375,25 +401,11 @@ public class Manager {
 
     /**
      * @return All Access Certificates where this device is providing access.
-     * @throws IllegalStateException when SDK is not initialized.
      */
-    public AccessCertificate[] getCertificates() throws IllegalStateException {
+    public AccessCertificate[] getCertificates() {
         checkInitialised();
         return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial()
                 .getByteArray());
-    }
-
-    /**
-     * @param context The application context.
-     * @param serial  The serial of the device that is providing access (eg this device).
-     * @return All stored Access Certificates where the device with the given serial is providing
-     * access.
-     * @deprecated Use {@link #getCertificates()} instead.
-     */
-    @Deprecated
-    public AccessCertificate[] getCertificates(DeviceSerial serial, Context context) {
-        if (storage == null) storage = new Storage(context);
-        return storage.getCertificatesWithProvidingSerial(serial.getByteArray());
     }
 
     /**
@@ -401,30 +413,9 @@ public class Manager {
      *
      * @param serial The serial number of the device that is gaining access.
      * @return An Access Certificate for the given serial if one exists, otherwise null.
-     * @throws IllegalStateException when SDK is not initialized.
      */
-    public AccessCertificate getCertificate(DeviceSerial serial) {
-        AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial
-                .getByteArray());
-
-        if (certificates != null && certificates.length > 0) {
-            return certificates[0];
-        }
-
-        return null;
-    }
-
-    /**
-     * Find a Access Certificate with the given serial number.
-     *
-     * @param serial  The serial number of the device that is gaining access.
-     * @param context The application context.
-     * @return An Access Certificate for the given serial if one exists, otherwise null.
-     * @deprecated Use {@link #getCertificate(DeviceSerial)} instead.
-     */
-    @Deprecated
-    public AccessCertificate getCertificate(DeviceSerial serial, Context context) {
-        if (storage == null) storage = new Storage(context);
+    @Nullable public AccessCertificate getCertificate(DeviceSerial serial) {
+        checkInitialised();
         AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial
                 .getByteArray());
 
@@ -439,13 +430,20 @@ public class Manager {
      * Delete an access certificate.
      *
      * @param serial The serial of the device that is gaining access.
-     * @return true if the certificate existed and was deleted successfully, otherwise false
-     * @throws IllegalStateException when SDK is not initialized.
+     * @return true if the certificate existed and was deleted successfully, otherwise false.
      */
-    public boolean deleteCertificate(DeviceSerial serial) throws IllegalStateException {
+    public boolean deleteCertificate(DeviceSerial serial) {
         checkInitialised();
         return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial()
                 .getByteArray());
+    }
+
+    /**
+     * Deletes all of the stored Access Certificates.
+     */
+    public void deleteCertificates() {
+        checkInitialised();
+        storage.resetStorage();
     }
 
     /**
@@ -458,29 +456,49 @@ public class Manager {
      */
     @Deprecated
     public boolean deleteCertificate(DeviceSerial serial, Context context) {
+        // this method should be deleted. cannot be initialised without context
         checkInitialised();
-        if (storage == null) storage = new Storage(context);
         return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial()
                 .getByteArray());
     }
 
     /**
-     * Deletes all of the stored Access Certificates.
+     * @param context The application context.
+     * @param serial  The serial of the device that is providing access (eg this device).
+     * @return All stored Access Certificates where the device with the given serial is providing
+     * access.
+     * @deprecated Use {@link Storage#getCertificates(DeviceSerial)} instead.
      */
-    public void deleteCertificates() {
-        storage.resetStorage();
+    @Deprecated
+    public AccessCertificate[] getCertificates(DeviceSerial serial, Context context) {
+        createStorage(context);
+        return storage.getCertificates(serial);
     }
 
     /**
-     * Deletes all the stored Access Certificates.
+     * Find an Access Certificate with the given serial number.
+     *
+     * @param serial  The serial number of the device that is gaining access.
+     * @param context The application context.
+     * @return An Access Certificate for the given serial if one exists, otherwise null.
+     * @deprecated Use {@link Storage#getCertificate(DeviceSerial)} instead.
+     */
+    @Deprecated
+    @Nullable public AccessCertificate getCertificate(DeviceSerial serial, Context context) {
+        createStorage(context);
+        return storage.getCertificate(serial);
+    }
+
+    /**
+     * Deletes all of the stored Access Certificates.
      *
      * @param context The application context.
-     * @deprecated Use {@link #deleteCertificates()} instead.
+     * @deprecated Use {@link Storage#deleteCertificates()} instead.
      */
     @Deprecated
     public void deleteCertificates(Context context) {
-        if (storage == null) storage = new Storage(context);
-        storage.resetStorage();
+        createStorage(context);
+        storage.deleteCertificates();
     }
 
     void postToMainThread(Runnable runnable) {
@@ -492,24 +510,51 @@ public class Manager {
     }
 
     void checkInitialised() throws IllegalStateException {
-        if (certificate == null) throw new IllegalStateException("SDK not initialized");
+        // if device cert exists, context has to exist as well.
+        if (certificate == null)
+            throw new IllegalStateException("Device certificate is not set. Call Manager" +
+                    ".initialise() first.");
     }
 
-    private void startCoreClock() {
-        if (coreClockTimer != null) return;
+    private static void createStorage(Context context) {
+        // storage could be accessed before init.
+        if (storage == null) storage = new Storage(context.getApplicationContext());
+    }
 
-        coreClockTimer = new Timer();
-        coreClockTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                workHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        core.HMBTCoreClock(coreInterface);
-                    }
-                });
-            }
-        }, 0, 1000);
+    private void startCore() {
+        // create the core if doesn't exist
+        if (coreInterface == null) {
+            mainHandler = new Handler(this.context.getMainLooper());
+            workThread.start();
+            workHandler = new Handler(workThread.getLooper());
+
+            // core init needs to be done once, only initialises structs(but requires device cert)
+            coreInterface = new BTCoreInterface(this);
+            core.HMBTCoreInit(coreInterface);
+        }
+
+        // start the core clock if is not running already
+        if (coreClockTimer == null) {
+            coreClockTimer = new Timer();
+            coreClockTimer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    workHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            core.HMBTCoreClock(coreInterface);
+                        }
+                    });
+                }
+            }, 0, 1000);
+        }
+    }
+
+    private void stopCore() {
+        if (coreClockTimer != null) {
+            coreClockTimer.cancel();
+            coreClockTimer = null;
+        }
     }
 
     /**

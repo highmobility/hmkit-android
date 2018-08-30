@@ -126,7 +126,7 @@ class ScannedLink extends Link {
 
     void connect() {
         Log.d(TAG, "connect " + btDevice.getAddress() + " " + this);
-        gatt = btDevice.connectGatt(scanner.manager.context, false, gattCallback);
+        gatt = btDevice.connectGatt(scanner.manager.getContext(), false, gattCallback);
     }
 
     void disconnect() {

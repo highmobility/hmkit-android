@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
@@ -306,8 +305,7 @@ public class Broadcaster implements SharedBleListener {
     public void disconnectAllLinks() {
         if (GATTServer == null) return;
 
-        List<BluetoothDevice> devices = manager.getBle().getManager().getConnectedDevices
-                (BluetoothProfile.GATT_SERVER);
+        List<BluetoothDevice> devices = manager.getBle().getConnectedDevices();
 
         for (BluetoothDevice device : devices) {
             // just to make sure all of the devices are tried to be disconnected. disconnect
@@ -334,13 +332,13 @@ public class Broadcaster implements SharedBleListener {
 
     /**
      * Called with {@link Manager#terminate()}. Broadcasting and alive pinging will be stopped
-     * because there is no device cert.
+     * because ble will be stopped.
      *
      * @throws IllegalStateException when there are still connected links.
      */
     void terminate() throws IllegalStateException {
         if (getLinks().size() > 0) {
-            // re initialise would mess up communication with previous links
+            // re initialise(new device cert) would mess up communication with previous links
             throw new IllegalStateException("Broadcaster cannot terminate if a connected " +
                     "link exists. Disconnect from all of the links.");
         }
@@ -544,7 +542,7 @@ public class Broadcaster implements SharedBleListener {
     private BluetoothGattService createGattServer() {
         if (GATTServer == null) {
             gattServerCallback = new GATTServerCallback(this);
-            GATTServer = manager.getBle().getManager().openGattServer(manager.context,
+            GATTServer = manager.getBle().getManager().openGattServer(manager.getContext(),
                     gattServerCallback);
 
             if (GATTServer == null) {
