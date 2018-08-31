@@ -51,33 +51,30 @@ public class Manager {
     public static String customEnvironmentBaseUrl = null;
 
     private static Manager instance;
-    private static Context context;
-    static Storage storage;
 
-    private DeviceCertificate certificate;
-    PrivateKey privateKey;
-    PublicKey caPublicKey;
-    byte[] issuer, appId; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
-    HMBTCore core = new HMBTCore();
-    BTCoreInterface coreInterface;
-
+    private Context context;
     private Scanner scanner;
     private Broadcaster broadcaster;
     private Telematics telematics;
     private WebService webService;
     private SharedBle ble;
+    private Storage storage;
 
+    HMBTCore core = new HMBTCore();
+    BTCoreInterface coreInterface;
     Handler mainHandler, workHandler;
-
     private final HandlerThread workThread = new HandlerThread("BTCoreThread");
     private Timer coreClockTimer;
+
+    private DeviceCertificate certificate;
+    byte[] issuer, appId; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
 
     /**
      * @return The Application Context set in {@link #initialise(DeviceCertificate, PrivateKey,
      * PublicKey, Context)}.
      */
     public Context getContext() {
-        checkInitialised();
+        throwIfContextNotSet();
         return context;
     }
 
@@ -85,7 +82,7 @@ public class Manager {
      * @return The Broadcaster instance. Null if BLE is not supported.
      */
     @Nullable public Broadcaster getBroadcaster() {
-        checkInitialised();
+        throwIfDeviceCertificateNotSet();
 
         if (broadcaster == null) {
             try {
@@ -102,7 +99,7 @@ public class Manager {
      * @return The Telematics instance.
      */
     public Telematics getTelematics() {
-        checkInitialised();
+        throwIfDeviceCertificateNotSet();
 
         if (telematics == null) telematics = new Telematics(this);
 
@@ -113,7 +110,7 @@ public class Manager {
      * @return The Scanner Instance. Null if BLE is not supported.
      */
     @Nullable Scanner getScanner() {
-        checkInitialised();
+        throwIfDeviceCertificateNotSet();
 
         if (scanner == null) {
             try {
@@ -129,7 +126,7 @@ public class Manager {
      * @return The device certificate that is used by the SDK to identify itself.
      */
     public DeviceCertificate getDeviceCertificate() {
-        checkInitialised();
+        throwIfDeviceCertificateNotSet();
         return certificate;
     }
 
@@ -138,7 +135,8 @@ public class Manager {
      * @throws IllegalStateException when SDK is not initialised.
      */
     public String getInfoString() {
-        checkInitialised();
+        throwIfContextNotSet();
+
         String infoString = "Android ";
         infoString += BuildConfig.VERSION_NAME;
 
@@ -180,30 +178,23 @@ public class Manager {
     /**
      * The Storage can be accessed before initialise.
      *
-     * @param context The application context.
      * @return The storage for Access Certificates.
      */
-    public static Storage getStorage(Context context) {
-        createStorage(context);
+    public Storage getStorage() {
+        throwIfContextNotSet();
         return storage;
     }
 
     /**
-     * Initialise the SDK with a Device Certificate. Call this before using the Manager.
+     * Initialise with context only. This allows access to storage. Call {@link
+     * #setDeviceCertificate (DeviceCertificate, PrivateKey, PublicKey)} later to send Commands.
      *
-     * @param certificate The broadcaster certificate.
-     * @param privateKey  32 byte private key with elliptic curve Prime 256v1.
-     * @param caPublicKey 64 byte public key of the Certificate Authority.
-     * @param context     The Application Context.
-     * @deprecated Use {@link #initialise(DeviceCertificate, PrivateKey, PublicKey, Context)}
-     * instead.
+     * @param context The application context.
+     * @return The Manager instance.
      */
-    @Deprecated
-    public void initialize(DeviceCertificate certificate,
-                           PrivateKey privateKey,
-                           PublicKey caPublicKey,
-                           Context context) {
-        initialise(certificate, privateKey, caPublicKey, context);
+    public Manager initialise(Context context) {
+        createStorage(context);
+        return instance;
     }
 
     /**
@@ -223,15 +214,33 @@ public class Manager {
                     "setDeviceCertificate() to set new Device Certificate.");
         }
 
-        createStorage(context);
+        initialise(context);
 
-        this.caPublicKey = issuerPublicKey;
         this.certificate = certificate;
-        this.privateKey = privateKey;
+        coreInterface.caPublicKey = issuerPublicKey;
+        coreInterface.privateKey = privateKey;
 
-        Log.i(TAG, "Initialized High-Mobility " + getInfoString() + certificate.toString());
+        Log.i(TAG, "Initialised High-Mobility " + getInfoString() + certificate.toString());
 
         return this;
+    }
+
+    /**
+     * Initialise the SDK with a Device Certificate. Call this before using the Manager.
+     *
+     * @param certificate The broadcaster certificate.
+     * @param privateKey  32 byte private key with elliptic curve Prime 256v1.
+     * @param caPublicKey 64 byte public key of the Certificate Authority.
+     * @param context     The Application Context.
+     * @deprecated Use {@link #initialise(DeviceCertificate, PrivateKey, PublicKey, Context)}
+     * instead.
+     */
+    @Deprecated
+    public void initialize(DeviceCertificate certificate,
+                           PrivateKey privateKey,
+                           PublicKey caPublicKey,
+                           Context context) {
+        initialise(certificate, privateKey, caPublicKey, context);
     }
 
     /**
@@ -297,6 +306,9 @@ public class Manager {
      */
     public void setDeviceCertificate(DeviceCertificate certificate, PrivateKey privateKey,
                                      PublicKey issuerPublicKey) throws IllegalStateException {
+        throwIfContextNotSet(); // need to check that context is set(initialise called).
+        // TODO: 31/08/2018 test with HMKit-sandbox app.
+
         if (broadcaster != null && broadcaster.getLinks().size() > 0) {
             throw new IllegalStateException("Cannot set a new Device Certificate if a connected " +
                     "link exists with the Broadcaster. Disconnect from all of the links.");
@@ -312,10 +324,9 @@ public class Manager {
                     "link exists with the Scanner. Disconnect from all of the links.");
         }
 
-        // TODO: 31/08/2018 test with HMKit-sandbox app.
-        this.caPublicKey = issuerPublicKey;
+        coreInterface.caPublicKey = issuerPublicKey;
+        coreInterface.privateKey = privateKey;
         this.certificate = certificate;
-        this.privateKey = privateKey;
     }
 
     /**
@@ -352,9 +363,9 @@ public class Manager {
      *                    finished or failed.
      */
     public void downloadCertificate(String accessToken, final DownloadCallback callback) {
-        checkInitialised();
+        throwIfDeviceCertificateNotSet();
         getWebService().requestAccessCertificate(accessToken,
-                privateKey,
+                coreInterface.privateKey,
                 getDeviceCertificate().getSerial(),
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -422,7 +433,7 @@ public class Manager {
      * @return All Access Certificates where this device is providing access.
      */
     public AccessCertificate[] getCertificates() {
-        checkInitialised();
+        throwIfDeviceCertificateNotSet();
         return storage.getCertificatesWithProvidingSerial(getDeviceCertificate().getSerial()
                 .getByteArray());
     }
@@ -434,7 +445,7 @@ public class Manager {
      * @return An Access Certificate for the given serial if one exists, otherwise null.
      */
     @Nullable public AccessCertificate getCertificate(DeviceSerial serial) {
-        checkInitialised();
+        throwIfDeviceCertificateNotSet();
         AccessCertificate[] certificates = storage.getCertificatesWithGainingSerial(serial
                 .getByteArray());
 
@@ -452,7 +463,7 @@ public class Manager {
      * @return true if the certificate existed and was deleted successfully, otherwise false.
      */
     public boolean deleteCertificate(DeviceSerial serial) {
-        checkInitialised();
+        throwIfDeviceCertificateNotSet();
         return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial()
                 .getByteArray());
     }
@@ -461,7 +472,7 @@ public class Manager {
      * Deletes all of the stored Access Certificates.
      */
     public void deleteCertificates() {
-        checkInitialised();
+        throwIfDeviceCertificateNotSet();
         storage.deleteCertificates();
     }
 
@@ -476,7 +487,7 @@ public class Manager {
     @Deprecated
     public boolean deleteCertificate(DeviceSerial serial, Context context) {
         // this method should be deleted. cannot be initialised without context
-        checkInitialised();
+        throwIfDeviceCertificateNotSet();
         return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial()
                 .getByteArray());
     }
@@ -486,9 +497,7 @@ public class Manager {
      * @param serial  The serial of the device that is providing access (eg this device).
      * @return All stored Access Certificates where the device with the given serial is providing
      * access.
-     * @deprecated Use {@link #getStorage(Context)} and
-     * {@link Storage#getCertificates(DeviceSerial)}
-     * instead.
+     * @deprecated Use {@link #getStorage()#getCertificates(DeviceSerial)} instead.
      */
     @Deprecated
     public AccessCertificate[] getCertificates(DeviceSerial serial, Context context) {
@@ -502,8 +511,7 @@ public class Manager {
      * @param serial  The serial number of the device that is gaining access.
      * @param context The application context.
      * @return An Access Certificate for the given serial if one exists, otherwise null.
-     * @deprecated Use {@link #getStorage(Context)} and {@link Storage#getCertificate(DeviceSerial)}
-     * instead.
+     * @deprecated Use {@link #getStorage()#getCertificate(DeviceSerial)} instead.
      */
     @Deprecated
     @Nullable public AccessCertificate getCertificate(DeviceSerial serial, Context context) {
@@ -515,8 +523,7 @@ public class Manager {
      * Deletes all of the stored Access Certificates.
      *
      * @param context The application context.
-     * @deprecated Use {@link #getStorage(Context)} and {@link Storage#deleteCertificates()}
-     * instead.
+     * @deprecated Use {@link #getStorage()#deleteCertificates()} instead.
      */
     @Deprecated
     public void deleteCertificates(Context context) {
@@ -532,15 +539,22 @@ public class Manager {
         }
     }
 
-    void checkInitialised() throws IllegalStateException {
+    void throwIfDeviceCertificateNotSet() throws IllegalStateException {
         // if device cert exists, context has to exist as well.
         if (certificate == null)
             throw new IllegalStateException("Device certificate is not set. Call Manager" +
                     ".initialise() first.");
     }
 
+    void throwIfContextNotSet() throws IllegalStateException {
+        if (context == null) {
+            throw new IllegalStateException("Context is not set. Call Manager" +
+                    ".initialise() first.");
+        }
+    }
+
     void startCore() {
-        checkInitialised();
+        throwIfDeviceCertificateNotSet();
 
         // create once if doesn't exist
         if (coreInterface == null) {
@@ -570,11 +584,11 @@ public class Manager {
         }
     }
 
-    private static void createStorage(Context context) {
+    private void createStorage(Context context) {
         // storage could be accessed before init.
         if (storage == null) {
-            Manager.getInstance().context = context.getApplicationContext();
-            storage = new Storage(Manager.getInstance().context);
+            this.context = context.getApplicationContext();
+            storage = new Storage(this.context);
         }
     }
 

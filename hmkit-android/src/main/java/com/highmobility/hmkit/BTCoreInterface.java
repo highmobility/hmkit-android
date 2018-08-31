@@ -5,6 +5,8 @@ import android.util.Log;
 import com.highmobility.btcore.HMBTCoreInterface;
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.crypto.AccessCertificate;
+import com.highmobility.crypto.value.PrivateKey;
+import com.highmobility.crypto.value.PublicKey;
 import com.highmobility.utils.ByteUtils;
 import com.highmobility.value.Bytes;
 
@@ -13,6 +15,8 @@ import java.security.SecureRandom;
 class BTCoreInterface implements HMBTCoreInterface {
     static final String TAG = "HMKit-CoreInterface";
     Manager manager;
+    PrivateKey privateKey;
+    PublicKey caPublicKey;
 
     BTCoreInterface(Manager manager) {
         this.manager = manager;
@@ -106,7 +110,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetLocalPrivateKey(byte[] privateKey) {
-        copyBytes(manager.privateKey, privateKey);
+        copyBytes(privateKey, privateKey);
         return 0;
     }
 
@@ -118,13 +122,13 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetCaPublicKey(byte[] publicKey) {
-        copyBytes(manager.caPublicKey, publicKey);
+        copyBytes(caPublicKey, publicKey);
         return 0;
     }
 
     @Override
     public int HMPersistenceHalgetOEMCaPublicKey(byte[] publicKey) {
-        copyBytes(manager.caPublicKey, publicKey);
+        copyBytes(caPublicKey, publicKey);
         return 0;
     }
 
@@ -135,7 +139,7 @@ class BTCoreInterface implements HMBTCoreInterface {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "HMPersistenceHaladdPublicKey: " + ByteUtils.hexFromBytes(serial));
 
-        int errorCode = manager.storage.storeCertificate(certificate).getValue();
+        int errorCode = manager.getStorage().storeCertificate(certificate).getValue();
         if (errorCode != 0) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(TAG, "Cant register certificate " + ByteUtils.hexFromBytes(serial) + ": " +
@@ -150,7 +154,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetPublicKey(byte[] serial, byte[] cert, int[] size) {
-        AccessCertificate certificate = manager.storage.certWithGainingSerial(serial);
+        AccessCertificate certificate = manager.getStorage().certWithGainingSerial(serial);
 
         if (certificate == null) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
@@ -167,7 +171,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetPublicKeyByIndex(int index, byte[] cert, int[] size) {
-        AccessCertificate[] certificates = manager.storage.getCertificatesWithProvidingSerial
+        AccessCertificate[] certificates = manager.getStorage().getCertificatesWithProvidingSerial
                 (manager.getDeviceCertificate().getSerial().getByteArray());
 
         if (certificates.length >= index) {
@@ -185,7 +189,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetPublicKeyCount(int[] count) {
-        int certCount = manager.storage.getCertificatesWithProvidingSerial(manager
+        int certCount = manager.getStorage().getCertificatesWithProvidingSerial(manager
                 .getDeviceCertificate().getSerial().getByteArray()).length;
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "HMPersistenceHalgetPublicKeyCount " + certCount);
@@ -195,7 +199,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalremovePublicKey(byte[] serial) {
-        if (manager.storage.deleteCertificateWithGainingSerial(serial)) {
+        if (manager.getStorage().deleteCertificateWithGainingSerial(serial)) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "HMPersistenceHalremovePublicKey success");
 
@@ -212,7 +216,7 @@ class BTCoreInterface implements HMBTCoreInterface {
     public int HMPersistenceHaladdStoredCertificate(byte[] cert, int size) {
         AccessCertificate certificate = new AccessCertificate(new Bytes(cert));
 
-        int errorCode = manager.storage.storeCertificate(certificate).getValue();
+        int errorCode = manager.getStorage().storeCertificate(certificate).getValue();
         if (errorCode != 0) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(TAG, "Cant store certificate: " + errorCode);
@@ -227,7 +231,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetStoredCertificate(byte[] serial, byte[] cert, int[] size) {
-        AccessCertificate[] storedCerts = manager.storage.getCertificatesWithoutProvidingSerial
+        AccessCertificate[] storedCerts = manager.getStorage().getCertificatesWithoutProvidingSerial
                 (manager.getDeviceCertificate().getSerial().getByteArray());
 
         for (AccessCertificate storedCert : storedCerts) {
@@ -249,12 +253,12 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHaleraseStoredCertificate(byte[] serial) {
-        AccessCertificate[] storedCerts = manager.storage.getCertificatesWithoutProvidingSerial
+        AccessCertificate[] storedCerts = manager.getStorage().getCertificatesWithoutProvidingSerial
                 (manager.getDeviceCertificate().getSerial().getByteArray());
 
         for (AccessCertificate cert : storedCerts) {
             if (cert.getProviderSerial().equals(serial)) {
-                if (manager.storage.deleteCertificate(cert.getGainerSerial().getByteArray(), cert
+                if (manager.getStorage().deleteCertificate(cert.getGainerSerial().getByteArray(), cert
                         .getProviderSerial().getByteArray())) {
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                         Log.d(Broadcaster.TAG, "Erased stored cert for serial " + ByteUtils

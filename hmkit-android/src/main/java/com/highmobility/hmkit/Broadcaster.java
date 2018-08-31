@@ -87,8 +87,7 @@ public class Broadcaster implements SharedBleListener {
      * @return The certificates that are registered for the Broadcaster.
      */
     public AccessCertificate[] getRegisteredCertificates() {
-        manager.checkInitialised();
-        return manager.storage.getCertificatesWithProvidingSerial(manager.getDeviceCertificate()
+        return manager.getStorage().getCertificatesWithProvidingSerial(manager.getDeviceCertificate()
                 .getSerial()
                 .getByteArray());
     }
@@ -97,8 +96,7 @@ public class Broadcaster implements SharedBleListener {
      * @return The certificates that are stored in the broadcaster's database for other devices.
      */
     public AccessCertificate[] getStoredCertificates() {
-        manager.checkInitialised();
-        return manager.storage.getCertificatesWithoutProvidingSerial(manager.getDeviceCertificate()
+        return manager.getStorage().getCertificatesWithoutProvidingSerial(manager.getDeviceCertificate()
                 .getSerial().getByteArray());
     }
 
@@ -252,14 +250,12 @@ public class Broadcaster implements SharedBleListener {
      * Storage.Result#STORAGE_FULL} if the storage is full.
      */
     public Storage.Result registerCertificate(AccessCertificate certificate) {
-        manager.checkInitialised();
-
         if (manager.getDeviceCertificate().getSerial().equals(certificate.getProviderSerial()) ==
                 false) {
             return Storage.Result.INTERNAL_ERROR;
         }
 
-        return manager.storage.storeCertificate(certificate);
+        return manager.getStorage().storeCertificate(certificate);
     }
 
     /**
@@ -270,7 +266,7 @@ public class Broadcaster implements SharedBleListener {
      * the storage is full. {@link Storage.Result#INTERNAL_ERROR} if certificate is null.
      */
     public Storage.Result storeCertificate(AccessCertificate certificate) {
-        return manager.storage.storeCertificate(certificate);
+        return manager.getStorage().storeCertificate(certificate);
     }
 
     /**
@@ -282,14 +278,14 @@ public class Broadcaster implements SharedBleListener {
      * if there are no matching certificate pairs for this serial.
      */
     public Storage.Result revokeCertificate(DeviceSerial serial) {
-        if (manager.storage.certWithGainingSerial(serial.getByteArray()) == null
-                || manager.storage.certWithProvidingSerial(serial.getByteArray()) == null) {
+        if (manager.getStorage().certWithGainingSerial(serial.getByteArray()) == null
+                || manager.getStorage().certWithProvidingSerial(serial.getByteArray()) == null) {
             return Storage.Result.INTERNAL_ERROR;
         }
 
-        if (manager.storage.deleteCertificateWithGainingSerial(serial.getByteArray()) == false)
+        if (manager.getStorage().deleteCertificateWithGainingSerial(serial.getByteArray()) == false)
             return Storage.Result.INTERNAL_ERROR;
-        if (manager.storage.deleteCertificateWithProvidingSerial(serial.getByteArray()) == false)
+        if (manager.getStorage().deleteCertificateWithProvidingSerial(serial.getByteArray()) == false)
             return Storage.Result.INTERNAL_ERROR;
 
         return Storage.Result.SUCCESS;
