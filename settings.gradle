@@ -1,7 +1,4 @@
-include ':mobile',
-        ':wear',
-        ':hmkit-android',
-        ':common',
+include ':hmkit-android',
         'hm-java-crypto',
         'hm-java-utils',
         ':ble-explorer-app',
