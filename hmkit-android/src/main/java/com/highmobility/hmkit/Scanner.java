@@ -101,6 +101,9 @@ class Scanner implements SharedBleListener {
         // = new byte[][] { array1, array2, array3, array4, array5 };
         if (getState() == State.SCANNING) return 0;
 
+        manager.startCore();
+        startBle();
+
         if (!manager.getBle().isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
 //            return Link.BLUETOOTH_OFF;
@@ -122,6 +125,17 @@ class Scanner implements SharedBleListener {
         });
 
         return 0;
+    }
+
+    private void startBle() {
+        // we need ble on ctor to listen to state change from IDLE to BLE_UNAVAILABLE.
+        // ble is stopped on terminate. could be started again on startBroadcasting.
+        manager.getBle().initialise();
+
+        // scanner could have already initialised the ble, then we need to add the listener and
+        // check for initial ble state.
+        manager.getBle().addListener(this);
+        if (manager.getBle().isBluetoothOn() == false) setState(State.BLUETOOTH_UNAVAILABLE);
     }
 
     /**

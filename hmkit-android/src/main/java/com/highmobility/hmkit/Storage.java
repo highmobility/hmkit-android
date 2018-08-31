@@ -82,8 +82,8 @@ public class Storage {
      * Deletes all of the stored Access Certificates.
      */
     public void deleteCertificates() {
-        // TODO: 29/08/2018 remove resetStorage method (duplicates)
-        resetStorage();
+        editor.remove(ACCESS_CERTIFICATE_STORAGE_KEY);
+        editor.commit();
     }
 
     AccessCertificate storeDownloadedCertificates(JSONObject response) throws Exception {
@@ -217,11 +217,6 @@ public class Storage {
 
         return new AccessCertificate[0];
 
-    }
-
-    void resetStorage() {
-        editor.remove(ACCESS_CERTIFICATE_STORAGE_KEY);
-        editor.commit();
     }
 
     boolean deleteCertificate(byte[] gainingSerial, byte[] providingSerial) {

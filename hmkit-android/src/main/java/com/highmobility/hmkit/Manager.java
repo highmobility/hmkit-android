@@ -51,14 +51,15 @@ public class Manager {
     public static String customEnvironmentBaseUrl = null;
 
     private static Manager instance;
-    private Context context;
+    private static Context context;
+    static Storage storage;
+
     private DeviceCertificate certificate;
     PrivateKey privateKey;
     PublicKey caPublicKey;
     byte[] issuer, appId; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
     HMBTCore core = new HMBTCore();
     BTCoreInterface coreInterface;
-    static Storage storage;
 
     private Scanner scanner;
     private Broadcaster broadcaster;
@@ -66,8 +67,8 @@ public class Manager {
     private WebService webService;
     private SharedBle ble;
 
-    Handler mainHandler;
-    Handler workHandler;
+    Handler mainHandler, workHandler;
+
     private final HandlerThread workThread = new HandlerThread("BTCoreThread");
     private Timer coreClockTimer;
 
@@ -208,34 +209,25 @@ public class Manager {
     /**
      * Initialise the SDK with a Device Certificate. Call this before using the Manager.
      *
-     * @param certificate The broadcaster certificate.
-     * @param privateKey  32 byte private key with elliptic curve Prime 256v1.
-     * @param caPublicKey 64 byte public key of the Certificate Authority.
-     * @param context     The Application Context.
+     * @param certificate     The broadcaster certificate.
+     * @param privateKey      32 byte private key with elliptic curve Prime 256v1.
+     * @param issuerPublicKey 64 byte public key of the Certificate Authority.
+     * @param context         The Application Context.
      * @return The Manager instance.
      */
     public Manager initialise(DeviceCertificate certificate, PrivateKey privateKey, PublicKey
-            caPublicKey, Context context) {
+            issuerPublicKey, Context context) {
         if (this.certificate != null) {
             // context could be set if Storage was accessed before. Need to check for certificate.
             throw new IllegalStateException("Manager can be initialised once. Call " +
                     "setDeviceCertificate() to set new Device Certificate.");
         }
 
-        this.context = context.getApplicationContext();
-        createStorage(this.context);
+        createStorage(context);
 
-        this.caPublicKey = caPublicKey;
+        this.caPublicKey = issuerPublicKey;
         this.certificate = certificate;
         this.privateKey = privateKey;
-
-        // TODO: 29/08/2018 start core/broadcaster/telematics logic in telematics / broadcaster
-        startCore();
-
-        // initialise after terminate.
-        // TODO: 29/08/2018 init never called after terminate
-        if (ble != null) ble.initialise();
-        if (broadcaster != null) broadcaster.initialise();
 
         Log.i(TAG, "Initialized High-Mobility " + getInfoString() + certificate.toString());
 
@@ -249,12 +241,11 @@ public class Manager {
      * @param privateKey      32 byte private key with elliptic curve Prime 256v1 in Base64 or hex.
      * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64 or hex.
      * @param context         the application context
-     * @throws IllegalArgumentException if the parameters are invalid.
      * @deprecated Use {@link #initialise(String, String, String, Context)} instead.
      */
     @Deprecated
     public void initialize(String certificate, String privateKey, String issuerPublicKey, Context
-            context) throws IllegalArgumentException {
+            context) {
         initialise(certificate, privateKey, issuerPublicKey, context);
     }
 
@@ -266,11 +257,9 @@ public class Manager {
      * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64 or hex.
      * @param context         The Application Context.
      * @return The Manager instance.
-     * @throws IllegalArgumentException if the parameters are invalid.
      */
     public Manager initialise(String certificate, String privateKey, String
-            issuerPublicKey, Context context) throws
-            IllegalArgumentException {
+            issuerPublicKey, Context context) {
         DeviceCertificate decodedCert = new DeviceCertificate(new Bytes(Base64.decode
                 (certificate)));
         PrivateKey decodedPrivateKey = new PrivateKey(privateKey);
@@ -280,41 +269,71 @@ public class Manager {
     }
 
     /**
-     * @param certificate
-     * @param privateKey
-     * @param issuerPublicKey
+     * Set a new Device Certificate.
+     *
+     * @param certificate     The device certificate in Base64 or hex.
+     * @param privateKey      32 byte private key with elliptic curve Prime 256v1 in Base64 or hex.
+     * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64 or hex.
      * @throws IllegalStateException if there are connected links with the Broadcaster or an ongoing
      *                               Telematics command.
      */
     public void setDeviceCertificate(String certificate, String privateKey, String
             issuerPublicKey) throws IllegalStateException {
-        // TODO: 29/08/2018 implement and comment
+        DeviceCertificate decodedCert = new DeviceCertificate(new Bytes(Base64.decode
+                (certificate)));
+        PrivateKey decodedPrivateKey = new PrivateKey(privateKey);
+        PublicKey decodedIssuerPublicKey = new PublicKey(issuerPublicKey);
+        setDeviceCertificate(decodedCert, decodedPrivateKey, decodedIssuerPublicKey);
     }
 
+    /**
+     * Set a new Device Certificate.
+     *
+     * @param certificate     The device certificate.
+     * @param privateKey      32 byte private key with elliptic curve Prime 256v1.
+     * @param issuerPublicKey 64 byte public key of the Certificate Authority.
+     * @throws IllegalStateException if there are connected links with the Broadcaster or an ongoing
+     *                               Telematics command.
+     */
     public void setDeviceCertificate(DeviceCertificate certificate, PrivateKey privateKey,
-                                     PublicKey caPublicKey) throws IllegalStateException {
-        // TODO: 29/08/2018 implement and comment
+                                     PublicKey issuerPublicKey) throws IllegalStateException {
+        if (broadcaster != null && broadcaster.getLinks().size() > 0) {
+            throw new IllegalStateException("Cannot set a new Device Certificate if a connected " +
+                    "link exists with the Broadcaster. Disconnect from all of the links.");
+        }
 
+        if (telematics != null && telematics.isSendingCommand()) {
+            throw new IllegalStateException("Cannot set a new Device Certificate sending " +
+                    "a Telematics command. Wait for the commands to finish.");
+        }
+
+        if (scanner != null && scanner.getLinks().size() > 0) {
+            throw new IllegalStateException("Cannot set a new Device Certificate if a connected " +
+                    "link exists with the Scanner. Disconnect from all of the links.");
+        }
+
+        // TODO: 31/08/2018 test with HMKit-sandbox app.
+        this.caPublicKey = issuerPublicKey;
+        this.certificate = certificate;
+        this.privateKey = privateKey;
     }
 
     /**
      * Terminate is meant to be called when the SDK is not used anymore(on app kill for example). It
-     * stops internal processes, unregisters BroadcastReceivers, stops broadcasting, cancels
-     * Telematics commands.
-     * <p>
-     * You can re use Broadcaster and Telematics after terminate without re initialise(Device
-     * Certificate reference is retained).
+     * stops internal processes, unregisters BroadcastReceivers, stops broadcasting, cancels web
+     * requests.
      * <p>
      * Stored certificates are not deleted.
      *
      * @throws IllegalStateException when there are links still connected.
      */
     public void terminate() throws IllegalStateException {
-        // TODO: use something to check that does not terminate twice. or check inside the methods
+        // TODO: 30/08/2018 try to call terminate 2x
 
         /**
-         * Broadcaster and ble are initialised once and then reused after other terminate/init-s.
-         * This is because users wouldn't have to reset the listener after terminate/init.
+         * Broadcaster and ble need to be terminated on app kill. Currently they can be used
+         * again after terminate(they start the processes again automatically) but this is not a
+         * requirement.
          */
         if (broadcaster != null) broadcaster.terminate();
         if (ble != null) ble.terminate();
@@ -443,7 +462,7 @@ public class Manager {
      */
     public void deleteCertificates() {
         checkInitialised();
-        storage.resetStorage();
+        storage.deleteCertificates();
     }
 
     /**
@@ -467,7 +486,9 @@ public class Manager {
      * @param serial  The serial of the device that is providing access (eg this device).
      * @return All stored Access Certificates where the device with the given serial is providing
      * access.
-     * @deprecated Use {@link Storage#getCertificates(DeviceSerial)} instead.
+     * @deprecated Use {@link #getStorage(Context)} and
+     * {@link Storage#getCertificates(DeviceSerial)}
+     * instead.
      */
     @Deprecated
     public AccessCertificate[] getCertificates(DeviceSerial serial, Context context) {
@@ -481,7 +502,8 @@ public class Manager {
      * @param serial  The serial number of the device that is gaining access.
      * @param context The application context.
      * @return An Access Certificate for the given serial if one exists, otherwise null.
-     * @deprecated Use {@link Storage#getCertificate(DeviceSerial)} instead.
+     * @deprecated Use {@link #getStorage(Context)} and {@link Storage#getCertificate(DeviceSerial)}
+     * instead.
      */
     @Deprecated
     @Nullable public AccessCertificate getCertificate(DeviceSerial serial, Context context) {
@@ -493,7 +515,8 @@ public class Manager {
      * Deletes all of the stored Access Certificates.
      *
      * @param context The application context.
-     * @deprecated Use {@link Storage#deleteCertificates()} instead.
+     * @deprecated Use {@link #getStorage(Context)} and {@link Storage#deleteCertificates()}
+     * instead.
      */
     @Deprecated
     public void deleteCertificates(Context context) {
@@ -516,13 +539,10 @@ public class Manager {
                     ".initialise() first.");
     }
 
-    private static void createStorage(Context context) {
-        // storage could be accessed before init.
-        if (storage == null) storage = new Storage(context.getApplicationContext());
-    }
+    void startCore() {
+        checkInitialised();
 
-    private void startCore() {
-        // create the core if doesn't exist
+        // create once if doesn't exist
         if (coreInterface == null) {
             mainHandler = new Handler(this.context.getMainLooper());
             workThread.start();
@@ -547,6 +567,14 @@ public class Manager {
                     });
                 }
             }, 0, 1000);
+        }
+    }
+
+    private static void createStorage(Context context) {
+        // storage could be accessed before init.
+        if (storage == null) {
+            Manager.getInstance().context = context.getApplicationContext();
+            storage = new Storage(Manager.getInstance().context);
         }
     }
 

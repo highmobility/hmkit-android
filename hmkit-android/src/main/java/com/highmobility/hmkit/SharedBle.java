@@ -19,14 +19,19 @@ import java.util.Random;
 
 public class SharedBle {
     Context context;
+    boolean receiverRegistered;
 
     BluetoothManager mBluetoothManager;
     BluetoothAdapter mBluetoothAdapter;
 
     private ArrayList<SharedBleListener> listeners = new ArrayList<>();
 
-    public void addListener(SharedBleListener listener) {
-        if (listeners.contains(listener) == false) listeners.add(listener);
+    public boolean addListener(SharedBleListener listener) {
+        if (listeners.contains(listener) == false) {
+            listeners.add(listener);
+            return true;
+        }
+        return false;
     }
 
     public void removeListener(SharedBleListener listener) {
@@ -66,13 +71,24 @@ public class SharedBle {
         initialise();
     }
 
-    void initialise() {
-        context.registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+    /**
+     * @return true if context receiver was registered.
+     */
+    boolean initialise() {
+        if (receiverRegistered == false) {
+            context.registerReceiver(receiver, new IntentFilter(BluetoothAdapter
+                    .ACTION_STATE_CHANGED));
+            receiverRegistered = true;
+            return true;
+        }
+
+        return false;
     }
 
     void terminate() {
-        if (mBluetoothAdapter != null) {
+        if (mBluetoothAdapter != null && receiverRegistered) {
             context.unregisterReceiver(receiver);
+            receiverRegistered = false;
             // don't clear listeners here because broadcaster is never nulled.
         }
     }

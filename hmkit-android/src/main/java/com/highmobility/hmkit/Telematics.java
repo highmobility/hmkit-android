@@ -20,12 +20,16 @@ import org.json.JSONObject;
 public class Telematics {
     static final String TAG = "HMKit-Telematics";
 
-    Manager manager;
-    CommandCallback callback;
-    boolean sendingCommand;
+    private Manager manager;
+    private CommandCallback callback;
+    private boolean sendingCommand;
 
     Telematics(Manager manager) {
         this.manager = manager;
+    }
+
+    boolean isSendingCommand() {
+        return sendingCommand;
     }
 
     /**
@@ -37,7 +41,7 @@ public class Telematics {
      */
     public void sendCommand(final Bytes command, DeviceSerial serial, final CommandCallback
             callback) {
-        manager.checkInitialised();
+        manager.startCore();
 
         if (command.getLength() > Constants.MAX_COMMAND_LENGTH) {
             TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_TOO_BIG, 0,

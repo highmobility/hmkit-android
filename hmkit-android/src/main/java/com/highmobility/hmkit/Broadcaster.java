@@ -119,8 +119,9 @@ public class Broadcaster implements SharedBleListener {
     }
 
     Broadcaster(Manager manager) throws IllegalStateException, BleNotSupportedException {
+        if (manager.getBle() == null) throw new BleNotSupportedException();
         this.manager = manager;
-        if (initialise() == false) throw new BleNotSupportedException();
+        startBle(); // start listening for ble on/off
     }
 
     /**
@@ -145,7 +146,6 @@ public class Broadcaster implements SharedBleListener {
      *                 something went wrong.
      */
     public void startBroadcasting(StartCallback callback) {
-        manager.checkInitialised();
         Log.d(TAG, "startBroadcasting() called");
 
         if (state == State.BROADCASTING) {
@@ -155,6 +155,10 @@ public class Broadcaster implements SharedBleListener {
             callback.onBroadcastingStarted();
             return;
         }
+
+        manager.startCore();
+        // if ble was stopped with terminate, we need to start it again.
+        startBle();
 
         if (state == State.BLUETOOTH_UNAVAILABLE) {
             callback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type.BLUETOOTH_OFF
@@ -316,18 +320,12 @@ public class Broadcaster implements SharedBleListener {
         // cant close service here, we wont get disconnect callback
     }
 
-    /**
-     * @return false if BLE is not supported for this device.
-     */
-    boolean initialise() {
-        // we need ble on initialise to listen to state change from IDLE to BLE_UNAVAILABLE.
-        // we reset the listener after terminate().
-        SharedBle ble = manager.getBle();
-        if (ble == null) return false;
-        ble.addListener(this);
-        if (ble.isBluetoothOn() == false) setState(State.BLUETOOTH_UNAVAILABLE);
-
-        return true;
+    private void startBle() {
+        manager.getBle().initialise();
+        // add state listener
+        manager.getBle().addListener(this);
+        // check for initial state
+        if (manager.getBle().isBluetoothOn() == false) setState(State.BLUETOOTH_UNAVAILABLE);
     }
 
     /**
@@ -338,7 +336,7 @@ public class Broadcaster implements SharedBleListener {
      */
     void terminate() throws IllegalStateException {
         if (getLinks().size() > 0) {
-            // re initialise(new device cert) would mess up communication with previous links
+            // re startBle(new device cert) would mess up communication with previous links
             throw new IllegalStateException("Broadcaster cannot terminate if a connected " +
                     "link exists. Disconnect from all of the links.");
         }
