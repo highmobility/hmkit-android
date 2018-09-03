@@ -5,8 +5,6 @@ import android.util.Log;
 import com.highmobility.btcore.HMBTCoreInterface;
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.crypto.AccessCertificate;
-import com.highmobility.crypto.value.PrivateKey;
-import com.highmobility.crypto.value.PublicKey;
 import com.highmobility.utils.ByteUtils;
 import com.highmobility.value.Bytes;
 
@@ -15,8 +13,6 @@ import java.security.SecureRandom;
 class BTCoreInterface implements HMBTCoreInterface {
     static final String TAG = "HMKit-CoreInterface";
     Manager manager;
-    PrivateKey privateKey;
-    PublicKey caPublicKey;
 
     BTCoreInterface(Manager manager) {
         this.manager = manager;
@@ -110,7 +106,7 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetLocalPrivateKey(byte[] privateKey) {
-        copyBytes(privateKey, privateKey);
+        copyBytes(manager.privateKey, privateKey);
         return 0;
     }
 
@@ -122,13 +118,13 @@ class BTCoreInterface implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetCaPublicKey(byte[] publicKey) {
-        copyBytes(caPublicKey, publicKey);
+        copyBytes(manager.caPublicKey, publicKey);
         return 0;
     }
 
     @Override
     public int HMPersistenceHalgetOEMCaPublicKey(byte[] publicKey) {
-        copyBytes(caPublicKey, publicKey);
+        copyBytes(manager.caPublicKey, publicKey);
         return 0;
     }
 
@@ -258,7 +254,8 @@ class BTCoreInterface implements HMBTCoreInterface {
 
         for (AccessCertificate cert : storedCerts) {
             if (cert.getProviderSerial().equals(serial)) {
-                if (manager.getStorage().deleteCertificate(cert.getGainerSerial().getByteArray(), cert
+                if (manager.getStorage().deleteCertificate(cert.getGainerSerial().getByteArray(),
+                        cert
                         .getProviderSerial().getByteArray())) {
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                         Log.d(Broadcaster.TAG, "Erased stored cert for serial " + ByteUtils

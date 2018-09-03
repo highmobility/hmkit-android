@@ -67,6 +67,8 @@ public class Manager {
     private Timer coreClockTimer;
 
     private DeviceCertificate certificate;
+    PrivateKey privateKey;
+    PublicKey caPublicKey;
     byte[] issuer, appId; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
 
     /**
@@ -186,19 +188,26 @@ public class Manager {
     }
 
     /**
-     * Initialise with context only. This allows access to storage. Call {@link
+     * Initialise the SDK with context to get access to storage only. Call {@link
      * #setDeviceCertificate (DeviceCertificate, PrivateKey, PublicKey)} later to send Commands.
      *
      * @param context The application context.
      * @return The Manager instance.
      */
     public Manager initialise(Context context) {
-        createStorage(context);
+        // all initialises come to here. throw to make clear how the sdk is supposed to be used -
+        // initialise(cert, ctx) or initialise(ctx) + setDeviceCert(cert).
+        if (this.context != null) {
+            throw new IllegalStateException("Manager can be initialised once. Call " +
+                    "setDeviceCertificate() to set new Device Certificate.");
+        }
+
+        setContextAndCreateStorage(context);
         return instance;
     }
 
     /**
-     * Initialise the SDK with a Device Certificate. Call this before using the Manager.
+     * Initialise the SDK with a Device Certificate. This is needed to send Commands.
      *
      * @param certificate     The broadcaster certificate.
      * @param privateKey      32 byte private key with elliptic curve Prime 256v1.
@@ -208,18 +217,8 @@ public class Manager {
      */
     public Manager initialise(DeviceCertificate certificate, PrivateKey privateKey, PublicKey
             issuerPublicKey, Context context) {
-        if (this.certificate != null) {
-            // context could be set if Storage was accessed before. Need to check for certificate.
-            throw new IllegalStateException("Manager can be initialised once. Call " +
-                    "setDeviceCertificate() to set new Device Certificate.");
-        }
-
         initialise(context);
-
-        this.certificate = certificate;
-        coreInterface.caPublicKey = issuerPublicKey;
-        coreInterface.privateKey = privateKey;
-
+        setDeviceCertificate(certificate, privateKey, issuerPublicKey);
         Log.i(TAG, "Initialised High-Mobility " + getInfoString() + certificate.toString());
 
         return this;
@@ -307,7 +306,6 @@ public class Manager {
     public void setDeviceCertificate(DeviceCertificate certificate, PrivateKey privateKey,
                                      PublicKey issuerPublicKey) throws IllegalStateException {
         throwIfContextNotSet(); // need to check that context is set(initialise called).
-        // TODO: 31/08/2018 test with HMKit-sandbox app.
 
         if (broadcaster != null && broadcaster.getLinks().size() > 0) {
             throw new IllegalStateException("Cannot set a new Device Certificate if a connected " +
@@ -324,15 +322,14 @@ public class Manager {
                     "link exists with the Scanner. Disconnect from all of the links.");
         }
 
-        coreInterface.caPublicKey = issuerPublicKey;
-        coreInterface.privateKey = privateKey;
+        this.caPublicKey = issuerPublicKey;
+        this.privateKey = privateKey;
         this.certificate = certificate;
     }
 
     /**
-     * Terminate is meant to be called when the SDK is not used anymore(on app kill for example). It
-     * stops internal processes, unregisters BroadcastReceivers, stops broadcasting, cancels web
-     * requests.
+     * Terminate stops internal processes, unregisters BroadcastReceivers, stops broadcasting,
+     * cancels web requests. It is meant to be called once, when app is destroyed.
      * <p>
      * Stored certificates are not deleted.
      *
@@ -344,7 +341,7 @@ public class Manager {
         /**
          * Broadcaster and ble need to be terminated on app kill. Currently they can be used
          * again after terminate(they start the processes again automatically) but this is not a
-         * requirement.
+         * requirement since terminate is supposed to be called once.
          */
         if (broadcaster != null) broadcaster.terminate();
         if (ble != null) ble.terminate();
@@ -365,7 +362,7 @@ public class Manager {
     public void downloadCertificate(String accessToken, final DownloadCallback callback) {
         throwIfDeviceCertificateNotSet();
         getWebService().requestAccessCertificate(accessToken,
-                coreInterface.privateKey,
+                privateKey,
                 getDeviceCertificate().getSerial(),
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -487,6 +484,10 @@ public class Manager {
     @Deprecated
     public boolean deleteCertificate(DeviceSerial serial, Context context) {
         // this method should be deleted. cannot be initialised without context
+
+        // ALSO: remove setContextAndCreateStorage() and move to initialise(ctx). That method is
+        // used to enable these deprecated storage methods.
+
         throwIfDeviceCertificateNotSet();
         return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial()
                 .getByteArray());
@@ -501,7 +502,7 @@ public class Manager {
      */
     @Deprecated
     public AccessCertificate[] getCertificates(DeviceSerial serial, Context context) {
-        createStorage(context);
+        setContextAndCreateStorage(context);
         return storage.getCertificates(serial);
     }
 
@@ -515,7 +516,7 @@ public class Manager {
      */
     @Deprecated
     @Nullable public AccessCertificate getCertificate(DeviceSerial serial, Context context) {
-        createStorage(context);
+        setContextAndCreateStorage(context);
         return storage.getCertificate(serial);
     }
 
@@ -527,7 +528,7 @@ public class Manager {
      */
     @Deprecated
     public void deleteCertificates(Context context) {
-        createStorage(context);
+        setContextAndCreateStorage(context);
         storage.deleteCertificates();
     }
 
@@ -541,15 +542,16 @@ public class Manager {
 
     void throwIfDeviceCertificateNotSet() throws IllegalStateException {
         // if device cert exists, context has to exist as well.
-        if (certificate == null)
+        if (certificate == null) {
+            throwIfContextNotSet();
             throw new IllegalStateException("Device certificate is not set. Call Manager" +
-                    ".initialise() first.");
+                    ".setDeviceCertificate() first.");
+        }
     }
 
     void throwIfContextNotSet() throws IllegalStateException {
         if (context == null) {
-            throw new IllegalStateException("Context is not set. Call Manager" +
-                    ".initialise() first.");
+            throw new IllegalStateException("Context is not set. Call Manager.initialise() first.");
         }
     }
 
@@ -584,8 +586,8 @@ public class Manager {
         }
     }
 
-    private void createStorage(Context context) {
-        // storage could be accessed before init.
+    private void setContextAndCreateStorage(Context context) {
+        // storage can be accessed with context only.
         if (storage == null) {
             this.context = context.getApplicationContext();
             storage = new Storage(this.context);
