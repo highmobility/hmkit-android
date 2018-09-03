@@ -87,17 +87,16 @@ public class Broadcaster implements SharedBleListener {
      * @return The certificates that are registered for the Broadcaster.
      */
     public AccessCertificate[] getRegisteredCertificates() {
-        return manager.getStorage().getCertificatesWithProvidingSerial(manager.getDeviceCertificate()
-                .getSerial()
-                .getByteArray());
+        return manager.getStorage().getCertificatesWithProvidingSerial(manager
+                .getDeviceCertificate().getSerial().getByteArray());
     }
 
     /**
      * @return The certificates that are stored in the broadcaster's database for other devices.
      */
     public AccessCertificate[] getStoredCertificates() {
-        return manager.getStorage().getCertificatesWithoutProvidingSerial(manager.getDeviceCertificate()
-                .getSerial().getByteArray());
+        return manager.getStorage().getCertificatesWithoutProvidingSerial(manager
+                .getDeviceCertificate().getSerial().getByteArray());
     }
 
     /**
@@ -116,7 +115,7 @@ public class Broadcaster implements SharedBleListener {
         this.listener = listener;
     }
 
-    Broadcaster(Manager manager) throws IllegalStateException, BleNotSupportedException {
+    Broadcaster(Manager manager) throws BleNotSupportedException {
         if (manager.getBle() == null) throw new BleNotSupportedException();
         this.manager = manager;
         startBle(); // start listening for ble on/off
@@ -235,9 +234,9 @@ public class Broadcaster implements SharedBleListener {
      * Stop the alive pinging.
      */
     public void stopAlivePinging() {
-        // TODO: 23/08/2018 try to call if hasnt started alive pinging before
+        if (isAlivePinging == false) return;
         isAlivePinging = false;
-        manager.workHandler.removeCallbacks(clockRunnable);
+        manager.workHandler.removeCallbacks(alivePingRunnable);
     }
 
     /**
@@ -285,7 +284,8 @@ public class Broadcaster implements SharedBleListener {
 
         if (manager.getStorage().deleteCertificateWithGainingSerial(serial.getByteArray()) == false)
             return Storage.Result.INTERNAL_ERROR;
-        if (manager.getStorage().deleteCertificateWithProvidingSerial(serial.getByteArray()) == false)
+        if (manager.getStorage().deleteCertificateWithProvidingSerial(serial.getByteArray()) ==
+                false)
             return Storage.Result.INTERNAL_ERROR;
 
         return Storage.Result.SUCCESS;
@@ -667,24 +667,15 @@ public class Broadcaster implements SharedBleListener {
         }
 
         if (isAlivePinging) {
-            manager.workHandler.postDelayed(clockRunnable, alivePingInterval);
+            manager.workHandler.postDelayed(alivePingRunnable, alivePingInterval);
         }
     }
 
-    ClockRunnable clockRunnable = new ClockRunnable(this);
-
-    static class ClockRunnable implements Runnable {
-        WeakReference<Broadcaster> broadcaster;
-
-        ClockRunnable(Broadcaster broadcaster) {
-            this.broadcaster = new WeakReference<>(broadcaster);
+    Runnable alivePingRunnable = new Runnable() {
+        @Override public void run() {
+            sendAlivePing();
         }
-
-        @Override
-        public void run() {
-            broadcaster.get().sendAlivePing();
-        }
-    }
+    };
 
     AdvertiseCb advertiseCallback = new AdvertiseCb(this);
 
