@@ -336,8 +336,6 @@ public class Manager {
      * @throws IllegalStateException when there are links still connected.
      */
     public void terminate() throws IllegalStateException {
-        // TODO: 30/08/2018 try to call terminate 2x
-
         /**
          * Broadcaster and ble need to be terminated on app kill. Currently they can be used
          * again after terminate(they start the processes again automatically) but this is not a
@@ -586,18 +584,18 @@ public class Manager {
         }
     }
 
+    private void stopCore() {
+        if (coreClockTimer != null) {
+            coreClockTimer.cancel();
+            coreClockTimer = null;
+        }
+    }
+
     private void setContextAndCreateStorage(Context context) {
         // storage can be accessed with context only.
         if (storage == null) {
             this.context = context.getApplicationContext();
             storage = new Storage(this.context);
-        }
-    }
-
-    private void stopCore() {
-        if (coreClockTimer != null) {
-            coreClockTimer.cancel();
-            coreClockTimer = null;
         }
     }
 
