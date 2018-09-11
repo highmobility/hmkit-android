@@ -9,6 +9,15 @@ extern "C" {
 }
 #include "hmbtcore.h"
 
+#define CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION              \
+                                                                  \
+  catch (...)                                                     \
+  {                                                               \
+    /* Oops I missed identifying this exception! */               \
+    jclass jc = env->FindClass("java/lang/Error");                \
+    if(jc) env->ThrowNew (jc, "unidentified exception");          \
+  }
+
 void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterface){
 
     interfaceClassRef = env->GetObjectClass(coreInterface);
@@ -60,16 +69,23 @@ JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreInit(JNIEnv *env, jobject instance,
                                                      jobject coreInterface) {
 
-    prepareCallbackFunctions(env,instance,coreInterface);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        hm_bt_core_init();
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
 
-    hm_bt_core_init();
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreClock(JNIEnv *env, jobject instance,jobject coreInterface) {
 
-    prepareCallbackFunctions(env,instance,coreInterface);
-    hm_bt_core_clock();
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        hm_bt_core_clock();
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
@@ -78,12 +94,16 @@ Java_com_highmobility_btcore_HMBTCore_HMBTCoreSensingReadNotification(JNIEnv *en
                                                                         jobject coreInterface,
                                                                         jbyteArray mac_,
                                                                         jint characteriistic_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *mac = env->GetByteArrayElements( mac_, NULL);
 
-    hm_bt_core_sensing_read_notification((uint8_t*)mac, (hm_characteristic)characteriistic_);
+        hm_bt_core_sensing_read_notification((uint8_t*)mac, (hm_characteristic)characteriistic_);
 
-    env->ReleaseByteArrayElements( mac_, mac, 0);
+        env->ReleaseByteArrayElements( mac_, mac, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
@@ -91,26 +111,34 @@ Java_com_highmobility_btcore_HMBTCore_HMBTCoreSensingReadResponse(JNIEnv *env, j
                                                                     jbyteArray data_, jint size,
                                                                     jint offset, jbyteArray mac_,
                                                                     jint characteriistic_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *data = env->GetByteArrayElements( data_, NULL);
-    jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *data = env->GetByteArrayElements( data_, NULL);
+        jbyte *mac = env->GetByteArrayElements( mac_, NULL);
 
-    hm_bt_core_sensing_read_response((uint8_t*)data,size,offset,(uint8_t*)mac,(hm_characteristic)characteriistic_);
+        hm_bt_core_sensing_read_response((uint8_t*)data,size,offset,(uint8_t*)mac,(hm_characteristic)characteriistic_);
 
-    env->ReleaseByteArrayElements( data_, data, 0);
-    env->ReleaseByteArrayElements( mac_, mac, 0);
+        env->ReleaseByteArrayElements( data_, data, 0);
+        env->ReleaseByteArrayElements( mac_, mac, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreSensingWriteResponse(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                      jbyteArray mac_,
                                                                      jint characteriistic_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *mac = env->GetByteArrayElements( mac_, NULL);
 
-    hm_bt_core_sensing_write_response((uint8_t*)mac,(hm_characteristic)characteriistic_);
+        hm_bt_core_sensing_write_response((uint8_t*)mac,(hm_characteristic)characteriistic_);
 
-    env->ReleaseByteArrayElements( mac_, mac, 0);
+        env->ReleaseByteArrayElements( mac_, mac, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
@@ -118,12 +146,16 @@ Java_com_highmobility_btcore_HMBTCore_HMBTCoreSensingPingNotification(JNIEnv *en
                                                                         jobject instance,jobject coreInterface,
                                                                         jbyteArray mac_,
                                                                         jint characteriistic_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *mac = env->GetByteArrayElements( mac_, NULL);
 
-    hm_bt_core_sensing_ping_notification((uint8_t*)mac,(hm_characteristic)characteriistic_);
+        hm_bt_core_sensing_ping_notification((uint8_t*)mac,(hm_characteristic)characteriistic_);
 
-    env->ReleaseByteArrayElements( mac_, mac, 0);
+        env->ReleaseByteArrayElements( mac_, mac, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
@@ -132,158 +164,210 @@ Java_com_highmobility_btcore_HMBTCore_HMBTCoreSensingProcessAdvertisement(JNIEnv
                                                                             jbyteArray mac_,
                                                                             jbyteArray data_,
                                                                             jint size) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *mac = env->GetByteArrayElements( mac_, NULL);
-    jbyte *data = env->GetByteArrayElements( data_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+        jbyte *data = env->GetByteArrayElements( data_, NULL);
 
-    hm_bt_core_sensing_process_advertisement((uint8_t*)mac,0, (uint8_t*)data,size);
+        hm_bt_core_sensing_process_advertisement((uint8_t*)mac,0, (uint8_t*)data,size);
 
-    env->ReleaseByteArrayElements( mac_, mac, 0);
-    env->ReleaseByteArrayElements( data_, data, 0);
+        env->ReleaseByteArrayElements( mac_, mac, 0);
+        env->ReleaseByteArrayElements( data_, data, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreSensingDiscoveryEvent(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                       jbyteArray mac_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *mac = env->GetByteArrayElements( mac_, NULL);
 
-    hm_bt_core_sensing_discovery_event((uint8_t*)mac);
+        hm_bt_core_sensing_discovery_event((uint8_t*)mac);
 
-    env->ReleaseByteArrayElements( mac_, mac, 0);
+        env->ReleaseByteArrayElements( mac_, mac, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreSensingScanStart(JNIEnv *env, jobject instance, jobject coreInterface) {
-    prepareCallbackFunctions(env,instance,coreInterface);
 
-    hm_bt_core_sensing_scan_start();
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        hm_bt_core_sensing_scan_start();
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreSensingConnect(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                jbyteArray mac_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *mac = env->GetByteArrayElements( mac_, NULL);
 
-    hm_bt_core_sensing_connect((uint8_t*)mac);
+        hm_bt_core_sensing_connect((uint8_t*)mac);
 
-    env->ReleaseByteArrayElements( mac_, mac, 0);
+        env->ReleaseByteArrayElements( mac_, mac, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreSensingDisconnect(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                   jbyteArray mac_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *mac = env->GetByteArrayElements( mac_, NULL);
 
-    hm_bt_core_sensing_disconnect((uint8_t*)mac);
+        hm_bt_core_sensing_disconnect((uint8_t*)mac);
 
-    env->ReleaseByteArrayElements( mac_, mac, 0);
+        env->ReleaseByteArrayElements( mac_, mac, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCorelinkConnect(JNIEnv *env, jobject instance,jobject coreInterface,
                                                             jbyteArray mac_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *mac = env->GetByteArrayElements( mac_, NULL);
 
-    hm_bt_core_link_connect((uint8_t*)mac);
+        hm_bt_core_link_connect((uint8_t*)mac);
 
-    env->ReleaseByteArrayElements( mac_, mac, 0);
+        env->ReleaseByteArrayElements( mac_, mac, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCorelinkDisconnect(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                jbyteArray mac_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *mac = env->GetByteArrayElements( mac_, NULL);
 
-    hm_bt_core_link_disconnect((uint8_t*)mac);
+        hm_bt_core_link_disconnect((uint8_t*)mac);
 
-    env->ReleaseByteArrayElements( mac_, mac, 0);
+        env->ReleaseByteArrayElements( mac_, mac, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCorelinkIncomingData(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                  jbyteArray data_, jint size,
                                                                  jbyteArray mac_,jint characteriistic_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *data = env->GetByteArrayElements( data_, NULL);
-    jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *data = env->GetByteArrayElements( data_, NULL);
+        jbyte *mac = env->GetByteArrayElements( mac_, NULL);
 
-    hm_bt_core_link_incoming_data((uint8_t*)data,size,(uint8_t*)mac,(hm_characteristic)characteriistic_);
+        hm_bt_core_link_incoming_data((uint8_t*)data,size,(uint8_t*)mac,(hm_characteristic)characteriistic_);
 
-    env->ReleaseByteArrayElements( data_, data, 0);
-    env->ReleaseByteArrayElements( mac_, mac, 0);
+        env->ReleaseByteArrayElements( data_, data, 0);
+        env->ReleaseByteArrayElements( mac_, mac, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCorelinkWriteResponse(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                  jbyteArray mac_,jint characteriistic_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *mac = env->GetByteArrayElements( mac_, NULL);
 
-    hm_bt_core_link_write_response((uint8_t*)mac,(hm_characteristic)characteriistic_);
+        hm_bt_core_link_write_response((uint8_t*)mac,(hm_characteristic)characteriistic_);
 
-    env->ReleaseByteArrayElements( mac_, mac, 0);
+        env->ReleaseByteArrayElements( mac_, mac, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreSendCustomCommand(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                   jbyteArray data_, jint size,
                                                                   jbyteArray mac_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *data = env->GetByteArrayElements( data_, NULL);
-    jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *data = env->GetByteArrayElements( data_, NULL);
+        jbyte *mac = env->GetByteArrayElements( mac_, NULL);
 
-    sendSecureContainerUsingMac((uint8_t*)mac, (uint8_t*)data, size);
+        sendSecureContainerUsingMac((uint8_t*)mac, (uint8_t*)data, size);
 
-    env->ReleaseByteArrayElements( data_, data, 0);
-    env->ReleaseByteArrayElements( mac_, mac, 0);
+        env->ReleaseByteArrayElements( data_, data, 0);
+        env->ReleaseByteArrayElements( mac_, mac, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreSendReadDeviceCertificate(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                   jbyteArray mac_, jbyteArray nonce_,
                                                                   jbyteArray caSignature_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *mac = env->GetByteArrayElements( mac_, NULL);
-    jbyte *nonce = env->GetByteArrayElements( nonce_, NULL);
-    jbyte *caSignature = env->GetByteArrayElements( caSignature_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+        jbyte *nonce = env->GetByteArrayElements( nonce_, NULL);
+        jbyte *caSignature = env->GetByteArrayElements( caSignature_, NULL);
 
-    hm_api_send_read_device_certificate((uint8_t*)mac, (uint8_t*)nonce, (uint8_t*)caSignature);
+        hm_api_send_read_device_certificate((uint8_t*)mac, (uint8_t*)nonce, (uint8_t*)caSignature);
 
-    env->ReleaseByteArrayElements( mac_, mac, 0);
-    env->ReleaseByteArrayElements( nonce_, nonce, 0);
-    env->ReleaseByteArrayElements( caSignature_, caSignature, 0);
+        env->ReleaseByteArrayElements( mac_, mac, 0);
+        env->ReleaseByteArrayElements( nonce_, nonce, 0);
+        env->ReleaseByteArrayElements( caSignature_, caSignature, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreSendRegisterAccessCertificate(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                           jbyteArray certificate_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
-    jbyte *certificate = env->GetByteArrayElements( certificate_, NULL);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
+        jbyte *certificate = env->GetByteArrayElements( certificate_, NULL);
 
-    hm_certificate_t cert;
-    hm_cert_get_as_struct((uint8_t*)certificate, &cert);
-    hm_api_send_register_access_certificate(&cert);
+        hm_certificate_t cert;
+        hm_cert_get_as_struct((uint8_t*)certificate, &cert);
+        hm_api_send_register_access_certificate(&cert);
 
-    env->ReleaseByteArrayElements( certificate_, certificate, 0);
+        env->ReleaseByteArrayElements( certificate_, certificate, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreCryptoCreateKeys(JNIEnv *env, jobject instance,
                                                                   jbyteArray privateKey_,
                                                                   jbyteArray publicKey_) {
-    jbyte *privatek = env->GetByteArrayElements( privateKey_, NULL);
-    jbyte *publick = env->GetByteArrayElements( publicKey_, NULL);
+    try{
+        jbyte *privatek = env->GetByteArrayElements( privateKey_, NULL);
+        jbyte *publick = env->GetByteArrayElements( publicKey_, NULL);
 
-    hm_crypto_openssl_create_keys((uint8_t*)privatek, (uint8_t*)publick, true);
+        hm_crypto_openssl_create_keys((uint8_t*)privatek, (uint8_t*)publick, true);
 
-    env->ReleaseByteArrayElements( privateKey_, privatek, 0);
-    env->ReleaseByteArrayElements( publicKey_, publick, 0);
+        env->ReleaseByteArrayElements( privateKey_, privatek, 0);
+        env->ReleaseByteArrayElements( publicKey_, publick, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
@@ -291,15 +375,19 @@ Java_com_highmobility_btcore_HMBTCore_HMBTCoreCryptoAddSignature(JNIEnv *env, jo
                                                                  jbyteArray data_, jint size,
                                                                  jbyteArray privateKey_, jbyteArray signature_) {
 
-    jbyte *data = env->GetByteArrayElements( data_, NULL);
-    jbyte *privatek = env->GetByteArrayElements( privateKey_, NULL);
-    jbyte *signature = env->GetByteArrayElements( signature_, NULL);
+    try{
+        jbyte *data = env->GetByteArrayElements( data_, NULL);
+        jbyte *privatek = env->GetByteArrayElements( privateKey_, NULL);
+        jbyte *signature = env->GetByteArrayElements( signature_, NULL);
 
-    hm_crypto_openssl_signature((uint8_t*)data, size, (uint8_t*)privatek, (uint8_t*)signature);
+        hm_crypto_openssl_signature((uint8_t*)data, size, (uint8_t*)privatek, (uint8_t*)signature);
 
-    env->ReleaseByteArrayElements( data_, data, 0);
-    env->ReleaseByteArrayElements( privateKey_, privatek, 0);
-    env->ReleaseByteArrayElements( signature_, signature, 0);
+        env->ReleaseByteArrayElements( data_, data, 0);
+        env->ReleaseByteArrayElements( privateKey_, privatek, 0);
+        env->ReleaseByteArrayElements( signature_, signature, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT jint JNICALL
@@ -307,55 +395,71 @@ Java_com_highmobility_btcore_HMBTCore_HMBTCoreCryptoValidateSignature(JNIEnv *en
         jbyteArray data_, jint size,
         jbyteArray pubKey_, jbyteArray signature_) {
 
-jbyte *data = env->GetByteArrayElements( data_, NULL);
-jbyte *public_key = env->GetByteArrayElements( pubKey_, NULL);
-jbyte *signature = env->GetByteArrayElements( signature_, NULL);
+    try{
+        jbyte *data = env->GetByteArrayElements( data_, NULL);
+        jbyte *public_key = env->GetByteArrayElements( pubKey_, NULL);
+        jbyte *signature = env->GetByteArrayElements( signature_, NULL);
 
-jint retvalue = hm_crypto_openssl_verify((uint8_t*)data, size, (uint8_t*)public_key, (uint8_t*)signature);
+        jint retvalue = hm_crypto_openssl_verify((uint8_t*)data, size, (uint8_t*)public_key, (uint8_t*)signature);
 
-env->ReleaseByteArrayElements( data_, data, 0);
-env->ReleaseByteArrayElements( pubKey_, public_key, 0);
-env->ReleaseByteArrayElements( signature_, signature, 0);
+        env->ReleaseByteArrayElements( data_, data, 0);
+        env->ReleaseByteArrayElements( pubKey_, public_key, 0);
+        env->ReleaseByteArrayElements( signature_, signature, 0);
+        return retvalue;
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
 
-return retvalue;
+    return 0;
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreTelematicsReceiveData(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                       jint length, jbyteArray data_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
 
-    jbyte *data = env->GetByteArrayElements( data_, NULL);
+        jbyte *data = env->GetByteArrayElements( data_, NULL);
 
-    hm_bt_core_telematics_receive_data(length, (uint8_t*)data);
+        hm_bt_core_telematics_receive_data(length, (uint8_t*)data);
 
-    env->ReleaseByteArrayElements( data_, data, 0);
+        env->ReleaseByteArrayElements( data_, data, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreSendTelematicsCommand(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                       jbyteArray serial_, jbyteArray nonce_, jint length, jbyteArray data_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
+    try{
+        prepareCallbackFunctions(env,instance,coreInterface);
 
-    jbyte *serial = env->GetByteArrayElements( serial_, NULL);
-    jbyte *nonce = env->GetByteArrayElements( nonce_, NULL);
-    jbyte *data = env->GetByteArrayElements( data_, NULL);
+        jbyte *serial = env->GetByteArrayElements( serial_, NULL);
+        jbyte *nonce = env->GetByteArrayElements( nonce_, NULL);
+        jbyte *data = env->GetByteArrayElements( data_, NULL);
 
-    hm_api_send_telematics_command((uint8_t*)serial, (uint8_t*)nonce, length, (uint8_t*)data);
+        hm_api_send_telematics_command((uint8_t*)serial, (uint8_t*)nonce, length, (uint8_t*)data);
 
-    env->ReleaseByteArrayElements( data_, data, 0);
-    env->ReleaseByteArrayElements( nonce_, nonce, 0);
-    env->ReleaseByteArrayElements( serial_, serial, 0);
+        env->ReleaseByteArrayElements( data_, data, 0);
+        env->ReleaseByteArrayElements( nonce_, nonce, 0);
+        env->ReleaseByteArrayElements( serial_, serial, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
 
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreSendRevoke(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                       jbyteArray serial_) {
-    prepareCallbackFunctions(env,instance,coreInterface);
+    try{
+          prepareCallbackFunctions(env,instance,coreInterface);
 
-    jbyte *serial = env->GetByteArrayElements( serial_, NULL);
+          jbyte *serial = env->GetByteArrayElements( serial_, NULL);
 
-    sendRevoke((uint8_t*)serial);
+          sendRevoke((uint8_t*)serial);
 
-    env->ReleaseByteArrayElements( serial_, serial, 0);
+          env->ReleaseByteArrayElements( serial_, serial, 0);
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
 }
