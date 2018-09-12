@@ -65,6 +65,8 @@ void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterfa
     coreInterfaceRef = coreInterface;
 }
 
+extern "C" {
+
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreInit(JNIEnv *env, jobject instance,
                                                      jobject coreInterface) {
@@ -462,4 +464,5 @@ Java_com_highmobility_btcore_HMBTCore_HMBTCoreSendRevoke(JNIEnv *env, jobject in
     }
     CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
 
+}
 }
