@@ -123,6 +123,12 @@ uint32_t hm_bt_crypto_hal_generate_nonce(uint8_t *nonce){
   jbyteArray nonce_ = (*envRef)->NewByteArray(envRef,9);
   (*envRef)->SetByteArrayRegion(envRef, nonce_, 0, 9, (const jbyte*) nonce );
   (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMCryptoHalGenerateNonce, nonce_);
+
+  if ((*envRef)->ExceptionCheck(envRef)) {
+      (*envRef)->ExceptionClear(envRef);
+      return 0;
+    }
+
   jbyte* content_array = (*envRef)->GetByteArrayElements(envRef, nonce_, NULL);
   memcpy(nonce,content_array,9);
   return 0;
