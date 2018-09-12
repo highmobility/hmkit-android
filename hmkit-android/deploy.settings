@@ -1,6 +1,6 @@
 siteUrl = https://github.com/highmobility/hmkit-android
 gitUrl = https://github.com/highmobility/hmkit-android
-version = dev
+version = 1.6.0-dev
 groupId = com.highmobility
 licenses = ['GPL-3.0']
 id = hmkit-android

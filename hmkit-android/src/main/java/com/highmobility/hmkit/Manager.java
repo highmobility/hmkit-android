@@ -201,13 +201,13 @@ public class Manager {
             throw new IllegalStateException("Manager can be initialised once. Call " +
                     "setDeviceCertificate() to set new Device Certificate.");
         }
-
         setContextAndCreateStorage(context);
+        Log.i(TAG, "Initialised: " + getInfoString());
         return instance;
     }
 
     /**
-     * Initialise the SDK with a Device Certificate. This is needed to send Commands.
+     * Initialise the SDK with a Device Certificate. This is needed before sending Commands.
      *
      * @param certificate     The broadcaster certificate.
      * @param privateKey      32 byte private key with elliptic curve Prime 256v1.
@@ -219,8 +219,6 @@ public class Manager {
             issuerPublicKey, Context context) {
         initialise(context);
         setDeviceCertificate(certificate, privateKey, issuerPublicKey);
-        Log.i(TAG, "Initialised High-Mobility " + getInfoString() + certificate.toString());
-
         return this;
     }
 
@@ -325,6 +323,8 @@ public class Manager {
         this.caPublicKey = issuerPublicKey;
         this.privateKey = privateKey;
         this.certificate = certificate;
+
+        Log.i(TAG, "Set certificate: " + certificate.toString());
     }
 
     /**
