@@ -133,6 +133,16 @@ public class Manager {
     }
 
     /**
+     * The Storage can be accessed before initialise.
+     *
+     * @return The storage for Access Certificates.
+     */
+    public Storage getStorage() {
+        throwIfContextNotSet();
+        return storage;
+    }
+
+    /**
      * @return An SDK description string containing version name and type(mobile or wear).
      * @throws IllegalStateException when SDK is not initialised.
      */
@@ -177,14 +187,7 @@ public class Manager {
         return instance;
     }
 
-    /**
-     * The Storage can be accessed before initialise.
-     *
-     * @return The storage for Access Certificates.
-     */
-    public Storage getStorage() {
-        throwIfContextNotSet();
-        return storage;
+    private Manager() {
     }
 
     /**
@@ -357,7 +360,7 @@ public class Manager {
      * @param callback    A {@link DownloadCallback} object that is invoked after the download is
      *                    finished or failed.
      */
-    public void downloadCertificate(String accessToken, final DownloadCallback callback) {
+    public void downloadAccessCertificate(String accessToken, final DownloadCallback callback) {
         throwIfDeviceCertificateNotSet();
         getWebService().requestAccessCertificate(accessToken,
                 privateKey,
@@ -422,6 +425,20 @@ public class Manager {
                         callback.onDownloadFailed(dispatchedError);
                     }
                 });
+    }
+
+    /**
+     * Download and store a access certificate for the given access token. The access token needs to
+     * be provided by the certificate provider.
+     *
+     * @param accessToken The token that is used to download the certificates.
+     * @param callback    A {@link DownloadCallback} object that is invoked after the download is
+     *                    finished or failed.
+     * @deprecated Use {@link #downloadCertificate(String, DownloadCallback)} instead.
+     */
+    @Deprecated
+    public void downloadCertificate(String accessToken, final DownloadCallback callback) {
+        downloadCertificate(accessToken, callback);
     }
 
     /**
