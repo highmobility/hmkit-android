@@ -15,7 +15,7 @@ import static com.highmobility.hmkit.Broadcaster.TAG;
 /**
  * Created by ttiganik on 09/08/16.
  */
-class SentCommand {
+class LinkCommand {
     boolean finished;
     Link.CommandCallback commandCallback;
     Timer timeoutTimer;
@@ -23,7 +23,7 @@ class SentCommand {
     Long commandStartTime;
     Handler dispatchThread;
 
-    SentCommand(Link.CommandCallback callback, Handler dispatchThread) {
+    LinkCommand(Link.CommandCallback callback, Handler dispatchThread) {
         finished = false;
         this.dispatchThread = dispatchThread;
         this.commandCallback = callback;
