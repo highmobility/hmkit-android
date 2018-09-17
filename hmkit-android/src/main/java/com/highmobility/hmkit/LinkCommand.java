@@ -11,7 +11,7 @@ import java.util.TimerTask;
 
 import static com.highmobility.hmkit.Broadcaster.TAG;
 
-class SentCommand {
+class LinkCommand {
     boolean finished;
     Link.CommandCallback commandCallback;
     Timer timeoutTimer;
@@ -19,7 +19,7 @@ class SentCommand {
     Long commandStartTime;
     Handler dispatchThread;
 
-    SentCommand(Link.CommandCallback callback, Handler dispatchThread) {
+    LinkCommand(Link.CommandCallback callback, Handler dispatchThread) {
         finished = false;
         this.dispatchThread = dispatchThread;
         this.commandCallback = callback;

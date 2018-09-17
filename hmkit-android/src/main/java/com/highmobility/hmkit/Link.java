@@ -26,7 +26,7 @@ public class Link {
     State state = State.CONNECTED;
     DeviceSerial serial;
 
-    SentCommand sentCommand;
+    LinkCommand sentCommand;
     LinkListener listener;
     long connectionTime;
     RevokeCallback revokeCallback;
@@ -117,7 +117,7 @@ public class Link {
             Log.d(TAG, "send command " + bytes
                     + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
-        sentCommand = new SentCommand(callback, manager.mainHandler);
+        sentCommand = new LinkCommand(callback, manager.mainHandler);
 
         manager.workHandler.post(new Runnable() {
             @Override
