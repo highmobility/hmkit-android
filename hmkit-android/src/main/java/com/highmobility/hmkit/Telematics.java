@@ -14,17 +14,18 @@ import com.highmobility.value.Bytes;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Created by ttiganik on 03/05/2017.
- * <p>
- * Telematics provides the option to send commands via telematics.
+ * Send commands via Telematics.
  */
-public class Telematics {
+public class Telematics implements TelematicsCommand.Callback {
     static final String TAG = "HMKit-Telematics";
 
     Manager manager;
-    CommandCallback callback;
-    boolean sendingCommand;
+    List<TelematicsCommand> activeCommands = new ArrayList<>();
+    TelematicsCommand interactingCommand; // reference between core interactions
 
     /**
      * CommandCallback is used to notify the user about telematics command result.
@@ -56,17 +57,11 @@ public class Telematics {
      * @param serial   serial of the device
      * @param callback A {@link CommandCallback} object that is invoked with the command result.
      */
-    public void sendCommand(final Bytes command, DeviceSerial serial, final CommandCallback callback) {
+    public void sendCommand(final Bytes command, DeviceSerial serial, final CommandCallback
+            callback) {
         if (command.getLength() > Constants.MAX_COMMAND_LENGTH) {
             TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_TOO_BIG, 0,
                     "Command size is bigger than " + Constants.MAX_COMMAND_LENGTH + " bytes");
-            callback.onCommandFailed(error);
-            return;
-        }
-
-        if (sendingCommand == true) {
-            TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_IN_PROGRESS,
-                    0, "Already sending a command");
             callback.onCommandFailed(error);
             return;
         }
@@ -83,7 +78,9 @@ public class Telematics {
         if (manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(TAG, "sendTelematicsCommand: " + command);
 
-        sendingCommand = true;
+        final TelematicsCommand activeCommand = new TelematicsCommand(this, callback, manager
+                .mainHandler);
+        activeCommands.add(activeCommand);
 
         manager.webService.getNonce(certificate.getProviderSerial(), new Response
                 .Listener<JSONObject>() {
@@ -92,35 +89,38 @@ public class Telematics {
                 try {
                     final byte[] nonce = Base64.decode(jsonResponse.getString("nonce"),
                             Base64.DEFAULT);
-                    Telematics.this.callback = callback;
                     manager.workHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            interactingCommand = activeCommand;
                             manager.core.HMBTCoreSendTelematicsCommand(manager.coreInterface,
-                                    certificate.getGainerSerial().getByteArray(), nonce, command
-                                            .getLength(), command.getByteArray());
+                                    certificate.getGainerSerial().getByteArray(), nonce,
+                                    command.getLength(), command.getByteArray());
                         }
                     });
                 } catch (JSONException e) {
-                    dispatchError(TelematicsError.Type.INVALID_SERVER_RESPONSE, 0, "Invalid nonce" +
-                            " response from server.");
+                    activeCommand.dispatchError(TelematicsError.Type
+                                    .INVALID_SERVER_RESPONSE, 0,
+                            "Invalid nonce response from server.");
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 if (error.networkResponse != null) {
-                    dispatchError(TelematicsError.Type.HTTP_ERROR, error.networkResponse
-                            .statusCode, new String(error.networkResponse.data));
+                    activeCommand.dispatchError(TelematicsError.Type.HTTP_ERROR, error
+                            .networkResponse.statusCode, new String(error.networkResponse.data));
                 } else {
-                    dispatchError(TelematicsError.Type.NO_CONNECTION, 0, "Cannot connect to the " +
-                            "web service. Check your internet connection");
+                    activeCommand.dispatchError(TelematicsError.Type.NO_CONNECTION, 0, "Cannot " +
+                            "connect to the web service. Check your internet connection");
                 }
             }
         });
     }
 
     void onTelematicsCommandEncrypted(byte[] serial, byte[] issuer, byte[] command) {
+        final TelematicsCommand commandSent = interactingCommand; // need this for command response
+
         manager.webService.sendTelematicsCommand(new Bytes(command), new DeviceSerial(serial),
                 new Issuer(issuer),
                 new Response.Listener<JSONObject>() {
@@ -137,19 +137,24 @@ public class Telematics {
                                 manager.workHandler.post(new Runnable() {
                                     @Override
                                     public void run() {
+                                        interactingCommand = commandSent;
                                         manager.core.HMBTCoreTelematicsReceiveData(manager
                                                 .coreInterface, data.length, data);
                                     }
                                 });
                             } else if (status.equals("timeout")) {
-                                dispatchError(TelematicsError.Type.TIMEOUT, 0, jsonObject
-                                        .getString("message"));
+                                commandSent.dispatchError(TelematicsError.Type.TIMEOUT, 0,
+                                        jsonObject
+                                                .getString("message"));
                             } else if (status.equals("error")) {
-                                dispatchError(TelematicsError.Type.SERVER_ERROR, 0, jsonObject
-                                        .getString("message"));
+                                commandSent.dispatchError(TelematicsError.Type
+                                                .SERVER_ERROR, 0,
+                                        jsonObject
+                                                .getString("message"));
                             }
                         } catch (JSONException e) {
-                            dispatchError(TelematicsError.Type.INVALID_SERVER_RESPONSE, 0,
+                            commandSent.dispatchError(TelematicsError.Type
+                                            .INVALID_SERVER_RESPONSE, 0,
                                     "Invalid response from server.");
                         }
                     }
@@ -162,20 +167,21 @@ public class Telematics {
                                 JSONObject json = new JSONObject(new String(error.networkResponse
                                         .data));
                                 if (json.has("message")) {
-                                    dispatchError(TelematicsError.Type.HTTP_ERROR, error
+                                    commandSent.dispatchError(TelematicsError.Type.HTTP_ERROR, error
                                             .networkResponse.statusCode, json.getString("message"));
                                 } else {
-                                    dispatchError(TelematicsError.Type.HTTP_ERROR, error
+                                    commandSent.dispatchError(TelematicsError.Type.HTTP_ERROR, error
                                             .networkResponse.statusCode, new String(error
                                             .networkResponse.data));
                                 }
                             } catch (JSONException e) {
-                                dispatchError(TelematicsError.Type.HTTP_ERROR, error
+                                commandSent.dispatchError(TelematicsError.Type.HTTP_ERROR, error
                                         .networkResponse.statusCode, "");
                             }
                         } else {
-                            dispatchError(TelematicsError.Type.NO_CONNECTION, 0, "Cannot connect " +
-                                    "to the web service. Check your internet connection");
+                            commandSent.dispatchError(TelematicsError.Type.NO_CONNECTION, 0,
+                                    "Cannot connect " +
+                                            "to the web service. Check your internet connection");
                         }
                     }
                 });
@@ -183,34 +189,17 @@ public class Telematics {
 
     void onTelematicsResponseDecrypted(byte[] serial, byte id, byte[] data) {
         if (id == 0x02) {
-            dispatchError(TelematicsError.Type.INTERNAL_ERROR, 0, "Failed to decrypt web service " +
-                    "response.");
+            interactingCommand.dispatchError(TelematicsError.Type.INTERNAL_ERROR, 0, "Failed to " +
+                    "decrypt web service response.");
         } else {
             final Bytes response = new Bytes(data);
             if (manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(TAG, "onTelematicsResponseDecrypted: " + response);
-
-            sendingCommand = false;
-
-            manager.postToMainThread(new Runnable() {
-                @Override
-                public void run() {
-                    callback.onCommandResponse(response);
-                }
-            });
+            interactingCommand.dispatchResult(response);
         }
     }
 
-    void dispatchError(final TelematicsError.Type type, final int code, final String message) {
-        manager.postToMainThread(new Runnable() {
-            @Override
-            public void run() {
-                sendingCommand = false;
-                if (callback != null) {
-                    final TelematicsError error = new TelematicsError(type, code, message);
-                    callback.onCommandFailed(error);
-                }
-            }
-        });
+    @Override public void onCommandFinished(TelematicsCommand command) {
+        activeCommands.remove(command);
     }
 }
