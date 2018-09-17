@@ -64,7 +64,7 @@ class ScannedLink extends Link {
     }
 
     public String versionInfo() {
-        return versionInfo();
+        return "";
     }
 
     /**

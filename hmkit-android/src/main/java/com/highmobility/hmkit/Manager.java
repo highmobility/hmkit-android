@@ -1,5 +1,6 @@
 package com.highmobility.hmkit;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
@@ -29,7 +30,8 @@ import java.util.TimerTask;
 import javax.annotation.Nullable;
 
 /**
- * Manager is the entry point to the HMKit.
+ * HMKit is the entry point for the HMKit library. It keeps a reference to the device certificate
+ * that both Broadcaster and Telematics use.
  */
 public class Manager {
     private static final String TAG = "HMKit-Manager";
@@ -49,8 +51,8 @@ public class Manager {
      * Custom web environment url. Will override { @link {@link #environment} }
      */
     public static String customEnvironmentBaseUrl = null;
-
-    private static Manager instance;
+    // Using application context, no chance for leak.
+    @SuppressLint("StaticFieldLeak") private static Manager instance;
 
     private Context context;
     private Scanner scanner;
@@ -133,7 +135,7 @@ public class Manager {
     }
 
     /**
-     * The Storage can be accessed before initialise.
+     * The Storage can be accessed before setting the device certificate.
      *
      * @return The storage for Access Certificates.
      */
@@ -331,8 +333,8 @@ public class Manager {
     }
 
     /**
-     * Terminate stops internal processes, unregisters BroadcastReceivers, stops broadcasting,
-     * cancels web requests. It is meant to be called once, when app is destroyed.
+     * Stop internal processes, unregister BroadcastReceivers, stop broadcasting, cancel web
+     * requests. It is meant to be called once, when app is destroyed.
      * <p>
      * Stored certificates are not deleted.
      *
@@ -353,8 +355,8 @@ public class Manager {
     }
 
     /**
-     * Download and store a access certificate for the given access token. The access token needs to
-     * be provided by the certificate provider.
+     * Download and store the access certificate for the given access token. The access token needs
+     * to be provided by the certificate provider.
      *
      * @param accessToken The token that is used to download the certificates.
      * @param callback    A {@link DownloadCallback} object that is invoked after the download is
@@ -390,7 +392,7 @@ public class Manager {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        DownloadAccessCertificateError dispatchedError = null;
+                        DownloadAccessCertificateError dispatchedError;
 
                         if (error.networkResponse != null) {
                             try {
@@ -428,17 +430,17 @@ public class Manager {
     }
 
     /**
-     * Download and store a access certificate for the given access token. The access token needs to
-     * be provided by the certificate provider.
+     * Download and store the access certificate for the given access token. The access token needs
+     * to be provided by the certificate provider.
      *
      * @param accessToken The token that is used to download the certificates.
      * @param callback    A {@link DownloadCallback} object that is invoked after the download is
      *                    finished or failed.
-     * @deprecated Use {@link #downloadCertificate(String, DownloadCallback)} instead.
+     * @deprecated Use {@link #downloadAccessCertificate(String, DownloadCallback)} instead.
      */
     @Deprecated
     public void downloadCertificate(String accessToken, final DownloadCallback callback) {
-        downloadCertificate(accessToken, callback);
+        downloadAccessCertificate(accessToken, callback);
     }
 
     /**
@@ -499,10 +501,6 @@ public class Manager {
     @Deprecated
     public boolean deleteCertificate(DeviceSerial serial, Context context) {
         // this method should be deleted. cannot be initialised without context
-
-        // ALSO: remove setContextAndCreateStorage() and move to initialise(ctx). That method is
-        // used to enable these deprecated storage methods.
-
         throwIfDeviceCertificateNotSet();
         return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial()
                 .getByteArray());
@@ -517,8 +515,11 @@ public class Manager {
      */
     @Deprecated
     public AccessCertificate[] getCertificates(DeviceSerial serial, Context context) {
-        setContextAndCreateStorage(context);
-        return storage.getCertificates(serial);
+        try {
+            initialise(context);
+        } finally {
+            return storage.getCertificates(serial);
+        }
     }
 
     /**
@@ -531,8 +532,11 @@ public class Manager {
      */
     @Deprecated
     @Nullable public AccessCertificate getCertificate(DeviceSerial serial, Context context) {
-        setContextAndCreateStorage(context);
-        return storage.getCertificate(serial);
+        try {
+            initialise(context);
+        } finally {
+            return storage.getCertificate(serial);
+        }
     }
 
     /**
@@ -543,8 +547,11 @@ public class Manager {
      */
     @Deprecated
     public void deleteCertificates(Context context) {
-        setContextAndCreateStorage(context);
-        storage.deleteCertificates();
+        try {
+            initialise(context);
+        } finally {
+            storage.deleteCertificates();
+        }
     }
 
     void postToMainThread(Runnable runnable) {
