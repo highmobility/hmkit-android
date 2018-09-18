@@ -3,14 +3,10 @@ package com.highmobility.hmkit;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
 import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.highmobility.btcore.HMBTCore;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.DeviceCertificate;
 import com.highmobility.crypto.value.DeviceSerial;
@@ -23,9 +19,6 @@ import com.highmobility.value.Bytes;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.annotation.Nullable;
 
@@ -51,6 +44,7 @@ public class Manager {
      * Custom web environment url. Will override { @link {@link #environment} }
      */
     public static String customEnvironmentBaseUrl = null;
+
     // Using application context, no chance for leak.
     @SuppressLint("StaticFieldLeak") private static Manager instance;
 
@@ -58,29 +52,13 @@ public class Manager {
     private Scanner scanner;
     private Broadcaster broadcaster;
     private Telematics telematics;
+
+    // created with context
     private WebService webService;
-    private SharedBle ble;
+    @Nullable private SharedBle ble;
     private Storage storage;
-
-    HMBTCore core = new HMBTCore();
-    BTCoreInterface coreInterface;
-    Handler mainHandler, workHandler;
-    private final HandlerThread workThread = new HandlerThread("BTCoreThread");
-    private Timer coreClockTimer;
-
-    private DeviceCertificate certificate;
-    PrivateKey privateKey;
-    PublicKey caPublicKey;
-    byte[] issuer, appId; // these are set from BTCoreInterface HMBTHalAdvertisementStart.
-
-    /**
-     * @return The Application Context set in {@link #initialise(DeviceCertificate, PrivateKey,
-     * PublicKey, Context)}.
-     */
-    public Context getContext() {
-        throwIfContextNotSet();
-        return context;
-    }
+    private Core core;
+    private ThreadManager threadManager;
 
     /**
      * @return The Broadcaster instance. Null if BLE is not supported.
@@ -88,16 +66,14 @@ public class Manager {
     @Nullable public Broadcaster getBroadcaster() {
         throwIfDeviceCertificateNotSet();
 
+        if (ble == null) return null;
+
         if (broadcaster == null) {
-            try {
-                broadcaster = new Broadcaster(this);
-            } catch (BleNotSupportedException e) {
-                e.printStackTrace();
-            }
+            broadcaster = new Broadcaster(core, storage, threadManager, ble);
         }
 
         return broadcaster;
-    }
+}
 
     /**
      * @return The Telematics instance.
@@ -131,7 +107,7 @@ public class Manager {
      */
     public DeviceCertificate getDeviceCertificate() {
         throwIfDeviceCertificateNotSet();
-        return certificate;
+        return core.getDeviceCertificate();
     }
 
     /**
@@ -163,7 +139,7 @@ public class Manager {
         return infoString;
     }
 
-    // protected ivars are accessed when ctx is already checked
+    /*// protected ivars are accessed when ctx is already checked
     @Nullable SharedBle getBle() {
         if (ble == null) {
             try {
@@ -179,6 +155,7 @@ public class Manager {
         if (webService == null) webService = new WebService(context);
         return webService;
     }
+*/
 
     /**
      * @return The instance of the Manager.
@@ -325,9 +302,9 @@ public class Manager {
                     "link exists with the Scanner. Disconnect from all of the links.");
         }
 
-        this.caPublicKey = issuerPublicKey;
-        this.privateKey = privateKey;
-        this.certificate = certificate;
+        if (core == null)
+            core = new Core(storage, threadManager, certificate, privateKey, issuerPublicKey);
+        else core.setDeviceCertificate(certificate, privateKey, issuerPublicKey);
 
         Log.i(TAG, "Set certificate: " + certificate.toString());
     }
@@ -350,8 +327,7 @@ public class Manager {
         if (ble != null) ble.terminate();
         // this terminates telematics as well because that uses the same web service.
         if (webService != null) webService.cancelAllRequests();
-
-        stopCore();
+        core.stop();
     }
 
     /**
@@ -365,7 +341,7 @@ public class Manager {
     public void downloadAccessCertificate(String accessToken, final DownloadCallback callback) {
         throwIfDeviceCertificateNotSet();
         getWebService().requestAccessCertificate(accessToken,
-                privateKey,
+                core.getPrivateKey(),
                 getDeviceCertificate().getSerial(),
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -478,7 +454,8 @@ public class Manager {
      */
     public boolean deleteCertificate(DeviceSerial serial) {
         throwIfDeviceCertificateNotSet();
-        return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial()
+        return storage.deleteCertificate(serial.getByteArray(), core.getDeviceCertificate()
+                .getSerial()
                 .getByteArray());
     }
 
@@ -502,7 +479,8 @@ public class Manager {
     public boolean deleteCertificate(DeviceSerial serial, Context context) {
         // this method should be deleted. cannot be initialised without context
         throwIfDeviceCertificateNotSet();
-        return storage.deleteCertificate(serial.getByteArray(), certificate.getSerial()
+        return storage.deleteCertificate(serial.getByteArray(), core.getDeviceCertificate()
+                .getSerial()
                 .getByteArray());
     }
 
@@ -554,17 +532,9 @@ public class Manager {
         }
     }
 
-    void postToMainThread(Runnable runnable) {
-        if (Looper.myLooper() != mainHandler.getLooper()) {
-            mainHandler.post(runnable);
-        } else {
-            runnable.run();
-        }
-    }
-
     void throwIfDeviceCertificateNotSet() throws IllegalStateException {
         // if device cert exists, context has to exist as well.
-        if (certificate == null) {
+        if (core == null) {
             throwIfContextNotSet();
             throw new IllegalStateException("Device certificate is not set. Call Manager" +
                     ".setDeviceCertificate() first.");
@@ -577,92 +547,71 @@ public class Manager {
         }
     }
 
-    void startCore() {
-        throwIfDeviceCertificateNotSet();
-
-        // create once if doesn't exist
-        if (coreInterface == null) {
-            mainHandler = new Handler(this.context.getMainLooper());
-            workThread.start();
-            workHandler = new Handler(workThread.getLooper());
-
-            // core init needs to be done once, only initialises structs(but requires device cert)
-            coreInterface = new BTCoreInterface(this);
-            core.HMBTCoreInit(coreInterface);
-        }
-
-        // start the core clock if is not running already
-        if (coreClockTimer == null) {
-            coreClockTimer = new Timer();
-            coreClockTimer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    workHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            core.HMBTCoreClock(coreInterface);
-                        }
-                    });
-                }
-            }, 0, 1000);
-        }
-    }
-
-    private void stopCore() {
-        if (coreClockTimer != null) {
-            coreClockTimer.cancel();
-            coreClockTimer = null;
-        }
-    }
-
     private void setContextAndCreateStorage(Context context) {
         // storage can be accessed with context only.
         if (storage == null) {
             this.context = context.getApplicationContext();
             storage = new Storage(this.context);
+            threadManager = new ThreadManager(this.context);
+            webService = new WebService(this.context);
+            // prolly should create ble here as well if possible (only make it necessary to get
+            // context once)
         }
     }
 
-    /**
-     * The web environment.
-     */
-    public enum Environment {
-        TEST, STAGING, PRODUCTION
+    /*void postToMainThread(Runnable runnable) {
+        core.postToMainThread(runnable);
     }
 
-    /**
-     * The logging level.
-     */
-    public enum LoggingLevel {
-        NONE(0), DEBUG(1), ALL(2);
-
-        private Integer level;
-
-        LoggingLevel(int level) {
-            this.level = level;
-        }
-
-        public int getValue() {
-            return level;
-        }
+    void startCore() {
+        throwIfDeviceCertificateNotSet();
+        core.start();
     }
 
-    /**
-     * {@link #downloadCertificate(String, DownloadCallback)} result.
-     */
-    public interface DownloadCallback {
-        /**
-         * Invoked if the certificate download was successful.
-         *
-         * @param serial the vehicle or charger serial.
-         */
-        void onDownloaded(DeviceSerial serial);
+    private void stopCore() {
+        core.stop();
+    }*/
 
-        /**
-         * Invoked when there was an error with the certificate download.
-         *
-         * @param error The error
-         */
-        void onDownloadFailed(DownloadAccessCertificateError error);
+/**
+ * The web environment.
+ */
+public enum Environment {
+    TEST, STAGING, PRODUCTION
+}
+
+/**
+ * The logging level.
+ */
+public enum LoggingLevel {
+    NONE(0), DEBUG(1), ALL(2);
+
+    private Integer level;
+
+    LoggingLevel(int level) {
+        this.level = level;
     }
+
+    public int getValue() {
+        return level;
+    }
+}
+
+/**
+ * {@link #downloadCertificate(String, DownloadCallback)} result.
+ */
+public interface DownloadCallback {
+    /**
+     * Invoked if the certificate download was successful.
+     *
+     * @param serial the vehicle or charger serial.
+     */
+    void onDownloaded(DeviceSerial serial);
+
+    /**
+     * Invoked when there was an error with the certificate download.
+     *
+     * @param error The error
+     */
+    void onDownloadFailed(DownloadAccessCertificateError error);
+}
 }

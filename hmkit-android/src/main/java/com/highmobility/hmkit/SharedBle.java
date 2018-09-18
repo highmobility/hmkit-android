@@ -18,11 +18,12 @@ import java.util.List;
 import java.util.Random;
 
 public class SharedBle {
-    Context context;
-    boolean receiverRegistered;
+    Context context; // the only place where need to store context: on start broadcasting and
+    // terminate
+    private boolean receiverRegistered;
 
-    BluetoothManager mBluetoothManager;
-    BluetoothAdapter mBluetoothAdapter;
+    private BluetoothManager mBluetoothManager;
+    private BluetoothAdapter mBluetoothAdapter;
 
     private ArrayList<SharedBleListener> listeners = new ArrayList<>();
 
@@ -46,13 +47,18 @@ public class SharedBle {
         return mBluetoothAdapter;
     }
 
+    public String getName() {
+        return mBluetoothAdapter.getName();
+    }
+
     // devices connected to the Broadcaster
     List<BluetoothDevice> getConnectedDevices() {
         return getManager().getConnectedDevices(BluetoothProfile.GATT_SERVER);
     }
 
     public boolean isBluetoothOn() {
-        return (getAdapter() != null && getAdapter().isEnabled() && getAdapter().getState() ==
+        return (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled() && mBluetoothAdapter
+                .getState() ==
                 BluetoothAdapter.STATE_ON);
     }
 
@@ -100,7 +106,7 @@ public class SharedBle {
         new Random().nextBytes(serialBytes);
         String randomBytesString = ByteUtils.hexFromBytes(serialBytes);
         name += randomBytesString.substring(1);
-        getAdapter().setName(name);
+        mBluetoothAdapter.setName(name);
     }
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
