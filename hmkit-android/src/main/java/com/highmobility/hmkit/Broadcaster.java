@@ -29,7 +29,7 @@ import javax.annotation.Nullable;
  * Access the broadcaster from {@link Manager#getBroadcaster()}. Broadcaster is created once and
  * then bound to Manager instance.
  */
-public class Broadcaster extends Core.Broadcaster implements SharedBleListener {
+public class Broadcaster extends Core.Broadcaster {
     /**
      * This class keeps link references, advertises.
      */
@@ -289,9 +289,38 @@ public class Broadcaster extends Core.Broadcaster implements SharedBleListener {
     private void startBle() {
         ble.initialise();
         // add state listener
-        ble.addListener(this);
+        ble.addListener(bleListener);
         // check for initial state
         if (ble.isBluetoothOn() == false) setState(State.BLUETOOTH_UNAVAILABLE);
+    }
+
+    private BleListener bleListener = new BleListener();
+
+    private class BleListener implements SharedBleListener {
+        // we don't want this method to be publicly available, so we create the class here
+        @Override public void bluetoothChangedToAvailable(boolean available) {
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+                Log.d(TAG, "bluetoothChangedToAvailable(): available = [" + available + "]");
+
+            if (available && getState() == State.BLUETOOTH_UNAVAILABLE) {
+                setState(State.IDLE);
+            } else if (!available && getState() != State.BLUETOOTH_UNAVAILABLE) {
+                // manually clear the links because there is no connection state change callback
+                // after turning ble off.
+                if (links.size() > 0) {
+                    for (ConnectedLink link : links) {
+                        core.HMBTCorelinkDisconnect(ByteUtils.bytesFromMacString(link.btDevice
+                                .getAddress()));
+                    }
+                }
+
+                // Need to reset the service after bluetooth reset because otherwise
+                // startBroadcasting will not include the service. Maybe internally the services are
+                // reset and we keep the invalid pointer here.
+                gattServer.close();
+                setState(State.BLUETOOTH_UNAVAILABLE);
+            }
+        }
     }
 
     /**
@@ -309,32 +338,7 @@ public class Broadcaster extends Core.Broadcaster implements SharedBleListener {
 
         stopBroadcasting();
         stopAlivePinging();
-        ble.removeListener(this);
-    }
-
-    @Override
-    public void bluetoothChangedToAvailable(boolean available) {
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(TAG, "bluetoothChangedToAvailable(): available = [" + available + "]");
-
-        if (available && getState() == State.BLUETOOTH_UNAVAILABLE) {
-            setState(State.IDLE);
-        } else if (!available && getState() != State.BLUETOOTH_UNAVAILABLE) {
-            // manually clear the links because there is no connection state change callback
-            // after turning ble off.
-            if (links.size() > 0) {
-                for (ConnectedLink link : links) {
-                    core.HMBTCorelinkDisconnect(ByteUtils.bytesFromMacString(link.btDevice
-                            .getAddress()));
-                }
-            }
-
-            // Need to reset the service after bluetooth reset because otherwise
-            // startBroadcasting will not include the service. Maybe internally the services are
-            // reset and we keep the invalid pointer here.
-            gattServer.close();
-            setState(State.BLUETOOTH_UNAVAILABLE);
-        }
+        ble.removeListener(bleListener);
     }
 
     @Override boolean onResolvedDevice(HMDevice device) {
@@ -429,7 +433,6 @@ public class Broadcaster extends Core.Broadcaster implements SharedBleListener {
 
     private void sendAlivePing() {
         if (gattServer.isOpen()) {
-            // TODO: 20/09/2018 test alive pinging
             for (Link link : links) {
                 gattServer.sendAlivePing(link.btDevice);
 
@@ -507,9 +510,9 @@ public class Broadcaster extends Core.Broadcaster implements SharedBleListener {
         }
     };
 
-    AdvertiseCb advertiseCallback = new AdvertiseCb(this);
+    private AdvertiseCb advertiseCallback = new AdvertiseCb(this);
 
-    static class AdvertiseCb extends AdvertiseCallback {
+    private static class AdvertiseCb extends AdvertiseCallback {
         WeakReference<Broadcaster> broadcaster;
 
         AdvertiseCb(Broadcaster broadcaster) {
