@@ -19,6 +19,8 @@ public class Link {
      * The time after which HMKit will fail the command if there has been no response. In ms.
      */
     public static long commandTimeout = 10000;
+    protected final Core core;
+    protected final ThreadManager threadManager;
 
     BluetoothDevice btDevice;
     HMDevice hmDevice;
@@ -32,9 +34,11 @@ public class Link {
     RevokeCallback revokeCallback;
     Manager manager;
 
-    Link(Manager manager, BluetoothDevice btDevice) {
+    Link(Core core, ThreadManager threadManager, BluetoothDevice btDevice) {
         this.btDevice = btDevice;
-        this.manager = manager;
+        this.core = core;
+        this.threadManager = threadManager;
+
         connectionTime = Calendar.getInstance().getTimeInMillis();
     }
 
@@ -58,7 +62,7 @@ public class Link {
 
             if (listener != null) {
                 final Link linkPointer = this;
-                manager.postToMainThread(new Runnable() {
+                threadManager.postToMain(new Runnable() {
                     @Override public void run() {
                         if (linkPointer.listener == null) return;
                         linkPointer.listener.onStateChanged(linkPointer, oldState);
@@ -117,13 +121,13 @@ public class Link {
             Log.d(TAG, "send command " + bytes
                     + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
 
-        sentCommand = new LinkCommand(callback, manager.mainHandler);
+        sentCommand = new LinkCommand(callback, threadManager);
 
-        manager.workHandler.post(new Runnable() {
+        threadManager.postToWork(new Runnable() {
             @Override
             public void run() {
-                manager.core.HMBTCoreSendCustomCommand(manager.coreInterface, bytes.getByteArray
-                        (), bytes.getLength(), getAddressBytes());
+                core.HMBTCoreSendCustomCommand(bytes.getByteArray(), bytes.getLength(),
+                        getAddressBytes());
             }
         });
     }
@@ -161,10 +165,10 @@ public class Link {
 
         this.revokeCallback = callback;
 
-        manager.workHandler.post(new Runnable() {
+        threadManager.postToWork(new Runnable() {
             @Override
             public void run() {
-                manager.core.HMBTCoreSendRevoke(manager.coreInterface, serial.getByteArray());
+                core.HMBTCoreSendRevoke(serial.getByteArray());
             }
         });
     }
@@ -192,7 +196,7 @@ public class Link {
             return;
         }
 
-        manager.postToMainThread(new Runnable() {
+        threadManager.postToMain(new Runnable() {
             @Override public void run() {
                 if (listener == null) return;
                 listener.onCommandReceived(Link.this, new Bytes(bytes));
@@ -218,7 +222,7 @@ public class Link {
     }
 
     void onRevokeResponse(final byte[] data, final int result) {
-        manager.postToMainThread(new Runnable() {
+        threadManager.postToMain(new Runnable() {
             @Override public void run() {
                 if (revokeCallback == null) return;
 

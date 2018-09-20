@@ -1,6 +1,5 @@
 package com.highmobility.hmkit;
 
-import android.os.Handler;
 import android.util.Log;
 
 import com.highmobility.hmkit.error.LinkError;
@@ -17,11 +16,11 @@ class LinkCommand {
     Timer timeoutTimer;
 
     Long commandStartTime;
-    Handler dispatchThread;
+    ThreadManager threadManager;
 
-    LinkCommand(Link.CommandCallback callback, Handler dispatchThread) {
+    LinkCommand(Link.CommandCallback callback, ThreadManager threadManager) {
         finished = false;
-        this.dispatchThread = dispatchThread;
+        this.threadManager = threadManager;
         this.commandCallback = callback;
         startTimeoutTimer();
         commandStartTime = Calendar.getInstance().getTimeInMillis();
@@ -32,7 +31,7 @@ class LinkCommand {
         if (errorCode == LinkError.Type.NONE) {
             cancelTimeoutTimer();
             finished = true;
-            dispatchThread.post(new Runnable() {
+            threadManager.postToMain(new Runnable() {
                 @Override
                 public void run() {
                     commandCallback.onCommandSent();
@@ -52,7 +51,7 @@ class LinkCommand {
             return;
         }
 
-        dispatchThread.post(new Runnable() {
+        threadManager.postToMain(new Runnable() {
             @Override
             public void run() {
                 commandCallback.onCommandFailed(new LinkError(type, errorCode, message));

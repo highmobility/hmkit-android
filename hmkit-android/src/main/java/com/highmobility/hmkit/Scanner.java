@@ -7,7 +7,6 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 
 import com.highmobility.btcore.HMDevice;
-import com.highmobility.hmkit.error.BleNotSupportedException;
 import com.highmobility.utils.ByteUtils;
 
 import java.util.ArrayList;
@@ -16,8 +15,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class Scanner implements SharedBleListener {
+class Scanner extends Core.Scanner implements SharedBleListener {
     static final String TAG = "HMKit-Scanner";
+    private final Core core;
+    private final SharedBle ble;
+    private final ThreadManager threadManager;
+    private final Storage storage;
 
     /**
      * Called when ble state has changed to available or not. Not available state can be called
@@ -40,19 +43,19 @@ class Scanner implements SharedBleListener {
 
     State state = State.IDLE;
 
-    Manager manager;
     BluetoothLeScanner bleScanner;
 
     ArrayList<byte[]> authenticatingMacs = new ArrayList<>();
 
-    Scanner(Manager manager) throws BleNotSupportedException {
-        if (initialise() == false) throw new BleNotSupportedException();
-        this.manager = manager;
+    Scanner(Core core, Storage storage, ThreadManager threadManager, SharedBle ble) {
+        this.core = core;
+        this.ble = ble;
+        this.storage = storage;
+        this.threadManager = threadManager;
+        initialise();
     }
 
     boolean initialise() {
-        SharedBle ble = manager.getBle();
-        if (ble == null) return false;
         ble.addListener(this);
         return true;
     }
@@ -101,26 +104,27 @@ class Scanner implements SharedBleListener {
         // = new byte[][] { array1, array2, array3, array4, array5 };
         if (getState() == State.SCANNING) return 0;
 
-        manager.startCore();
+        core.start();
         startBle();
 
-        if (!manager.getBle().isBluetoothOn()) {
+        if (!ble.isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
 //            return Link.BLUETOOTH_OFF;
             return 2; // use some descriptive error method
         }
 
-        if (bleScanner == null) bleScanner = manager.getBle().getAdapter().getBluetoothLeScanner();
+        if (bleScanner == null) bleScanner = ble.getAdapter().getBluetoothLeScanner();
         final ScanSettings settings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .build();
 
         bleScanner.startScan(null, settings, scanCallback);
         setState(State.SCANNING);
-        manager.workHandler.post(new Runnable() {
+
+        threadManager.postToWork(new Runnable() {
             @Override
             public void run() {
-                manager.core.HMBTCoreSensingScanStart(manager.coreInterface);
+                core.HMBTCoreSensingScanStart();
             }
         });
 
@@ -130,12 +134,12 @@ class Scanner implements SharedBleListener {
     private void startBle() {
         // we need ble on ctor to listen to state change from IDLE to BLE_UNAVAILABLE.
         // ble is stopped on terminate. could be started again on startBroadcasting.
-        manager.getBle().initialise();
+        ble.initialise();
 
         // scanner could have already initialised the ble, then we need to add the listener and
         // check for initial ble state.
-        manager.getBle().addListener(this);
-        if (manager.getBle().isBluetoothOn() == false) setState(State.BLUETOOTH_UNAVAILABLE);
+        ble.addListener(this);
+        if (ble.isBluetoothOn() == false) setState(State.BLUETOOTH_UNAVAILABLE);
     }
 
     /**
@@ -172,12 +176,11 @@ class Scanner implements SharedBleListener {
             final BluetoothDevice device = result.getDevice();
             final byte[] advBytes = result.getScanRecord().getBytes();
 
-            manager.workHandler.post(new Runnable() {
+            threadManager.postToWork(new Runnable() {
                 @Override
                 public void run() {
-                    manager.core.HMBTCoreSensingProcessAdvertisement(manager.coreInterface,
-                            ByteUtils.bytesFromMacString(device.getAddress()),
-                            advBytes, advBytes.length);
+                    core.HMBTCoreSensingProcessAdvertisement(ByteUtils.bytesFromMacString(device
+                            .getAddress()), advBytes, advBytes.length);
                 }
             });
         }
@@ -189,7 +192,7 @@ class Scanner implements SharedBleListener {
         }
 
         addAuthenticatingMac(mac);
-        BluetoothDevice bluetoothDevice = manager.getBle().getAdapter().getRemoteDevice(mac);
+        BluetoothDevice bluetoothDevice = ble.getAdapter().getRemoteDevice(mac);
 
         for (ScannedLink existingDevice : devices) {
             if (existingDevice.btDevice.getAddress().equals(bluetoothDevice.getAddress())) {
@@ -198,7 +201,7 @@ class Scanner implements SharedBleListener {
             }
         }
 
-        ScannedLink device = new ScannedLink(this, bluetoothDevice);
+        ScannedLink device = new ScannedLink(ble, core, threadManager, bluetoothDevice);
         devices.add(device);
         device.connect();
     }
@@ -212,13 +215,14 @@ class Scanner implements SharedBleListener {
         devices.remove(device);
     }
 
-    boolean deviceExitedProximity(byte[] mac) {
+    boolean onDeviceExitedProximity(byte[] mac) {
         final ScannedLink device = getLinkForMac(mac);
         if (device == null) return false;
         device.onDeviceExitedProximity();
 
         if (listener != null) {
-            manager.postToMainThread(new Runnable() {
+
+            threadManager.postToMain(new Runnable() {
                 @Override
                 public void run() {
                     if (listener == null) return;
@@ -237,13 +241,13 @@ class Scanner implements SharedBleListener {
         device.discoverServices();
     }
 
-    boolean didResolveDevice(HMDevice device) {
+    boolean onResolvedDevice(HMDevice device) {
         removeAuthenticatingMac(device.getMac());
         final ScannedLink scannedLink = getLinkForMac(device.getMac());
         if (scannedLink != null) {
             scannedLink.setHmDevice(device);
             if (listener != null) {
-                manager.postToMainThread(new Runnable() {
+                threadManager.postToMain(new Runnable() {
                     @Override
                     public void run() {
                         if (listener == null) return;
@@ -312,7 +316,7 @@ class Scanner implements SharedBleListener {
             this.state = state;
 
             if (listener != null) {
-                manager.postToMainThread(new Runnable() {
+                threadManager.postToMain(new Runnable() {
                     @Override
                     public void run() {
                         if (listener == null) return;

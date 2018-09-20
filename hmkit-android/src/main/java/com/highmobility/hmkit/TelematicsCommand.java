@@ -1,26 +1,25 @@
 package com.highmobility.hmkit;
 
-import android.os.Handler;
-
 import com.highmobility.hmkit.error.TelematicsError;
 import com.highmobility.value.Bytes;
 
 class TelematicsCommand {
     Telematics.CommandCallback commandCallback;
     Callback callback;
-    Handler dispatchThread;
+
+    ThreadManager threadManager;
     boolean finished;
 
-    TelematicsCommand(Callback callback, Telematics.CommandCallback commandCallback, Handler
-            dispatchThread) {
+    TelematicsCommand(Callback callback, Telematics.CommandCallback commandCallback, ThreadManager
+            threadManager) {
         finished = false;
-        this.dispatchThread = dispatchThread;
+        this.threadManager = threadManager;
         this.commandCallback = commandCallback;
         this.callback = callback;
     }
 
     void dispatchError(final TelematicsError.Type type, final int code, final String message) {
-        dispatchThread.post(new Runnable() {
+        threadManager.postToMain(new Runnable() {
             @Override
             public void run() {
                 finished = true;
@@ -35,7 +34,7 @@ class TelematicsCommand {
     }
 
     public void dispatchResult(final Bytes response) {
-        dispatchThread.post(new Runnable() {
+        threadManager.postToMain(new Runnable() {
             @Override
             public void run() {
                 finished = true;

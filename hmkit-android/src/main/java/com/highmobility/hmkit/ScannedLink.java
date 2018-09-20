@@ -26,6 +26,7 @@ import java.util.UUID;
  */
 class ScannedLink extends Link {
     private static final String TAG = "HMKit-ScannedLink";
+    private final SharedBle ble;
 
     Scanner scanner;
 
@@ -96,10 +97,10 @@ class ScannedLink extends Link {
         // TSODO:
     }
 
-    ScannedLink(Scanner scanner, BluetoothDevice btDevice) {
-        super(scanner.manager, btDevice);
-        this.scanner = scanner;
+    ScannedLink(SharedBle ble, Core core, ThreadManager threadManager, BluetoothDevice btDevice) {
+        super(core, threadManager, btDevice);
         this.btDevice = btDevice;
+        this.ble = ble;
     }
 
     void writeValue(byte[] value) {
@@ -126,7 +127,7 @@ class ScannedLink extends Link {
 
     void connect() {
         Log.d(TAG, "connect " + btDevice.getAddress() + " " + this);
-        gatt = btDevice.connectGatt(scanner.manager.getContext(), false, gattCallback);
+        gatt = btDevice.connectGatt(ble.context, false, gattCallback);
     }
 
     void disconnect() {
@@ -152,11 +153,10 @@ class ScannedLink extends Link {
                 case BluetoothProfile.STATE_CONNECTED:
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                         Log.d(TAG, "STATE_CONNECTED " + this);
-                    scanner.manager.workHandler.post(new Runnable() {
+                    threadManager.postToWork(new Runnable() {
                         @Override
                         public void run() {
-                            scanner.manager.core.HMBTCoreSensingConnect(scanner.manager
-                                    .coreInterface, getAddressBytes());
+                            core.HMBTCoreSensingConnect(getAddressBytes());
                         }
                     });
                     break;
@@ -164,11 +164,10 @@ class ScannedLink extends Link {
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                         Log.d(TAG, "STATE_DISCONNECTED " + this);
 
-                    scanner.manager.workHandler.post(new Runnable() {
+                    threadManager.postToWork(new Runnable() {
                         @Override
                         public void run() {
-                            scanner.manager.core.HMBTCoreSensingDisconnect(scanner.manager
-                                    .coreInterface, getAddressBytes());
+                            core.HMBTCoreSensingDisconnect(getAddressBytes());
                         }
                     });
                     break;
@@ -262,13 +261,13 @@ class ScannedLink extends Link {
                     Log.d(TAG, "onCharacteristicRead " + ByteUtils.hexFromBytes(characteristic
                             .getValue()));
                 if (characteristic.getUuid().equals(Constants.READ_CHAR_UUID)) {
-                    scanner.manager.workHandler.post(new Runnable() {
+                    threadManager.postToWork(new Runnable() {
                         @Override
                         public void run() {
                             //TSODO add proper characteristic
-                            scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager
-                                    .coreInterface, characteristic.getValue(), characteristic
-                                    .getValue().length, 0, getAddressBytes(), 0);
+                            core.HMBTCoreSensingReadResponse(characteristic.getValue(),
+                                    characteristic
+                                            .getValue().length, 0, getAddressBytes(), 0);
                         }
                     });
                 } else if (characteristic.getUuid().equals(Constants.INFO_CHAR_UUID)) {
@@ -285,12 +284,11 @@ class ScannedLink extends Link {
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic
                 characteristic, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                scanner.manager.workHandler.post(new Runnable() {
+                threadManager.postToWork(new Runnable() {
                     @Override
                     public void run() {
                         //TSODO add proper characteristic
-                        scanner.manager.core.HMBTCoreSensingWriteResponse(scanner.manager
-                                .coreInterface, getAddressBytes(), 0);
+                        core.HMBTCoreSensingWriteResponse(getAddressBytes(), 0);
                     }
                 });
             } else {
@@ -305,12 +303,12 @@ class ScannedLink extends Link {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
                 Log.d(TAG, "onCharacteristicChanged " + ByteUtils.hexFromBytes(characteristic
                         .getValue()));
-            scanner.manager.workHandler.post(new Runnable() {
+            threadManager.postToWork(new Runnable() {
                 @Override
                 public void run() {
                     //TSODO add proper characteristic
-                    scanner.manager.core.HMBTCoreSensingReadResponse(scanner.manager
-                            .coreInterface, characteristic.getValue(), characteristic.getValue()
+                    core.HMBTCoreSensingReadResponse(characteristic.getValue(), characteristic
+                            .getValue()
                             .length, 0, getAddressBytes(), 0);
                 }
             });
@@ -320,11 +318,10 @@ class ScannedLink extends Link {
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int
                 status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                scanner.manager.workHandler.post(new Runnable() {
+                threadManager.postToWork(new Runnable() {
                     @Override
                     public void run() {
-                        scanner.manager.core.HMBTCoreSensingDiscoveryEvent(scanner.manager
-                                .coreInterface, getAddressBytes());
+                        core.HMBTCoreSensingDiscoveryEvent(getAddressBytes());
                     }
                 });
             } else {

@@ -19,7 +19,10 @@ class ThreadManager {
         workHandler = new Handler(workThread.getLooper());
     }
 
-    void postToMainThread(Runnable runnable) {
+    /**
+     * Post to main thread.
+     */
+    void postToMain(Runnable runnable) {
         if (Looper.myLooper() != mainHandler.getLooper()) {
             mainHandler.post(runnable);
         } else {
@@ -27,15 +30,18 @@ class ThreadManager {
         }
     }
 
-    void postToWorkThread(Runnable runnable) {
+    /**
+     * Post to work thread.
+     */
+    void postToWork(Runnable runnable) {
         workHandler.post(runnable);
     }
 
     /**
      * Post to work thread after a delay.
      */
-    void postDelayed(Runnable runnable, long interval) {
-        workHandler.postDelayed(runnable, interval);
+    void postDelayed(Runnable runnable, long delay) {
+        workHandler.postDelayed(runnable, delay);
     }
 
     void cancelDelayed(Runnable runnable) {

@@ -16,11 +16,8 @@ import javax.annotation.Nullable;
  * ConnectedLink is used to provide the authorization callbacks.
  */
 public class ConnectedLink extends Link {
-    Broadcaster broadcaster;
-
-    ConnectedLink(BluetoothDevice btDevice, Broadcaster broadcaster) {
-        super(broadcaster.manager, btDevice);
-        this.broadcaster = broadcaster;
+    ConnectedLink(Core core, ThreadManager threadManager, BluetoothDevice btDevice) {
+        super(core, threadManager, btDevice);
     }
 
     /**
@@ -43,7 +40,7 @@ public class ConnectedLink extends Link {
         final ConnectedLink reference = this;
         pairingResponse = -1;
 
-        broadcaster.manager.postToMainThread(new Runnable() {
+        threadManager.postToMain(new Runnable() {
             @Override public void run() {
                 if (listener == null) {
                     pairingResponse = 1;
@@ -52,16 +49,16 @@ public class ConnectedLink extends Link {
 
                 ((ConnectedLinkListener) listener).onAuthorizationRequested(reference, new
                         ConnectedLinkListener.AuthorizationCallback() {
-                    @Override
-                    public void approve() {
-                        pairingResponse = 0;
-                    }
+                            @Override
+                            public void approve() {
+                                pairingResponse = 0;
+                            }
 
-                    @Override
-                    public void decline() {
-                        pairingResponse = 1;
-                    }
-                });
+                            @Override
+                            public void decline() {
+                                pairingResponse = 1;
+                            }
+                        });
             }
         });
 
@@ -72,7 +69,7 @@ public class ConnectedLink extends Link {
             int passedSeconds = Calendar.getInstance().get(Calendar.SECOND);
             if (passedSeconds - startSeconds > Constants.registerTimeout) {
                 if (listener != null) {
-                    broadcaster.manager.postToMainThread(new Runnable() {
+                    threadManager.postToMain(new Runnable() {
                         @Override public void run() {
                             if (listener == null) return;
                             ((ConnectedLinkListener) listener).onAuthorizationTimeout(reference);

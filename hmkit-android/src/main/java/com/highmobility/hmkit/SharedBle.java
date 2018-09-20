@@ -2,6 +2,8 @@ package com.highmobility.hmkit;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGattServer;
+import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
@@ -17,6 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Used to access shared BLE resources.
+ */
 public class SharedBle {
     Context context; // the only place where need to store context: on start broadcasting and
     // terminate
@@ -54,6 +59,18 @@ public class SharedBle {
     // devices connected to the Broadcaster
     List<BluetoothDevice> getConnectedDevices() {
         return getManager().getConnectedDevices(BluetoothProfile.GATT_SERVER);
+    }
+
+    String getInfoString() {
+        PackageManager packageManager = context.getPackageManager();
+
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            return Manager.infoStringPrefix() + "w"; // wearable
+        } else if (packageManager.hasSystemFeature(PackageManager.FEATURE_EMBEDDED)) {
+            return Manager.infoStringPrefix() + "t"; // android things
+        } else {
+            return Manager.infoStringPrefix() + "m";
+        }
     }
 
     public boolean isBluetoothOn() {
@@ -97,6 +114,10 @@ public class SharedBle {
             receiverRegistered = false;
             // don't clear listeners here because broadcaster is never nulled.
         }
+    }
+
+    BluetoothGattServer openGattServer(BluetoothGattServerCallback callback) {
+        return getManager().openGattServer(context, callback);
     }
 
     void setRandomAdapterName(boolean overrideLocalName) {

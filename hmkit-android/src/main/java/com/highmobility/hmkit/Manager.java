@@ -3,6 +3,7 @@ package com.highmobility.hmkit;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 
 import com.android.volley.Response;
@@ -70,10 +71,11 @@ public class Manager {
 
         if (broadcaster == null) {
             broadcaster = new Broadcaster(core, storage, threadManager, ble);
+
         }
 
         return broadcaster;
-}
+    }
 
     /**
      * @return The Telematics instance.
@@ -81,7 +83,8 @@ public class Manager {
     public Telematics getTelematics() {
         throwIfDeviceCertificateNotSet();
 
-        if (telematics == null) telematics = new Telematics(this);
+        if (telematics == null)
+            telematics = new Telematics(core, storage, threadManager, webService);
 
         return telematics;
     }
@@ -92,12 +95,10 @@ public class Manager {
     @Nullable Scanner getScanner() {
         throwIfDeviceCertificateNotSet();
 
+        if (ble == null) return null;
+
         if (scanner == null) {
-            try {
-                scanner = new Scanner(this);
-            } catch (BleNotSupportedException e) {
-                e.printStackTrace();
-            }
+            scanner = new Scanner(core, storage, threadManager, ble);
         }
         return scanner;
     }
@@ -122,22 +123,39 @@ public class Manager {
 
     /**
      * @return An SDK description string containing version name and type(mobile or wear).
-     * @throws IllegalStateException when SDK is not initialised.
      */
     public String getInfoString() {
         throwIfContextNotSet();
 
-        String infoString = "Android ";
-        infoString += BuildConfig.VERSION_NAME;
+        // has bluetooth (shared with broadcaster)
+        if (ble != null) return ble.getInfoString();
 
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)) {
-            infoString += " w";
-        } else {
-            infoString += " m";
+        String infoString = infoStringPrefix();
+        final PackageManager pm = context.getPackageManager();
+        if (pm.hasSystemFeature(PackageManager.FEATURE_EMBEDDED)) {
+            return infoString + "t"; // android things
+        } else if (isEmulator()) {
+            return infoString + "e"; // emulator
         }
 
-        return infoString;
+        return infoString + "unknown";
     }
+
+    static String infoStringPrefix() {
+        return "Android " + BuildConfig.VERSION_NAME + " ";
+    }
+
+    static boolean isEmulator() {
+        return Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || "google_sdk".equals(Build.PRODUCT);
+    }
+
 
     /*// protected ivars are accessed when ctx is already checked
     @Nullable SharedBle getBle() {
@@ -340,7 +358,7 @@ public class Manager {
      */
     public void downloadAccessCertificate(String accessToken, final DownloadCallback callback) {
         throwIfDeviceCertificateNotSet();
-        getWebService().requestAccessCertificate(accessToken,
+        webService.requestAccessCertificate(accessToken,
                 core.getPrivateKey(),
                 getDeviceCertificate().getSerial(),
                 new Response.Listener<JSONObject>() {
@@ -554,64 +572,55 @@ public class Manager {
             storage = new Storage(this.context);
             threadManager = new ThreadManager(this.context);
             webService = new WebService(this.context);
-            // prolly should create ble here as well if possible (only make it necessary to get
-            // context once)
+
+            try {
+                ble = new SharedBle(context);
+            } catch (BleNotSupportedException e) {
+
+            }
         }
     }
 
-    /*void postToMainThread(Runnable runnable) {
-        core.postToMainThread(runnable);
-    }
-
-    void startCore() {
-        throwIfDeviceCertificateNotSet();
-        core.start();
-    }
-
-    private void stopCore() {
-        core.stop();
-    }*/
-
-/**
- * The web environment.
- */
-public enum Environment {
-    TEST, STAGING, PRODUCTION
-}
-
-/**
- * The logging level.
- */
-public enum LoggingLevel {
-    NONE(0), DEBUG(1), ALL(2);
-
-    private Integer level;
-
-    LoggingLevel(int level) {
-        this.level = level;
-    }
-
-    public int getValue() {
-        return level;
-    }
-}
-
-/**
- * {@link #downloadCertificate(String, DownloadCallback)} result.
- */
-public interface DownloadCallback {
     /**
-     * Invoked if the certificate download was successful.
-     *
-     * @param serial the vehicle or charger serial.
+     * The web environment.
      */
-    void onDownloaded(DeviceSerial serial);
+    public enum Environment {
+        TEST, STAGING, PRODUCTION
+    }
 
     /**
-     * Invoked when there was an error with the certificate download.
-     *
-     * @param error The error
+     * The logging level.
      */
-    void onDownloadFailed(DownloadAccessCertificateError error);
-}
+    public enum LoggingLevel {
+        NONE(0), DEBUG(1), ALL(2);
+
+        private Integer level;
+
+        LoggingLevel(int level) {
+            this.level = level;
+        }
+
+        public int getValue() {
+            return level;
+        }
+    }
+
+    /**
+     * {@link #downloadCertificate(String, DownloadCallback)} result.
+     */
+    public interface DownloadCallback {
+        /**
+         * Invoked if the certificate download was successful.
+         *
+         * @param serial the vehicle or charger serial.
+         */
+        void onDownloaded(DeviceSerial serial);
+
+        /**
+         * Invoked when there was an error with the certificate download.
+         *
+         * @param error The error
+         */
+        void onDownloadFailed(DownloadAccessCertificateError error);
+    }
 }

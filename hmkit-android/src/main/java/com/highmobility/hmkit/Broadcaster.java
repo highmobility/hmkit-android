@@ -1,10 +1,6 @@
 package com.highmobility.hmkit;
 
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattServer;
-import android.bluetooth.BluetoothGattService;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
@@ -33,7 +29,10 @@ import javax.annotation.Nullable;
  * Access the broadcaster from {@link Manager#getBroadcaster()}. Broadcaster is created once and
  * then bound to Manager instance.
  */
-public class Broadcaster implements SharedBleListener {
+public class Broadcaster extends Core.Broadcaster implements SharedBleListener {
+    /**
+     * This class keeps link references, advertises.
+     */
     static final String TAG = "HMKit-Broadcaster";
 
     private Core core;
@@ -45,15 +44,7 @@ public class Broadcaster implements SharedBleListener {
 
     private StartCallback startCallback;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
-    private BluetoothGattServer GATTServer;
-    private GATTServerCallback gattServerCallback;
-
-    private BluetoothGattCharacteristic readCharacteristic;
-    private BluetoothGattCharacteristic writeCharacteristic;
-    private BluetoothGattCharacteristic aliveCharacteristic;
-    private BluetoothGattCharacteristic infoCharacteristic;
-    private BluetoothGattCharacteristic sensingReadCharacteristic;
-    private BluetoothGattCharacteristic sensingWriteCharacteristic;
+    private GattServer gattServer;
 
     private boolean isAlivePinging;
     private long alivePingInterval = 500;
@@ -68,7 +59,8 @@ public class Broadcaster implements SharedBleListener {
         this.storage = storage;
         this.ble = ble;
         this.threadManager = threadManager;
-
+        core.broadcaster = this;
+        gattServer = new GattServer(core, threadManager, ble, gattServerCallback);
         startBle(); // start listening for ble on/off
     }
 
@@ -185,25 +177,7 @@ public class Broadcaster implements SharedBleListener {
         if (this.configuration == null) this.configuration = new BroadcastConfiguration();
         ble.setRandomAdapterName(configuration.isOverridingAdvertisementName());
         startCallback = callback;
-
-        if (GATTServer != null && GATTServer.getServices().size() > 0) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(TAG, "gatt service already exists");
-            onServiceAdded(true);
-        } else {
-            BluetoothGattService service = createGattServer();
-
-            if (service != null) {
-                if (GATTServer.addService(service) == false) {
-                    Log.e(TAG, "Cannot add service to GATT server");
-                    onServiceAdded(false);
-                }
-                // else gatt server started adding the service and will call onServiceAdded.
-            } else {
-                // failed to create the gatt service
-                onServiceAdded(false);
-            }
-        }
+        gattServer.open();
     }
 
     /**
@@ -309,17 +283,7 @@ public class Broadcaster implements SharedBleListener {
      * The user is responsible for releasing the Link's BroadcasterListener.
      */
     public void disconnectAllLinks() {
-        if (GATTServer == null) return;
-
-        List<BluetoothDevice> devices = ble.getConnectedDevices();
-
-        for (BluetoothDevice device : devices) {
-            // just to make sure all of the devices are tried to be disconnected. disconnect
-            // callback should find the one in this.links if it exists.
-            GATTServer.cancelConnection(device);
-        }
-
-        // cant close service here, we wont get disconnect callback
+        gattServer.disconnectAllLinks();
     }
 
     private void startBle() {
@@ -348,46 +312,6 @@ public class Broadcaster implements SharedBleListener {
         ble.removeListener(this);
     }
 
-    void onServiceAdded(boolean success) {
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(TAG, "onServiceAdded() [" + success + "]");
-
-        if (success) {
-            final AdvertiseSettings settings = new AdvertiseSettings.Builder()
-                    .setAdvertiseMode(configuration.getAdvertiseMode())
-                    .setConnectable(true)
-                    .setTimeout(0)
-                    .setTxPowerLevel(configuration.getTxPowerLevel())
-                    .build();
-
-            UUID advertiseUUID;
-            byte[] uuidBytes;
-
-            if (configuration.getBroadcastTarget() == null) {
-                uuidBytes = ByteUtils.concatBytes(core.getIssuer(), core.getAppId());
-            } else {
-                uuidBytes = ByteUtils.concatBytes(new byte[]{0x00, 0x00, 0x00, 0x00}, configuration
-                        .getBroadcastTarget().getByteArray());
-                uuidBytes = ByteUtils.concatBytes(uuidBytes, new byte[]{0x00, 0x00, 0x00});
-            }
-
-            ByteUtils.reverse(uuidBytes);
-            advertiseUUID = ByteUtils.UUIDFromByteArray(uuidBytes);
-
-            final AdvertiseData data = new AdvertiseData.Builder()
-                    .setIncludeDeviceName(configuration.isOverridingAdvertisementName() == true)
-                    .addServiceUuid(new ParcelUuid(advertiseUUID))
-                    .build();
-
-            mBluetoothLeAdvertiser.startAdvertising(settings, data, advertiseCallback);
-        } else {
-            setState(State.BLUETOOTH_UNAVAILABLE);
-            startCallback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type
-                    .BLUETOOTH_FAILURE
-                    , 0, "Failed to create gatt server."));
-        }
-    }
-
     @Override
     public void bluetoothChangedToAvailable(boolean available) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
@@ -400,21 +324,20 @@ public class Broadcaster implements SharedBleListener {
             // after turning ble off.
             if (links.size() > 0) {
                 for (ConnectedLink link : links) {
-                    manager.core.HMBTCorelinkDisconnect(manager
-                            .coreInterface, ByteUtils.bytesFromMacString(link.btDevice.getAddress
-                            ()));
+                    core.HMBTCorelinkDisconnect(ByteUtils.bytesFromMacString(link.btDevice
+                            .getAddress()));
                 }
             }
 
             // Need to reset the service after bluetooth reset because otherwise
             // startBroadcasting will not include the service. Maybe internally the services are
             // reset and we keep the invalid pointer here.
-            closeGattServer();
+            gattServer.close();
             setState(State.BLUETOOTH_UNAVAILABLE);
         }
     }
 
-    boolean didResolveDevice(HMDevice device) {
+    @Override boolean onResolvedDevice(HMDevice device) {
         final ConnectedLink link = getLinkForMac(device.getMac());
         if (link == null) return false;
 
@@ -423,22 +346,7 @@ public class Broadcaster implements SharedBleListener {
         return true;
     }
 
-    void linkDidConnect(BluetoothDevice device) {
-        // need to dispatch the link before authenticating to forward pairing request for instance
-        final ConnectedLink link = new ConnectedLink(device, this);
-        links.add(link);
-
-        if (listener != null) {
-            manager.postToMainThread(new Runnable() {
-                @Override public void run() {
-                    if (listener == null) return;
-                    listener.onLinkReceived(link);
-                }
-            });
-        }
-    }
-
-    boolean deviceExitedProximity(HMDevice device) {
+    @Override boolean onDeviceExitedProximity(HMDevice device) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
             Log.d(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
@@ -450,7 +358,7 @@ public class Broadcaster implements SharedBleListener {
 
         // invoke the listener listener
         if (listener != null) {
-            manager.postToMainThread(new Runnable() {
+            threadManager.postToMain(new Runnable() {
                 @Override public void run() {
                     if (listener == null) return;
                     listener.onLinkLost(link);
@@ -465,29 +373,28 @@ public class Broadcaster implements SharedBleListener {
         return true;
     }
 
-    boolean onCommandResponseReceived(HMDevice device, byte[] data) {
+    @Override boolean onCommandResponseReceived(HMDevice device, byte[] data) {
         Link link = getLinkForMac(device.getMac());
         if (link == null) return false;
-
         link.onCommandResponseReceived(data);
         return true;
     }
 
-    boolean onCommandReceived(HMDevice device, byte[] data) {
+    @Override boolean onCommandReceived(HMDevice device, byte[] data) {
         Link link = getLinkForMac(device.getMac());
         if (link == null) return false;
         link.onCommandReceived(data);
         return true;
     }
 
-    boolean onRevokeResult(HMDevice device, byte[] data, int result) {
+    @Override boolean onRevokeResult(HMDevice device, byte[] data, int result) {
         Link link = getLinkForMac(device.getMac());
         if (link == null) return false;
         link.onRevokeResponse(data, result);
         return true;
     }
 
-    int didReceivePairingRequest(HMDevice device) {
+    @Override int onReceivedPairingRequest(HMDevice device) {
         ConnectedLink link = getLinkForMac(device.getMac());
         if (link != null) {
             return link.didReceivePairingRequest();
@@ -496,31 +403,10 @@ public class Broadcaster implements SharedBleListener {
         return 1;
     }
 
-    boolean writeData(byte[] mac, byte[] value, int characteristicId) {
+    @Override boolean writeData(byte[] mac, byte[] value, int characteristicId) {
         ConnectedLink link = getLinkForMac(mac);
         if (link == null || link.btDevice == null) return false;
-
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "write " + ByteUtils.hexFromBytes(value) + " to " + ByteUtils.hexFromBytes
-                    (link.getAddressBytes()) + " char: " + characteristicId);
-
-        BluetoothGattCharacteristic characteristic = getCharacteristicForId(characteristicId);
-        if (characteristic == null) {
-            Log.e(TAG, "no characteristic for write");
-            return false;
-        }
-
-        if (characteristic.setValue(value) == false) {
-            Log.e(TAG, "can't set read char value");
-            return false;
-        }
-
-        if (GATTServer.notifyCharacteristicChanged(link.btDevice, characteristic, false) == false) {
-            Log.e(TAG, "can't notify characteristic changed");
-            return false;
-        }
-
-        return true;
+        return gattServer.writeData(link.btDevice, value, characteristicId);
     }
 
     ConnectedLink getLinkForMac(byte[] mac) {
@@ -535,136 +421,18 @@ public class Broadcaster implements SharedBleListener {
         return null;
     }
 
-    /**
-     * @return true if created the server with the service and characteristics.
-     */
-    private BluetoothGattService createGattServer() {
-        if (GATTServer == null) {
-            gattServerCallback = new GATTServerCallback(this);
-            GATTServer = manager.getBle().getManager().openGattServer(manager.getContext(),
-                    gattServerCallback);
-
-            if (GATTServer == null) {
-                Log.e(TAG, "Cannot create gatt server");
-                return null;
-            }
+    Runnable alivePingRunnable = new Runnable() {
+        @Override public void run() {
+            sendAlivePing();
         }
-
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(TAG, "createGattServer()");
-
-        // create the service
-        BluetoothGattService service = new BluetoothGattService(Constants.SERVICE_UUID,
-                BluetoothGattService.SERVICE_TYPE_PRIMARY);
-
-        // add characteristics to the service
-        readCharacteristic = new BluetoothGattCharacteristic(Constants.READ_CHAR_UUID,
-                BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic
-                        .PROPERTY_NOTIFY,
-                BluetoothGattCharacteristic.PERMISSION_READ);
-
-        sensingReadCharacteristic = new BluetoothGattCharacteristic(Constants
-                .SENSING_READ_CHAR_UUID,
-                BluetoothGattCharacteristic.PROPERTY_READ | BluetoothGattCharacteristic
-                        .PROPERTY_NOTIFY,
-                BluetoothGattCharacteristic.PERMISSION_READ);
-
-        writeCharacteristic =
-                new BluetoothGattCharacteristic(Constants.WRITE_CHAR_UUID,
-                        BluetoothGattCharacteristic.PROPERTY_WRITE,
-                        BluetoothGattCharacteristic.PERMISSION_WRITE);
-
-        sensingWriteCharacteristic = new BluetoothGattCharacteristic(Constants
-                .SENSING_WRITE_CHAR_UUID,
-                BluetoothGattCharacteristic.PROPERTY_WRITE,
-                BluetoothGattCharacteristic.PERMISSION_WRITE);
-
-        aliveCharacteristic = new BluetoothGattCharacteristic(Constants.ALIVE_CHAR_UUID,
-                BluetoothGattCharacteristic.PROPERTY_NOTIFY,
-                BluetoothGattCharacteristic.PERMISSION_READ);
-
-        infoCharacteristic = new BluetoothGattCharacteristic(Constants.INFO_CHAR_UUID,
-                BluetoothGattCharacteristic.PROPERTY_READ,
-                BluetoothGattCharacteristic.PERMISSION_READ);
-
-        if (readCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants
-                .NOTIFY_DESCRIPTOR_UUID,
-                BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor
-                        .PERMISSION_READ)) == false) {
-            Log.e(TAG, "Cannot add read descriptor");
-            return null;
-        }
-
-        if (sensingReadCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants
-                .NOTIFY_DESCRIPTOR_UUID,
-                BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor
-                        .PERMISSION_READ)) == false) {
-            Log.e(TAG, "Cannot add sensing read descriptor");
-            return null;
-        }
-
-        if (aliveCharacteristic.addDescriptor(new BluetoothGattDescriptor(Constants
-                .NOTIFY_DESCRIPTOR_UUID,
-                BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor
-                        .PERMISSION_READ)) == false) {
-            Log.e(TAG, "Cannot add alive descriptor");
-            return null;
-        }
-
-        if (aliveCharacteristic.setValue(new byte[]{}) == false) {
-            Log.e(TAG, "Cannot set alive char value");
-            return null;
-        }
-
-        if (infoCharacteristic.setValue(manager.getInfoString()) == false) {
-            Log.e(TAG, "Cannot set info char value");
-            return null;
-        }
-
-        if (service.addCharacteristic(readCharacteristic) == false) {
-            Log.e(TAG, "Cannot add read char");
-            return null;
-        }
-
-        if (service.addCharacteristic(sensingReadCharacteristic) == false) {
-            Log.e(TAG, "Cannot add sensing read char");
-            return null;
-        }
-
-        if (service.addCharacteristic(writeCharacteristic) == false) {
-            Log.e(TAG, "Cannot add write char");
-            return null;
-        }
-
-        if (service.addCharacteristic(sensingWriteCharacteristic) == false) {
-            Log.e(TAG, "Cannot add sensing write char");
-            return null;
-        }
-
-        if (service.addCharacteristic(aliveCharacteristic) == false) {
-            Log.e(TAG, "Cannot add alive char");
-            return null;
-        }
-
-        if (service.addCharacteristic(infoCharacteristic) == false) {
-            Log.e(TAG, "Cannot add info char");
-            return null;
-        }
-
-        return service;
-    }
-
-    private void closeGattServer() {
-        if (GATTServer == null) return;
-        GATTServer.clearServices();
-        GATTServer.close();
-        GATTServer = null;
-    }
+    };
 
     private void sendAlivePing() {
-        if (GATTServer != null) {
+        if (gattServer.isOpen()) {
+            // TODO: 20/09/2018 test alive pinging
             for (Link link : links) {
-                GATTServer.notifyCharacteristicChanged(link.btDevice, aliveCharacteristic, false);
+                gattServer.sendAlivePing(link.btDevice);
+
             }
         } else {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
@@ -676,9 +444,66 @@ public class Broadcaster implements SharedBleListener {
         }
     }
 
-    Runnable alivePingRunnable = new Runnable() {
-        @Override public void run() {
-            sendAlivePing();
+    GattServer.Callback gattServerCallback = new GattServer.Callback() {
+        @Override void onServiceAdded(boolean success) {
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
+                Log.d(TAG, "onServiceAdded() [" + success + "]");
+
+            if (success) {
+                final AdvertiseSettings settings = new AdvertiseSettings.Builder()
+                        .setAdvertiseMode(configuration.getAdvertiseMode())
+                        .setConnectable(true)
+                        .setTimeout(0)
+                        .setTxPowerLevel(configuration.getTxPowerLevel())
+                        .build();
+
+                UUID advertiseUUID;
+                byte[] uuidBytes;
+
+                if (configuration.getBroadcastTarget() == null) {
+                    uuidBytes = ByteUtils.concatBytes(core.getIssuer(), core.getAppId());
+                } else {
+                    uuidBytes = ByteUtils.concatBytes(new byte[]{0x00, 0x00, 0x00, 0x00},
+                            configuration
+                                    .getBroadcastTarget().getByteArray());
+                    uuidBytes = ByteUtils.concatBytes(uuidBytes, new byte[]{0x00, 0x00, 0x00});
+                }
+
+                ByteUtils.reverse(uuidBytes);
+                advertiseUUID = ByteUtils.UUIDFromByteArray(uuidBytes);
+
+                final AdvertiseData data = new AdvertiseData.Builder()
+                        .setIncludeDeviceName(configuration.isOverridingAdvertisementName() == true)
+                        .addServiceUuid(new ParcelUuid(advertiseUUID))
+                        .build();
+
+                mBluetoothLeAdvertiser.startAdvertising(settings, data, advertiseCallback);
+            } else {
+                setState(State.BLUETOOTH_UNAVAILABLE);
+                startCallback.onBroadcastingFailed(new BroadcastError(BroadcastError.Type
+                        .BLUETOOTH_FAILURE
+                        , 0, "Failed to create gatt server."));
+            }
+        }
+
+        @Override
+        boolean onNotificationsStartedForReadCharacteristic(BluetoothDevice device, byte[] mac) {
+            if (getLinkForMac(mac) != null) return false;
+
+            // need to dispatch the link before authenticating to forward pairing request for
+            // instance
+            final ConnectedLink link = new ConnectedLink(core, threadManager, device);
+            links.add(link);
+
+            if (listener != null) {
+                threadManager.postToMain(new Runnable() {
+                    @Override public void run() {
+                        if (listener == null) return;
+                        listener.onLinkReceived(link);
+                    }
+                });
+            }
+            return true;
         }
     };
 
@@ -748,38 +573,13 @@ public class Broadcaster implements SharedBleListener {
             this.state = state;
 
             if (listener != null) {
-                manager.postToMainThread(new Runnable() {
+                threadManager.postToMain(new Runnable() {
                     @Override public void run() {
                         if (listener == null) return;
                         listener.onStateChanged(oldState);
                     }
                 });
             }
-        }
-    }
-
-    BluetoothGattCharacteristic getCharacteristicForId(int id) {
-        switch (id) {
-            case CoreInterface.hm_characteristic_alive: {
-                return aliveCharacteristic;
-            }
-            case CoreInterface.hm_characteristic_info: {
-                return infoCharacteristic;
-            }
-            case CoreInterface.hm_characteristic_link_read: {
-                return readCharacteristic;
-            }
-            case CoreInterface.hm_characteristic_link_write: {
-                return writeCharacteristic;
-            }
-            case CoreInterface.hm_characteristic_sensing_read: {
-                return sensingReadCharacteristic;
-            }
-            case CoreInterface.hm_characteristic_sensing_write: {
-                return sensingWriteCharacteristic;
-            }
-            default:
-                return null;
         }
     }
 

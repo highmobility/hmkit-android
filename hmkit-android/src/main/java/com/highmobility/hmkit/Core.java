@@ -7,21 +7,21 @@ import com.highmobility.btcore.HMBTCoreInterface;
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.DeviceCertificate;
-import com.highmobility.crypto.value.DeviceSerial;
-import com.highmobility.crypto.value.Issuer;
 import com.highmobility.crypto.value.PrivateKey;
 import com.highmobility.crypto.value.PublicKey;
 import com.highmobility.utils.ByteUtils;
 import com.highmobility.value.Bytes;
 
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.annotation.Nullable;
 
 /**
- * Interface to the C core. Handles all of the threading and device certificates as well.
+ * Interface to the C core. Keeps a reference to the device certificate as well because core only
+ * uses handles one device certificate.
  */
 class Core implements HMBTCoreInterface {
     static final String TAG = "HMKit-Core";
@@ -37,33 +37,9 @@ class Core implements HMBTCoreInterface {
     private PublicKey caPublicKey;
 
     // 3x listeners. telematics, broadcaster and scanner
-    @Nullable public TelematicsListener telematicsListener;
-    @Nullable public BroadcasterListener broadcasterListener;
-    @Nullable public ScannerListener scannerListener;
-
-    interface TelematicsListener {
-        void onTelematicsCommandEncrypted(DeviceSerial serial, Issuer issuer, Bytes data);
-
-        void onTelematicsResponseDecrypted(DeviceSerial serial, int resultCode, Bytes data);
-    }
-
-    interface BroadcasterListener {
-
-        boolean writeData(byte[] mac, byte[] data, int characteristic);
-    }
-
-    interface ScannerListener {
-
-        void connect(Bytes bytes);
-
-        void disconnect(Bytes bytes);
-
-        void startServiceDiscovery(Bytes bytes);
-
-        boolean writeData(byte[] mac, byte[] data, int characteristic);
-
-        boolean readValue(byte[] mac, int characteristic);
-    }
+    @Nullable public Telematics telematics;
+    @Nullable public Broadcaster broadcaster;
+    @Nullable public Scanner scanner;
 
     private byte[] issuer, appId; // these are set from HMBTCoreInterface HMBTHalAdvertisementStart.
 
@@ -114,7 +90,7 @@ class Core implements HMBTCoreInterface {
             coreClockTimer.scheduleAtFixedRate(new TimerTask() {
                 @Override
                 public void run() {
-                    threadManager.postToWorkThread(new Runnable() {
+                    threadManager.postToWork(new Runnable() {
                         @Override
                         public void run() {
                             core.HMBTCoreClock(Core.this);
@@ -136,14 +112,6 @@ class Core implements HMBTCoreInterface {
     }
 
     // MARK: init
-    void HMBTCoreInit() {
-        core.HMBTCoreInit(this);
-    }
-
-    // Send clock beat to core
-    void HMBTCoreClock() {
-        core.HMBTCoreClock(this);
-    }
 
     // MARK: sensing
 
@@ -172,7 +140,7 @@ class Core implements HMBTCoreInterface {
         core.HMBTCoreSensingDiscoveryEvent(this, mac);
     }
 
-    void HMBTCoreSensingScanStart(HMBTCoreInterface coreInterface) {
+    void HMBTCoreSensingScanStart() {
         core.HMBTCoreSensingScanStart(this);
     }
 
@@ -280,28 +248,28 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public int HMBTHalConnect(byte[] mac) {
-        if (scannerListener != null) scannerListener.connect(new Bytes(mac));
+        if (scanner != null) scanner.connect(mac);
         return 0;
     }
 
     @Override
     public int HMBTHalDisconnect(byte[] mac) {
-        if (scannerListener != null) scannerListener.disconnect(new Bytes(mac));
+        if (scanner != null) scanner.disconnect(mac);
         return 0;
     }
 
     @Override
     public int HMBTHalServiceDiscovery(byte[] mac) {
-        if (scannerListener != null) scannerListener.startServiceDiscovery(new Bytes(mac));
+        if (scanner != null) scanner.startServiceDiscovery(mac);
         return 0;
     }
 
     @Override
     public int HMBTHalWriteData(byte[] mac, int length, byte[] data, int characteristic) {
-        if (broadcasterListener != null && broadcasterListener.writeData(mac, data, characteristic))
+        if (broadcaster != null && broadcaster.writeData(mac, data, characteristic))
             return 1;
 
-        if (scannerListener != null && scannerListener.writeData(mac, data, characteristic))
+        if (scanner != null && scanner.writeData(mac, data, characteristic))
             return 1;
 
         return 0;
@@ -309,20 +277,17 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public int HMBTHalReadData(byte[] mac, int offset, int characteristic) {
-        if (scannerListener != null)
-            return scannerListener.readValue(mac, characteristic) == true ? 0 : 1;
+        if (scanner != null)
+            return scanner.readValue(mac, characteristic) == true ? 0 : 1;
 
         return 0;
     }
 
     @Override
     public int HMBTHalTelematicsSendData(byte[] issuer, byte[] serial, int length, byte[] data) {
-        if (telematicsListener != null) {
-            telematicsListener.onTelematicsCommandEncrypted(
-                    new DeviceSerial(serial),
-                    new Issuer(issuer),
-                    new Bytes(trimmedBytes(data, length)));
-        }
+        if (telematics != null)
+            telematics.onTelematicsCommandEncrypted(serial, issuer, trimmedBytes(data, length));
+
         return 0;
     }
 
@@ -469,14 +434,16 @@ class Core implements HMBTCoreInterface {
                 copyBytes(storedCert.getBytes(), cert);
                 size[0] = storedCert.getBytes().getLength();
                 if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                    Log.d(Broadcaster.TAG, "Returned stored cert for serial " + ByteUtils
+                    Log.d(com.highmobility.hmkit.Broadcaster.TAG, "Returned stored cert for " +
+                            "serial " + ByteUtils
                             .hexFromBytes(serial));
                 return 0;
             }
         }
 
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(Broadcaster.TAG, "No stored cert for serial " + ByteUtils.hexFromBytes(serial));
+            Log.d(com.highmobility.hmkit.Broadcaster.TAG, "No stored cert for serial " +
+                    ByteUtils.hexFromBytes(serial));
 
         return 1;
     }
@@ -492,20 +459,23 @@ class Core implements HMBTCoreInterface {
                         cert
                                 .getProviderSerial().getByteArray())) {
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                        Log.d(Broadcaster.TAG, "Erased stored cert for serial " + ByteUtils
+                        Log.d(com.highmobility.hmkit.Broadcaster.TAG, "Erased stored cert for " +
+                                "serial " + ByteUtils
                                 .hexFromBytes(serial));
 
                     return 0;
                 } else {
                     if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                        Log.d(Broadcaster.TAG, "Could not erase cert for serial " + ByteUtils
+                        Log.d(com.highmobility.hmkit.Broadcaster.TAG, "Could not erase cert for " +
+                                "serial " + ByteUtils
                                 .hexFromBytes(serial));
                     return 1;
                 }
             }
         }
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(Broadcaster.TAG, "No cert to erase for serial " + ByteUtils.hexFromBytes(serial));
+            Log.d(com.highmobility.hmkit.Broadcaster.TAG, "No cert to erase for serial " +
+                    ByteUtils.hexFromBytes(serial));
 
         return 1;
     }
@@ -513,41 +483,41 @@ class Core implements HMBTCoreInterface {
     @Override
     public void HMApiCallbackEnteredProximity(HMDevice device) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(Broadcaster.TAG, "HMCtwEnteredProximity");
+            Log.d(com.highmobility.hmkit.Broadcaster.TAG, "HMCtwEnteredProximity");
 
         // this means core has finished identification of the broadcaster (might me authenticated
         // or not) - show broadcaster info on screen
         // always update the broadcaster with this, auth state might have changed later with this
         // callback as well
-        if (manager.getBroadcaster().didResolveDevice(device) == false) {
-            manager.getScanner().didResolveDevice(device);
-        }
+        if (broadcaster != null && broadcaster.onResolvedDevice(device)) return;
+        if (scanner != null) scanner.onResolvedDevice(device);
     }
 
     @Override
     public void HMApiCallbackExitedProximity(HMDevice device) {
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(Broadcaster.TAG, "HMCtwExitedProximity");
+            Log.d(com.highmobility.hmkit.Broadcaster.TAG, "HMCtwExitedProximity");
 
-        if (manager.getBroadcaster().deviceExitedProximity(device) == false) {
-            manager.getScanner().deviceExitedProximity(device.getMac());
-        }
+        if (broadcaster != null && broadcaster.onDeviceExitedProximity(device)) return;
+        if (scanner != null) scanner.onDeviceExitedProximity(device.getMac());
     }
 
     @Override
     public void HMApiCallbackCustomCommandIncoming(HMDevice device, byte[] data, int length) {
-        if (manager.getBroadcaster().onCommandReceived(device, trimmedBytes(data, length)) ==
-                false) {
-            manager.getScanner().onCommandReceived(device, trimmedBytes(data, length));
-        }
+        byte[] trimmedBytes = trimmedBytes(data, length);
+
+        if (broadcaster != null && broadcaster.onCommandReceived(device, trimmedBytes)) return;
+        if (scanner != null) scanner.onCommandReceived(device, trimmedBytes);
     }
 
     @Override
     public void HMApiCallbackCustomCommandResponse(HMDevice device, byte[] data, int length) {
         byte[] trimmedBytes = trimmedBytes(data, length);
-        if (manager.getBroadcaster().onCommandResponseReceived(device, trimmedBytes) == false) {
-            manager.getScanner().onCommandResponseReceived(device, trimmedBytes);
-        }
+
+        if (broadcaster != null && broadcaster.onCommandResponseReceived(device, trimmedBytes))
+            return;
+
+        if (scanner != null) scanner.onCommandResponseReceived(device, trimmedBytes);
     }
 
     @Override
@@ -561,17 +531,16 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public int HMApiCallbackPairingRequested(HMDevice device) {
-        return manager.getBroadcaster().didReceivePairingRequest(device);
+        if (broadcaster != null) return broadcaster.onReceivedPairingRequest(device);
+        return 1;
     }
 
     @Override
     public void HMApiCallbackTelematicsCommandIncoming(HMDevice device, int id, int length,
                                                        byte[] data) {
-        if (telematicsListener != null) {
-            telematicsListener.onTelematicsResponseDecrypted(
-                    new DeviceSerial(device.getSerial()),
-                    id,
-                    new Bytes(trimmedBytes(data, length)));
+        if (telematics != null) {
+            telematics.onTelematicsResponseDecrypted(device.getSerial(), id, trimmedBytes(data,
+                    length));
         }
     }
 
@@ -591,8 +560,9 @@ class Core implements HMBTCoreInterface {
         }
         byte[] trimmedBytes = trimmedBytes(data, length);
 
-        if (manager.getBroadcaster().onRevokeResult(device, trimmedBytes, status) == false) {
-            manager.getScanner().onRevokeResult(device, trimmedBytes, status);
+        if (broadcaster != null && broadcaster.onRevokeResult(device, trimmedBytes, status) ==
+                false) {
+            if (scanner != null) scanner.onRevokeResult(device, trimmedBytes, status);
         }
     }
 
@@ -606,13 +576,53 @@ class Core implements HMBTCoreInterface {
 
     byte[] trimmedBytes(byte[] bytes, int length) {
         if (bytes.length == length) return bytes;
+        return Arrays.copyOfRange(bytes, 0, length);
+    }
 
-        byte[] trimmedBytes = new byte[length];
+    // MARK: listeners
 
-        for (int i = 0; i < length; i++) {
-            trimmedBytes[i] = bytes[i];
-        }
+    abstract static class Telematics {
+        abstract void onTelematicsCommandEncrypted(byte[] serial, byte[] issuer, byte[] data);
 
-        return trimmedBytes;
+        abstract void onTelematicsResponseDecrypted(byte[] serial, int resultCode, byte[] data);
+    }
+
+    abstract static class Broadcaster {
+        abstract boolean writeData(byte[] mac, byte[] data, int characteristic);
+
+        abstract boolean onResolvedDevice(HMDevice device);
+
+        abstract boolean onDeviceExitedProximity(HMDevice device);
+
+        abstract boolean onCommandReceived(HMDevice device, byte[] bytes);
+
+        abstract boolean onCommandResponseReceived(HMDevice device, byte[] trimmedBytes);
+
+        abstract int onReceivedPairingRequest(HMDevice device);
+
+        abstract boolean onRevokeResult(HMDevice device, byte[] bytes, int status);
+    }
+
+    abstract static class Scanner {
+
+        abstract void connect(byte[] bytes);
+
+        abstract void disconnect(byte[] bytes);
+
+        abstract void startServiceDiscovery(byte[] bytes);
+
+        abstract boolean writeData(byte[] mac, byte[] data, int characteristic);
+
+        abstract boolean readValue(byte[] mac, int characteristic);
+
+        abstract boolean onResolvedDevice(HMDevice device);
+
+        abstract boolean onDeviceExitedProximity(byte[] mac);
+
+        abstract boolean onCommandReceived(HMDevice device, byte[] bytes);
+
+        abstract boolean onCommandResponseReceived(HMDevice device, byte[] bytes);
+
+        abstract boolean onRevokeResult(HMDevice device, byte[] bytes, int status);
     }
 }
