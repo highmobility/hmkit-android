@@ -47,7 +47,7 @@ class TelematicsCommand {
         });
     }
 
-    interface Callback {
-        void onCommandFinished(TelematicsCommand command);
+    static abstract class Callback {
+        abstract void onCommandFinished(TelematicsCommand command);
     }
 }

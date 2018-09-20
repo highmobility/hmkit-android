@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * Telematics provides the option to send commands via Telematics.
  */
-public class Telematics extends Core.Telematics implements TelematicsCommand.Callback {
+public class Telematics extends Core.Telematics {
     static final String TAG = "HMKit-Telematics";
     private final Core core;
     private final WebService webService;
@@ -71,7 +71,7 @@ public class Telematics extends Core.Telematics implements TelematicsCommand.Cal
         if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
             Log.d(TAG, "sendTelematicsCommand: " + command);
 
-        final TelematicsCommand activeCommand = new TelematicsCommand(this, callback,
+        final TelematicsCommand activeCommand = new TelematicsCommand(commandCallback, callback,
                 threadManager);
         activeCommands.add(activeCommand);
 
@@ -193,9 +193,11 @@ public class Telematics extends Core.Telematics implements TelematicsCommand.Cal
         }
     }
 
-    @Override public void onCommandFinished(TelematicsCommand command) {
-        activeCommands.remove(command);
-    }
+    TelematicsCommand.Callback commandCallback = new TelematicsCommand.Callback() {
+        @Override void onCommandFinished(TelematicsCommand command) {
+            activeCommands.remove(command);
+        }
+    };
 
     /**
      * CommandCallback is used to notify the user about telematics command result.
