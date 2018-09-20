@@ -156,25 +156,6 @@ public class Manager {
                 || "google_sdk".equals(Build.PRODUCT);
     }
 
-
-    /*// protected ivars are accessed when ctx is already checked
-    @Nullable SharedBle getBle() {
-        if (ble == null) {
-            try {
-                ble = new SharedBle(context); // could be that the device has no bluetooth.
-            } catch (BleNotSupportedException e) {
-                e.printStackTrace();
-            }
-        }
-        return ble;
-    }
-
-    WebService getWebService() {
-        if (webService == null) webService = new WebService(context);
-        return webService;
-    }
-*/
-
     /**
      * @return The instance of the Manager.
      */
