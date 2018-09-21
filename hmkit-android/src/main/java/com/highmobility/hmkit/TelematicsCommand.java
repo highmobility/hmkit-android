@@ -5,9 +5,9 @@ import com.highmobility.value.Bytes;
 
 class TelematicsCommand {
     Telematics.CommandCallback commandCallback;
-    Callback callback;
+    final Callback callback;
+    final ThreadManager threadManager;
 
-    ThreadManager threadManager;
     boolean finished;
 
     TelematicsCommand(Callback callback, Telematics.CommandCallback commandCallback, ThreadManager

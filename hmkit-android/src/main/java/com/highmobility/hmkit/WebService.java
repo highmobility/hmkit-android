@@ -33,7 +33,7 @@ class WebService {
 
     private static String telematicsUrl;
 
-    RequestQueue queue;
+    private final RequestQueue queue;
 
     WebService(Context context) {
         // ignoreSslErrors();
@@ -181,7 +181,7 @@ class WebService {
         queueRequest(request);
     }
 
-    void queueRequest(JsonObjectRequest request) {
+    private void queueRequest(JsonObjectRequest request) {
         request.setTag(this);
         printRequest(request);
         queue.add(request);

@@ -22,17 +22,16 @@ public class Link {
     protected final Core core;
     protected final ThreadManager threadManager;
 
-    BluetoothDevice btDevice;
-    HMDevice hmDevice;
-
-    State state = State.CONNECTED;
-    DeviceSerial serial;
-
-    LinkCommand sentCommand;
     LinkListener listener;
-    long connectionTime;
-    RevokeCallback revokeCallback;
-    Manager manager;
+    BluetoothDevice btDevice;
+
+    private HMDevice hmDevice;
+    private DeviceSerial serial;
+    private State state = State.CONNECTED;
+
+    private LinkCommand sentCommand;
+    private final long connectionTime;
+    private RevokeCallback revokeCallback;
 
     Link(Core core, ThreadManager threadManager, BluetoothDevice btDevice) {
         this.btDevice = btDevice;

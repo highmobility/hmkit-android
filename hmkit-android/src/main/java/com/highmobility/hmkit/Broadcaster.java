@@ -35,23 +35,23 @@ public class Broadcaster extends Core.Broadcaster {
      */
     static final String TAG = "HMKit-Broadcaster";
 
-    private Core core;
-    private Storage storage;
-    private SharedBle ble;
-    private ThreadManager threadManager;
+    private final Core core;
+    private final Storage storage;
+    private final SharedBle ble;
+    private final ThreadManager threadManager;
 
     private BroadcasterListener listener;
 
     private StartCallback startCallback;
     private BluetoothLeAdvertiser mBluetoothLeAdvertiser;
-    private GattServer gattServer;
+    private final GattServer gattServer;
 
     private boolean isAlivePinging;
     private long alivePingInterval = 500;
 
     private State state = State.IDLE;
 
-    private ArrayList<ConnectedLink> links = new ArrayList<>();
+    private final ArrayList<ConnectedLink> links = new ArrayList<>();
     private BroadcastConfiguration configuration;
 
     Broadcaster(Core core, Storage storage, ThreadManager threadManager, SharedBle ble) {
@@ -205,7 +205,7 @@ public class Broadcaster extends Core.Broadcaster {
      */
     public void startAlivePinging(long interval) {
         alivePingInterval = interval;
-        if (isAlivePinging == true) return;
+        if (isAlivePinging) return;
         isAlivePinging = true;
         sendAlivePing();
     }
@@ -294,7 +294,7 @@ public class Broadcaster extends Core.Broadcaster {
         if (ble.isBluetoothOn() == false) setState(State.BLUETOOTH_UNAVAILABLE);
     }
 
-    private BleListener bleListener = new BleListener();
+    private final BleListener bleListener = new BleListener();
 
     private class BleListener implements SharedBleListener {
         // we don't want this method to be publicly available, so we create the class here
@@ -413,7 +413,7 @@ public class Broadcaster extends Core.Broadcaster {
         return gattServer.writeData(link.btDevice, value, characteristicId);
     }
 
-    ConnectedLink getLinkForMac(byte[] mac) {
+    private ConnectedLink getLinkForMac(byte[] mac) {
         for (int i = 0; i < links.size(); i++) {
             ConnectedLink link = links.get(i);
 
@@ -425,7 +425,7 @@ public class Broadcaster extends Core.Broadcaster {
         return null;
     }
 
-    Runnable alivePingRunnable = new Runnable() {
+    final Runnable alivePingRunnable = new Runnable() {
         @Override public void run() {
             sendAlivePing();
         }
@@ -447,7 +447,7 @@ public class Broadcaster extends Core.Broadcaster {
         }
     }
 
-    GattServer.Callback gattServerCallback = new GattServer.Callback() {
+    final GattServer.Callback gattServerCallback = new GattServer.Callback() {
         @Override void onServiceAdded(boolean success) {
             if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
                 Log.d(TAG, "onServiceAdded() [" + success + "]");
@@ -510,10 +510,10 @@ public class Broadcaster extends Core.Broadcaster {
         }
     };
 
-    private AdvertiseCb advertiseCallback = new AdvertiseCb(this);
+    private final AdvertiseCb advertiseCallback = new AdvertiseCb(this);
 
     private static class AdvertiseCb extends AdvertiseCallback {
-        WeakReference<Broadcaster> broadcaster;
+        final WeakReference<Broadcaster> broadcaster;
 
         AdvertiseCb(Broadcaster broadcaster) {
             this.broadcaster = new WeakReference<>(broadcaster);

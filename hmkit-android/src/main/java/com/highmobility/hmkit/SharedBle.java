@@ -23,14 +23,14 @@ import java.util.Random;
  * Used to access shared BLE resources.
  */
 public class SharedBle {
-    Context context; // the only place where need to store context: on start broadcasting and
+    final Context context; // the only place where need to store context: on start broadcasting and
     // terminate
     private boolean receiverRegistered;
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
 
-    private ArrayList<SharedBleListener> listeners = new ArrayList<>();
+    private final ArrayList<SharedBleListener> listeners = new ArrayList<>();
 
     public boolean addListener(SharedBleListener listener) {
         if (listeners.contains(listener) == false) {

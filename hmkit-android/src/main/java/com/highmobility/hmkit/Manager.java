@@ -575,7 +575,7 @@ public class Manager {
     public enum LoggingLevel {
         NONE(0), DEBUG(1), ALL(2);
 
-        private Integer level;
+        private final Integer level;
 
         LoggingLevel(int level) {
             this.level = level;

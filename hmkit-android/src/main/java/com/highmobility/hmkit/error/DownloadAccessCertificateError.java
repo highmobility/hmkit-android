@@ -18,9 +18,9 @@ public class DownloadAccessCertificateError {
         SERVER_ERROR
     }
 
-    DownloadAccessCertificateError.Type type;
-    int code;
-    String message;
+    private final DownloadAccessCertificateError.Type type;
+    final int code;
+    final String message;
 
     public DownloadAccessCertificateError(DownloadAccessCertificateError.Type type, int errorCode, String message) {
         this.code = errorCode;

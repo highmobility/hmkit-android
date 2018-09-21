@@ -27,7 +27,7 @@ import static com.highmobility.hmkit.Broadcaster.TAG;
  */
 public class Storage {
     private static final String ACCESS_CERTIFICATE_STORAGE_KEY = "ACCESS_CERTIFICATE_STORAGE_KEY";
-    static final String device_certificate_json_object = "device_access_certificate";
+    private static final String device_certificate_json_object = "device_access_certificate";
 
     public enum Result {
         SUCCESS(0), STORAGE_FULL(1), INTERNAL_ERROR(2);
@@ -43,8 +43,8 @@ public class Storage {
         }
     }
 
-    private SharedPreferences settings;
-    private SharedPreferences.Editor editor;
+    private final SharedPreferences settings;
+    private final SharedPreferences.Editor editor;
 
     Storage(Context ctx) {
         settings = ctx.getSharedPreferences("com.hm.wearable.UserPrefs",
@@ -137,7 +137,7 @@ public class Storage {
         return deviceAccessCertificate;
     }
 
-    AccessCertificate[] getCertificates() {
+    private AccessCertificate[] getCertificates() {
         Set<String> bytesStringSet = settings.getStringSet(ACCESS_CERTIFICATE_STORAGE_KEY, null);
 
         if (bytesStringSet != null && bytesStringSet.size() > 0) {
@@ -156,7 +156,7 @@ public class Storage {
         return new AccessCertificate[0];
     }
 
-    boolean writeCertificates(AccessCertificate[] certificates) {
+    private boolean writeCertificates(AccessCertificate[] certificates) {
         HashSet<String> stringSet = new HashSet<>();
 
         for (Certificate cert : certificates) {

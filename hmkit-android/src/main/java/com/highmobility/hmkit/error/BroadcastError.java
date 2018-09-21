@@ -13,9 +13,9 @@ public class BroadcastError {
         UNINITIALIZED
     }
 
-    Type errorType;
-    int errorCode;
-    String message;
+    private final Type errorType;
+    private final int errorCode;
+    private final String message;
 
     public BroadcastError(Type type, int errorCode, String message) {
         this.errorCode = errorCode;

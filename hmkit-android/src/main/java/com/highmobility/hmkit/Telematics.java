@@ -21,13 +21,13 @@ import java.util.List;
  * Telematics provides the option to send commands via Telematics.
  */
 public class Telematics extends Core.Telematics {
-    static final String TAG = "HMKit-Telematics";
+    private static final String TAG = "HMKit-Telematics";
     private final Core core;
     private final WebService webService;
     private final Storage storage;
     private final ThreadManager threadManager;
 
-    List<TelematicsCommand> activeCommands = new ArrayList<>();
+    final List<TelematicsCommand> activeCommands = new ArrayList<>();
     TelematicsCommand interactingCommand; // reference between core interactions
 
     Telematics(Core core, Storage storage, ThreadManager threadManager, WebService webService) {
@@ -193,7 +193,7 @@ public class Telematics extends Core.Telematics {
         }
     }
 
-    TelematicsCommand.Callback commandCallback = new TelematicsCommand.Callback() {
+    final TelematicsCommand.Callback commandCallback = new TelematicsCommand.Callback() {
         @Override void onCommandFinished(TelematicsCommand command) {
             activeCommands.remove(command);
         }

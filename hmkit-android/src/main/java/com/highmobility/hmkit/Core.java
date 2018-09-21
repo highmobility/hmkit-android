@@ -24,11 +24,11 @@ import javax.annotation.Nullable;
  * uses handles one device certificate.
  */
 class Core implements HMBTCoreInterface {
-    static final String TAG = "HMKit-Core";
+    private static final String TAG = "HMKit-Core";
 
-    private HMBTCore core = new HMBTCore();
-    private Storage storage;
-    private ThreadManager threadManager;
+    private final HMBTCore core = new HMBTCore();
+    private final Storage storage;
+    private final ThreadManager threadManager;
 
     private Timer coreClockTimer;
 

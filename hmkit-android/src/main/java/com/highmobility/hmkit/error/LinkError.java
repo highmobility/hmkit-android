@@ -27,9 +27,9 @@ public class LinkError {
         COMMAND_TOO_BIG
     }
 
-    Type errorType;
-    int errorCode;
-    String message;
+    private final Type errorType;
+    private final int errorCode;
+    private final String message;
 
     public LinkError(Type type, int errorCode, String message) {
         this.errorCode = errorCode;

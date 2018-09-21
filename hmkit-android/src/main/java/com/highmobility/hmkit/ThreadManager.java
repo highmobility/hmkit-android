@@ -9,12 +9,12 @@ import android.os.Looper;
  * Handles main and work thread.
  */
 class ThreadManager {
-    private Handler mainHandler, workHandler;
-    private HandlerThread workThread;
+    private final Handler mainHandler;
+    private final Handler workHandler;
 
     public ThreadManager(Context context) {
         mainHandler = new Handler(context.getMainLooper());
-        workThread = new HandlerThread("HMKit work thread");
+        HandlerThread workThread = new HandlerThread("HMKit work thread");
         workThread.start();
         workHandler = new Handler(workThread.getLooper());
     }

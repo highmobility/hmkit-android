@@ -29,7 +29,7 @@ public class ConnectedLink extends Link {
         this.listener = listener;
     }
 
-    int pairingResponse = -1;
+    private int pairingResponse = -1;
 
     int didReceivePairingRequest() {
         if (listener == null) {

@@ -22,9 +22,9 @@ public class TelematicsError {
         COMMAND_TOO_BIG
     }
 
-    Type type;
-    int code;
-    String message;
+    private final Type type;
+    private final int code;
+    private final String message;
 
     public TelematicsError(Type type, int errorCode, String message) {
         this.code = errorCode;

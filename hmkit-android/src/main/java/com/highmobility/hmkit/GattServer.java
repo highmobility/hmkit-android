@@ -20,7 +20,7 @@ import java.util.List;
  * This is the Broadcaster's GATT server.
  */
 class GattServer extends BluetoothGattServerCallback {
-    static final String TAG = "HMKit-GATTServer";
+    private static final String TAG = "HMKit-GATTServer";
 
     private final Core core;
     private final ThreadManager threadManager;
@@ -390,7 +390,7 @@ class GattServer extends BluetoothGattServerCallback {
         }
     }
 
-    int getCharacteristicIdForCharacteristic(BluetoothGattCharacteristic characteristic) {
+    private int getCharacteristicIdForCharacteristic(BluetoothGattCharacteristic characteristic) {
         if (characteristic.getUuid().equals(writeCharacteristic.getUuid())) {
             return 0x03;
         } else if (characteristic.getUuid().equals(sensingWriteCharacteristic.getUuid
@@ -425,7 +425,7 @@ class GattServer extends BluetoothGattServerCallback {
         return "Unknown";
     }
 
-    BluetoothGattCharacteristic getCharacteristicForId(int id) {
+    private BluetoothGattCharacteristic getCharacteristicForId(int id) {
         switch (id) {
             case HMBTCoreInterface.hm_characteristic_alive: {
                 return aliveCharacteristic;

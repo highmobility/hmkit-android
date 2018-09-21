@@ -23,9 +23,9 @@ public class RevokeError {
         COMMAND_IN_PROGRESS
     }
 
-    Type errorType;
-    int errorCode;
-    String message;
+    private final Type errorType;
+    private final int errorCode;
+    private final String message;
 
     public RevokeError(Type type, int errorCode, String message) {
         this.errorCode = errorCode;
