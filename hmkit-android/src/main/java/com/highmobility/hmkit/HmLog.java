@@ -20,6 +20,10 @@ public class HmLog {
         Timber.plant(new Timber.DebugTree());
     }
 
+    static void d(String message, Object... args) {
+        d(Level.DEBUG, message, args);
+    }
+
     static void d(Level level, String message, Object... args) {
         if (Manager.loggingLevel.getValue() >= level.getValue()) {
             Timber.tag(getTag());
@@ -32,11 +36,6 @@ public class HmLog {
             Timber.tag(getTag());
             Timber.i(message, args);
         }
-    }
-
-    static void d(String message, Object... args) {
-        Timber.tag(getTag());
-        Timber.d(message, args);
     }
 
     static void i(String message, Object... args) {

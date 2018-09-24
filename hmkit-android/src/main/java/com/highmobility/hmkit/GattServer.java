@@ -86,7 +86,7 @@ class GattServer extends BluetoothGattServerCallback {
     }
 
     boolean writeData(BluetoothDevice device, byte[] value, int characteristicId) {
-        HmLog.d(HmLog.Level.DEBUG, "write %s to %s, char: %s", ByteUtils.hexFromBytes(value),
+        HmLog.d("write %s to %s, char: %s", ByteUtils.hexFromBytes(value),
                 device.getAddress().replaceAll(":", ""), characteristicId);
 
         BluetoothGattCharacteristic characteristic = getCharacteristicForId(characteristicId);
@@ -125,7 +125,7 @@ class GattServer extends BluetoothGattServerCallback {
             }
         }
 
-        HmLog.d(HmLog.Level.DEBUG, "createGattServer()");
+        HmLog.d("createGattServer()");
 
         // create the service
         BluetoothGattService service = new BluetoothGattService(Constants.SERVICE_UUID,
@@ -234,7 +234,7 @@ class GattServer extends BluetoothGattServerCallback {
             HmLog.e("connecting failed with status" + status);
         }
 
-        HmLog.d(HmLog.Level.DEBUG, "onConnectionStateChange: %s %s", getConnectionState(newState)
+        HmLog.d("onConnectionStateChange: %s %s", getConnectionState(newState)
                 , device.getAddress());
 
         if (newState == BluetoothProfile.STATE_DISCONNECTED) {
@@ -298,7 +298,7 @@ class GattServer extends BluetoothGattServerCallback {
             return;
         }
 
-        HmLog.d(HmLog.Level.DEBUG, "incoming data %s: %s from %s", characteristicId, ByteUtils
+        HmLog.d("incoming data %s: %s from %s", characteristicId, ByteUtils
                 .hexFromBytes(value), ByteUtils.hexFromBytes(ByteUtils.bytesFromMacString(device
                 .getAddress())));
 

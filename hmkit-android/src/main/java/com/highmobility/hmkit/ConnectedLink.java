@@ -75,7 +75,7 @@ public class ConnectedLink extends Link {
                         }
                     });
 
-                    HmLog.d(HmLog.Level.DEBUG, "pairing timer exceeded");
+                    HmLog.d("pairing timer exceeded");
                     return 1; // TOD1O: use correct code
                 }
             }

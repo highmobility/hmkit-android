@@ -19,7 +19,7 @@ import javax.annotation.Nullable;
 
 /**
  * Interface to the C core. Keeps a reference to the device certificate as well because core only
- * uses handles one device certificate.
+ * handles one device certificate.
  */
 class Core implements HMBTCoreInterface {
     private final HMBTCore core = new HMBTCore();
@@ -331,7 +331,7 @@ class Core implements HMBTCoreInterface {
 
         int errorCode = storage.storeCertificate(certificate).getValue();
         if (errorCode != 0) {
-            HmLog.d(HmLog.Level.DEBUG, "Cant register certificate " + ByteUtils.hexFromBytes
+            HmLog.d("Cant register certificate " + ByteUtils.hexFromBytes
                     (serial) + ": " + errorCode);
         }
 
@@ -346,7 +346,7 @@ class Core implements HMBTCoreInterface {
         AccessCertificate certificate = storage.certWithGainingSerial(serial);
 
         if (certificate == null) {
-            HmLog.d(HmLog.Level.DEBUG, "No registered cert with gaining serial " + ByteUtils
+            HmLog.d("No registered cert with gaining serial " + ByteUtils
                     .hexFromBytes(serial));
             return 1;
         }
@@ -402,7 +402,7 @@ class Core implements HMBTCoreInterface {
 
         int errorCode = storage.storeCertificate(certificate).getValue();
         if (errorCode != 0) {
-            HmLog.d(HmLog.Level.DEBUG, "Cant store certificate: " + errorCode);
+            HmLog.d("Cant store certificate: " + errorCode);
         } else {
             HmLog.d(HmLog.Level.ALL, "HMPersistenceHaladdStoredCertificate " + certificate
                     .getGainerSerial() + " success");
@@ -421,14 +421,14 @@ class Core implements HMBTCoreInterface {
                 copyBytes(storedCert.getBytes(), cert);
                 size[0] = storedCert.getBytes().getLength();
 
-                HmLog.d(HmLog.Level.DEBUG, "Returned stored cert for " +
+                HmLog.d("Returned stored cert for " +
                         "serial " + ByteUtils
                         .hexFromBytes(serial));
                 return 0;
             }
         }
 
-        HmLog.d(HmLog.Level.DEBUG, "No stored cert for serial " + ByteUtils.hexFromBytes(serial));
+        HmLog.d("No stored cert for serial " + ByteUtils.hexFromBytes(serial));
 
         return 1;
     }

@@ -49,7 +49,7 @@ public class Link {
         if (this.state != state) {
             final State oldState = this.state;
             if (state == State.AUTHENTICATED) {
-                HmLog.d(HmLog.Level.DEBUG, "authenticated in %s ms", (Calendar
+                HmLog.d("authenticated in %s ms", (Calendar
                         .getInstance().getTimeInMillis() - connectionTime));
             }
 
@@ -109,7 +109,7 @@ public class Link {
             return;
         }
 
-        HmLog.d(HmLog.Level.DEBUG, "send command %s to %s", bytes, ByteUtils
+        HmLog.d("send command %s to %s", bytes, ByteUtils
                 .hexFromBytes(hmDevice.getMac()));
 
         sentCommand = new LinkCommand(callback, threadManager);
@@ -135,7 +135,7 @@ public class Link {
      */
     public void revoke(RevokeCallback callback) {
         if (state != State.AUTHENTICATED) {
-            HmLog.d(HmLog.Level.DEBUG, "not authenticated");
+            HmLog.d("not authenticated");
             callback.onRevokeFailed(new RevokeError(RevokeError.Type.UNAUTHORIZED, 0, "not " +
                     "authenticated"));
             return;
@@ -149,7 +149,7 @@ public class Link {
             return;
         }
 
-        HmLog.d(HmLog.Level.DEBUG, "revoke " + serial);
+        HmLog.d("revoke " + serial);
 
         this.revokeCallback = callback;
 
@@ -175,11 +175,11 @@ public class Link {
     }
 
     void onCommandReceived(final byte[] bytes) {
-        HmLog.d(HmLog.Level.DEBUG, "did receive command %s from %s", ByteUtils.hexFromBytes
+        HmLog.d("did receive command %s from %s", ByteUtils.hexFromBytes
                 (bytes), ByteUtils.hexFromBytes(hmDevice.getMac()));
 
         if (listener == null) {
-            HmLog.d(HmLog.Level.DEBUG, "can't dispatch notification: no listener set");
+            HmLog.d("can't dispatch notification: no listener set");
             return;
         }
 
@@ -193,13 +193,13 @@ public class Link {
 
     void onCommandResponseReceived(final byte[] data) {
 
-        HmLog.d(HmLog.Level.DEBUG, "did receive command response %s from %s in %s ms", ByteUtils
+        HmLog.d("did receive command response %s from %s in %s ms", ByteUtils
                 .hexFromBytes(data), ByteUtils.hexFromBytes(hmDevice.getMac()), (Calendar
                 .getInstance().getTimeInMillis() - sentCommand.commandStartTime)
         );
 
         if (sentCommand == null || sentCommand.finished) {
-            HmLog.d(HmLog.Level.DEBUG, "can't dispatch command response: sentCommand = null || " +
+            HmLog.d("can't dispatch command response: sentCommand = null || " +
                     "finished");
             return;
         }

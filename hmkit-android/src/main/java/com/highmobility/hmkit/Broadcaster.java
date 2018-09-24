@@ -139,10 +139,10 @@ public class Broadcaster extends Core.Broadcaster {
      *                 something went wrong.
      */
     public void startBroadcasting(StartCallback callback) {
-        HmLog.d(HmLog.Level.DEBUG, "startBroadcasting() called");
+        HmLog.d("startBroadcasting() called");
 
         if (state == State.BROADCASTING) {
-            HmLog.d(HmLog.Level.DEBUG, "will not start broadcasting: already " +
+            HmLog.d("will not start broadcasting: already " +
                     "broadcasting");
 
             callback.onBroadcastingStarted();
@@ -186,7 +186,7 @@ public class Broadcaster extends Core.Broadcaster {
 
         // stopAdvertising cancels all the BT connections as well.
         if (mBluetoothLeAdvertiser != null) {
-            HmLog.d(HmLog.Level.DEBUG, "stopBroadcasting() called");
+            HmLog.d("stopBroadcasting() called");
             mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
             mBluetoothLeAdvertiser = null;
         }
@@ -297,7 +297,7 @@ public class Broadcaster extends Core.Broadcaster {
     private class BleListener implements SharedBleListener {
         // we don't want this method to be publicly available, so we create the class here
         @Override public void bluetoothChangedToAvailable(boolean available) {
-            HmLog.d(HmLog.Level.DEBUG, "bluetoothChangedToAvailable(): available = %s",
+            HmLog.d("bluetoothChangedToAvailable(): available = %s",
                     available);
 
             if (available && getState() == State.BLUETOOTH_UNAVAILABLE) {
@@ -349,7 +349,7 @@ public class Broadcaster extends Core.Broadcaster {
     }
 
     @Override boolean onDeviceExitedProximity(HMDevice device) {
-        HmLog.d(HmLog.Level.DEBUG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
+        HmLog.d("lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
         final ConnectedLink link = getLinkForMac(device.getMac());
         if (link == null) return false;
@@ -435,7 +435,7 @@ public class Broadcaster extends Core.Broadcaster {
 
             }
         } else {
-            HmLog.d(HmLog.Level.DEBUG, "need to start broadcasting before pinging");
+            HmLog.d("need to start broadcasting before pinging");
         }
 
         if (isAlivePinging) {
@@ -445,7 +445,7 @@ public class Broadcaster extends Core.Broadcaster {
 
     final GattServer.Callback gattServerCallback = new GattServer.Callback() {
         @Override void onServiceAdded(boolean success) {
-            HmLog.d(HmLog.Level.DEBUG, "onServiceAdded: %s", success);
+            HmLog.d("onServiceAdded: %s", success);
 
             if (success) {
                 final AdvertiseSettings settings = new AdvertiseSettings.Builder()
@@ -524,7 +524,7 @@ public class Broadcaster extends Core.Broadcaster {
                     name = "not advertising name";
                 }
 
-                HmLog.d(HmLog.Level.DEBUG, "Start advertise: " + name);
+                HmLog.d("Start advertise: " + name);
             }
             broadcaster.get().setState(State.BROADCASTING);
             if (broadcaster.get().startCallback != null) {

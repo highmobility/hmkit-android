@@ -22,8 +22,6 @@ import org.json.JSONObject;
 
 import javax.annotation.Nullable;
 
-import timber.log.Timber;
-
 /**
  * HMKit is the entry point for the HMKit library. Use the singleton to access Broadcaster and
  * Telematics.
@@ -349,7 +347,7 @@ public class Manager {
                         try {
                             certificate = storage.storeDownloadedCertificates(response);
                         } catch (Exception e) {
-                            HmLog.d(HmLog.Level.DEBUG, "storeDownloadedCertificates error: " + e
+                            HmLog.d("storeDownloadedCertificates error: " + e
                                     .getMessage());
 
                             DownloadAccessCertificateError error = new
@@ -372,7 +370,7 @@ public class Manager {
                             try {
                                 JSONObject json = new JSONObject(new String(error.networkResponse
                                         .data));
-                                HmLog.d(HmLog.Level.DEBUG, "onErrorResponse: " + json.toString());
+                                HmLog.d("onErrorResponse: " + json.toString());
                                 if (json.has("message")) {
                                     dispatchedError = new DownloadAccessCertificateError(
                                             DownloadAccessCertificateError.Type.HTTP_ERROR,
@@ -556,7 +554,7 @@ public class Manager {
             try {
                 ble = new SharedBle(context);
             } catch (BleNotSupportedException e) {
-
+                HmLog.d(HmLog.Level.ALL, "Ble not supported");
             }
         }
     }

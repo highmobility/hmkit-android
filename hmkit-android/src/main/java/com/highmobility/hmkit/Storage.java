@@ -108,7 +108,7 @@ public class Storage {
             throw new Exception("certificate storage failed " + result);
         }
 
-        HmLog.d(HmLog.Level.DEBUG, "storeDownloadedCertificates: deviceCert %s",
+        HmLog.d("storeDownloadedCertificates: deviceCert %s",
                 deviceAccessCertificate.toString());
 
         if (response.has("vehicle_access_certificate") == true) {
@@ -123,7 +123,7 @@ public class Storage {
                     throw new Exception("cannot store vehicle access cert");
                 }
 
-                HmLog.d(HmLog.Level.DEBUG, "storeDownloadedCertificates: vehicleCert %s",
+                HmLog.d("storeDownloadedCertificates: vehicleCert %s",
                         vehicleAccessCertificate.toString());
             }
         }
@@ -223,7 +223,7 @@ public class Storage {
                     cert.getProviderSerial().equals(providingSerial)) {
                 removedIndex = i;
 
-                HmLog.d(HmLog.Level.DEBUG, "deleteCertificate success: %s", cert
+                HmLog.d("deleteCertificate success: %s", cert
                         .toString());
 
                 break;
@@ -235,7 +235,7 @@ public class Storage {
             if (writeCertificates(newCerts) == true) return true;
         }
 
-        HmLog.d(HmLog.Level.DEBUG, "deleteCertificate: failed for gaining: %s providing " +
+        HmLog.d("deleteCertificate: failed for gaining: %s providing " +
                 "%s", ByteUtils.hexFromBytes(gainingSerial), ByteUtils.hexFromBytes
                 (providingSerial));
 
@@ -251,7 +251,7 @@ public class Storage {
             if (cert.getGainerSerial().equals(serial)) {
                 removedIndex = i;
 
-                HmLog.d(HmLog.Level.DEBUG, "deleteCertificateWithGainingSerial success: " +
+                HmLog.d("deleteCertificateWithGainingSerial success: " +
                         "%s", cert.toString());
 
                 break;
@@ -263,7 +263,7 @@ public class Storage {
             if (writeCertificates(newCerts) == true) return true;
         }
 
-        HmLog.d(HmLog.Level.DEBUG, "deleteCertificateWithGainingSerial failed: %s",
+        HmLog.d("deleteCertificateWithGainingSerial failed: %s",
                 ByteUtils.hexFromBytes(serial));
 
         return false;
@@ -278,7 +278,7 @@ public class Storage {
             if (cert.getProviderSerial().equals(serial)) {
                 removedIndex = i;
 
-                HmLog.d(HmLog.Level.DEBUG, "deleteCertificateWithProvidingSerial " +
+                HmLog.d("deleteCertificateWithProvidingSerial " +
                         "success: %s" + cert.toString());
 
                 break;
