@@ -1,7 +1,6 @@
 package com.highmobility.hmkit;
 
 import android.bluetooth.BluetoothDevice;
-import android.util.Log;
 
 import java.util.Calendar;
 
@@ -33,7 +32,7 @@ public class ConnectedLink extends Link {
 
     int didReceivePairingRequest() {
         if (listener == null) {
-            Log.e(Broadcaster.TAG, "link listener not set");
+            HmLog.e("link listener not set");
             return 1;
         }
 
@@ -76,8 +75,7 @@ public class ConnectedLink extends Link {
                         }
                     });
 
-                    if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                        Log.d(Broadcaster.TAG, "pairing timer exceeded");
+                    HmLog.d(HmLog.Level.DEBUG, "pairing timer exceeded");
                     return 1; // TOD1O: use correct code
                 }
             }

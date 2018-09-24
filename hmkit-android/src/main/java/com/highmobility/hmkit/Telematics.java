@@ -1,7 +1,6 @@
 package com.highmobility.hmkit;
 
 import android.util.Base64;
-import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -21,7 +20,6 @@ import java.util.List;
  * Telematics provides the option to send commands via Telematics.
  */
 public class Telematics extends Core.Telematics {
-    private static final String TAG = "HMKit-Telematics";
     private final Core core;
     private final WebService webService;
     private final Storage storage;
@@ -68,8 +66,7 @@ public class Telematics extends Core.Telematics {
             return;
         }
 
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "sendTelematicsCommand: " + command);
+        HmLog.d(HmLog.Level.DEBUG, "sendTelematicsCommand: %s", command);
 
         final TelematicsCommand activeCommand = new TelematicsCommand(commandCallback, callback,
                 threadManager);
@@ -187,8 +184,7 @@ public class Telematics extends Core.Telematics {
                     "decrypt web service response.");
         } else {
             final Bytes response = new Bytes(data);
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "onTelematicsResponseDecrypted: " + response);
+            HmLog.d(HmLog.Level.DEBUG, "onTelematicsResponseDecrypted: " + response);
             interactingCommand.dispatchResult(response);
         }
     }

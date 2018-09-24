@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 class Scanner extends Core.Scanner implements SharedBleListener {
-    static final String TAG = "HMKit-Scanner";
     private final Core core;
     private final SharedBle ble;
     private final ThreadManager threadManager;

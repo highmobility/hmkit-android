@@ -1,14 +1,10 @@
 package com.highmobility.hmkit;
 
-import android.util.Log;
-
 import com.highmobility.hmkit.error.LinkError;
 
 import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import static com.highmobility.hmkit.Broadcaster.TAG;
 
 class LinkCommand {
     boolean finished;
@@ -47,7 +43,7 @@ class LinkCommand {
         finished = true;
 
         if (commandCallback == null) {
-            Log.d(TAG, "cannot dispatch the result: no callback reference");
+            HmLog.d(HmLog.Level.DEBUG, "cannot dispatch the result: no callback");
             return;
         }
 

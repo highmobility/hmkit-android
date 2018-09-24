@@ -33,8 +33,6 @@ public class Broadcaster extends Core.Broadcaster {
     /**
      * This class keeps link references, advertises.
      */
-    static final String TAG = "HMKit-Broadcaster";
-
     private final Core core;
     private final Storage storage;
     private final SharedBle ble;
@@ -141,11 +139,11 @@ public class Broadcaster extends Core.Broadcaster {
      *                 something went wrong.
      */
     public void startBroadcasting(StartCallback callback) {
-        Log.d(TAG, "startBroadcasting() called");
+        HmLog.d(HmLog.Level.DEBUG, "startBroadcasting() called");
 
         if (state == State.BROADCASTING) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(TAG, "will not start broadcasting: already broadcasting");
+            HmLog.d(HmLog.Level.DEBUG, "will not start broadcasting: already " +
+                    "broadcasting");
 
             callback.onBroadcastingStarted();
             return;
@@ -188,7 +186,7 @@ public class Broadcaster extends Core.Broadcaster {
 
         // stopAdvertising cancels all the BT connections as well.
         if (mBluetoothLeAdvertiser != null) {
-            Log.d(TAG, "stopBroadcasting() called");
+            HmLog.d(HmLog.Level.DEBUG, "stopBroadcasting() called");
             mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
             mBluetoothLeAdvertiser = null;
         }
@@ -299,8 +297,8 @@ public class Broadcaster extends Core.Broadcaster {
     private class BleListener implements SharedBleListener {
         // we don't want this method to be publicly available, so we create the class here
         @Override public void bluetoothChangedToAvailable(boolean available) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(TAG, "bluetoothChangedToAvailable(): available = [" + available + "]");
+            HmLog.d(HmLog.Level.DEBUG, "bluetoothChangedToAvailable(): available = %s",
+                    available);
 
             if (available && getState() == State.BLUETOOTH_UNAVAILABLE) {
                 setState(State.IDLE);
@@ -351,8 +349,7 @@ public class Broadcaster extends Core.Broadcaster {
     }
 
     @Override boolean onDeviceExitedProximity(HMDevice device) {
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-            Log.d(TAG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
+        HmLog.d(HmLog.Level.DEBUG, "lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
         final ConnectedLink link = getLinkForMac(device.getMac());
         if (link == null) return false;
@@ -438,8 +435,7 @@ public class Broadcaster extends Core.Broadcaster {
 
             }
         } else {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(TAG, "need to start broadcasting before pinging");
+            HmLog.d(HmLog.Level.DEBUG, "need to start broadcasting before pinging");
         }
 
         if (isAlivePinging) {
@@ -449,8 +445,7 @@ public class Broadcaster extends Core.Broadcaster {
 
     final GattServer.Callback gattServerCallback = new GattServer.Callback() {
         @Override void onServiceAdded(boolean success) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(TAG, "onServiceAdded() [" + success + "]");
+            HmLog.d(HmLog.Level.DEBUG, "onServiceAdded: %s", success);
 
             if (success) {
                 final AdvertiseSettings settings = new AdvertiseSettings.Builder()
@@ -521,7 +516,7 @@ public class Broadcaster extends Core.Broadcaster {
 
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue()) {
+            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
                 String name;
                 if (broadcaster.get().configuration.isOverridingAdvertisementName()) {
                     name = broadcaster.get().getName();
@@ -529,7 +524,7 @@ public class Broadcaster extends Core.Broadcaster {
                     name = "not advertising name";
                 }
 
-                Log.d(TAG, "Start advertise: " + name);
+                HmLog.d(HmLog.Level.DEBUG, "Start advertise: " + name);
             }
             broadcaster.get().setState(State.BROADCASTING);
             if (broadcaster.get().startCallback != null) {
@@ -543,16 +538,16 @@ public class Broadcaster extends Core.Broadcaster {
                 case AdvertiseCallback.ADVERTISE_FAILED_ALREADY_STARTED:
                     break;
                 case AdvertiseCallback.ADVERTISE_FAILED_DATA_TOO_LARGE:
-                    Log.e(TAG, "Advertise failed: data too large");
+                    HmLog.e("Advertise failed: data too large");
                     break;
                 case AdvertiseCallback.ADVERTISE_FAILED_FEATURE_UNSUPPORTED:
-                    Log.e(TAG, "Advertise failed: feature unsupported");
+                    HmLog.e("Advertise failed: feature unsupported");
                     break;
                 case AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR:
-                    Log.e(TAG, "Advertise failed: internal error");
+                    HmLog.e("Advertise failed: internal error");
                     break;
                 case AdvertiseCallback.ADVERTISE_FAILED_TOO_MANY_ADVERTISERS:
-                    Log.e(TAG, "Advertise failed: too many advertisers");
+                    HmLog.e("Advertise failed: too many advertisers");
                     break;
             }
 

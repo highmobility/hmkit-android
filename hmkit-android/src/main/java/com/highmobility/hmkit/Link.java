@@ -1,7 +1,6 @@
 package com.highmobility.hmkit;
 
 import android.bluetooth.BluetoothDevice;
-import android.util.Log;
 
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.crypto.value.DeviceSerial;
@@ -11,8 +10,6 @@ import com.highmobility.utils.ByteUtils;
 import com.highmobility.value.Bytes;
 
 import java.util.Calendar;
-
-import static com.highmobility.hmkit.Broadcaster.TAG;
 
 public class Link {
     /**
@@ -51,10 +48,9 @@ public class Link {
     void setState(State state) {
         if (this.state != state) {
             final State oldState = this.state;
-            if (state == State.AUTHENTICATED && Manager.loggingLevel.getValue() >= Manager
-                    .LoggingLevel.DEBUG.getValue()) {
-                Log.d(TAG, "authenticated in " + (Calendar.getInstance().getTimeInMillis() -
-                        connectionTime) + "ms");
+            if (state == State.AUTHENTICATED) {
+                HmLog.d(HmLog.Level.DEBUG, "authenticated in %s ms", (Calendar
+                        .getInstance().getTimeInMillis() - connectionTime));
             }
 
             this.state = state;
@@ -100,25 +96,21 @@ public class Link {
         }
 
         if (state != State.AUTHENTICATED) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(TAG, "not authenticated");
             callback.onCommandFailed(new LinkError(LinkError.Type.UNAUTHORIZED, 0, "not " +
                     "authenticated"));
             return;
         }
 
         if (sentCommand != null && sentCommand.finished == false) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(TAG, "custom command in progress");
+            HmLog.d(HmLog.Level.ALL, "custom command in progress");
 
             callback.onCommandFailed(new LinkError(LinkError.Type.COMMAND_IN_PROGRESS, 0, "custom" +
                     " command in progress"));
             return;
         }
 
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "send command " + bytes
-                    + " to " + ByteUtils.hexFromBytes(hmDevice.getMac()));
+        HmLog.d(HmLog.Level.DEBUG, "send command %s to %s", bytes, ByteUtils
+                .hexFromBytes(hmDevice.getMac()));
 
         sentCommand = new LinkCommand(callback, threadManager);
 
@@ -143,24 +135,21 @@ public class Link {
      */
     public void revoke(RevokeCallback callback) {
         if (state != State.AUTHENTICATED) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(TAG, "not authenticated");
+            HmLog.d(HmLog.Level.DEBUG, "not authenticated");
             callback.onRevokeFailed(new RevokeError(RevokeError.Type.UNAUTHORIZED, 0, "not " +
                     "authenticated"));
             return;
         }
 
         if (sentCommand != null && sentCommand.finished == false) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.ALL.getValue())
-                Log.d(TAG, "custom command in progress");
+            HmLog.d(HmLog.Level.ALL, "custom command in progress");
 
             callback.onRevokeFailed(new RevokeError(RevokeError.Type.COMMAND_IN_PROGRESS, 0, "a " +
                     " command is in progress"));
             return;
         }
 
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "revoke " + serial);
+        HmLog.d(HmLog.Level.DEBUG, "revoke " + serial);
 
         this.revokeCallback = callback;
 
@@ -186,12 +175,11 @@ public class Link {
     }
 
     void onCommandReceived(final byte[] bytes) {
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "did receive command " + ByteUtils.hexFromBytes(bytes)
-                    + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()));
+        HmLog.d(HmLog.Level.DEBUG, "did receive command %s from %s", ByteUtils.hexFromBytes
+                (bytes), ByteUtils.hexFromBytes(hmDevice.getMac()));
 
         if (listener == null) {
-            Log.d(TAG, "can't dispatch notification: no listener set");
+            HmLog.d(HmLog.Level.DEBUG, "can't dispatch notification: no listener set");
             return;
         }
 
@@ -204,16 +192,15 @@ public class Link {
     }
 
     void onCommandResponseReceived(final byte[] data) {
-        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
 
-            Log.d(TAG, "did receive command response " + ByteUtils.hexFromBytes(data)
-                    + " from " + ByteUtils.hexFromBytes(hmDevice.getMac()) + " in " +
-                    (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime) +
-                    "ms");
+        HmLog.d(HmLog.Level.DEBUG, "did receive command response %s from %s in %s ms", ByteUtils
+                .hexFromBytes(data), ByteUtils.hexFromBytes(hmDevice.getMac()), (Calendar
+                .getInstance().getTimeInMillis() - sentCommand.commandStartTime)
+        );
 
         if (sentCommand == null || sentCommand.finished) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "can't dispatch command response: sentCommand = null || finished");
+            HmLog.d(HmLog.Level.DEBUG, "can't dispatch command response: sentCommand = null || " +
+                    "finished");
             return;
         }
 

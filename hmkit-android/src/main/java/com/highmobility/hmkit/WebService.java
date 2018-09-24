@@ -1,7 +1,6 @@
 package com.highmobility.hmkit;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -23,8 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 class WebService {
-    private static final String TAG = "HMKit-WebService";
-
     private static final String testBaseUrl = "https://limitless-gorge-44605.herokuapp.com"; // test
     private static final String productionBaseUrl = "https://developers.high-mobility.com"; //
     // production
@@ -79,18 +76,20 @@ class WebService {
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new
                 Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject jsonObject) {
-                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
-                    try {
-                        Log.d(TAG, "response " + jsonObject.toString(2));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
+                                .getValue()) {
+                            try {
+                                HmLog.d(HmLog.Level.DEBUG, "response " + jsonObject
+                                        .toString(2));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        response.onResponse(jsonObject);
                     }
-                }
-                response.onResponse(jsonObject);
-            }
-        }, error) {
+                }, error) {
             @Override
             public Map<String, String> getHeaders() {
                 return headers;
@@ -119,19 +118,21 @@ class WebService {
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new
                 Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject jsonObject) {
-                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
-                    try {
-                        Log.d(TAG, "response " + jsonObject.toString(2));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
+                                .getValue()) {
+                            try {
+                                HmLog.d(HmLog.Level.DEBUG, "response " + jsonObject
+                                        .toString(2));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
 
-                response.onResponse(jsonObject);
-            }
-        }, error) {
+                        response.onResponse(jsonObject);
+                    }
+                }, error) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 return headers;
@@ -159,19 +160,21 @@ class WebService {
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new
                 Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject jsonObject) {
-                if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
-                    try {
-                        Log.d(TAG, "response " + jsonObject.toString(2));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
+                                .getValue()) {
+                            try {
+                                HmLog.d(HmLog.Level.DEBUG, "response " + jsonObject
+                                        .toString(2));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
 
-                response.onResponse(jsonObject);
-            }
-        }, error) {
+                        response.onResponse(jsonObject);
+                    }
+                }, error) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 return headers;
@@ -199,7 +202,7 @@ class WebService {
             JSONObject headers = new JSONObject(request.getHeaders());
 
             try {
-                Log.d(TAG, request.getUrl() + "\n" + headers.toString(2) + bodyString);
+                HmLog.d(HmLog.Level.DEBUG, request.getUrl() + "\n" + headers.toString(2) + bodyString);
             } catch (JSONException e) {
                 e.printStackTrace();
             }

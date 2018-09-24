@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -23,17 +22,17 @@ import org.json.JSONObject;
 
 import javax.annotation.Nullable;
 
+import timber.log.Timber;
+
 /**
- * HMKit is the entry point for the HMKit library. It keeps a reference to the device certificate
- * that both Broadcaster and Telematics use.
+ * HMKit is the entry point for the HMKit library. Use the singleton to access Broadcaster and
+ * Telematics.
  */
 public class Manager {
-    private static final String TAG = "HMKit-Manager";
-
     /**
      * The logging level of HMKit.
      */
-    public static LoggingLevel loggingLevel = LoggingLevel.ALL;
+    public static HmLog.Level loggingLevel = HmLog.Level.ALL;
 
     /**
      * The environment of the Web Service. If initialised, call {@link #terminate()} before
@@ -42,7 +41,7 @@ public class Manager {
     public static Environment environment = Environment.PRODUCTION;
 
     /**
-     * Custom web environment url. Will override { @link {@link #environment} }
+     * Custom web environment url. Will override {@link #environment}
      */
     public static String customEnvironmentBaseUrl = null;
 
@@ -166,6 +165,7 @@ public class Manager {
     }
 
     private Manager() {
+        HmLog.init();
     }
 
     /**
@@ -183,7 +183,7 @@ public class Manager {
                     "setDeviceCertificate() to set new Device Certificate.");
         }
         setContextAndCreateStorage(context);
-        Log.i(TAG, "Initialised: " + getInfoString());
+        HmLog.d(HmLog.Level.NONE, "Initialised: " + getInfoString());
         return instance;
     }
 
@@ -305,7 +305,7 @@ public class Manager {
             core = new Core(storage, threadManager, certificate, privateKey, issuerPublicKey);
         else core.setDeviceCertificate(certificate, privateKey, issuerPublicKey);
 
-        Log.i(TAG, "Set certificate: " + certificate.toString());
+        HmLog.d(HmLog.Level.NONE, "Set certificate: " + certificate.toString());
     }
 
     /**
@@ -349,10 +349,9 @@ public class Manager {
                         try {
                             certificate = storage.storeDownloadedCertificates(response);
                         } catch (Exception e) {
-                            if (Manager.loggingLevel.getValue() >= Manager
-                                    .LoggingLevel.DEBUG.getValue()) {
-                                Log.d(TAG, "storeDownloadedCertificates error: " + e.getMessage());
-                            }
+                            HmLog.d(HmLog.Level.DEBUG, "storeDownloadedCertificates error: " + e
+                                    .getMessage());
+
                             DownloadAccessCertificateError error = new
                                     DownloadAccessCertificateError(
                                     DownloadAccessCertificateError.Type.INVALID_SERVER_RESPONSE,
@@ -373,7 +372,7 @@ public class Manager {
                             try {
                                 JSONObject json = new JSONObject(new String(error.networkResponse
                                         .data));
-                                Log.d(TAG, "onErrorResponse: " + json.toString());
+                                HmLog.d(HmLog.Level.DEBUG, "onErrorResponse: " + json.toString());
                                 if (json.has("message")) {
                                     dispatchedError = new DownloadAccessCertificateError(
                                             DownloadAccessCertificateError.Type.HTTP_ERROR,
@@ -571,7 +570,10 @@ public class Manager {
 
     /**
      * The logging level.
+     *
+     * @deprecated use {@link HmLog.Level} instead.
      */
+    @Deprecated
     public enum LoggingLevel {
         NONE(0), DEBUG(1), ALL(2);
 
