@@ -338,12 +338,10 @@ public class Broadcaster extends Core.Broadcaster {
         ble.removeListener(bleListener);
     }
 
-    @Override boolean onResolvedDevice(HMDevice device) {
+    @Override boolean onChangedAuthenticationState(HMDevice device) {
         final ConnectedLink link = getLinkForMac(device.getMac());
         if (link == null) return false;
-
-        link.setHmDevice(device);
-
+        link.onChangedAuthenticationState(device);
         return true;
     }
 

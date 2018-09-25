@@ -107,8 +107,6 @@ class Core implements HMBTCoreInterface {
         }
     }
 
-    // MARK: init
-
     // MARK: sensing
 
     void HMBTCoreSensingReadNotification(byte[] mac, int characteristic) {
@@ -420,16 +418,12 @@ class Core implements HMBTCoreInterface {
             if (storedCert.getProviderSerial().equals(serial)) {
                 copyBytes(storedCert.getBytes(), cert);
                 size[0] = storedCert.getBytes().getLength();
-
-                HmLog.d("Returned stored cert for " +
-                        "serial " + ByteUtils
-                        .hexFromBytes(serial));
+                HmLog.d("Returned stored cert for serial " + ByteUtils.hexFromBytes(serial));
                 return 0;
             }
         }
 
         HmLog.d("No stored cert for serial " + ByteUtils.hexFromBytes(serial));
-
         return 1;
     }
 
@@ -444,14 +438,13 @@ class Core implements HMBTCoreInterface {
                         cert
                                 .getProviderSerial().getByteArray())) {
 
-                    HmLog.d(HmLog.Level.ALL, "Erased stored cert for " +
-                            "serial " + ByteUtils.hexFromBytes(serial));
+                    HmLog.d(HmLog.Level.ALL, "Erased stored cert for serial " + ByteUtils
+                            .hexFromBytes(serial));
 
                     return 0;
                 } else {
 
-                    HmLog.d(HmLog.Level.ALL, "Could not erase cert for " +
-                            "serial " + ByteUtils
+                    HmLog.d(HmLog.Level.ALL, "Could not erase cert for serial " + ByteUtils
                             .hexFromBytes(serial));
                     return 1;
                 }
@@ -465,19 +458,18 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public void HMApiCallbackEnteredProximity(HMDevice device) {
-        HmLog.d(HmLog.Level.ALL, "HMCtwEnteredProximity");
+        HmLog.d(HmLog.Level.ALL, "HMApiCallbackEnteredProximity. authenticated: " + device.getIsAuthenticated());
 
-        // this means core has finished identification of the broadcaster (might me authenticated
-        // or not) - show broadcaster info on screen
-        // always update the broadcaster with this, auth state might have changed later with this
-        // callback as well
-        if (broadcaster != null && broadcaster.onResolvedDevice(device)) return;
-        if (scanner != null) scanner.onResolvedDevice(device);
+        // core has finished identification of the link: its now authenticated or the
+        // authentication failed.
+        // also, auth state might change from authenticated > connected with this call as well
+        if (broadcaster != null && broadcaster.onChangedAuthenticationState(device)) return;
+        if (scanner != null) scanner.onChangedAuthenticationState(device);
     }
 
     @Override
     public void HMApiCallbackExitedProximity(HMDevice device) {
-        HmLog.d(HmLog.Level.ALL, "HMCtwExitedProximity");
+        HmLog.d(HmLog.Level.ALL, "HMApiCallbackExitedProximity");
 
         if (broadcaster != null && broadcaster.onDeviceExitedProximity(device)) return;
         if (scanner != null) scanner.onDeviceExitedProximity(device.getMac());
@@ -570,7 +562,7 @@ class Core implements HMBTCoreInterface {
     abstract static class Broadcaster {
         abstract boolean writeData(byte[] mac, byte[] data, int characteristic);
 
-        abstract boolean onResolvedDevice(HMDevice device);
+        abstract boolean onChangedAuthenticationState(HMDevice device);
 
         abstract boolean onDeviceExitedProximity(HMDevice device);
 
@@ -595,7 +587,7 @@ class Core implements HMBTCoreInterface {
 
         abstract boolean readValue(byte[] mac, int characteristic);
 
-        abstract boolean onResolvedDevice(HMDevice device);
+        abstract boolean onChangedAuthenticationState(HMDevice device);
 
         abstract boolean onDeviceExitedProximity(byte[] mac);
 

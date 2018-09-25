@@ -240,11 +240,11 @@ class Scanner extends Core.Scanner implements SharedBleListener {
         device.discoverServices();
     }
 
-    boolean onResolvedDevice(HMDevice device) {
+    boolean onChangedAuthenticationState(HMDevice device) {
         removeAuthenticatingMac(device.getMac());
         final ScannedLink scannedLink = getLinkForMac(device.getMac());
         if (scannedLink != null) {
-            scannedLink.setHmDevice(device);
+            scannedLink.onChangedAuthenticationState(device);
             if (listener != null) {
                 threadManager.postToMain(new Runnable() {
                     @Override

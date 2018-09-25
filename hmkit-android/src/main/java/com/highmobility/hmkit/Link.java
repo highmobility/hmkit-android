@@ -143,7 +143,6 @@ public class Link {
 
         if (sentCommand != null && sentCommand.finished == false) {
             HmLog.d(HmLog.Level.ALL, "custom command in progress");
-
             callback.onRevokeFailed(new RevokeError(RevokeError.Type.COMMAND_IN_PROGRESS, 0, "a " +
                     " command is in progress"));
             return;
@@ -161,14 +160,21 @@ public class Link {
         });
     }
 
-    void setHmDevice(HMDevice hmDevice) {
+    void onChangedAuthenticationState(HMDevice hmDevice) {
         this.hmDevice = hmDevice;
+
         if (serial == null || serial.equals(hmDevice.getSerial()) == false) {
             serial = new DeviceSerial(hmDevice.getSerial());
         }
 
         if (hmDevice.getIsAuthenticated() == 0) {
-            setState(State.CONNECTED);
+            if (state == State.AUTHENTICATED) {
+                // we were authenticated, go back to connected state
+                setState(State.CONNECTED);
+            } else {
+                // otherwise state is connected and now authentication failed
+                setState(State.AUTHENTICATION_FAILED);
+            }
         } else {
             setState(State.AUTHENTICATED);
         }
@@ -192,7 +198,6 @@ public class Link {
     }
 
     void onCommandResponseReceived(final byte[] data) {
-
         HmLog.d("did receive command response %s from %s in %s ms", ByteUtils
                 .hexFromBytes(data), ByteUtils.hexFromBytes(hmDevice.getMac()), (Calendar
                 .getInstance().getTimeInMillis() - sentCommand.commandStartTime)
@@ -226,8 +231,13 @@ public class Link {
         return ByteUtils.bytesFromMacString(btDevice.getAddress());
     }
 
+    /**
+     * The possible states of the Link.
+     *
+     * @see LinkListener#onStateChanged(Link, State)
+     */
     public enum State {
-        DISCONNECTED, CONNECTED, AUTHENTICATED
+        DISCONNECTED, CONNECTED, AUTHENTICATION_FAILED, AUTHENTICATED
     }
 
     /**
