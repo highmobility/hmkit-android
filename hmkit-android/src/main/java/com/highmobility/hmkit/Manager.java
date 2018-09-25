@@ -1,7 +1,7 @@
 package com.highmobility.hmkit;
 
 /**
- * @deprecated use {@link HmKit} instead.
+ * @deprecated use {@link HMKit} instead.
  */
 @Deprecated
 public class Manager {

@@ -25,8 +25,8 @@ import javax.annotation.Nullable;
  * Broadcaster acts as a gateway to the application's capability to broadcast itself and handle
  * ConnectedLink connectivity.
  * <p>
- * Access the broadcaster from {@link HmKit#getBroadcaster()}. Broadcaster is created once and
- * then bound to HmKit instance.
+ * Access the broadcaster from {@link HMKit#getBroadcaster()}. Broadcaster is created once and
+ * then bound to HMKit instance.
  */
 public class Broadcaster extends Core.Broadcaster {
     /**
@@ -321,7 +321,7 @@ public class Broadcaster extends Core.Broadcaster {
     }
 
     /**
-     * Called with {@link HmKit#terminate()}. Broadcasting and alive pinging will be stopped
+     * Called with {@link HMKit#terminate()}. Broadcasting and alive pinging will be stopped
      * because ble will be stopped.
      *
      * @throws IllegalStateException when there are still connected links.
@@ -515,7 +515,7 @@ public class Broadcaster extends Core.Broadcaster {
 
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            if (HmKit.loggingLevel.getValue() >= HmLog.Level.DEBUG.getValue()) {
+            if (HMKit.loggingLevel.getValue() >= HmLog.Level.DEBUG.getValue()) {
                 String name;
                 if (broadcaster.get().configuration.isOverridingAdvertisementName()) {
                     name = broadcaster.get().getName();

@@ -25,14 +25,14 @@ public class HmLog {
     }
 
     static void d(Level level, String message, Object... args) {
-        if (HmKit.loggingLevel.getValue() >= level.getValue()) {
+        if (HMKit.loggingLevel.getValue() >= level.getValue()) {
             Timber.tag(getTag());
             Timber.d(message, args);
         }
     }
 
     void i(Level level, String message, Object... args) {
-        if (HmKit.loggingLevel.getValue() >= level.getValue()) {
+        if (HMKit.loggingLevel.getValue() >= level.getValue()) {
             Timber.tag(getTag());
             Timber.i(message, args);
         }

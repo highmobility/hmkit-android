@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
  * HMKit is the entry point for the HMKit library. Use the singleton to access Broadcaster and
  * Telematics.
  */
-public class HmKit {
+public class HMKit {
     /**
      * The logging level of HMKit.
      */
@@ -44,7 +44,7 @@ public class HmKit {
     public static String customEnvironmentBaseUrl = null;
 
     // Using application context, no chance for leak.
-    @SuppressLint("StaticFieldLeak") private static HmKit instance;
+    @SuppressLint("StaticFieldLeak") private static HMKit instance;
 
     private Context context;
     private Scanner scanner;
@@ -154,15 +154,15 @@ public class HmKit {
     }
 
     /**
-     * @return The instance of the HmKit.
+     * @return The instance of the HMKit.
      */
-    public static HmKit getInstance() {
-        if (instance == null) instance = new HmKit();
+    public static HMKit getInstance() {
+        if (instance == null) instance = new HMKit();
 
         return instance;
     }
 
-    private HmKit() {
+    private HMKit() {
         HmLog.init();
     }
 
@@ -171,13 +171,13 @@ public class HmKit {
      * #setDeviceCertificate (DeviceCertificate, PrivateKey, PublicKey)} later to send Commands.
      *
      * @param context The application context.
-     * @return The HmKit instance.
+     * @return The HMKit instance.
      */
-    public HmKit initialise(Context context) {
+    public HMKit initialise(Context context) {
         // all initialises come to here. throw to make clear how the sdk is supposed to be used -
         // initialise(cert, ctx) or initialise(ctx) + setDeviceCert(cert).
         if (this.context != null) {
-            throw new IllegalStateException("HmKit can be initialised once. Call " +
+            throw new IllegalStateException("HMKit can be initialised once. Call " +
                     "setDeviceCertificate() to set new Device Certificate.");
         }
         setContextAndCreateStorage(context);
@@ -192,9 +192,9 @@ public class HmKit {
      * @param privateKey      32 byte private key with elliptic curve Prime 256v1.
      * @param issuerPublicKey 64 byte public key of the Certificate Authority.
      * @param context         The Application Context.
-     * @return The HmKit instance.
+     * @return The HMKit instance.
      */
-    public HmKit initialise(DeviceCertificate certificate, PrivateKey privateKey, PublicKey
+    public HMKit initialise(DeviceCertificate certificate, PrivateKey privateKey, PublicKey
             issuerPublicKey, Context context) {
         initialise(context);
         setDeviceCertificate(certificate, privateKey, issuerPublicKey);
@@ -202,7 +202,7 @@ public class HmKit {
     }
 
     /**
-     * Initialise the SDK with a Device Certificate. Call this before using the HmKit.
+     * Initialise the SDK with a Device Certificate. Call this before using the HMKit.
      *
      * @param certificate The broadcaster certificate.
      * @param privateKey  32 byte private key with elliptic curve Prime 256v1.
@@ -220,7 +220,7 @@ public class HmKit {
     }
 
     /**
-     * Initialise the SDK with a Device Certificate. Call this before using the HmKit.
+     * Initialise the SDK with a Device Certificate. Call this before using the HMKit.
      *
      * @param certificate     The device certificate in Base64 or hex.
      * @param privateKey      32 byte private key with elliptic curve Prime 256v1 in Base64 or hex.
@@ -235,15 +235,15 @@ public class HmKit {
     }
 
     /**
-     * Initialise the SDK with a Device Certificate. Call this before using the HmKit.
+     * Initialise the SDK with a Device Certificate. Call this before using the HMKit.
      *
      * @param certificate     The device certificate in Base64 or hex.
      * @param privateKey      32 byte private key with elliptic curve Prime 256v1 in Base64 or hex.
      * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64 or hex.
      * @param context         The Application Context.
-     * @return The HmKit instance.
+     * @return The HMKit instance.
      */
-    public HmKit initialise(String certificate, String privateKey, String
+    public HMKit initialise(String certificate, String privateKey, String
             issuerPublicKey, Context context) {
         DeviceCertificate decodedCert = new DeviceCertificate(new Bytes(Base64.decode
                 (certificate)));
@@ -532,14 +532,14 @@ public class HmKit {
         // if device cert exists, context has to exist as well.
         if (core == null) {
             throwIfContextNotSet();
-            throw new IllegalStateException("Device certificate is not set. Call HmKit" +
+            throw new IllegalStateException("Device certificate is not set. Call HMKit" +
                     ".setDeviceCertificate() first.");
         }
     }
 
     void throwIfContextNotSet() throws IllegalStateException {
         if (context == null) {
-            throw new IllegalStateException("Context is not set. Call HmKit.initialise() first.");
+            throw new IllegalStateException("Context is not set. Call HMKit.initialise() first.");
         }
     }
 
