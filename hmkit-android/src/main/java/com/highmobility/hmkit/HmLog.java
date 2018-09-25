@@ -16,7 +16,7 @@ public class HmLog {
     private static final Pattern ANONYMOUS_CLASS = Pattern.compile("(\\$\\d+)+$");
     private static final String LOG_PREFIX = "hmkit-";
 
-    public static void init() {
+    static void init() {
         Timber.plant(new Timber.DebugTree());
     }
 
@@ -25,14 +25,14 @@ public class HmLog {
     }
 
     static void d(Level level, String message, Object... args) {
-        if (Manager.loggingLevel.getValue() >= level.getValue()) {
+        if (HmKit.loggingLevel.getValue() >= level.getValue()) {
             Timber.tag(getTag());
             Timber.d(message, args);
         }
     }
 
     void i(Level level, String message, Object... args) {
-        if (Manager.loggingLevel.getValue() >= level.getValue()) {
+        if (HmKit.loggingLevel.getValue() >= level.getValue()) {
             Timber.tag(getTag());
             Timber.i(message, args);
         }

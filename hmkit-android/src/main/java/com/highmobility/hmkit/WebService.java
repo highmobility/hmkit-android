@@ -35,10 +35,10 @@ class WebService {
     WebService(Context context) {
         // ignoreSslErrors();
         queue = Volley.newRequestQueue(context);
-        if (Manager.customEnvironmentBaseUrl != null) {
-            telematicsUrl = Manager.customEnvironmentBaseUrl + apiUrl;
+        if (HmKit.customEnvironmentBaseUrl != null) {
+            telematicsUrl = HmKit.customEnvironmentBaseUrl + apiUrl;
         } else {
-            switch (Manager.environment) {
+            switch (HmKit.environment) {
                 case TEST:
                     telematicsUrl = testBaseUrl + apiUrl;
                     break;
@@ -78,7 +78,7 @@ class WebService {
                 Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
-                        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
+                        if (HmKit.loggingLevel.getValue() >= HmKit.LoggingLevel.DEBUG
                                 .getValue()) {
                             try {
                                 HmLog.d("response " + jsonObject
@@ -120,7 +120,7 @@ class WebService {
                 Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
-                        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
+                        if (HmKit.loggingLevel.getValue() >= HmKit.LoggingLevel.DEBUG
                                 .getValue()) {
                             try {
                                 HmLog.d("response " + jsonObject
@@ -162,7 +162,7 @@ class WebService {
                 Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
-                        if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
+                        if (HmKit.loggingLevel.getValue() >= HmKit.LoggingLevel.DEBUG
                                 .getValue()) {
                             try {
                                 HmLog.d("response " + jsonObject
@@ -195,7 +195,7 @@ class WebService {
     }
 
     private static void printRequest(JsonRequest request) {
-        if (Manager.loggingLevel.getValue() < Manager.LoggingLevel.DEBUG.getValue()) return;
+        if (HmKit.loggingLevel.getValue() < HmKit.LoggingLevel.DEBUG.getValue()) return;
         try {
             byte[] body = request.getBody();
             String bodyString = body != null ? "\n" + new String(request.getBody()) : "";

@@ -6,7 +6,6 @@ import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.os.ParcelUuid;
-import android.util.Log;
 
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.crypto.AccessCertificate;
@@ -26,8 +25,8 @@ import javax.annotation.Nullable;
  * Broadcaster acts as a gateway to the application's capability to broadcast itself and handle
  * ConnectedLink connectivity.
  * <p>
- * Access the broadcaster from {@link Manager#getBroadcaster()}. Broadcaster is created once and
- * then bound to Manager instance.
+ * Access the broadcaster from {@link HmKit#getBroadcaster()}. Broadcaster is created once and
+ * then bound to HmKit instance.
  */
 public class Broadcaster extends Core.Broadcaster {
     /**
@@ -322,7 +321,7 @@ public class Broadcaster extends Core.Broadcaster {
     }
 
     /**
-     * Called with {@link Manager#terminate()}. Broadcasting and alive pinging will be stopped
+     * Called with {@link HmKit#terminate()}. Broadcasting and alive pinging will be stopped
      * because ble will be stopped.
      *
      * @throws IllegalStateException when there are still connected links.
@@ -516,7 +515,7 @@ public class Broadcaster extends Core.Broadcaster {
 
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            if (Manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue()) {
+            if (HmKit.loggingLevel.getValue() >= HmLog.Level.DEBUG.getValue()) {
                 String name;
                 if (broadcaster.get().configuration.isOverridingAdvertisementName()) {
                     name = broadcaster.get().getName();

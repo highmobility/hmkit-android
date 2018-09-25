@@ -109,8 +109,7 @@ public class Telematics extends Core.Telematics {
         });
     }
 
-    @Override
-    public void onTelematicsCommandEncrypted(byte[] serial, byte[] issuer, byte[] command) {
+    @Override void onTelematicsCommandEncrypted(byte[] serial, byte[] issuer, byte[] command) {
         final TelematicsCommand commandSent = interactingCommand; // need this for command response
         webService.sendTelematicsCommand(new Bytes(command), new DeviceSerial(serial),
                 new Issuer(issuer),
@@ -177,8 +176,7 @@ public class Telematics extends Core.Telematics {
                 });
     }
 
-    @Override
-    public void onTelematicsResponseDecrypted(byte[] serial, int resultCode, byte[] data) {
+    @Override void onTelematicsResponseDecrypted(byte[] serial, int resultCode, byte[] data) {
         if (resultCode == 0x02) {
             interactingCommand.dispatchError(TelematicsError.Type.INTERNAL_ERROR, 0, "Failed to " +
                     "decrypt web service response.");

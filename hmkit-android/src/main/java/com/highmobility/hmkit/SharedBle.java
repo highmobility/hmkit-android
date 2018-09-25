@@ -65,11 +65,11 @@ public class SharedBle {
         PackageManager packageManager = context.getPackageManager();
 
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)) {
-            return Manager.infoStringPrefix() + "w"; // wearable
+            return HmKit.infoStringPrefix() + "w"; // wearable
         } else if (packageManager.hasSystemFeature(PackageManager.FEATURE_EMBEDDED)) {
-            return Manager.infoStringPrefix() + "t"; // android things
+            return HmKit.infoStringPrefix() + "t"; // android things
         } else {
-            return Manager.infoStringPrefix() + "m";
+            return HmKit.infoStringPrefix() + "m";
         }
     }
 
