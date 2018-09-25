@@ -138,10 +138,10 @@ public class Broadcaster extends Core.Broadcaster {
      *                 something went wrong.
      */
     public void startBroadcasting(StartCallback callback) {
-        HmLog.d("startBroadcasting() called");
+        HMLog.d("startBroadcasting() called");
 
         if (state == State.BROADCASTING) {
-            HmLog.d("will not start broadcasting: already " +
+            HMLog.d("will not start broadcasting: already " +
                     "broadcasting");
 
             callback.onBroadcastingStarted();
@@ -185,7 +185,7 @@ public class Broadcaster extends Core.Broadcaster {
 
         // stopAdvertising cancels all the BT connections as well.
         if (mBluetoothLeAdvertiser != null) {
-            HmLog.d("stopBroadcasting() called");
+            HMLog.d("stopBroadcasting() called");
             mBluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
             mBluetoothLeAdvertiser = null;
         }
@@ -296,7 +296,7 @@ public class Broadcaster extends Core.Broadcaster {
     private class BleListener implements SharedBleListener {
         // we don't want this method to be publicly available, so we create the class here
         @Override public void bluetoothChangedToAvailable(boolean available) {
-            HmLog.d("bluetoothChangedToAvailable(): available = %s",
+            HMLog.d("bluetoothChangedToAvailable(): available = %s",
                     available);
 
             if (available && getState() == State.BLUETOOTH_UNAVAILABLE) {
@@ -346,7 +346,7 @@ public class Broadcaster extends Core.Broadcaster {
     }
 
     @Override boolean onDeviceExitedProximity(HMDevice device) {
-        HmLog.d("lose link " + ByteUtils.hexFromBytes(device.getMac()));
+        HMLog.d("lose link " + ByteUtils.hexFromBytes(device.getMac()));
 
         final ConnectedLink link = getLinkForMac(device.getMac());
         if (link == null) return false;
@@ -432,7 +432,7 @@ public class Broadcaster extends Core.Broadcaster {
 
             }
         } else {
-            HmLog.d("need to start broadcasting before pinging");
+            HMLog.d("need to start broadcasting before pinging");
         }
 
         if (isAlivePinging) {
@@ -442,7 +442,7 @@ public class Broadcaster extends Core.Broadcaster {
 
     final GattServer.Callback gattServerCallback = new GattServer.Callback() {
         @Override void onServiceAdded(boolean success) {
-            HmLog.d("onServiceAdded: %s", success);
+            HMLog.d("onServiceAdded: %s", success);
 
             if (success) {
                 final AdvertiseSettings settings = new AdvertiseSettings.Builder()
@@ -513,7 +513,7 @@ public class Broadcaster extends Core.Broadcaster {
 
         @Override
         public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-            if (HMKit.loggingLevel.getValue() >= HmLog.Level.DEBUG.getValue()) {
+            if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
                 String name;
                 if (broadcaster.get().configuration.isOverridingAdvertisementName()) {
                     name = broadcaster.get().getName();
@@ -521,7 +521,7 @@ public class Broadcaster extends Core.Broadcaster {
                     name = "not advertising name";
                 }
 
-                HmLog.d("Start advertise: " + name);
+                HMLog.d("Start advertise: " + name);
             }
             broadcaster.get().setState(State.BROADCASTING);
             if (broadcaster.get().startCallback != null) {
@@ -535,16 +535,16 @@ public class Broadcaster extends Core.Broadcaster {
                 case AdvertiseCallback.ADVERTISE_FAILED_ALREADY_STARTED:
                     break;
                 case AdvertiseCallback.ADVERTISE_FAILED_DATA_TOO_LARGE:
-                    HmLog.e("Advertise failed: data too large");
+                    HMLog.e("Advertise failed: data too large");
                     break;
                 case AdvertiseCallback.ADVERTISE_FAILED_FEATURE_UNSUPPORTED:
-                    HmLog.e("Advertise failed: feature unsupported");
+                    HMLog.e("Advertise failed: feature unsupported");
                     break;
                 case AdvertiseCallback.ADVERTISE_FAILED_INTERNAL_ERROR:
-                    HmLog.e("Advertise failed: internal error");
+                    HMLog.e("Advertise failed: internal error");
                     break;
                 case AdvertiseCallback.ADVERTISE_FAILED_TOO_MANY_ADVERTISERS:
-                    HmLog.e("Advertise failed: too many advertisers");
+                    HMLog.e("Advertise failed: too many advertisers");
                     break;
             }
 

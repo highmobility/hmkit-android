@@ -46,7 +46,7 @@ class GattServer extends BluetoothGattServerCallback {
 
     void open() {
         if (isOpen()) {
-            HmLog.d(HmLog.Level.ALL, "gatt service already exists");
+            HMLog.d(HMLog.Level.ALL, "gatt service already exists");
             broadcaster.onServiceAdded(true);
             return;
         }
@@ -55,7 +55,7 @@ class GattServer extends BluetoothGattServerCallback {
 
         if (service != null) {
             if (gattServer.addService(service) == false) {
-                HmLog.e("Cannot add service to GATT server");
+                HMLog.e("Cannot add service to GATT server");
                 broadcaster.onServiceAdded(false);
             }
             // else gatt server started adding the service and will call onServiceAdded.
@@ -86,22 +86,22 @@ class GattServer extends BluetoothGattServerCallback {
     }
 
     boolean writeData(BluetoothDevice device, byte[] value, int characteristicId) {
-        HmLog.d("write %s to %s, char: %s", ByteUtils.hexFromBytes(value),
+        HMLog.d("write %s to %s, char: %s", ByteUtils.hexFromBytes(value),
                 device.getAddress().replaceAll(":", ""), characteristicId);
 
         BluetoothGattCharacteristic characteristic = getCharacteristicForId(characteristicId);
         if (characteristic == null) {
-            HmLog.e("no characteristic for write");
+            HMLog.e("no characteristic for write");
             return false;
         }
 
         if (characteristic.setValue(value) == false) {
-            HmLog.e("can't set read char value");
+            HMLog.e("can't set read char value");
             return false;
         }
 
         if (gattServer.notifyCharacteristicChanged(device, characteristic, false) == false) {
-            HmLog.e("can't notify characteristic changed");
+            HMLog.e("can't notify characteristic changed");
             return false;
         }
 
@@ -120,12 +120,12 @@ class GattServer extends BluetoothGattServerCallback {
             gattServer = ble.openGattServer(this);
 
             if (gattServer == null) {
-                HmLog.e("Cannot create gatt server");
+                HMLog.e("Cannot create gatt server");
                 return null;
             }
         }
 
-        HmLog.d("createGattServer()");
+        HMLog.d("createGattServer()");
 
         // create the service
         BluetoothGattService service = new BluetoothGattService(Constants.SERVICE_UUID,
@@ -165,7 +165,7 @@ class GattServer extends BluetoothGattServerCallback {
                 .NOTIFY_DESCRIPTOR_UUID,
                 BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor
                         .PERMISSION_READ)) == false) {
-            HmLog.e("Cannot add read descriptor");
+            HMLog.e("Cannot add read descriptor");
             return null;
         }
 
@@ -173,7 +173,7 @@ class GattServer extends BluetoothGattServerCallback {
                 .NOTIFY_DESCRIPTOR_UUID,
                 BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor
                         .PERMISSION_READ)) == false) {
-            HmLog.e("Cannot add sensing read descriptor");
+            HMLog.e("Cannot add sensing read descriptor");
             return null;
         }
 
@@ -181,47 +181,47 @@ class GattServer extends BluetoothGattServerCallback {
                 .NOTIFY_DESCRIPTOR_UUID,
                 BluetoothGattDescriptor.PERMISSION_WRITE | BluetoothGattDescriptor
                         .PERMISSION_READ)) == false) {
-            HmLog.e("Cannot add alive descriptor");
+            HMLog.e("Cannot add alive descriptor");
             return null;
         }
 
         if (aliveCharacteristic.setValue(new byte[]{}) == false) {
-            HmLog.e("Cannot set alive char value");
+            HMLog.e("Cannot set alive char value");
             return null;
         }
 
         if (infoCharacteristic.setValue(ble.getInfoString()) == false) {
-            HmLog.e("Cannot set info char value");
+            HMLog.e("Cannot set info char value");
             return null;
         }
 
         if (service.addCharacteristic(readCharacteristic) == false) {
-            HmLog.e("Cannot add read char");
+            HMLog.e("Cannot add read char");
             return null;
         }
 
         if (service.addCharacteristic(sensingReadCharacteristic) == false) {
-            HmLog.e("Cannot add sensing read char");
+            HMLog.e("Cannot add sensing read char");
             return null;
         }
 
         if (service.addCharacteristic(writeCharacteristic) == false) {
-            HmLog.e("Cannot add write char");
+            HMLog.e("Cannot add write char");
             return null;
         }
 
         if (service.addCharacteristic(sensingWriteCharacteristic) == false) {
-            HmLog.e("Cannot add sensing write char");
+            HMLog.e("Cannot add sensing write char");
             return null;
         }
 
         if (service.addCharacteristic(aliveCharacteristic) == false) {
-            HmLog.e("Cannot add alive char");
+            HMLog.e("Cannot add alive char");
             return null;
         }
 
         if (service.addCharacteristic(infoCharacteristic) == false) {
-            HmLog.e("Cannot add info char");
+            HMLog.e("Cannot add info char");
             return null;
         }
 
@@ -231,10 +231,10 @@ class GattServer extends BluetoothGattServerCallback {
     @Override
     public void onConnectionStateChange(final BluetoothDevice device, int status, int newState) {
         if (status != BluetoothGatt.GATT_SUCCESS) {
-            HmLog.e("connecting failed with status" + status);
+            HMLog.e("connecting failed with status" + status);
         }
 
-        HmLog.d("onConnectionStateChange: %s %s", getConnectionState(newState)
+        HMLog.d("onConnectionStateChange: %s %s", getConnectionState(newState)
                 , device.getAddress());
 
         if (newState == BluetoothProfile.STATE_DISCONNECTED) {
@@ -262,7 +262,7 @@ class GattServer extends BluetoothGattServerCallback {
         byte[] offsetBytes = Arrays.copyOfRange(value, offset, value.length);
         final int characteristicId = getCharacteristicIdForCharacteristic(characteristic);
 
-        HmLog.d(HmLog.Level.ALL, "onCharacteristicReadRequest %s %s", characteristicId, ByteUtils
+        HMLog.d(HMLog.Level.ALL, "onCharacteristicReadRequest %s %s", characteristicId, ByteUtils
                 .hexFromBytes(offsetBytes));
 
         boolean result = gattServer.sendResponse(device,
@@ -272,7 +272,7 @@ class GattServer extends BluetoothGattServerCallback {
                 offsetBytes);
 
         if (result == false) {
-            HmLog.e("onCharacteristicReadRequest: failed to send response");
+            HMLog.e("onCharacteristicReadRequest: failed to send response");
         }
 
         threadManager.postDelayed(new Runnable() {
@@ -294,11 +294,11 @@ class GattServer extends BluetoothGattServerCallback {
                                              final byte[] value) {
         final int characteristicId = getCharacteristicIdForCharacteristic(characteristic);
         if (characteristicId == -1) {
-            HmLog.e("incoming data from invalid characteristic");
+            HMLog.e("incoming data from invalid characteristic");
             return;
         }
 
-        HmLog.d("incoming data %s: %s from %s", characteristicId, ByteUtils
+        HMLog.d("incoming data %s: %s from %s", characteristicId, ByteUtils
                 .hexFromBytes(value), ByteUtils.hexFromBytes(ByteUtils.bytesFromMacString(device
                 .getAddress())));
 
@@ -307,7 +307,7 @@ class GattServer extends BluetoothGattServerCallback {
                     .GATT_SUCCESS, 0, null);
 
             if (result == false) {
-                HmLog.e("onCharacteristicWriteRequest: failed to send response");
+                HMLog.e("onCharacteristicWriteRequest: failed to send response");
             }
 
             threadManager.postToWork(new Runnable() {
@@ -330,7 +330,7 @@ class GattServer extends BluetoothGattServerCallback {
         boolean result = gattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS,
                 offset, offsetBytes);
 
-        if (result == false) HmLog.e("onDescriptorReadRequest: failed to send response");
+        if (result == false) HMLog.e("onDescriptorReadRequest: failed to send response");
     }
 
     @Override
@@ -347,7 +347,7 @@ class GattServer extends BluetoothGattServerCallback {
                     value);
 
             if (result == false) {
-                HmLog.e("onDescriptorWriteRequest: failed to send response");
+                HMLog.e("onDescriptorWriteRequest: failed to send response");
             }
 
             if (descriptor.getCharacteristic().getUuid().equals(Constants.READ_CHAR_UUID) == false)
@@ -376,7 +376,7 @@ class GattServer extends BluetoothGattServerCallback {
 
     @Override
     public void onNotificationSent(BluetoothDevice device, int status) {
-        HmLog.d(HmLog.Level.ALL, "onNotificationSent: %s", (status == BluetoothGatt.GATT_SUCCESS ?
+        HMLog.d(HMLog.Level.ALL, "onNotificationSent: %s", (status == BluetoothGatt.GATT_SUCCESS ?
                 "success" : "failed"));
     }
 

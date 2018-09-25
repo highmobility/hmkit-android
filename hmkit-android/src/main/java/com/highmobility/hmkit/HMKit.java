@@ -30,7 +30,7 @@ public class HMKit {
     /**
      * The logging level of HMKit.
      */
-    public static HmLog.Level loggingLevel = HmLog.Level.ALL;
+    public static HMLog.Level loggingLevel = HMLog.Level.ALL;
 
     /**
      * The environment of the Web Service. If initialised, call {@link #terminate()} before
@@ -163,7 +163,7 @@ public class HMKit {
     }
 
     private HMKit() {
-        HmLog.init();
+        HMLog.init();
     }
 
     /**
@@ -181,7 +181,7 @@ public class HMKit {
                     "setDeviceCertificate() to set new Device Certificate.");
         }
         setContextAndCreateStorage(context);
-        HmLog.d(HmLog.Level.NONE, "Initialised: " + getInfoString());
+        HMLog.d(HMLog.Level.NONE, "Initialised: " + getInfoString());
         return instance;
     }
 
@@ -303,7 +303,7 @@ public class HMKit {
             core = new Core(storage, threadManager, certificate, privateKey, issuerPublicKey);
         else core.setDeviceCertificate(certificate, privateKey, issuerPublicKey);
 
-        HmLog.d(HmLog.Level.NONE, "Set certificate: " + certificate.toString());
+        HMLog.d(HMLog.Level.NONE, "Set certificate: " + certificate.toString());
     }
 
     /**
@@ -347,7 +347,7 @@ public class HMKit {
                         try {
                             certificate = storage.storeDownloadedCertificates(response);
                         } catch (Exception e) {
-                            HmLog.d("storeDownloadedCertificates error: " + e
+                            HMLog.d("storeDownloadedCertificates error: " + e
                                     .getMessage());
 
                             DownloadAccessCertificateError error = new
@@ -370,7 +370,7 @@ public class HMKit {
                             try {
                                 JSONObject json = new JSONObject(new String(error.networkResponse
                                         .data));
-                                HmLog.d("onErrorResponse: " + json.toString());
+                                HMLog.d("onErrorResponse: " + json.toString());
                                 if (json.has("message")) {
                                     dispatchedError = new DownloadAccessCertificateError(
                                             DownloadAccessCertificateError.Type.HTTP_ERROR,
@@ -554,7 +554,7 @@ public class HMKit {
             try {
                 ble = new SharedBle(context);
             } catch (BleNotSupportedException e) {
-                HmLog.d(HmLog.Level.ALL, "Ble not supported");
+                HMLog.d(HMLog.Level.ALL, "Ble not supported");
             }
         }
     }
@@ -569,7 +569,7 @@ public class HMKit {
     /**
      * The logging level.
      *
-     * @deprecated use {@link HmLog.Level} instead.
+     * @deprecated use {@link HMLog.Level} instead.
      */
     @Deprecated
     public enum LoggingLevel {

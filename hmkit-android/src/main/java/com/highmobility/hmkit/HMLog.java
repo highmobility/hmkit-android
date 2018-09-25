@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 import timber.log.Timber;
 
-public class HmLog {
+public class HMLog {
     private static final int MAX_TAG_LENGTH = 23;
     private static final int CALL_STACK_INDEX = 2;
     private static final Pattern ANONYMOUS_CLASS = Pattern.compile("(\\$\\d+)+$");

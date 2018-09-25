@@ -43,7 +43,7 @@ class LinkCommand {
         finished = true;
 
         if (commandCallback == null) {
-            HmLog.d("cannot dispatch the result: no callback");
+            HMLog.d("cannot dispatch the result: no callback");
             return;
         }
 

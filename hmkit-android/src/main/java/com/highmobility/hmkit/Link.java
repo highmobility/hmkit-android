@@ -49,7 +49,7 @@ public class Link {
         if (this.state != state) {
             final State oldState = this.state;
             if (state == State.AUTHENTICATED) {
-                HmLog.d("authenticated in %s ms", (Calendar
+                HMLog.d("authenticated in %s ms", (Calendar
                         .getInstance().getTimeInMillis() - connectionTime));
             }
 
@@ -102,14 +102,14 @@ public class Link {
         }
 
         if (sentCommand != null && sentCommand.finished == false) {
-            HmLog.d(HmLog.Level.ALL, "custom command in progress");
+            HMLog.d(HMLog.Level.ALL, "custom command in progress");
 
             callback.onCommandFailed(new LinkError(LinkError.Type.COMMAND_IN_PROGRESS, 0, "custom" +
                     " command in progress"));
             return;
         }
 
-        HmLog.d("send command %s to %s", bytes, ByteUtils
+        HMLog.d("send command %s to %s", bytes, ByteUtils
                 .hexFromBytes(hmDevice.getMac()));
 
         sentCommand = new LinkCommand(callback, threadManager);
@@ -135,20 +135,20 @@ public class Link {
      */
     public void revoke(RevokeCallback callback) {
         if (state != State.AUTHENTICATED) {
-            HmLog.d("not authenticated");
+            HMLog.d("not authenticated");
             callback.onRevokeFailed(new RevokeError(RevokeError.Type.UNAUTHORIZED, 0, "not " +
                     "authenticated"));
             return;
         }
 
         if (sentCommand != null && sentCommand.finished == false) {
-            HmLog.d(HmLog.Level.ALL, "custom command in progress");
+            HMLog.d(HMLog.Level.ALL, "custom command in progress");
             callback.onRevokeFailed(new RevokeError(RevokeError.Type.COMMAND_IN_PROGRESS, 0, "a " +
                     " command is in progress"));
             return;
         }
 
-        HmLog.d("revoke " + serial);
+        HMLog.d("revoke " + serial);
 
         this.revokeCallback = callback;
 
@@ -181,11 +181,11 @@ public class Link {
     }
 
     void onCommandReceived(final byte[] bytes) {
-        HmLog.d("did receive command %s from %s", ByteUtils.hexFromBytes
+        HMLog.d("did receive command %s from %s", ByteUtils.hexFromBytes
                 (bytes), ByteUtils.hexFromBytes(hmDevice.getMac()));
 
         if (listener == null) {
-            HmLog.d("can't dispatch notification: no listener set");
+            HMLog.d("can't dispatch notification: no listener set");
             return;
         }
 
@@ -198,13 +198,13 @@ public class Link {
     }
 
     void onCommandResponseReceived(final byte[] data) {
-        HmLog.d("did receive command response %s from %s in %s ms", ByteUtils
+        HMLog.d("did receive command response %s from %s in %s ms", ByteUtils
                 .hexFromBytes(data), ByteUtils.hexFromBytes(hmDevice.getMac()), (Calendar
                 .getInstance().getTimeInMillis() - sentCommand.commandStartTime)
         );
 
         if (sentCommand == null || sentCommand.finished) {
-            HmLog.d("can't dispatch command response: sentCommand = null || " +
+            HMLog.d("can't dispatch command response: sentCommand = null || " +
                     "finished");
             return;
         }

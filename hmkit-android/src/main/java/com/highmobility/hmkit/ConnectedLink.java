@@ -32,7 +32,7 @@ public class ConnectedLink extends Link {
 
     int didReceivePairingRequest() {
         if (listener == null) {
-            HmLog.e("link listener not set");
+            HMLog.e("link listener not set");
             return 1;
         }
 
@@ -75,7 +75,7 @@ public class ConnectedLink extends Link {
                         }
                     });
 
-                    HmLog.d("pairing timer exceeded");
+                    HMLog.d("pairing timer exceeded");
                     return 1; // TOD1O: use correct code
                 }
             }

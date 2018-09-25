@@ -81,7 +81,7 @@ class WebService {
                         if (HMKit.loggingLevel.getValue() >= HMKit.LoggingLevel.DEBUG
                                 .getValue()) {
                             try {
-                                HmLog.d("response " + jsonObject
+                                HMLog.d("response " + jsonObject
                                         .toString(2));
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -123,7 +123,7 @@ class WebService {
                         if (HMKit.loggingLevel.getValue() >= HMKit.LoggingLevel.DEBUG
                                 .getValue()) {
                             try {
-                                HmLog.d("response " + jsonObject
+                                HMLog.d("response " + jsonObject
                                         .toString(2));
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -165,7 +165,7 @@ class WebService {
                         if (HMKit.loggingLevel.getValue() >= HMKit.LoggingLevel.DEBUG
                                 .getValue()) {
                             try {
-                                HmLog.d("response " + jsonObject
+                                HMLog.d("response " + jsonObject
                                         .toString(2));
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -202,7 +202,7 @@ class WebService {
             JSONObject headers = new JSONObject(request.getHeaders());
 
             try {
-                HmLog.d(request.getUrl() + "\n" + headers.toString(2) + bodyString);
+                HMLog.d(request.getUrl() + "\n" + headers.toString(2) + bodyString);
             } catch (JSONException e) {
                 e.printStackTrace();
             }

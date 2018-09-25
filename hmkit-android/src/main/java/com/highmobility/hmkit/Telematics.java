@@ -66,7 +66,7 @@ public class Telematics extends Core.Telematics {
             return;
         }
 
-        HmLog.d("sendTelematicsCommand: %s", command);
+        HMLog.d("sendTelematicsCommand: %s", command);
 
         final TelematicsCommand activeCommand = new TelematicsCommand(commandCallback, callback,
                 threadManager);
@@ -182,7 +182,7 @@ public class Telematics extends Core.Telematics {
                     "decrypt web service response.");
         } else {
             final Bytes response = new Bytes(data);
-            HmLog.d("onTelematicsResponseDecrypted: " + response);
+            HMLog.d("onTelematicsResponseDecrypted: " + response);
             interactingCommand.dispatchResult(response);
         }
     }

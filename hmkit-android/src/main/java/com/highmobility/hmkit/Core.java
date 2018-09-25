@@ -325,15 +325,15 @@ class Core implements HMBTCoreInterface {
     public int HMPersistenceHaladdPublicKey(byte[] serial, byte[] cert, int size) {
         AccessCertificate certificate = new AccessCertificate(new Bytes(trimmedBytes(cert, size)));
 
-        HmLog.d(HmLog.Level.ALL, "HMPersistenceHaladdPublicKey: " + ByteUtils.hexFromBytes(serial));
+        HMLog.d(HMLog.Level.ALL, "HMPersistenceHaladdPublicKey: " + ByteUtils.hexFromBytes(serial));
 
         int errorCode = storage.storeCertificate(certificate).getValue();
         if (errorCode != 0) {
-            HmLog.d("Cant register certificate " + ByteUtils.hexFromBytes
+            HMLog.d("Cant register certificate " + ByteUtils.hexFromBytes
                     (serial) + ": " + errorCode);
         }
 
-        HmLog.d(HmLog.Level.ALL, "HMPersistenceHaladdPublicKey: " + ByteUtils.hexFromBytes
+        HMLog.d(HMLog.Level.ALL, "HMPersistenceHaladdPublicKey: " + ByteUtils.hexFromBytes
                 (serial));
 
         return 0;
@@ -344,7 +344,7 @@ class Core implements HMBTCoreInterface {
         AccessCertificate certificate = storage.certWithGainingSerial(serial);
 
         if (certificate == null) {
-            HmLog.d("No registered cert with gaining serial " + ByteUtils
+            HMLog.d("No registered cert with gaining serial " + ByteUtils
                     .hexFromBytes(serial));
             return 1;
         }
@@ -367,7 +367,7 @@ class Core implements HMBTCoreInterface {
             return 0;
         }
 
-        HmLog.d(HmLog.Level.ALL, "No registered cert for index " + index);
+        HMLog.d(HMLog.Level.ALL, "No registered cert for index " + index);
 
         return 1;
     }
@@ -377,7 +377,7 @@ class Core implements HMBTCoreInterface {
         int certCount = storage.getCertificatesWithProvidingSerial(getDeviceCertificate()
                 .getSerial().getByteArray()).length;
 
-        HmLog.d(HmLog.Level.ALL, "HMPersistenceHalgetPublicKeyCount " + certCount);
+        HMLog.d(HMLog.Level.ALL, "HMPersistenceHalgetPublicKeyCount " + certCount);
 
         count[0] = certCount;
         return 0;
@@ -386,10 +386,10 @@ class Core implements HMBTCoreInterface {
     @Override
     public int HMPersistenceHalremovePublicKey(byte[] serial) {
         if (storage.deleteCertificateWithGainingSerial(serial)) {
-            HmLog.d(HmLog.Level.ALL, "HMPersistenceHalremovePublicKey success");
+            HMLog.d(HMLog.Level.ALL, "HMPersistenceHalremovePublicKey success");
             return 0;
         } else {
-            HmLog.d(HmLog.Level.ALL, "HMPersistenceHalremovePublicKey failure");
+            HMLog.d(HMLog.Level.ALL, "HMPersistenceHalremovePublicKey failure");
             return 1;
         }
     }
@@ -400,9 +400,9 @@ class Core implements HMBTCoreInterface {
 
         int errorCode = storage.storeCertificate(certificate).getValue();
         if (errorCode != 0) {
-            HmLog.d("Cant store certificate: " + errorCode);
+            HMLog.d("Cant store certificate: " + errorCode);
         } else {
-            HmLog.d(HmLog.Level.ALL, "HMPersistenceHaladdStoredCertificate " + certificate
+            HMLog.d(HMLog.Level.ALL, "HMPersistenceHaladdStoredCertificate " + certificate
                     .getGainerSerial() + " success");
         }
 
@@ -418,12 +418,12 @@ class Core implements HMBTCoreInterface {
             if (storedCert.getProviderSerial().equals(serial)) {
                 copyBytes(storedCert.getBytes(), cert);
                 size[0] = storedCert.getBytes().getLength();
-                HmLog.d("Returned stored cert for serial " + ByteUtils.hexFromBytes(serial));
+                HMLog.d("Returned stored cert for serial " + ByteUtils.hexFromBytes(serial));
                 return 0;
             }
         }
 
-        HmLog.d("No stored cert for serial " + ByteUtils.hexFromBytes(serial));
+        HMLog.d("No stored cert for serial " + ByteUtils.hexFromBytes(serial));
         return 1;
     }
 
@@ -438,27 +438,27 @@ class Core implements HMBTCoreInterface {
                         cert
                                 .getProviderSerial().getByteArray())) {
 
-                    HmLog.d(HmLog.Level.ALL, "Erased stored cert for serial " + ByteUtils
+                    HMLog.d(HMLog.Level.ALL, "Erased stored cert for serial " + ByteUtils
                             .hexFromBytes(serial));
 
                     return 0;
                 } else {
 
-                    HmLog.d(HmLog.Level.ALL, "Could not erase cert for serial " + ByteUtils
+                    HMLog.d(HMLog.Level.ALL, "Could not erase cert for serial " + ByteUtils
                             .hexFromBytes(serial));
                     return 1;
                 }
             }
         }
 
-        HmLog.d(HmLog.Level.ALL, "No cert to erase for serial " + ByteUtils.hexFromBytes(serial));
+        HMLog.d(HMLog.Level.ALL, "No cert to erase for serial " + ByteUtils.hexFromBytes(serial));
 
         return 1;
     }
 
     @Override
     public void HMApiCallbackEnteredProximity(HMDevice device) {
-        HmLog.d(HmLog.Level.ALL, "HMApiCallbackEnteredProximity. authenticated: " + device.getIsAuthenticated());
+        HMLog.d(HMLog.Level.ALL, "HMApiCallbackEnteredProximity. authenticated: " + device.getIsAuthenticated());
 
         // core has finished identification of the link: its now authenticated or the
         // authentication failed.
@@ -469,7 +469,7 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public void HMApiCallbackExitedProximity(HMDevice device) {
-        HmLog.d(HmLog.Level.ALL, "HMApiCallbackExitedProximity");
+        HMLog.d(HMLog.Level.ALL, "HMApiCallbackExitedProximity");
 
         if (broadcaster != null && broadcaster.onDeviceExitedProximity(device)) return;
         if (scanner != null) scanner.onDeviceExitedProximity(device.getMac());
@@ -495,7 +495,7 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public int HMApiCallbackGetDeviceCertificateFailed(HMDevice device, byte[] nonce) {
-        HmLog.d(HmLog.Level.ALL, "HMApiCallbackGetDeviceCertificateFailed ");
+        HMLog.d(HMLog.Level.ALL, "HMApiCallbackGetDeviceCertificateFailed ");
         // should ask the CA for the signature for the nonce
         // return false getting the sig start failed
         // return true started acquiring signature
@@ -525,7 +525,7 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public void HMApiCallbackRevokeResponse(HMDevice device, byte[] data, int length, int status) {
-        HmLog.d(HmLog.Level.ALL, "HMApiCallbackRevokeResponse() called with: device = [" + ByteUtils
+        HMLog.d(HMLog.Level.ALL, "HMApiCallbackRevokeResponse() called with: device = [" + ByteUtils
                 .hexFromBytes(device.getSerial()) + "], " + "data = " +
                 "[" + ByteUtils.hexFromBytes(data) + "], length = [" + length + "], status = " +
                 "[" + status + "]");
