@@ -237,7 +237,7 @@ public class Link {
      * @see LinkListener#onStateChanged(Link, State)
      */
     public enum State {
-        DISCONNECTED, CONNECTED, AUTHENTICATION_FAILED, AUTHENTICATED
+        DISCONNECTED, CONNECTED, NOT_AUTHENTICATED, AUTHENTICATED
     }
 
     /**
