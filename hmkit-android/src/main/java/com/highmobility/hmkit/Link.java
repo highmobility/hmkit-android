@@ -49,8 +49,8 @@ public class Link {
         if (this.state != state) {
             final State oldState = this.state;
             if (state == State.AUTHENTICATED) {
-                HMLog.d("authenticated in %s ms", (Calendar
-                        .getInstance().getTimeInMillis() - connectionTime));
+                HMLog.d("authenticated in %s ms", (Calendar.getInstance().getTimeInMillis() -
+                        connectionTime));
             }
 
             this.state = state;
@@ -168,13 +168,8 @@ public class Link {
         }
 
         if (hmDevice.getIsAuthenticated() == 0) {
-            if (state == State.AUTHENTICATED) {
-                // we were authenticated, go back to connected state
-                setState(State.CONNECTED);
-            } else {
-                // otherwise state is connected and now authentication failed
-                setState(State.AUTHENTICATION_FAILED);
-            }
+            // either authentication failed(wrong signature) or after revoke
+            setState(State.NOT_AUTHENTICATED);
         } else {
             setState(State.AUTHENTICATED);
         }
