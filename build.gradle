@@ -30,7 +30,7 @@ allprojects {
         cryptoVersion = "1.4.0"
 
         masterProject = true // this is for child projects to know their context
-        // 0 no release, dependencies are local projects
+        // 0 no release, dependencies are local submodules (for quicker development)
         // 1 dev release, dependencies are remote
         // 2 prod release, dependencies are remote
         release = 0
