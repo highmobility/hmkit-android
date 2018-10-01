@@ -2,9 +2,7 @@ include ':hmkit-android',
         'hm-java-crypto',
         'hm-java-utils',
         ':ble-explorer-app',
-        ':sandboxui',
-        ':hmkit-sandbox'
+        ':sandboxui'
 project(':hm-java-utils').projectDir = new File('hm-java-crypto/hm-java-utils')
 project(':ble-explorer-app').projectDir = new File('hm-android-bluetooth-auto-api-explorer/ble-explorer-app')
 project(':sandboxui').projectDir = new File('hm-android-bluetooth-auto-api-explorer/sandboxui')
-project(':hmkit-sandbox').projectDir = new File('hm-android-bluetooth-auto-api-explorer/hm-android-hmkit-sandbox/hmkit-sandbox')
