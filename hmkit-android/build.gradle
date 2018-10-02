@@ -59,51 +59,53 @@ dependencies {
     } else {
         implementation("com.highmobility:hmkit-crypto:$rootProject.ext.cryptoVersion")
     }
-    
+
     implementation('com.android.volley:volley:1.1.0')
     implementation('com.google.code.findbugs:jsr305:3.0.2')
     implementation 'com.jakewharton.timber:timber:4.7.1'
 }
 
+if (project.property('release') > 0) {
 // deploy
 
-apply plugin: 'com.jfrog.artifactory'
-apply plugin: 'digital.wup.android-maven-publish'
+    apply plugin: 'com.jfrog.artifactory'
+    apply plugin: 'digital.wup.android-maven-publish'
 
-def repo = project.hasProperty("repo") ? project.property("repo") : artifact.repo
+    def repo = project.hasProperty("repo") ? project.property("repo") : artifact.repo
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from android.sourceSets.main.java.srcDirs
-}
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from android.sourceSets.main.java.srcDirs
+    }
 
-publishing {
-    publications {
-        aar(MavenPublication) {
-            from components.android
-            groupId artifact.groupId
-            // for bintray: https://github.com/bintray/gradle-bintray-plugin
+    publishing {
+        publications {
+            aar(MavenPublication) {
+                from components.android
+                groupId artifact.groupId
+                // for bintray: https://github.com/bintray/gradle-bintray-plugin
+            }
         }
     }
-}
 
 // artifactory
-artifactory {
-    contextUrl = System.properties['hmArtifactoryUrl']
+    artifactory {
+        contextUrl = System.properties['hmArtifactoryUrl']
 
-    publish {
-        repository {
-            repoKey = repo
-            username = System.properties['hmArtifactoryPublishUser']
-            password = System.properties['hmArtifactoryPublishPassword']
-            maven = true
-        }
+        publish {
+            repository {
+                repoKey = repo
+                username = System.properties['hmArtifactoryPublishUser']
+                password = System.properties['hmArtifactoryPublishPassword']
+                maven = true
+            }
 
-        defaults {
-            publishArtifacts = true
-            publications('aar')
-            publishIvy = false
-            publishPom = true
+            defaults {
+                publishArtifacts = true
+                publications('aar')
+                publishIvy = false
+                publishPom = true
+            }
         }
     }
 }
