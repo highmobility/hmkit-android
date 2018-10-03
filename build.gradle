@@ -34,6 +34,8 @@ ext {
     // 1 dev release, dependencies are remote
     // 2 prod release, dependencies are remote
     release = 0
+    // these versions will be used for remote dependencies
+    hmkitVersion = "1.6.0"
 
     if (release == 1) {
         // this overrides child project's repos.
