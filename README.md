@@ -1,8 +1,6 @@
-### What is this repository for?
+This is the Android HMKit with Bluetooth Explorer sample app.
 
-* This is the Android SDK with Bluetooth Explorer sample app.
-
-### How do I get set up?
+### Setup
 
 * git submodule update --init --recursive
 * import the Gradle project.
@@ -11,14 +9,15 @@
 Supported devices: Lollipop 5.0+ with chipset support for BLE peripheral mode, https://stackoverflow.com/questions/26482611/chipsets-devices-supporting-android-5-ble-peripheral-mode https://altbeacon.github.io/android-beacon-library/beacon-transmitter-devices.html - list of some devices.
 
 ### Compile core
-* If you wish to re compile the bt core, you need to install the NDK through Android SDK Manager(in SDK tools tab).
+
+To compile the bt core, you need to install the NDK through Android SDK Manager(in SDK tools tab).
+
 ```
 cd {PROJECT_DIR}/hmlink/src/main/jni 
 ndk-build
 ```
 
-
-### Releasing
+### Release
 
 This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypto and hmkit-utils.
 
