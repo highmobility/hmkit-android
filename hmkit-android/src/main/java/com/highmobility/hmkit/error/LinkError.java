@@ -1,9 +1,5 @@
 package com.highmobility.hmkit.error;
 
-/**
- * Created by ttiganik on 6/22/17.
- *
- */
 public class LinkError {
     public enum Type {
         NONE,
@@ -11,7 +7,7 @@ public class LinkError {
         BLUETOOTH_OFF,
         /// A custom command has not yet received a response
         COMMAND_IN_PROGRESS,
-        /// Framework encountered an internal error (commonly releated to invalid data received)
+        /// Framework encountered an internal error (commonly related to invalid data received)
         INTERNAL_ERROR,
         /// Bluetooth failed to act as expected
         BLUETOOTH_FAILURE,
@@ -31,9 +27,9 @@ public class LinkError {
         COMMAND_TOO_BIG
     }
 
-    Type errorType;
-    int errorCode;
-    String message;
+    private final Type errorType;
+    private final int errorCode;
+    private final String message;
 
     public LinkError(Type type, int errorCode, String message) {
         this.errorCode = errorCode;

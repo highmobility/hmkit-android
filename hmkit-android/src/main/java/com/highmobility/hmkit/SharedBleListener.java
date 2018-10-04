@@ -1,8 +1,5 @@
 package com.highmobility.hmkit;
 
-/**
- * Created by ttiganik on 22/06/16.
- */
 public interface SharedBleListener {
     /**
      * Called when ble state has changed to available or not. Not available state can be called

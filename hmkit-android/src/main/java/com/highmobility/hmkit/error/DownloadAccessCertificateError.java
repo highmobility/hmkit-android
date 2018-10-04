@@ -8,7 +8,7 @@ public class DownloadAccessCertificateError {
     public enum Type {
         /// Internal error
         INTERNAL_ERROR,
-        /// HTTP ERROR occured. Result code is included in field code
+        /// HTTP ERROR occurred. Result code is included in field code
         HTTP_ERROR,
         /// Invalid data from the server.
         INVALID_SERVER_RESPONSE,
@@ -18,9 +18,9 @@ public class DownloadAccessCertificateError {
         SERVER_ERROR
     }
 
-    DownloadAccessCertificateError.Type type;
-    int code;
-    String message;
+    private final DownloadAccessCertificateError.Type type;
+    final int code;
+    final String message;
 
     public DownloadAccessCertificateError(DownloadAccessCertificateError.Type type, int errorCode, String message) {
         this.code = errorCode;

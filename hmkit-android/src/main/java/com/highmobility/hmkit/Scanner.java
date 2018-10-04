@@ -15,11 +15,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by ttiganik on 01/06/16.
- */
-class Scanner {
-    static final String TAG = "HMKit-Scanner";
+class Scanner extends Core.Scanner implements SharedBleListener {
+    private final Core core;
+    private final SharedBle ble;
+    private final ThreadManager threadManager;
+    private final Storage storage;
+
+    /**
+     * Called when ble state has changed to available or not. Not available state can be called
+     * multiple times.
+     *
+     * @param available true if bluetooth is available
+     */
+    @Override public void bluetoothChangedToAvailable(boolean available) {
+
+    }
 
     public enum State {
         BLUETOOTH_UNAVAILABLE, IDLE, SCANNING
@@ -32,17 +42,24 @@ class Scanner {
 
     State state = State.IDLE;
 
-    Manager manager;
     BluetoothLeScanner bleScanner;
 
     ArrayList<byte[]> authenticatingMacs = new ArrayList<>();
 
-    Scanner(Manager manager) {
-        this.manager = manager;
+    Scanner(Core core, Storage storage, ThreadManager threadManager, SharedBle ble) {
+        this.core = core;
+        this.ble = ble;
+        this.storage = storage;
+        this.threadManager = threadManager;
+        initialise();
+    }
+
+    boolean initialise() {
+        ble.addListener(this);
+        return true;
     }
 
     /**
-     *
      * @return The links currently in proximity
      */
     public List<ScannedLink> getLinks() {
@@ -50,7 +67,6 @@ class Scanner {
     }
 
     /**
-     *
      * @return The Scanner state
      * @see State
      */
@@ -68,10 +84,10 @@ class Scanner {
     }
 
     /**
-     * Add a trusted Certificate Authority to the scan list. This is used to recognize
-     * Link-enabled devices when scanning.
+     * Add a trusted Certificate Authority to the scan list. This is used to recognize Link-enabled
+     * devices when scanning.
      *
-     * @param issuer The CA issuer identifier
+     * @param issuer    The CA issuer identifier
      * @param publicKey The CA public key
      */
     public void addTrustedCertificateAuthority(byte[] issuer, byte[] publicKey) {
@@ -81,40 +97,48 @@ class Scanner {
     /**
      * Start scanning for nearby links.
      *
-     * @return 0 if succeeded or    Link.UNSUPPORTED if BLE is not supported with this device
-     *                              Link.BLUETOOTH_OFF if BLE is turned off
+     * @return 0 if succeeded or Link.BLUETOOTH_OFF if BLE is turned off
      */
     public int startScanning() {
         // = new byte[][] { array1, array2, array3, array4, array5 };
         if (getState() == State.SCANNING) return 0;
 
-        if (!manager.getBle().isBluetoothSupported()) {
-            setState(State.BLUETOOTH_UNAVAILABLE);
-//            return Link.UNSUPPORTED;
-            return 1; // use some descriptive error method
-        }
+        core.start();
+        startBle();
 
-        if (!manager.getBle().isBluetoothOn()) {
+        if (!ble.isBluetoothOn()) {
             setState(State.BLUETOOTH_UNAVAILABLE);
 //            return Link.BLUETOOTH_OFF;
             return 2; // use some descriptive error method
         }
 
-        if (bleScanner == null) bleScanner = manager.getBle().getAdapter().getBluetoothLeScanner();
+        if (bleScanner == null) bleScanner = ble.getAdapter().getBluetoothLeScanner();
         final ScanSettings settings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .build();
 
         bleScanner.startScan(null, settings, scanCallback);
         setState(State.SCANNING);
-        manager.workHandler.post(new Runnable() {
+
+        threadManager.postToWork(new Runnable() {
             @Override
             public void run() {
-                manager.core.HMBTCoreSensingScanStart(manager.coreInterface);
+                core.HMBTCoreSensingScanStart();
             }
         });
 
         return 0;
+    }
+
+    private void startBle() {
+        // we need ble on ctor to listen to state change from IDLE to BLE_UNAVAILABLE.
+        // ble is stopped on terminate. could be started again on startBroadcasting.
+        ble.initialise();
+
+        // scanner could have already initialised the ble, then we need to add the listener and
+        // check for initial ble state.
+        ble.addListener(this);
+        if (ble.isBluetoothOn() == false) setState(State.BLUETOOTH_UNAVAILABLE);
     }
 
     /**
@@ -151,12 +175,11 @@ class Scanner {
             final BluetoothDevice device = result.getDevice();
             final byte[] advBytes = result.getScanRecord().getBytes();
 
-            manager.workHandler.post(new Runnable() {
+            threadManager.postToWork(new Runnable() {
                 @Override
                 public void run() {
-            manager.core.HMBTCoreSensingProcessAdvertisement(manager.coreInterface,
-                    ByteUtils.bytesFromMacString(device.getAddress()),
-                    advBytes, advBytes.length);
+                    core.HMBTCoreSensingProcessAdvertisement(ByteUtils.bytesFromMacString(device
+                            .getAddress()), advBytes, advBytes.length);
                 }
             });
         }
@@ -168,7 +191,7 @@ class Scanner {
         }
 
         addAuthenticatingMac(mac);
-        BluetoothDevice bluetoothDevice = manager.getBle().getAdapter().getRemoteDevice(mac);
+        BluetoothDevice bluetoothDevice = ble.getAdapter().getRemoteDevice(mac);
 
         for (ScannedLink existingDevice : devices) {
             if (existingDevice.btDevice.getAddress().equals(bluetoothDevice.getAddress())) {
@@ -177,7 +200,7 @@ class Scanner {
             }
         }
 
-        ScannedLink device = new ScannedLink(this, bluetoothDevice);
+        ScannedLink device = new ScannedLink(ble, core, threadManager, bluetoothDevice);
         devices.add(device);
         device.connect();
     }
@@ -191,13 +214,14 @@ class Scanner {
         devices.remove(device);
     }
 
-    boolean deviceExitedProximity(byte[] mac) {
+    boolean onDeviceExitedProximity(byte[] mac) {
         final ScannedLink device = getLinkForMac(mac);
         if (device == null) return false;
         device.onDeviceExitedProximity();
 
         if (listener != null) {
-            manager.postToMainThread(new Runnable() {
+
+            threadManager.postToMain(new Runnable() {
                 @Override
                 public void run() {
                     if (listener == null) return;
@@ -216,13 +240,13 @@ class Scanner {
         device.discoverServices();
     }
 
-    boolean didResolveDevice(HMDevice device) {
+    boolean onChangedAuthenticationState(HMDevice device) {
         removeAuthenticatingMac(device.getMac());
         final ScannedLink scannedLink = getLinkForMac(device.getMac());
         if (scannedLink != null) {
-            scannedLink.setHmDevice(device);
+            scannedLink.onChangedAuthenticationState(device);
             if (listener != null) {
-                manager.postToMainThread(new Runnable() {
+                threadManager.postToMain(new Runnable() {
                     @Override
                     public void run() {
                         if (listener == null) return;
@@ -260,7 +284,7 @@ class Scanner {
     boolean writeData(byte[] mac, byte[] value, int characteristic) {
         ScannedLink link = getLinkForMac(mac);
         if (link == null) return false;
-        // TODO: use characteristic from id
+        // TSODO: use characteristic from id
         link.writeValue(value);
 
         return true;
@@ -269,14 +293,15 @@ class Scanner {
     boolean readValue(byte[] mac, int characteristic) {
         ScannedLink link = getLinkForMac(mac);
         if (link == null) return false;
-        // TODO: use the characteristic id
+        // TSODO: use the characteristic id
         link.readValue();
         return true;
     }
 
     private ScannedLink getLinkForMac(byte[] mac) {
         for (ScannedLink existingDevice : devices) {
-            if (Arrays.equals(ByteUtils.bytesFromMacString(existingDevice.btDevice.getAddress()), mac)) {
+            if (Arrays.equals(ByteUtils.bytesFromMacString(existingDevice.btDevice.getAddress()),
+                    mac)) {
                 return existingDevice;
             }
         }
@@ -290,7 +315,7 @@ class Scanner {
             this.state = state;
 
             if (listener != null) {
-                manager.postToMainThread(new Runnable() {
+                threadManager.postToMain(new Runnable() {
                     @Override
                     public void run() {
                         if (listener == null) return;

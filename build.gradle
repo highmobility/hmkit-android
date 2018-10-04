@@ -24,22 +24,23 @@ allprojects {
             }
         }
     }
+}
 
-    ext {
-        compileSdkVersion = 26
-        cryptoVersion = "1.4.0"
+ext {
+    compileSdkVersion = 26
+    cryptoVersion = "1.4.0"
+    utilsVersion = "1.4.0"
+    hmkitVersion = "1.6.0"
 
-        masterProject = true // this is for child projects to know their context
-        // 0 no release, dependencies are local projects
-        // 1 dev release, dependencies are remote
-        // 2 prod release, dependencies are remote
-        release = 0
+    // 0 no release, local dependencies
+    // 1 dev release, remote dependencies
+    // 2 prod release, remote dependencies
+    releaseType = 1
 
-        if (release == 1) {
-            // this overrides child project's repos.
-            repo = "gradle-dev-local"
-        } else if (release == 2) {
-            repo = "gradle-release-local"
-        }
+    // override deploy.settings repos
+    if (releaseType == 1) {
+        repo = "gradle-dev-local"
+    } else if (releaseType == 2) {
+        repo = "gradle-release-local"
     }
 }

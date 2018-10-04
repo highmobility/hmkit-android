@@ -42,7 +42,7 @@ public class BroadcastConfiguration {
         return overrideAdvertisementName;
     }
 
-    BroadcastConfiguration(Builder builder) {
+    private BroadcastConfiguration(Builder builder) {
         this.advertiseMode = builder.advertiseMode;
         this.txPowerLevel = builder.txPowerLevel;
         this.broadcastTarget = builder.broadcastTarget;

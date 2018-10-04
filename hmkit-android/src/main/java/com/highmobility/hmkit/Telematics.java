@@ -1,7 +1,6 @@
 package com.highmobility.hmkit;
 
 import android.util.Base64;
-import android.util.Log;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -18,36 +17,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Send commands via Telematics.
+ * Telematics provides the option to send commands via Telematics.
  */
-public class Telematics implements TelematicsCommand.Callback {
-    static final String TAG = "HMKit-Telematics";
+public class Telematics extends Core.Telematics {
+    private final Core core;
+    private final WebService webService;
+    private final Storage storage;
+    private final ThreadManager threadManager;
 
-    Manager manager;
-    List<TelematicsCommand> activeCommands = new ArrayList<>();
+    final List<TelematicsCommand> activeCommands = new ArrayList<>();
     TelematicsCommand interactingCommand; // reference between core interactions
 
-    /**
-     * CommandCallback is used to notify the user about telematics command result.
-     */
-    public interface CommandCallback {
-        /**
-         * Invoked if the command was sent successfully and a response was received.
-         *
-         * @param bytes the response bytes
-         */
-        void onCommandResponse(Bytes bytes);
-
-        /**
-         * Invoked if something went wrong.
-         *
-         * @param error The error
-         */
-        void onCommandFailed(TelematicsError error);
+    Telematics(Core core, Storage storage, ThreadManager threadManager, WebService webService) {
+        this.core = core;
+        this.storage = storage;
+        this.threadManager = threadManager;
+        this.webService = webService;
+        core.telematics = this;
     }
 
-    Telematics(Manager manager) {
-        this.manager = manager;
+    boolean isSendingCommand() {
+        return activeCommands.size() > 0;
     }
 
     /**
@@ -59,6 +49,7 @@ public class Telematics implements TelematicsCommand.Callback {
      */
     public void sendCommand(final Bytes command, DeviceSerial serial, final CommandCallback
             callback) {
+        core.start();
         if (command.getLength() > Constants.MAX_COMMAND_LENGTH) {
             TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_TOO_BIG, 0,
                     "Command size is bigger than " + Constants.MAX_COMMAND_LENGTH + " bytes");
@@ -66,7 +57,7 @@ public class Telematics implements TelematicsCommand.Callback {
             return;
         }
 
-        final AccessCertificate certificate = manager.getCertificate(serial);
+        final AccessCertificate certificate = storage.getCertificate(serial);
 
         if (certificate == null) {
             TelematicsError error = new TelematicsError(TelematicsError.Type.INVALID_SERIAL, 0,
@@ -75,27 +66,27 @@ public class Telematics implements TelematicsCommand.Callback {
             return;
         }
 
-        if (manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "sendTelematicsCommand: " + command);
+        HMLog.d("sendTelematicsCommand: %s", command);
 
-        final TelematicsCommand activeCommand = new TelematicsCommand(this, callback, manager
-                .mainHandler);
+        final TelematicsCommand activeCommand = new TelematicsCommand(commandCallback, callback,
+                threadManager);
         activeCommands.add(activeCommand);
 
-        manager.webService.getNonce(certificate.getProviderSerial(), new Response
+        webService.getNonce(certificate.getProviderSerial(), new Response
                 .Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonResponse) {
                 try {
                     final byte[] nonce = Base64.decode(jsonResponse.getString("nonce"),
                             Base64.DEFAULT);
-                    manager.workHandler.post(new Runnable() {
+
+                    threadManager.postToWork(new Runnable() {
                         @Override
                         public void run() {
                             interactingCommand = activeCommand;
-                            manager.core.HMBTCoreSendTelematicsCommand(manager.coreInterface,
-                                    certificate.getGainerSerial().getByteArray(), nonce,
-                                    command.getLength(), command.getByteArray());
+                            core.HMBTCoreSendTelematicsCommand(certificate.getGainerSerial()
+                                    .getByteArray(), nonce, command.getLength(), command
+                                    .getByteArray());
                         }
                     });
                 } catch (JSONException e) {
@@ -118,10 +109,9 @@ public class Telematics implements TelematicsCommand.Callback {
         });
     }
 
-    void onTelematicsCommandEncrypted(byte[] serial, byte[] issuer, byte[] command) {
+    @Override void onTelematicsCommandEncrypted(byte[] serial, byte[] issuer, byte[] command) {
         final TelematicsCommand commandSent = interactingCommand; // need this for command response
-
-        manager.webService.sendTelematicsCommand(new Bytes(command), new DeviceSerial(serial),
+        webService.sendTelematicsCommand(new Bytes(command), new DeviceSerial(serial),
                 new Issuer(issuer),
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -134,12 +124,11 @@ public class Telematics implements TelematicsCommand.Callback {
                                 final byte[] data = Base64.decode(jsonObject.getString
                                         ("response_data"), Base64.NO_WRAP);
 
-                                manager.workHandler.post(new Runnable() {
+                                threadManager.postToWork(new Runnable() {
                                     @Override
                                     public void run() {
                                         interactingCommand = commandSent;
-                                        manager.core.HMBTCoreTelematicsReceiveData(manager
-                                                .coreInterface, data.length, data);
+                                        core.HMBTCoreTelematicsReceiveData(data.length, data);
                                     }
                                 });
                             } else if (status.equals("timeout")) {
@@ -187,19 +176,40 @@ public class Telematics implements TelematicsCommand.Callback {
                 });
     }
 
-    void onTelematicsResponseDecrypted(byte[] serial, byte id, byte[] data) {
-        if (id == 0x02) {
+    @Override void onTelematicsResponseDecrypted(byte[] serial, int resultCode, byte[] data) {
+        if (resultCode == 0x02) {
             interactingCommand.dispatchError(TelematicsError.Type.INTERNAL_ERROR, 0, "Failed to " +
                     "decrypt web service response.");
         } else {
             final Bytes response = new Bytes(data);
-            if (manager.loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-                Log.d(TAG, "onTelematicsResponseDecrypted: " + response);
+            HMLog.d("onTelematicsResponseDecrypted: " + response);
             interactingCommand.dispatchResult(response);
         }
     }
 
-    @Override public void onCommandFinished(TelematicsCommand command) {
-        activeCommands.remove(command);
+    final TelematicsCommand.Callback commandCallback = new TelematicsCommand.Callback() {
+        @Override void onCommandFinished(TelematicsCommand command) {
+            activeCommands.remove(command);
+        }
+    };
+
+    /**
+     * CommandCallback is used to notify the user about telematics command result.
+     */
+    public interface CommandCallback {
+        /**
+         * Invoked if the command was sent successfully and a response was received.
+         *
+         * @param bytes the response bytes
+         */
+        void onCommandResponse(Bytes bytes);
+
+        /**
+         * Invoked if something went wrong.
+         *
+         * @param error The error
+         */
+        void onCommandFailed(TelematicsError error);
     }
+
 }

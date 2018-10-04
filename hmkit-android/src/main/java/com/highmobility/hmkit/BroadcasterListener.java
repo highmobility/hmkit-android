@@ -1,8 +1,6 @@
 package com.highmobility.hmkit;
 
 /**
- * Created by ttiganik on 13/04/16.
- *
  * The listener of the Broadcaster is used to observe the device's state changes and for
  * discovered/lost Links.
  */

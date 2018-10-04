@@ -1,31 +1,22 @@
 package com.highmobility.hmkit;
 
-import android.os.Handler;
-import android.util.Log;
-
 import com.highmobility.hmkit.error.LinkError;
 
 import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.highmobility.hmkit.Broadcaster.TAG;
-
-
-/**
- * Created by ttiganik on 09/08/16.
- */
 class LinkCommand {
     boolean finished;
     Link.CommandCallback commandCallback;
     Timer timeoutTimer;
 
     Long commandStartTime;
-    Handler dispatchThread;
+    ThreadManager threadManager;
 
-    LinkCommand(Link.CommandCallback callback, Handler dispatchThread) {
+    LinkCommand(Link.CommandCallback callback, ThreadManager threadManager) {
         finished = false;
-        this.dispatchThread = dispatchThread;
+        this.threadManager = threadManager;
         this.commandCallback = callback;
         startTimeoutTimer();
         commandStartTime = Calendar.getInstance().getTimeInMillis();
@@ -36,14 +27,13 @@ class LinkCommand {
         if (errorCode == LinkError.Type.NONE) {
             cancelTimeoutTimer();
             finished = true;
-            dispatchThread.post(new Runnable() {
+            threadManager.postToMain(new Runnable() {
                 @Override
                 public void run() {
                     commandCallback.onCommandSent();
                 }
             });
-        }
-        else {
+        } else {
             dispatchError(errorCode, 0, "");
         }
     }
@@ -53,11 +43,11 @@ class LinkCommand {
         finished = true;
 
         if (commandCallback == null) {
-            Log.d(TAG, "cannot dispatch the result: no callback reference");
+            HMLog.d("cannot dispatch the result: no callback");
             return;
         }
 
-        dispatchThread.post(new Runnable() {
+        threadManager.postToMain(new Runnable() {
             @Override
             public void run() {
                 commandCallback.onCommandFailed(new LinkError(type, errorCode, message));

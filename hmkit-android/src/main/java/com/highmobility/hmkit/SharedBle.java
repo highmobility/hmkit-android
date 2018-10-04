@@ -1,31 +1,43 @@
 package com.highmobility.hmkit;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGattServer;
+import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 
+import com.highmobility.hmkit.error.BleNotSupportedException;
 import com.highmobility.utils.ByteUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
- * Created by ttiganik on 01/06/16.
+ * Used to access shared BLE resources.
  */
 public class SharedBle {
-    Context context;
+    final Context context; // the only place where need to store context: on start broadcasting and
+    // terminate
+    private boolean receiverRegistered;
 
-    BluetoothManager mBluetoothManager;
-    BluetoothAdapter mBluetoothAdapter;
+    private BluetoothManager mBluetoothManager;
+    private BluetoothAdapter mBluetoothAdapter;
 
-    private ArrayList<SharedBleListener> listeners = new ArrayList<>();
+    private final ArrayList<SharedBleListener> listeners = new ArrayList<>();
 
-    public void addListener(SharedBleListener listener) {
-        if (listeners.contains(listener) == false) listeners.add(listener);
+    public boolean addListener(SharedBleListener listener) {
+        if (listeners.contains(listener) == false) {
+            listeners.add(listener);
+            return true;
+        }
+        return false;
     }
 
     public void removeListener(SharedBleListener listener) {
@@ -37,30 +49,75 @@ public class SharedBle {
     }
 
     public BluetoothAdapter getAdapter() {
-        if (mBluetoothAdapter == null) {
-            createAdapter();
-        }
-
         return mBluetoothAdapter;
     }
 
-    public boolean isBluetoothSupported() {
-        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
+    public String getName() {
+        return mBluetoothAdapter.getName();
+    }
+
+    // devices connected to the Broadcaster
+    List<BluetoothDevice> getConnectedDevices() {
+        return getManager().getConnectedDevices(BluetoothProfile.GATT_SERVER);
+    }
+
+    String getInfoString() {
+        PackageManager packageManager = context.getPackageManager();
+
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            return HMKit.infoStringPrefix() + "w"; // wearable
+        } else if (packageManager.hasSystemFeature(PackageManager.FEATURE_EMBEDDED)) {
+            return HMKit.infoStringPrefix() + "t"; // android things
+        } else {
+            return HMKit.infoStringPrefix() + "m";
+        }
     }
 
     public boolean isBluetoothOn() {
-        return (getAdapter() != null && getAdapter().isEnabled() && getAdapter().getState() ==
+        return (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled() && mBluetoothAdapter
+                .getState() ==
                 BluetoothAdapter.STATE_ON);
     }
 
-    SharedBle(Context context) {
+    SharedBle(Context context) throws BleNotSupportedException {
         this.context = context;
+
+        Object bleService = context.getSystemService(Context.BLUETOOTH_SERVICE);
+        if (bleService == null ||
+                context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
+                        == false)
+            throw new BleNotSupportedException();
+
+        mBluetoothManager = (BluetoothManager) bleService;
+        mBluetoothAdapter = mBluetoothManager.getAdapter();
+
         initialise();
     }
 
-    void initialise() {
-        context.registerReceiver(receiver, new IntentFilter(BluetoothAdapter
-                .ACTION_STATE_CHANGED));
+    /**
+     * @return true if context receiver was registered.
+     */
+    boolean initialise() {
+        if (receiverRegistered == false) {
+            context.registerReceiver(receiver, new IntentFilter(BluetoothAdapter
+                    .ACTION_STATE_CHANGED));
+            receiverRegistered = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    void terminate() {
+        if (mBluetoothAdapter != null && receiverRegistered) {
+            context.unregisterReceiver(receiver);
+            receiverRegistered = false;
+            // don't clear listeners here because broadcaster is never nulled.
+        }
+    }
+
+    BluetoothGattServer openGattServer(BluetoothGattServerCallback callback) {
+        return getManager().openGattServer(context, callback);
     }
 
     void setRandomAdapterName(boolean overrideLocalName) {
@@ -70,22 +127,7 @@ public class SharedBle {
         new Random().nextBytes(serialBytes);
         String randomBytesString = ByteUtils.hexFromBytes(serialBytes);
         name += randomBytesString.substring(1);
-        getAdapter().setName(name);
-    }
-
-    void createAdapter() {
-        if (mBluetoothManager == null) {
-            mBluetoothManager = (BluetoothManager) context.getSystemService(Context
-                    .BLUETOOTH_SERVICE);
-            mBluetoothAdapter = mBluetoothManager.getAdapter();
-        }
-    }
-
-    void terminate() {
-        if (mBluetoothAdapter != null) {
-            context.unregisterReceiver(receiver);
-            // dont clear listeners here because broadcaster is never nulled.
-        }
+        mBluetoothAdapter.setName(name);
     }
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {

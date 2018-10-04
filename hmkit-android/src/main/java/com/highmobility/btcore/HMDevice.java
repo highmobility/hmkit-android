@@ -1,8 +1,5 @@
 package com.highmobility.btcore;
 
-/**
- * Created by ttiganik on 13/04/16.
- */
 public class HMDevice {
     byte[] _mac = {0,0,0,0,0,0};
     byte[] _serial = {0,0,0,0,0,0,0,0,0};
@@ -42,8 +39,6 @@ public class HMDevice {
     }
 
     private void copyBytesToJNI(byte[] from, byte[] to) {
-        for (int i = 0; i < from.length; i++) {
-            to[i] = from[i];
-        }
+        System.arraycopy(from, 0, to, 0, from.length);
     }
 }

@@ -2,10 +2,11 @@ package com.highmobility.hmkit;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.Certificate;
+import com.highmobility.crypto.value.DeviceSerial;
+import com.highmobility.utils.ByteUtils;
 import com.highmobility.value.Bytes;
 
 import org.json.JSONObject;
@@ -14,18 +15,16 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.highmobility.hmkit.Broadcaster.TAG;
+import javax.annotation.Nullable;
 
 /**
- * Created by ttiganik on 14/04/16.
- * <p>
- * Storage is used to access broadcaster's storage, where certificates are stored.
+ * Access for stored Access Certificates.
  * <p>
  * Uses Android SharedPreferences.
  */
 public class Storage {
     private static final String ACCESS_CERTIFICATE_STORAGE_KEY = "ACCESS_CERTIFICATE_STORAGE_KEY";
-    static final String device_certificate_json_object = "device_access_certificate";
+    private static final String device_certificate_json_object = "device_access_certificate";
 
     public enum Result {
         SUCCESS(0), STORAGE_FULL(1), INTERNAL_ERROR(2);
@@ -41,13 +40,47 @@ public class Storage {
         }
     }
 
-    private SharedPreferences settings;
-    private SharedPreferences.Editor editor;
+    private final SharedPreferences settings;
+    private final SharedPreferences.Editor editor;
 
     Storage(Context ctx) {
         settings = ctx.getSharedPreferences("com.hm.wearable.UserPrefs",
                 Context.MODE_PRIVATE);
         editor = settings.edit();
+    }
+
+    /**
+     * @param serial The serial of the device that is providing access (eg this device).
+     * @return All stored Access Certificates where the device with the given serial is providing
+     * access.
+     */
+    public AccessCertificate[] getCertificates(DeviceSerial serial) {
+        return getCertificatesWithProvidingSerial(serial.getByteArray());
+    }
+
+    /**
+     * Find an Access Certificate with the given serial number.
+     *
+     * @param serial The serial number of the device that is gaining access.
+     * @return An Access Certificate for the given serial if one exists, otherwise null.
+     */
+    @Nullable public AccessCertificate getCertificate(DeviceSerial serial) {
+        AccessCertificate[] certificates = getCertificatesWithGainingSerial(serial
+                .getByteArray());
+
+        if (certificates != null && certificates.length > 0) {
+            return certificates[0];
+        }
+
+        return null;
+    }
+
+    /**
+     * Deletes all of the stored Access Certificates.
+     */
+    public void deleteCertificates() {
+        editor.remove(ACCESS_CERTIFICATE_STORAGE_KEY);
+        editor.commit();
     }
 
     AccessCertificate storeDownloadedCertificates(JSONObject response) throws Exception {
@@ -75,32 +108,30 @@ public class Storage {
             throw new Exception("certificate storage failed " + result);
         }
 
-        if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue())
-            Log.d(TAG, "storeDownloadedCertificates: deviceCert " + deviceAccessCertificate
-                    .toString());
+        HMLog.d("storeDownloadedCertificates: deviceCert %s",
+                deviceAccessCertificate.toString());
 
         if (response.has("vehicle_access_certificate") == true) {
             // stored cert. this does not has to exist in the response
             vehicleAccessCertificateBase64 = response.getString("vehicle_access_certificate");
             if (vehicleAccessCertificateBase64 != null && vehicleAccessCertificateBase64.equals
                     ("null") == false) {
-                vehicleAccessCertificate = new AccessCertificate(new Bytes(vehicleAccessCertificateBase64));
+                vehicleAccessCertificate = new AccessCertificate(new Bytes
+                        (vehicleAccessCertificateBase64));
 
                 if (storeCertificate(vehicleAccessCertificate) != Result.SUCCESS) {
                     throw new Exception("cannot store vehicle access cert");
                 }
 
-                if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
-                        .getValue())
-                    Log.d(TAG, "storeDownloadedCertificates: vehicleCert " +
-                            vehicleAccessCertificate.toString());
+                HMLog.d("storeDownloadedCertificates: vehicleCert %s",
+                        vehicleAccessCertificate.toString());
             }
         }
 
         return deviceAccessCertificate;
     }
 
-    AccessCertificate[] getCertificates() {
+    private AccessCertificate[] getCertificates() {
         Set<String> bytesStringSet = settings.getStringSet(ACCESS_CERTIFICATE_STORAGE_KEY, null);
 
         if (bytesStringSet != null && bytesStringSet.size() > 0) {
@@ -119,7 +150,7 @@ public class Storage {
         return new AccessCertificate[0];
     }
 
-    boolean writeCertificates(AccessCertificate[] certificates) {
+    private boolean writeCertificates(AccessCertificate[] certificates) {
         HashSet<String> stringSet = new HashSet<>();
 
         for (Certificate cert : certificates) {
@@ -182,11 +213,6 @@ public class Storage {
 
     }
 
-    void resetStorage() {
-        editor.remove(ACCESS_CERTIFICATE_STORAGE_KEY);
-        editor.commit();
-    }
-
     boolean deleteCertificate(byte[] gainingSerial, byte[] providingSerial) {
         AccessCertificate[] certs = getCertificates();
 
@@ -197,10 +223,8 @@ public class Storage {
                     cert.getProviderSerial().equals(providingSerial)) {
                 removedIndex = i;
 
-                if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
-                        .getValue()) {
-                    Log.d(TAG, "deleteCertificate success: " + cert.toString());
-                }
+                HMLog.d("deleteCertificate success: %s", cert
+                        .toString());
 
                 break;
             }
@@ -211,11 +235,9 @@ public class Storage {
             if (writeCertificates(newCerts) == true) return true;
         }
 
-        if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue
-                ()) {
-            Log.d(TAG, "deleteCertificate: failed for gaining: " + gainingSerial
-                    + " providing: " + providingSerial);
-        }
+        HMLog.d("deleteCertificate: failed for gaining: %s providing " +
+                "%s", ByteUtils.hexFromBytes(gainingSerial), ByteUtils.hexFromBytes
+                (providingSerial));
 
         return false;
     }
@@ -228,10 +250,10 @@ public class Storage {
             AccessCertificate cert = certs[i];
             if (cert.getGainerSerial().equals(serial)) {
                 removedIndex = i;
-                if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
-                        .getValue()) {
-                    Log.d(TAG, "deleteCertificateWithGainingSerial success:" + cert.toString());
-                }
+
+                HMLog.d("deleteCertificateWithGainingSerial success: " +
+                        "%s", cert.toString());
+
                 break;
             }
         }
@@ -241,10 +263,8 @@ public class Storage {
             if (writeCertificates(newCerts) == true) return true;
         }
 
-        if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG.getValue
-                ()) {
-            Log.d(TAG, "deleteCertificateWithGainingSerial failed: " + serial);
-        }
+        HMLog.d("deleteCertificateWithGainingSerial failed: %s",
+                ByteUtils.hexFromBytes(serial));
 
         return false;
     }
@@ -257,17 +277,17 @@ public class Storage {
             AccessCertificate cert = certs[i];
             if (cert.getProviderSerial().equals(serial)) {
                 removedIndex = i;
-                if (Manager.getInstance().loggingLevel.getValue() >= Manager.LoggingLevel.DEBUG
-                        .getValue()) {
-                    Log.d(TAG, "deleteCertificateWithProvidingSerial success: " + cert.toString());
-                }
+
+                HMLog.d("deleteCertificateWithProvidingSerial " +
+                        "success: %s" + cert.toString());
+
                 break;
             }
         }
 
         if (removedIndex != -1) {
             AccessCertificate[] newCerts = removeAtIndex(removedIndex, certs);
-            if (writeCertificates(newCerts) == true) return true;
+            return writeCertificates(newCerts) == true;
         }
 
         return false;
@@ -314,19 +334,16 @@ public class Storage {
                     && cert.getProviderSerial().equals(certificate.getProviderSerial())
                     && cert.getGainerPublicKey().equals(certificate.getGainerPublicKey())) {
 
-                if (!deleteCertificateWithGainingSerial(certificate.getGainerSerial().getByteArray())) {
-                    Log.e(TAG, "failed to delete existing cert");
+                if (!deleteCertificateWithGainingSerial(certificate.getGainerSerial()
+                        .getByteArray())) {
+                    HMLog.e("failed to delete existing cert");
                 }
             }
         }
 
         certs = getCertificates();
         AccessCertificate[] newCerts = new AccessCertificate[certs.length + 1];
-
-        for (int i = 0; i < certs.length; i++) {
-            newCerts[i] = certs[i];
-        }
-
+        System.arraycopy(certs, 0, newCerts, 0, certs.length);
         newCerts[newCerts.length - 1] = certificate;
 
         if (writeCertificates(newCerts) == true) return Result.SUCCESS;
