@@ -57,7 +57,7 @@ dependencies {
         implementation project(':hm-java-crypto')
         implementation project(':hm-java-utils')
     } else {
-        implementation("com.highmobility:hmkit-crypto:1.4.0")
+        implementation("com.highmobility:hmkit-crypto:${project.cryptoVersion}")
     }
 
     implementation('com.android.volley:volley:1.1.0')

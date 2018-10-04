@@ -28,16 +28,17 @@ allprojects {
 
 ext {
     compileSdkVersion = 26
-
-    // 0 no release, dependencies are local submodules (for quicker development)
-    // 1 dev release, dependencies are remote
-    // 2 prod release, dependencies are remote
-    releaseType = 0
-    // these versions will be used for remote dependencies
+    cryptoVersion = "1.4.0"
+    utilsVersion = "1.4.0"
     hmkitVersion = "1.6.0"
 
+    // 0 no release, local dependencies
+    // 1 dev release, remote dependencies
+    // 2 prod release, remote dependencies
+    releaseType = 1
+
+    // override deploy.settings repos
     if (releaseType == 1) {
-        // this overrides child project's repos.
         repo = "gradle-dev-local"
     } else if (releaseType == 2) {
         repo = "gradle-release-local"

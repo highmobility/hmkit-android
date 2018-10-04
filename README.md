@@ -1,11 +1,10 @@
 ### What is this repository for?
 
-* This is the Android SDK with Mobile and Wear reference apps.
+* This is the Android SDK with Bluetooth Explorer sample app.
 
 ### How do I get set up?
 
-* git submodule init
-* git submodule update --recursive --remote
+* git submodule update --init --recursive
 
 Supported devices: Lollipop 5.0+ with chipset support for BLE peripheral mode, https://stackoverflow.com/questions/26482611/chipsets-devices-supporting-android-5-ble-peripheral-mode https://altbeacon.github.io/android-beacon-library/beacon-transmitter-devices.html - list of some devices.
 
@@ -23,9 +22,9 @@ This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypt
 
 For a release, update the "version = 1.5.0" in all of the deploy.settings files(if needed).
 
-Set the release environment in project's build.gradle (ext property release = 0/1/2).
+Set the release environment in root build.gradle (ext property release = 0/1/2).
 call ./gradlew artifactoryPublish to release all of the packages.
-call ./gradlew :hmkit-android:artifactoryPublish to release specific packages.
+call ./gradlew :hmkit-android:artifactoryPublish to release a specific package.
 
 If pushing the same version number, in dev package will be overwritten, in release rejected.
 
