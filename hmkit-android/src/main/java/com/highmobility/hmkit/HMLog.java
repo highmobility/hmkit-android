@@ -21,7 +21,12 @@ public class HMLog {
     }
 
     static void d(String message, Object... args) {
-        d(Level.DEBUG, message, args);
+        if (HMKit.loggingLevel.getValue() >= Level.DEBUG.getValue()) {
+            // don't call to this class again(HMLog.d(Level.DEBUG, message, args)), will mess up
+            // stack index and log tag.
+            Timber.tag(getTag());
+            Timber.d(message, args);
+        }
     }
 
     static void d(Level level, String message, Object... args) {
@@ -56,9 +61,9 @@ public class HMLog {
     static final String getTag() {
         StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         if (stackTrace.length <= CALL_STACK_INDEX) {
-            throw new IllegalStateException(
-                    "Synthetic stacktrace didn't have enough elements: are you using proguard?");
+            return LOG_PREFIX;
         }
+
         return LOG_PREFIX + createStackElementTag(stackTrace[CALL_STACK_INDEX]);
     }
 
