@@ -1,14 +1,12 @@
 package com.highmobility.hmkit;
 
 import android.os.Build;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.util.Log;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import timber.log.Timber;
+import javax.annotation.Nullable;
 
 public class HMLog {
     private static final int MAX_TAG_LENGTH = 23;
@@ -17,45 +15,39 @@ public class HMLog {
     private static final String LOG_PREFIX = "hmkit-";
 
     static void init() {
-        Timber.plant(new Timber.DebugTree());
+
     }
 
     static void d(String message, Object... args) {
         if (HMKit.loggingLevel.getValue() >= Level.DEBUG.getValue()) {
-            // don't call to this class again(HMLog.d(Level.DEBUG, message, args)), will mess up
-            // stack index and log tag.
-            Timber.tag(getTag());
-            Timber.d(message, args);
+            // don't call to this class again, this will mess up stack index and log tag. Always
+            // call straight to Timber.d in a method in this class.
+            Log.d(getTag(), String.format(message, args));
         }
     }
 
     static void d(Level level, String message, Object... args) {
         if (HMKit.loggingLevel.getValue() >= level.getValue()) {
-            Timber.tag(getTag());
-            Timber.d(message, args);
+            Log.d(getTag(), String.format(message, args));
         }
     }
 
     void i(Level level, String message, Object... args) {
         if (HMKit.loggingLevel.getValue() >= level.getValue()) {
-            Timber.tag(getTag());
-            Timber.i(message, args);
+            Log.i(getTag(), String.format(message, args));
         }
     }
 
     static void i(String message, Object... args) {
-        Timber.tag(getTag());
-        Timber.i(message, args);
+        Log.i(getTag(), String.format(message, args));
     }
 
     static void e(Throwable t, String message, Object... args) {
-        Timber.tag(getTag());
-        Timber.e(t, message, args);
+        Log.e(getTag(), String.format(message, args), t);
     }
 
     static void e(String message, Object... args) {
-        Timber.tag(getTag());
-        Timber.e(message, args);
+        Log.e(getTag(), String.format(message, args));
     }
 
     static final String getTag() {
@@ -67,9 +59,7 @@ public class HMLog {
         return LOG_PREFIX + createStackElementTag(stackTrace[CALL_STACK_INDEX]);
     }
 
-    // Timber does not allow overriding of DebugTree's stack index. https://github
-    // .com/JakeWharton/timber/pull/314
-    @Nullable static String createStackElementTag(@NotNull StackTraceElement element) {
+    @Nullable static String createStackElementTag(StackTraceElement element) {
         String tag = element.getClassName();
         Matcher m = ANONYMOUS_CLASS.matcher(tag);
         if (m.find()) {
