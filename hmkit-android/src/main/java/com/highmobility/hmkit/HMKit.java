@@ -587,7 +587,7 @@ public class HMKit {
     }
 
     /**
-     * {@link #downloadCertificate(String, DownloadCallback)} result.
+     * {@link #downloadAccessCertificate(String, DownloadCallback)} result.
      */
     public interface DownloadCallback {
         /**

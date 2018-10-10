@@ -103,7 +103,7 @@ class ScannedLink extends Link {
 
     void writeValue(byte[] value) {
         if (writeCharacteristic != null) {
-            if (HMKit.loggingLevel.getValue() >= HMKit.LoggingLevel.DEBUG.getValue())
+            if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue())
                 HMLog.d("write value " + ByteUtils.hexFromBytes(value));
 
             if (writeCharacteristic.setValue(value) == false || gatt.writeCharacteristic
@@ -138,7 +138,7 @@ class ScannedLink extends Link {
             // TSODO: how to failed connection should be handled
             // also remove authenticatingMac from scanner
 
-            if (HMKit.loggingLevel.getValue() >= HMKit.LoggingLevel.DEBUG.getValue())
+            if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue())
                 HMLog.d("cannot initiate discoverServices");
         }
     }
