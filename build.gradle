@@ -28,9 +28,9 @@ allprojects {
 
 ext {
     compileSdkVersion = 26
+    // these are not release numbers. release numbers are in deploy.settings files.
     cryptoVersion = "1.4.0"
     utilsVersion = "1.4.0"
-    hmkitVersion = "1.6.0"
 
     // 0 no release, local dependencies
     // 1 dev release, remote dependencies

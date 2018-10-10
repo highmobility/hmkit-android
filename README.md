@@ -1,10 +1,10 @@
-This is the Android HMKit with Bluetooth Explorer sample app.
+This is the HMKit Android project.
 
 ### Setup
 
 * git submodule update --init --recursive
 * import the Gradle project.
-* The test app is the Bluetooth Auto API Explorer app. run MainActivity in ble-explorer-app package.
+* Build hmkit-android module.
 * If there are errors: Try `Gradle clean`, `File > Invalidate caches and restart`.
 
 Supported devices: Lollipop 5.0+ with chipset support for BLE peripheral mode, https://stackoverflow.com/questions/26482611/chipsets-devices-supporting-android-5-ble-peripheral-mode https://altbeacon.github.io/android-beacon-library/beacon-transmitter-devices.html - list of some devices.
