@@ -51,18 +51,27 @@ class GattServer extends BluetoothGattServerCallback {
             return;
         }
 
-        BluetoothGattService service = createGattServer();
+        if (gattServer == null) {
+            // first server open
+            gattServer = ble.openGattServer(this);
 
-        if (service != null) {
-            if (gattServer.addService(service) == false) {
-                HMLog.e("Cannot add service to GATT server");
-                broadcaster.onServiceAdded(false);
+            if (gattServer == null) {
+                HMLog.e("Cannot create gatt server");
+                onServiceAdded(BluetoothGatt.GATT_FAILURE, null);
+                return;
             }
-            // else gatt server started adding the service and will call onServiceAdded.
-        } else {
-            // failed to create the gatt service
-            broadcaster.onServiceAdded(false);
         }
+
+        HMLog.d("createGattServer()");
+        BluetoothGattService service = createGattService();
+
+        if (service == null) {
+            onServiceAdded(BluetoothGatt.GATT_FAILURE, null);
+        } else if (gattServer.addService(service) == false) {
+            HMLog.e("Cannot add service to GATT server");
+            onServiceAdded(BluetoothGatt.GATT_FAILURE, null);
+        }
+        // now gatt server started adding the service and will call onServiceAdded.
     }
 
     void close() {
@@ -115,18 +124,7 @@ class GattServer extends BluetoothGattServerCallback {
     /**
      * @return true if created the server with the service and characteristics.
      */
-    private BluetoothGattService createGattServer() {
-        if (gattServer == null) {
-            gattServer = ble.openGattServer(this);
-
-            if (gattServer == null) {
-                HMLog.e("Cannot create gatt server");
-                return null;
-            }
-        }
-
-        HMLog.d("createGattServer()");
-
+    private BluetoothGattService createGattService() {
         // create the service
         BluetoothGattService service = new BluetoothGattService(Constants.SERVICE_UUID,
                 BluetoothGattService.SERVICE_TYPE_PRIMARY);
@@ -227,6 +225,8 @@ class GattServer extends BluetoothGattServerCallback {
 
         return service;
     }
+
+    // MARK: BluetoothGattServerCallback
 
     @Override
     public void onConnectionStateChange(final BluetoothDevice device, int status, int newState) {
