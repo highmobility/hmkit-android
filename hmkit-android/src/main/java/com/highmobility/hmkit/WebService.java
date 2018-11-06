@@ -23,8 +23,8 @@ import java.util.Map;
 
 class WebService {
     private static final String testBaseUrl = "https://limitless-gorge-44605.herokuapp.com"; // test
-    private static final String productionBaseUrl = "https://developers.high-mobility.com"; //
-    // production
+    private static final String productionBaseUrl = "https://high-mobility.com"; // production
+
     private static final String stagingBaseUrl = "https://developers.h-m.space"; // staging
     private static final String apiUrl = "/hm_cloud/api/v1";
 
