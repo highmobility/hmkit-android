@@ -476,8 +476,7 @@ public class HMKit {
         // this method should be deleted. cannot be initialised without context
         throwIfDeviceCertificateNotSet();
         return storage.deleteCertificate(serial.getByteArray(), core.getDeviceCertificate()
-                .getSerial()
-                .getByteArray());
+                .getSerial().getByteArray());
     }
 
     /**
