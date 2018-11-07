@@ -1,6 +1,7 @@
 /Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/obj/local/x86/objs/hmbtcore/__/__/__/__/crypto-c/Crypto/Crypto.o: \
   /Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/../../../../crypto-c/Crypto/Crypto.c \
   ../../../../crypto-c/Crypto/Crypto.h \
+  /Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/hm_config.h \
   /Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/openssl/aes.h \
   /Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/openssl/opensslconf.h \
   /Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/openssl/ecdh.h \
@@ -24,6 +25,8 @@
   /Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/openssl/rand.h
 
 ../../../../crypto-c/Crypto/Crypto.h:
+
+/Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/hm_config.h:
 
 /Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/openssl/aes.h:
 
