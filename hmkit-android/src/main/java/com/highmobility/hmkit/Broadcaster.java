@@ -250,22 +250,10 @@ public class Broadcaster extends Core.Broadcaster {
      * accompanying registered certificate are deleted from the storage.
      *
      * @param serial The 9-byte serial number of the access providing broadcaster
-     * @return {@link Storage.Result#SUCCESS} on success or {@link Storage.Result#INTERNAL_ERROR }
-     * if there are no matching certificate pairs for this serial.
      */
-    public Storage.Result revokeCertificate(DeviceSerial serial) {
-        if (storage.certWithGainingSerial(serial.getByteArray()) == null
-                || storage.certWithProvidingSerial(serial.getByteArray()) == null) {
-            return Storage.Result.INTERNAL_ERROR;
-        }
-
-        if (storage.deleteCertificateWithGainingSerial(serial.getByteArray()) == false)
-            return Storage.Result.INTERNAL_ERROR;
-        if (storage.deleteCertificateWithProvidingSerial(serial.getByteArray()) ==
-                false)
-            return Storage.Result.INTERNAL_ERROR;
-
-        return Storage.Result.SUCCESS;
+    public void revokeCertificate(DeviceSerial serial) {
+        storage.deleteCertificateWithGainingSerial(serial.getByteArray());
+        storage.deleteCertificateWithProvidingSerial(serial.getByteArray());
     }
 
     /**

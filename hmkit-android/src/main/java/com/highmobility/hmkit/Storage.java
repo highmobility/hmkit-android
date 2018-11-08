@@ -250,10 +250,7 @@ public class Storage {
             AccessCertificate cert = certs[i];
             if (cert.getGainerSerial().equals(serial)) {
                 removedIndex = i;
-
-                HMLog.d("deleteCertificateWithGainingSerial success: " +
-                        "%s", cert.toString());
-
+                HMLog.d("deleteCertificateWithGainingSerial success: %s", cert.toString());
                 break;
             }
         }
@@ -263,8 +260,7 @@ public class Storage {
             if (writeCertificates(newCerts) == true) return true;
         }
 
-        HMLog.d("deleteCertificateWithGainingSerial failed: %s",
-                ByteUtils.hexFromBytes(serial));
+        HMLog.d("deleteCertificateWithGainingSerial failed: %s", ByteUtils.hexFromBytes(serial));
 
         return false;
     }
