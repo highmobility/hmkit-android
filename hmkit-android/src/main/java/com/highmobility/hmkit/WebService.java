@@ -21,35 +21,35 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 class WebService {
-    private static final String testBaseUrl = "https://limitless-gorge-44605.herokuapp.com"; // test
-    private static final String productionBaseUrl = "https://high-mobility.com"; // production
-
-    private static final String stagingBaseUrl = "https://developers.h-m.space"; // staging
+    private static final String defaultUrl = "https://high-mobility.com";
+    private static final String xvUrl = "https://xv-platform.high-mobility.com/";
     private static final String apiUrl = "/hm_cloud/api/v1";
+    
+    private static final byte[] testIssuer = new byte[]{0x74, 0x65, 0x73, 0x74};
+    private static final byte[] xvIssuer = new byte[]{0x78, 0x76, 0x68, 0x6D};
 
-    private static String telematicsUrl;
-
+    private static String baseUrl;
     private final RequestQueue queue;
 
-    WebService(Context context) {
+    WebService(Context context, Issuer issuer, @Nullable String customUrl) {
         // ignoreSslErrors();
         queue = Volley.newRequestQueue(context);
-        if (HMKit.customEnvironmentBaseUrl != null) {
-            telematicsUrl = HMKit.customEnvironmentBaseUrl + apiUrl;
-        } else {
-            switch (HMKit.environment) {
-                case TEST:
-                    telematicsUrl = testBaseUrl + apiUrl;
-                    break;
-                case STAGING:
-                    telematicsUrl = stagingBaseUrl + apiUrl;
-                    break;
-                case PRODUCTION:
-                    telematicsUrl = productionBaseUrl + apiUrl;
-                    break;
-            }
-        }
+        setIssuer(issuer, customUrl);
+    }
+
+    void setIssuer(Issuer issuer, @Nullable String customUrl) {
+        if (customUrl != null) {
+            baseUrl = customUrl;
+        } else if (issuer.equals(testIssuer)) {
+            baseUrl = defaultUrl;
+        } else if (issuer.equals(xvIssuer)) {
+            baseUrl = xvUrl;
+        } else baseUrl = defaultUrl;
+
+        baseUrl += apiUrl;
     }
 
     void requestAccessCertificate(String accessToken,
@@ -57,7 +57,7 @@ class WebService {
                                   DeviceSerial serialNumber,
                                   final Response.Listener<JSONObject> response,
                                   Response.ErrorListener error) throws IllegalArgumentException {
-        String url = telematicsUrl + "/access_certificates";
+        String url = baseUrl + "/access_certificates";
 
         // headers
         final Map<String, String> headers = new HashMap<>(1);
@@ -99,7 +99,7 @@ class WebService {
 
     void sendTelematicsCommand(Bytes command, DeviceSerial serial, Issuer issuer, final Response
             .Listener<JSONObject> response, Response.ErrorListener error) {
-        String url = telematicsUrl + "/telematics_commands";
+        String url = baseUrl + "/telematics_commands";
         // headers
         final Map<String, String> headers = new HashMap<>(1);
         headers.put("Content-Type", "application/json");
@@ -130,7 +130,7 @@ class WebService {
                     }
                 }, error) {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
+            public Map<String, String> getHeaders() {
                 return headers;
             }
         };
@@ -140,7 +140,7 @@ class WebService {
 
     void getNonce(DeviceSerial serial, final Response.Listener<JSONObject> response, Response
             .ErrorListener error) {
-        String url = telematicsUrl + "/nonces";
+        String url = baseUrl + "/nonces";
 
         // headers
         final Map<String, String> headers = new HashMap<>(1);
