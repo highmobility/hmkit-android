@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:layout_margin="10dp"
         android:orientation="vertical"
-        android:layout_centerInParent="true">
+        android:layout_centerInParent="true"
+        android:gravity="center">
 
         <ProgressBar
             android:id="@+id/progress_bar"
@@ -24,6 +25,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="create access token"/>
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"/>
 
         <TextView
             android:id="@+id/text_view"

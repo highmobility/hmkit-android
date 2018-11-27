@@ -16,13 +16,12 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <action android:name="android.intent.action.VIEW"/>
-
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <category android:name="android.intent.category.DEFAULT"/>
 
                 <data
                     android:scheme="com.hm.1542392929-z6dz5swisgnv"
-                    android:host="/in-app"/>
+                    android:host="in-app"/>
             </intent-filter>
         </activity>
     </application>

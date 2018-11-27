@@ -2,6 +2,7 @@ package com.highmobility.oauthtest
 
 import android.app.Activity
 import android.os.Bundle
+import android.os.Handler
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
@@ -36,10 +37,10 @@ class OAuthTestActivity : Activity() {
         button.setOnClickListener {
             HMKit.getInstance().oAuth.getAccessToken(
                     "***REMOVED***",
-                    "",
-                    "",
+                    "https://owner-panel.h-m.space/oauth/new",
+                    "***REMOVED***",
                     "com.hm.1542392929-z6dz5swisgnv://in-app",
-                    "",
+                    "https://xv-platform.h-m.space/hm_cloud/api/v1/access_tokens",
                     null,
                     null,
                     null
@@ -52,6 +53,11 @@ class OAuthTestActivity : Activity() {
                 }
             }
         }
+        
+        // TODO: delete
+        Handler().postDelayed({
+            button.performClick()
+        }, 100)
     }
 
     private fun onAccessTokenDownloaded(accessToken: String) {

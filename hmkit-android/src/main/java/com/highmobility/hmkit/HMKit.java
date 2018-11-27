@@ -319,6 +319,8 @@ public class HMKit {
             core = new Core(storage, threadManager, certificate, privateKey, issuerPublicKey);
         else core.setDeviceCertificate(certificate, privateKey, issuerPublicKey);
 
+        if (oauth != null) oauth.setDeviceCertificate(privateKey, certificate.getSerial());
+
         HMLog.d(HMLog.Level.NONE, "Set certificate: " + certificate.toString());
     }
 
