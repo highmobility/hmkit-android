@@ -1,8 +1,8 @@
-/Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/obj/local/arm64-v8a/objs/hmbtcore/hmbtcore.o: \
-  /Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/hmbtcore.c \
+/Users/maiduule/Workspace/hmkit-android/hmkit-android/src/main/obj/local/arm64-v8a/objs/hmbtcore/hmbtcore.o: \
+  /Users/maiduule/Workspace/hmkit-android/hmkit-android/src/main/jni/hmbtcore.c \
   ../../../../high-mobility-bt-core/hm_bt_core.h \
   ../../../../high-mobility-bt-core/hm_api.h \
-  /Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/hmbtcore.h \
+  /Users/maiduule/Workspace/hmkit-android/hmkit-android/src/main/jni/hmbtcore.h \
   ../../../../crypto-c/Crypto/Crypto.h \
   ../../../../high-mobility-bt-core/hm_bt_debug_hal.h \
   ../../../../high-mobility-bt-core/hm_cert.h
@@ -11,7 +11,7 @@
 
 ../../../../high-mobility-bt-core/hm_api.h:
 
-/Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/hmbtcore.h:
+/Users/maiduule/Workspace/hmkit-android/hmkit-android/src/main/jni/hmbtcore.h:
 
 ../../../../crypto-c/Crypto/Crypto.h:
 
