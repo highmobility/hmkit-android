@@ -385,7 +385,7 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalremovePublicKey(byte[] serial) {
-        if (storage.deleteCertificateWithGainingSerial(serial)) {
+        if (storage.deleteCertificate(serial, null)) {
             HMLog.d(HMLog.Level.ALL, "HMPersistenceHalremovePublicKey success");
             return 0;
         } else {

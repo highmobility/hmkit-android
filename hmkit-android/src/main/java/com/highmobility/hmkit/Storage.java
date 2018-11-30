@@ -213,36 +213,53 @@ public class Storage {
 
     }
 
-    boolean deleteCertificate(byte[] gainingSerial, byte[] providingSerial) {
+    /**
+     * Delete all certs that have the given gaining serial or providing serial or both.
+     *
+     * @param gainingSerial   The gaining serial.
+     * @param providingSerial The providing serial.
+     * @return true if one or more certificates were deleted.
+     */
+    boolean deleteCertificate(@Nullable byte[] gainingSerial, @Nullable byte[] providingSerial) {
+        HMLog.d("deleteCertificate for gaining: %s providing: %s",
+                gainingSerial != null ? ByteUtils.hexFromBytes(gainingSerial) : "any",
+                providingSerial != null ? ByteUtils.hexFromBytes(providingSerial) : "any");
+
+        if (gainingSerial == null && providingSerial == null) return false;
         AccessCertificate[] certs = getCertificates();
 
-        int removedIndex = -1;
+        ArrayList<AccessCertificate> newCertificates = new ArrayList<>(certs.length);
+
+        boolean checkingGaining = gainingSerial != null;
+        boolean checkingProviding = providingSerial != null;
+        boolean checkingBoth = checkingGaining && checkingProviding;
+        boolean foundCertToDelete = false;
+
         for (int i = 0; i < certs.length; i++) {
             AccessCertificate cert = certs[i];
-            if (cert.getGainerSerial().equals(gainingSerial) &&
-                    cert.getProviderSerial().equals(providingSerial)) {
-                removedIndex = i;
 
-                HMLog.d("deleteCertificate success: %s", cert
-                        .toString());
-
-                break;
+            if ((checkingBoth && cert.getGainerSerial().equals(gainingSerial) &&
+                    cert.getProviderSerial().equals(providingSerial)) ||
+                    (checkingGaining && cert.getGainerSerial().equals(gainingSerial)) ||
+                    (checkingProviding && cert.getProviderSerial().equals(providingSerial))) {
+                HMLog.d("will delete cert: %s", cert.toString());
+                foundCertToDelete = true;
+            } else {
+                newCertificates.add(cert);
             }
         }
 
-        if (removedIndex != -1) {
-            AccessCertificate[] newCerts = removeAtIndex(removedIndex, certs);
-            if (writeCertificates(newCerts) == true) return true;
+        if (foundCertToDelete) {
+            boolean result = writeCertificates(newCertificates.toArray(new AccessCertificate[0]));
+            if (result != true) HMLog.d("deleteCertificate: failed to write");
+            return result;
+        } else {
+            HMLog.d("deleteCertificate: did not find a cert to delete");
+            return false;
         }
-
-        HMLog.d("deleteCertificate: failed for gaining: %s providing " +
-                "%s", ByteUtils.hexFromBytes(gainingSerial), ByteUtils.hexFromBytes
-                (providingSerial));
-
-        return false;
     }
 
-    boolean deleteCertificateWithGainingSerial(byte[] serial) {
+    /*boolean deleteCertificateWithGainingSerial(byte[] serial) {
         AccessCertificate[] certs = getCertificates();
 
         int removedIndex = -1;
@@ -287,7 +304,8 @@ public class Storage {
         }
 
         return false;
-    }
+    }*/
+    // TODO: delete ^^
 
     AccessCertificate certWithProvidingSerial(byte[] serial) {
         AccessCertificate[] certs = getCertificates();
@@ -323,21 +341,19 @@ public class Storage {
 
         if (certs.length >= Constants.certificateStorageCount) return Result.STORAGE_FULL;
 
-        // delete existing cert with same serials
+        // replace existing cert with same serials if exists
         for (int i = 0; i < certs.length; i++) {
             AccessCertificate cert = certs[i];
             if (cert.getGainerSerial().equals(certificate.getGainerSerial())
                     && cert.getProviderSerial().equals(certificate.getProviderSerial())
                     && cert.getGainerPublicKey().equals(certificate.getGainerPublicKey())) {
-
-                if (!deleteCertificateWithGainingSerial(certificate.getGainerSerial()
-                        .getByteArray())) {
-                    HMLog.e("failed to delete existing cert");
-                }
+                certs[i] = certificate;
+                if (writeCertificates(certs) == true) return Result.SUCCESS;
+                return Result.STORAGE_FULL;
             }
         }
 
-        certs = getCertificates();
+        // otherwise add new cert
         AccessCertificate[] newCerts = new AccessCertificate[certs.length + 1];
         System.arraycopy(certs, 0, newCerts, 0, certs.length);
         newCerts[newCerts.length - 1] = certificate;

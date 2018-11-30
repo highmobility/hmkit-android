@@ -25,8 +25,8 @@ import javax.annotation.Nullable;
  * Broadcaster acts as a gateway to the application's capability to broadcast itself and handle
  * ConnectedLink connectivity.
  * <p>
- * Access the broadcaster from {@link HMKit#getBroadcaster()}. Broadcaster is created once and
- * then bound to HMKit instance.
+ * Access the broadcaster from {@link HMKit#getBroadcaster()}. Broadcaster is created once and then
+ * bound to HMKit instance.
  */
 public class Broadcaster extends Core.Broadcaster {
     /**
@@ -252,8 +252,8 @@ public class Broadcaster extends Core.Broadcaster {
      * @param serial The 9-byte serial number of the access providing broadcaster
      */
     public void revokeCertificate(DeviceSerial serial) {
-        storage.deleteCertificateWithGainingSerial(serial.getByteArray());
-        storage.deleteCertificateWithProvidingSerial(serial.getByteArray());
+        storage.deleteCertificate(serial.getByteArray(), null);
+        storage.deleteCertificate(null, serial.getByteArray());
     }
 
     /**
@@ -309,8 +309,8 @@ public class Broadcaster extends Core.Broadcaster {
     }
 
     /**
-     * Called with {@link HMKit#terminate()}. Broadcasting and alive pinging will be stopped
-     * because ble will be stopped.
+     * Called with {@link HMKit#terminate()}. Broadcasting and alive pinging will be stopped because
+     * ble will be stopped.
      *
      * @throws IllegalStateException when there are still connected links.
      */
