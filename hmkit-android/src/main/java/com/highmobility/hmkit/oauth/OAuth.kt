@@ -17,7 +17,6 @@ import com.highmobility.crypto.value.PrivateKey
 import com.highmobility.hmkit.HMLog.d
 import com.highmobility.hmkit.oauth.OAuthActivity
 import com.highmobility.utils.Base64
-import com.highmobility.value.Bytes
 import org.json.JSONException
 import org.json.JSONObject
 import java.nio.charset.Charset
@@ -125,18 +124,14 @@ class OAuth internal constructor(private val context: Context,
 
     private fun getJwt() : String {
         var privateKey = this.privateKey
-        d(this.privateKey.hex)
+
         val header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}"
         var body = "{\"code_verifier\":\"$nonceString\",\"serial_number\":\"${deviceSerial.hex}\"}"
-        val jsonHeader = Base64.encodeUrlSafe(header.toByteArray())
 
-        /*///
-        privateKey = PrivateKey("***REMOVED***")
-        body = "{\"code_verifier\":\"tomoyo\",\"serial_number\":\"6A1A7C3494F0B01C7E\"}"
-        /// TODO: delete test*/
+        val headerBase64 = Base64.encodeUrlSafe(header.toByteArray())
+        val bodyBase64 = Base64.encodeUrlSafe(body.toByteArray())
 
-        val jsonBody = Base64.encodeUrlSafe(body.toByteArray())
-        val jwtContent = String.format("%s.%s", jsonHeader, jsonBody)
+        val jwtContent = String.format("%s.%s", headerBase64, bodyBase64)
         val jwtSignature = Crypto.signJWT(jwtContent.toByteArray(), privateKey)
 
         return String.format("%s.%s", jwtContent, jwtSignature.base64UrlSafe)
