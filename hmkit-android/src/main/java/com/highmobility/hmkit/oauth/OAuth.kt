@@ -123,8 +123,6 @@ class OAuth internal constructor(private val context: Context,
     }
 
     private fun getJwt() : String {
-        var privateKey = this.privateKey
-
         val header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}"
         var body = "{\"code_verifier\":\"$nonceString\",\"serial_number\":\"${deviceSerial.hex}\"}"
 
