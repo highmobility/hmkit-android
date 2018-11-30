@@ -31,7 +31,10 @@ android {
 dependencies {
     implementation project(':hmkit-android')
     implementation project(':hm-java-crypto')
-    implementation 'com.highmobility:hmkit-auto-api:1.8.1'
+    implementation project(':hm-java-utils')
+    implementation 'com.highmobility:hmkit-auto-api:1.8.1', {
+        exclude group: 'com.highmobility', module: 'hmkit-utils'
+    }
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'

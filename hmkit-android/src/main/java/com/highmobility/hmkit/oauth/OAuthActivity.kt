@@ -28,10 +28,9 @@ internal class OAuthActivity : Activity() {
         HMKit.getInstance().oAuth.didReturnFromUri(intent?.data, this)
     }
 
-    override fun onResume() {
+    /*override fun onResume() {
         super.onResume()
-        d("onResume ${intent.data} $this")
         // TODO: 2018-11-26 if browser was started and came back with back button, fail the oauth
         // process
-    }
+    }*/
 }

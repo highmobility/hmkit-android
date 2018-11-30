@@ -20,6 +20,7 @@ import com.highmobility.utils.Base64
 import com.highmobility.value.Bytes
 import org.json.JSONException
 import org.json.JSONObject
+import java.nio.charset.Charset
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
@@ -60,15 +61,24 @@ class OAuth internal constructor(private val context: Context,
         this.redirectScheme = redirectScheme
         this.tokenUrl = tokenUrl
         this.completionHandler = completionHandler
+        val nonceBytes = nonceString.toByteArray(Charset.forName("ASCII"))
+        val nonceSha256 = Crypto.sha256(nonceBytes).byteArray
+        val codeChallenge = Base64.encodeUrlSafe(nonceSha256)
 
-        val webViewUrl = webViewUrl(appId, authUrl, clientId, redirectScheme, startDate,
-                endDate, state)
-        d("start browser:$webViewUrl")
+        var webUrl = authUrl
+        webUrl += "?app_id=$appId"
+        webUrl += "&client_id=$clientId"
+        webUrl += "&redirect_uri=$redirectScheme"
+        webUrl += "&code_challenge=$codeChallenge"
 
-        intent.putExtra(EXTRA_URI_KEY, webViewUrl)
+        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
+        if (startDate != null) webUrl += "&validity_start_date=${df.format(startDate)}"
+        if (endDate != null) webUrl += "&validity_end_date=${df.format(endDate)}"
+        if (state != null) webUrl += "&state=$state"
 
+        d("start browser\nnonce: $nonceString\nurl: $webUrl\njwt: ${getJwt()}") // TODO: 2018-11-30 delete jwt log
 
-        d("jwt: ${getJwt()}")
+        intent.putExtra(EXTRA_URI_KEY, webUrl)
 
         context.startActivity(intent)
     }
@@ -81,14 +91,6 @@ class OAuth internal constructor(private val context: Context,
             finishedDownloadingAccessToken(null, "Invalid redirect uri")
             return
         }
-
-        /*
-        grant_type: authorization_code
-        code: the code that you get in the redirect
-        redirect_uri: redirect_uri that you sent during the start of the flow
-        client_id: client_id! static value
-        code_verifier: a JWT token that is signed by device's private key
-         */
 
         var tokenUrl = tokenUrl
 
@@ -121,33 +123,21 @@ class OAuth internal constructor(private val context: Context,
         Volley.newRequestQueue(context).add(request)
     }
 
-    private fun getJwt(): String {
+    private fun getJwt() : String {
+        var privateKey = this.privateKey
+        d(this.privateKey.hex)
         val header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}"
-        var body = "{serial_number=\"${deviceSerial.hex}\",code_verifier=\"$nonceString\"}"
-
+        var body = "{\"code_verifier\":\"$nonceString\",\"serial_number\":\"${deviceSerial.hex}\"}"
         val jsonHeader = Base64.encodeUrlSafe(header.toByteArray())
-        var jsonBody = Base64.encodeUrlSafe(body.toByteArray())
 
-        var jwtContent = String.format("%s.%s", jsonHeader, jsonBody)
-        var jwtSignature = Crypto.sign(sha256(jwtContent), privateKey)
-
-        ///
-        /*val miladPrivBytes = Bytes("***REMOVED***")
-        val miladPrivBase64 = Base64.encode(miladPrivBytes.byteArray)
-
-        val miladPublicBytes = Bytes("***REMOVED***")
-        val miladPublicBase64 = Base64.encode(miladPublicBytes.byteArray)
-
+        /*///
+        privateKey = PrivateKey("***REMOVED***")
         body = "{\"code_verifier\":\"tomoyo\",\"serial_number\":\"6A1A7C3494F0B01C7E\"}"
-        d("header:$header body:$body")
-        jsonBody = Base64.encode(body.toByteArray())
-        jwtContent = String.format("%s.%s", jsonHeader, jsonBody)
+        /// TODO: delete test*/
 
-        d("priv $miladPrivBytes $miladPrivBase64\npublic $miladPublicBytes $miladPublicBase64")
-
-        jwtSignature = Crypto.sign(sha256(jwtContent), miladPrivBytes.byteArray)*/
-
-        /// // TODO: delete
+        val jsonBody = Base64.encodeUrlSafe(body.toByteArray())
+        val jwtContent = String.format("%s.%s", jsonHeader, jsonBody)
+        val jwtSignature = Crypto.signJWT(jwtContent.toByteArray(), privateKey)
 
         return String.format("%s.%s", jwtContent, jwtSignature.base64UrlSafe)
     }
@@ -156,26 +146,6 @@ class OAuth internal constructor(private val context: Context,
                              deviceSerial: DeviceSerial) {
         this.privateKey = privateKey
         this.deviceSerial = deviceSerial
-    }
-
-    private fun webViewUrl(appId: String,
-                           authUrl: String,
-                           clientId: String,
-                           redirectScheme: String,
-                           startDate: Calendar? = null,
-                           endDate: Calendar? = null,
-                           state: String? = null): String {
-        var webUrl = authUrl
-        webUrl += "?app_id=$appId"
-        webUrl += "&client_id=$clientId"
-        webUrl += "&redirect_uri=$redirectScheme"
-        webUrl += "&code_challenge=${Base64.encode(sha256(nonceString))}"
-
-        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
-        if (startDate != null) webUrl += "&validity_start_date=${df.format(startDate)}"
-        if (endDate != null) webUrl += "&validity_end_date=${df.format(endDate)}"
-        if (state != null) webUrl += "&state=$state"
-        return webUrl
     }
 
     private fun finishedDownloadingAccessToken(accessToken: String?, errorMessage: String?) {
@@ -202,13 +172,7 @@ class OAuth internal constructor(private val context: Context,
     }
 
     private fun createNonce() {
-        val range = ('a'..'z')
-        nonceString = (1..9)
-                .map {
-                    (Random().nextInt(range.endInclusive.toInt() - range.start.toInt()) +
-                            range.start.toInt()).toChar()
-                }
-                .joinToString("")
+        nonceString = Crypto.createSerialNumber().hex
     }
 
     private fun sha256(input: String): ByteArray {
