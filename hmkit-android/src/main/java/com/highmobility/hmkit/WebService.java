@@ -101,35 +101,33 @@ class WebService {
     void sendTelematicsCommand(Bytes command, DeviceSerial serial, Issuer issuer, final Response
             .Listener<JSONObject> response, Response.ErrorListener error) {
         String url = telematicsUrl + "/telematics_commands";
-        // headers
         final Map<String, String> headers = new HashMap<>(1);
+
+        // headers
         headers.put("Content-Type", "application/json");
 
-        // payload
-        JSONObject payload = new JSONObject();
-        try {
-            payload.put("serial_number", serial.getHex());
-            payload.put("issuer", issuer.getHex());
-            payload.put("data", command.getBase64());
-        } catch (JSONException e) {
-            throw new IllegalArgumentException();
-        }
+        Uri uri = Uri.parse(url)
+                .buildUpon()
+                .appendQueryParameter("serial_number", serial.getHex())
+                .appendQueryParameter("issuer", issuer.getHex())
+                .appendQueryParameter("data", command.getBase64())
+                .build();
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new
-                Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
-                            try {
-                                HMLog.d("response " + jsonObject.toString(2));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        response.onResponse(jsonObject);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, uri.toString(),
+                null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
+                    try {
+                        HMLog.d("response " + jsonObject.toString(2));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, error) {
+                }
+
+                response.onResponse(jsonObject);
+            }
+        }, error) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 return headers;
@@ -147,29 +145,27 @@ class WebService {
         final Map<String, String> headers = new HashMap<>(1);
         headers.put("Content-Type", "application/json");
 
-        // payload
-        JSONObject payload = new JSONObject();
-        try {
-            payload.put("serial_number", serial.getHex());
-        } catch (JSONException e) {
-            throw new IllegalArgumentException();
-        }
+        // query
+        Uri uri = Uri.parse(url)
+                .buildUpon()
+                .appendQueryParameter("serial_number", serial.getHex())
+                .build();
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new
-                Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
-                            try {
-                                HMLog.d("response " + jsonObject.toString(2));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        response.onResponse(jsonObject);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, uri.toString(),
+                null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
+                    try {
+                        HMLog.d("response " + jsonObject.toString(2));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, error) {
+                }
+
+                response.onResponse(jsonObject);
+            }
+        }, error) {
             @Override
             public Map<String, String> getHeaders() {
                 return headers;
