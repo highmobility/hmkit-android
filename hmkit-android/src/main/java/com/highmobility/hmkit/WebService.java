@@ -1,6 +1,7 @@
 package com.highmobility.hmkit;
 
 import android.content.Context;
+import android.net.Uri;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -18,6 +19,7 @@ import com.highmobility.value.Bytes;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,37 +59,36 @@ class WebService {
                                   DeviceSerial serialNumber,
                                   final Response.Listener<JSONObject> response,
                                   Response.ErrorListener error) throws IllegalArgumentException {
+
         String url = telematicsUrl + "/access_certificates";
+        Bytes accessTokenBytes = new Bytes(accessToken.getBytes());
+        String signature = Crypto.sign(accessTokenBytes, privateKey).getBase64();
+
+        Uri uri = Uri.parse(url)
+                .buildUpon()
+                .appendQueryParameter("serial_number", serialNumber.getHex())
+                .appendQueryParameter("access_token", accessToken)
+                .appendQueryParameter("signature", signature)
+                .build();
 
         // headers
         final Map<String, String> headers = new HashMap<>(1);
         headers.put("Content-Type", "application/json");
 
-        // payload
-        JSONObject payload = new JSONObject();
-        try {
-            Bytes accessTokenBytes = new Bytes(accessToken.getBytes("UTF-8"));
-            payload.put("serial_number", serialNumber.getHex());
-            payload.put("access_token", accessToken);
-            payload.put("signature", Crypto.sign(accessTokenBytes, privateKey).getBase64());
-        } catch (Exception e) {
-            throw new IllegalArgumentException();
-        }
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new
-                Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
-                            try {
-                                HMLog.d("response " + jsonObject.toString(2));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        response.onResponse(jsonObject);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, uri.toString(),
+                null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
+                    try {
+                        HMLog.d("response " + jsonObject.toString(2));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, error) {
+                }
+                response.onResponse(jsonObject);
+            }
+        }, error) {
             @Override
             public Map<String, String> getHeaders() {
                 return headers;
@@ -194,14 +195,10 @@ class WebService {
             byte[] body = request.getBody();
             String bodyString = body != null ? "\n" + new String(request.getBody()) : "";
             JSONObject headers = new JSONObject(request.getHeaders());
-
-            try {
-                HMLog.d(request.getUrl() + "\n" + headers.toString(2) + bodyString);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } catch (AuthFailureError authFailureError) {
-            authFailureError.printStackTrace();
+            String decodedUrl = URLDecoder.decode(request.getUrl(), "ASCII");
+            HMLog.d(decodedUrl + "\n" + headers.toString(2) + bodyString);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
