@@ -24,12 +24,13 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 class WebService {
-    private static final String defaultUrl = "https://high-mobility.com";
-    private static final String xvUrl = "https://xv-platform.high-mobility.com/";
-    private static final String apiUrl = "/hm_cloud/api/v1";
+    private static final String defaultUrl = "https://sandbox.api.high-mobility.com";
+    private static final String testUrl = defaultUrl;
+    private static final String hmxvUrl = "https://api.high-mobility.com";
+    private static final String apiUrl = "/v1";
     
-    private static final byte[] testIssuer = new byte[]{0x74, 0x65, 0x73, 0x74};
-    private static final byte[] xvIssuer = new byte[]{0x78, 0x76, 0x68, 0x6D};
+    private static final byte[] testIssuer = new byte[]{ 0x74, 0x65, 0x73, 0x74 };
+    private static final byte[] xvIssuer = new byte[]{ 0x78, 0x76, 0x68, 0x6D };
 
     private static String baseUrl;
     private final RequestQueue queue;
@@ -44,9 +45,9 @@ class WebService {
         if (customUrl != null) {
             baseUrl = customUrl;
         } else if (issuer.equals(testIssuer)) {
-            baseUrl = defaultUrl;
+            baseUrl = testUrl;
         } else if (issuer.equals(xvIssuer)) {
-            baseUrl = xvUrl;
+            baseUrl = hmxvUrl;
         } else baseUrl = defaultUrl;
 
         baseUrl += apiUrl;
