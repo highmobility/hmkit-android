@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Bundle
 import com.highmobility.basicoauth.OAuth
 import com.highmobility.hmkit.HMKit
-import com.highmobility.hmkit.HMLog.d
 
 import com.highmobility.hmkit.R
 

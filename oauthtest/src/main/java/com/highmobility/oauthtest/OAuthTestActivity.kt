@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import com.highmobility.autoapi.CommandResolver
+import com.highmobility.autoapi.Failure
 import com.highmobility.autoapi.GetVehicleStatus
 import com.highmobility.autoapi.VehicleStatus
 import com.highmobility.crypto.value.DeviceSerial
@@ -75,21 +76,25 @@ class OAuthTestActivity : Activity() {
 
     private fun getVs(vehicleSerial: DeviceSerial) {
         progressBar.visibility = View.VISIBLE
-        textView.text = "Sending get vehicle status"
+        textView.text = "Sending Get Vehicle Status"
         // send a simple command to see everything worked
-        val command = GetVehicleStatus()
-        HMKit.getInstance().telematics.sendCommand(command, vehicleSerial,
-                object : Telematics.CommandCallback {
-                    override fun onCommandResponse(p0: com.highmobility.value.Bytes?) {
-                        progressBar.visibility = View.GONE
-                        val vs = CommandResolver.resolve(p0) as VehicleStatus
-                        textView.text = "Got Vehicle Status,\nlicense plate: ${vs.licensePlate}"
-                    }
+        HMKit.getInstance().telematics.sendCommand(GetVehicleStatus(), vehicleSerial, object :
+                Telematics.CommandCallback {
+            override fun onCommandResponse(p0: com.highmobility.value.Bytes?) {
+                progressBar.visibility = View.GONE
+                val command = CommandResolver.resolve(p0)
 
-                    override fun onCommandFailed(p0: TelematicsError?) {
-                        onError("failed to get VS:\n" + p0?.type + " " + p0?.message)
-                    }
-                })
+                when (command) {
+                    is VehicleStatus -> textView.text = "Got Vehicle Status,\nlicense plate: ${command.licensePlate}"
+                    is Failure -> textView.text = "Get Vehicle Status failure:\n\n${command.failureReason}\n${command.failureDescription}"
+                    else -> textView.text = "Unknown command response"
+                }
+            }
+
+            override fun onCommandFailed(p0: TelematicsError?) {
+                onError("failed to get VS:\n" + p0?.type + " " + p0?.message)
+            }
+        })
     }
 
     private fun onError(msg: String) {
