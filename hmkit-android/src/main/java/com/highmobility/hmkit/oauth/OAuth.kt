@@ -20,10 +20,8 @@ import com.highmobility.utils.Base64
 import org.json.JSONException
 import org.json.JSONObject
 import java.nio.charset.Charset
-import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
-
 
 typealias CompletionHandler = (accessToken: String?, errorMessage: String?) -> Unit
 
@@ -75,8 +73,6 @@ class OAuth internal constructor(private val context: Context,
         if (endDate != null) webUrl += "&validity_end_date=${df.format(endDate)}"
         if (state != null) webUrl += "&state=$state"
 
-        d("start browser\nnonce: $nonceString\nurl: $webUrl\njwt: ${getJwt()}") // TODO: 2018-11-30 delete jwt log
-
         intent.putExtra(EXTRA_URI_KEY, webUrl)
 
         context.startActivity(intent)
@@ -122,7 +118,7 @@ class OAuth internal constructor(private val context: Context,
         Volley.newRequestQueue(context).add(request)
     }
 
-    private fun getJwt() : String {
+    private fun getJwt(): String {
         val header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}"
         var body = "{\"code_verifier\":\"$nonceString\",\"serial_number\":\"${deviceSerial.hex}\"}"
 
@@ -135,8 +131,7 @@ class OAuth internal constructor(private val context: Context,
         return String.format("%s.%s", jwtContent, jwtSignature.base64UrlSafe)
     }
 
-    fun setDeviceCertificate(privateKey: PrivateKey,
-                             deviceSerial: DeviceSerial) {
+    fun setDeviceCertificate(privateKey: PrivateKey, deviceSerial: DeviceSerial) {
         this.privateKey = privateKey
         this.deviceSerial = deviceSerial
     }
@@ -158,7 +153,6 @@ class OAuth internal constructor(private val context: Context,
             } catch (e: JSONException) {
                 e.printStackTrace()
             }
-
         } catch (authFailureError: AuthFailureError) {
             authFailureError.printStackTrace()
         }
@@ -166,12 +160,6 @@ class OAuth internal constructor(private val context: Context,
 
     private fun createNonce() {
         nonceString = Crypto.createSerialNumber().hex
-    }
-
-    private fun sha256(input: String): ByteArray {
-        val bytes = input.toByteArray()
-        val md = MessageDigest.getInstance("SHA-256")
-        return md.digest(bytes)
     }
 
     companion object {
