@@ -20,8 +20,6 @@ android {
             moduleName = "hmbtcore"
             ldLibs "log"
         }
-
-
     }
 
     buildTypes {

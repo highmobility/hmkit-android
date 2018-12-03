@@ -26,7 +26,7 @@ class OAuthTestActivity : Activity() {
         textView = findViewById(R.id.text_view)
         progressBar = findViewById(R.id.progress_bar)
         button = findViewById(R.id.access_token_text_button)
-        HMKit.customEnvironmentBaseUrl = "https://xv-platform.h-m.space"
+//        HMKit.customEnvironmentBaseUrl = "https://xv-platform.h-m.space"
         HMKit.getInstance().initialise(
                 "***REMOVED***",
                 "***REMOVED***",
