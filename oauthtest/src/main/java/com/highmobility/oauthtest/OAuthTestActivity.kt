@@ -6,10 +6,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.highmobility.autoapi.CommandResolver
-import com.highmobility.autoapi.Failure
-import com.highmobility.autoapi.GetVehicleStatus
-import com.highmobility.autoapi.VehicleStatus
+import com.highmobility.autoapi.*
 import com.highmobility.crypto.value.DeviceSerial
 import com.highmobility.hmkit.HMKit
 import com.highmobility.hmkit.HMLog
@@ -76,17 +73,17 @@ class OAuthTestActivity : Activity() {
 
     private fun getVs(vehicleSerial: DeviceSerial) {
         progressBar.visibility = View.VISIBLE
-        textView.text = "Sending Get Vehicle Status"
+        textView.text = "Sending Get Diagnostics"
         // send a simple command to see everything worked
-        HMKit.getInstance().telematics.sendCommand(GetVehicleStatus(), vehicleSerial, object :
+        HMKit.getInstance().telematics.sendCommand(GetDiagnosticsState(), vehicleSerial, object :
                 Telematics.CommandCallback {
             override fun onCommandResponse(p0: com.highmobility.value.Bytes?) {
                 progressBar.visibility = View.GONE
                 val command = CommandResolver.resolve(p0)
 
                 when (command) {
-                    is VehicleStatus -> textView.text = "Got Vehicle Status,\nlicense plate: ${command.licensePlate}"
-                    is Failure -> textView.text = "Get Vehicle Status failure:\n\n${command.failureReason}\n${command.failureDescription}"
+                    is DiagnosticsState -> textView.text = "Got Diagnostics,\nmileage: ${command.mileage}"
+                    is Failure -> textView.text = "Get Diagnostics failure:\n\n${command.failureReason}\n${command.failureDescription}"
                     else -> textView.text = "Unknown command response"
                 }
             }
