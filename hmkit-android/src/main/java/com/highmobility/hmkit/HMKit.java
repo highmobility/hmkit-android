@@ -7,6 +7,7 @@ import android.os.Build;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.highmobility.basicoauth.OAuth;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.DeviceCertificate;
 import com.highmobility.crypto.value.DeviceSerial;
@@ -33,23 +34,21 @@ public class HMKit {
     public static HMLog.Level loggingLevel = HMLog.Level.ALL;
 
     /**
-     * The environment of the Web Service. If initialised, call {@link #terminate()} before
-     * changing.
+     * Custom web environment url. If set, will override the default url or the url from the device
+     * certificate.
      */
-    public static Environment environment = Environment.PRODUCTION;
-
-    /**
-     * Custom web environment url. Will override {@link #environment}
-     */
-    public static String customEnvironmentBaseUrl = null;
+    @Nullable public static String webUrl = null;
 
     // Using application context, no chance for leak.
     @SuppressLint("StaticFieldLeak") private static HMKit instance;
 
     private Context context;
-    private Scanner scanner;
+
+    // created with device cert
     private Broadcaster broadcaster;
+    private Scanner scanner;
     private Telematics telematics;
+    private OAuth oauth;
 
     // created with context
     private WebService webService;
@@ -75,6 +74,20 @@ public class HMKit {
     }
 
     /**
+     * @return The Scanner Instance. Null if BLE is not supported.
+     */
+    @Nullable Scanner getScanner() {
+        throwIfDeviceCertificateNotSet();
+
+        if (ble == null) return null;
+
+        if (scanner == null) {
+            scanner = new Scanner(core, storage, threadManager, ble);
+        }
+        return scanner;
+    }
+
+    /**
      * @return The Telematics instance.
      */
     public Telematics getTelematics() {
@@ -87,17 +100,15 @@ public class HMKit {
     }
 
     /**
-     * @return The Scanner Instance. Null if BLE is not supported.
+     * @return The Telematics instance.
      */
-    @Nullable Scanner getScanner() {
+    public OAuth getOAuth() {
         throwIfDeviceCertificateNotSet();
 
-        if (ble == null) return null;
+        if (oauth == null)
+            oauth = new OAuth(context, core.getPrivateKey(), getDeviceCertificate().getSerial());
 
-        if (scanner == null) {
-            scanner = new Scanner(core, storage, threadManager, ble);
-        }
-        return scanner;
+        return oauth;
     }
 
     /**
@@ -302,6 +313,12 @@ public class HMKit {
         if (core == null)
             core = new Core(storage, threadManager, certificate, privateKey, issuerPublicKey);
         else core.setDeviceCertificate(certificate, privateKey, issuerPublicKey);
+
+
+        if (oauth != null) oauth.setDeviceCertificate(privateKey, certificate.getSerial());
+
+        if (webService == null) webService = new WebService(this.context, certificate.getIssuer(), webUrl);
+        else webService.setIssuer(certificate.getIssuer(), webUrl);
 
         HMLog.d(HMLog.Level.NONE, "Set certificate: " + certificate.toString());
     }
@@ -548,7 +565,6 @@ public class HMKit {
             this.context = context.getApplicationContext();
             storage = new Storage(this.context);
             threadManager = new ThreadManager(this.context);
-            webService = new WebService(this.context);
 
             try {
                 ble = new SharedBle(context);
@@ -556,13 +572,6 @@ public class HMKit {
                 HMLog.d(HMLog.Level.ALL, "Ble not supported");
             }
         }
-    }
-
-    /**
-     * The web environment.
-     */
-    public enum Environment {
-        TEST, STAGING, PRODUCTION
     }
 
     /**

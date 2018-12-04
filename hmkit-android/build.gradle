@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 def artifact = new Properties()
 artifact.load(new FileInputStream("$projectDir/deploy.settings"))
@@ -19,8 +20,6 @@ android {
             moduleName = "hmbtcore"
             ldLibs "log"
         }
-
-
     }
 
     buildTypes {
@@ -54,14 +53,15 @@ android {
 
 dependencies {
     if (project.releaseType == 0) {
-        implementation project(':hm-java-crypto')
-        implementation project(':hm-java-utils')
+        implementation project(':hmkit-crypto')
+        implementation project(':hmkit-utils')
     } else {
         implementation("com.highmobility:hmkit-crypto:${project.cryptoVersion}")
     }
 
-    implementation('com.android.volley:volley:1.1.0')
-    implementation('com.google.code.findbugs:jsr305:3.0.2')
+    implementation 'com.android.volley:volley:1.1.0'
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 if (project.releaseType > 0) {
@@ -107,4 +107,7 @@ if (project.releaseType > 0) {
             }
         }
     }
+}
+repositories {
+    mavenCentral()
 }
