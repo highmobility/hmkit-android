@@ -26,4 +26,9 @@ internal class OAuthActivity : Activity() {
         super.onNewIntent(intent)
         HMKit.getInstance().oAuth.didReturnFromUri(intent?.data, this)
     }
+
+    override fun onResume() {
+        super.onResume()
+        // TODO: 2018-12-04 use in app webview
+    }
 }
