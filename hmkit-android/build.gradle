@@ -57,8 +57,8 @@ android {
 
 dependencies {
     if (project.releaseType == 0) {
-        implementation project(':hm-java-crypto')
-        implementation project(':hm-java-utils')
+        implementation project(':hmkit-crypto')
+        implementation project(':hmkit-utils')
     } else {
         implementation("com.highmobility:hmkit-crypto:${project.cryptoVersion}")
     }
