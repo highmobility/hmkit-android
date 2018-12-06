@@ -29,9 +29,9 @@ class WebService {
     private static final String testUrl = defaultUrl;
     private static final String hmxvUrl = "https://api.high-mobility.com";
     private static final String apiUrl = "/v1";
-    
-    private static final byte[] testIssuer = new byte[]{ 0x74, 0x65, 0x73, 0x74 };
-    private static final byte[] xvIssuer = new byte[]{ 0x78, 0x76, 0x68, 0x6D };
+
+    private static final byte[] testIssuer = new byte[]{0x74, 0x65, 0x73, 0x74};
+    private static final byte[] xvIssuer = new byte[]{0x78, 0x76, 0x68, 0x6D};
 
     private String baseUrl;
     private final RequestQueue queue;
@@ -67,18 +67,29 @@ class WebService {
 
         Uri uri = Uri.parse(url)
                 .buildUpon()
-                .appendQueryParameter("serial_number", serialNumber.getHex())
+                /*.appendQueryParameter("serial_number", serialNumber.getHex())
                 .appendQueryParameter("access_token", accessToken)
-                .appendQueryParameter("signature", signature)
+                .appendQueryParameter("signature", signature)*/
                 .build();
 
+                // TODO: 2018-12-06 remove query param comments when spec finalised
+
+        // payload
+        JSONObject payload = new JSONObject();
+        try {
+            payload.put("serial_number", serialNumber.getHex());
+            payload.put("access_token", accessToken);
+            payload.put("signature", signature);
+        } catch (Exception e) {
+            throw new IllegalArgumentException();
+        }
 
         // headers
         final Map<String, String> headers = new HashMap<>(1);
         headers.put("Content-Type", "application/json");
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, uri.toString(),
-                null, new Response.Listener<JSONObject>() {
+                payload, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
                 if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
@@ -109,13 +120,22 @@ class WebService {
 
         Uri uri = Uri.parse(url)
                 .buildUpon()
-                .appendQueryParameter("serial_number", serial.getHex())
+                /*.appendQueryParameter("serial_number", serial.getHex())
                 .appendQueryParameter("issuer", issuer.getHex())
-                .appendQueryParameter("data", command.getBase64())
+                .appendQueryParameter("data", command.getBase64())*/
                 .build();
 
+        JSONObject payload = new JSONObject();
+        try {
+            payload.put("serial_number", serial.getHex());
+            payload.put("issuer", issuer.getHex());
+            payload.put("data", command.getBase64());
+        } catch (Exception e) {
+            throw new IllegalArgumentException();
+        }
+
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, uri.toString(),
-                null, new Response.Listener<JSONObject>() {
+                payload, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
                 if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
@@ -149,11 +169,18 @@ class WebService {
         // query
         Uri uri = Uri.parse(url)
                 .buildUpon()
-                .appendQueryParameter("serial_number", serial.getHex())
+                /*.appendQueryParameter("serial_number", serial.getHex())*/
                 .build();
 
+        JSONObject payload = new JSONObject();
+        try {
+            payload.put("serial_number", serial.getHex());
+        } catch (Exception e) {
+            throw new IllegalArgumentException();
+        }
+
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, uri.toString(),
-                null, new Response.Listener<JSONObject>() {
+                payload, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
                 if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
