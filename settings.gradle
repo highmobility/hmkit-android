@@ -1,5 +1,6 @@
 include ':hmkit-android',
         ':oauthtest',
-        ':hm-java-crypto',
-        ':hm-java-utils'
+        ':hmkit-crypto',
+        ':hmkit-utils'
+project(':hmkit-crypto').projectDir = new File('hm-java-crypto/')
 project(':hmkit-utils').projectDir = new File('hm-java-crypto/hm-java-utils')

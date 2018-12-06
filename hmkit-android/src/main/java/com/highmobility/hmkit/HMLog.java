@@ -50,7 +50,7 @@ public class HMLog {
         Log.e(getTag(), String.format(message, args));
     }
 
-    static final String getTag() {
+    static String getTag() {
         StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         if (stackTrace.length <= CALL_STACK_INDEX) {
             return LOG_PREFIX;
