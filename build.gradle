@@ -1,5 +1,6 @@
 buildscript {
     ext.kotlin_version = '1.3.10'
+    
     repositories {
         google()
         jcenter()
@@ -30,7 +31,8 @@ allprojects {
 
 ext {
     compileSdkVersion = 26
-    // these are not release numbers. release numbers are in deploy.settings files.
+    // These are the versions used across the app. These are not release numbers.
+    // Release numbers are in deploy.settings files.
     cryptoVersion = "1.4.1"
     utilsVersion = "1.4.1"
 
