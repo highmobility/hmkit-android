@@ -131,7 +131,7 @@ public class Storage {
         return deviceAccessCertificate;
     }
 
-    private AccessCertificate[] getCertificates() {
+    protected AccessCertificate[] getCertificates() {
         Set<String> bytesStringSet = settings.getStringSet(ACCESS_CERTIFICATE_STORAGE_KEY, null);
 
         if (bytesStringSet != null && bytesStringSet.size() > 0) {

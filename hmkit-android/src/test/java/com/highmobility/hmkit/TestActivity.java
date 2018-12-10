@@ -1,4 +1,4 @@
-package com.highmobility.autoapitest;
+package com.highmobility.hmkit;
 
 import android.app.Activity;
 
