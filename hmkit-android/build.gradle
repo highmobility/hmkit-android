@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 26
+        targetSdkVersion rootProject.ext.compileSdkVersion
         versionCode 1
         versionName "${version}"
         multiDexEnabled true
