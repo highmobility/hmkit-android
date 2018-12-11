@@ -43,7 +43,7 @@ class OAuthTestActivity : Activity() {
         // if (cert != null) getVs(cert.gainerSerial) // TODO: uncomment
 
         button.setOnClickListener {
-            onAccessTokenDownloaded("a60fc8b6-e16d-4c26-aaaf-83fa482db6a7") // TODO: delete
+            onAccessTokenDownloaded("20d70dd3-d01f-4bdd-9d2d-fea3b4ebd199") // TODO: delete
 
             /*HMKit.getInstance().oAuth.getAccessToken(
                     "***REMOVED***",

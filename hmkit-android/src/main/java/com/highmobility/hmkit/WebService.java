@@ -90,17 +90,6 @@ class WebService {
             e.printStackTrace();
         }
 
-/*        Map<String, String> params = new HashMap<>();
-
-        params.put("serial_number", serialNumber.getHex());
-        params.put("access_token", accessToken);
-        params.put("signature", signature);*/
-        /*try {
-            HMLog.d("getParams(): " + new JSONObject(params).toString(2));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }*/
-
         Request<JSONObject> request = new JsonObjectRequest(Request.Method.POST, uri.toString(),
                 body, new Response.Listener<JSONObject>() {
             @Override
@@ -121,19 +110,12 @@ class WebService {
             }
 
             /*@Override public byte[] getBody() {
-                Map<String, String> params = new HashMap<>();
-
-                params.put("serial_number", serialNumber.getHex());
-                params.put("access_token", accessToken);
-                params.put("signature", signature);
                 try {
-                    HMLog.d("getParams(): " + new JSONObject(params).toString(2));
-                    return new JSONObject(params).toString().getBytes("ASCII");
-                } catch (Exception e) {
+                    return body.toString().getBytes("ASCII");
+                } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
+                    return null;
                 }
-
-                return null;
             }*/
 
             /*@Override protected Map<String, String> getParams() {
