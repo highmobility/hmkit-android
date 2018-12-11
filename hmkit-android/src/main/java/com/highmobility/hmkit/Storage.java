@@ -172,7 +172,7 @@ public class Storage {
         }
 
         if (storedCertificates.size() > 0) {
-            return storedCertificates.toArray(new AccessCertificate[storedCertificates.size()]);
+            return storedCertificates.toArray(new AccessCertificate[0]);
         }
 
         return new AccessCertificate[0];
@@ -189,7 +189,7 @@ public class Storage {
         }
 
         if (storedCertificates.size() > 0) {
-            return storedCertificates.toArray(new AccessCertificate[storedCertificates.size()]);
+            return storedCertificates.toArray(new AccessCertificate[0]);
         }
 
         return new AccessCertificate[0];
@@ -206,7 +206,7 @@ public class Storage {
         }
 
         if (storedCertificates.size() > 0) {
-            return storedCertificates.toArray(new AccessCertificate[storedCertificates.size()]);
+            return storedCertificates.toArray(new AccessCertificate[0]);
         }
 
         return new AccessCertificate[0];

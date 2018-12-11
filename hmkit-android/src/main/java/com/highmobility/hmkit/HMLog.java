@@ -18,7 +18,7 @@ public class HMLog {
 
     }
 
-    static void d(String message, Object... args) {
+    public static void d(String message, Object... args) {
         if (HMKit.loggingLevel.getValue() >= Level.DEBUG.getValue()) {
             // don't call to this class again, this will mess up stack index and log tag. Always
             // call straight to Timber.d in a method in this class.
@@ -46,11 +46,11 @@ public class HMLog {
         Log.e(getTag(), String.format(message, args), t);
     }
 
-    static void e(String message, Object... args) {
+    public static void e(String message, Object... args) {
         Log.e(getTag(), String.format(message, args));
     }
 
-    static final String getTag() {
+    static String getTag() {
         StackTraceElement[] stackTrace = new Throwable().getStackTrace();
         if (stackTrace.length <= CALL_STACK_INDEX) {
             return LOG_PREFIX;

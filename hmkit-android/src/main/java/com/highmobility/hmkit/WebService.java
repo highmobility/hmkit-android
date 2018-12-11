@@ -1,8 +1,8 @@
 package com.highmobility.hmkit;
 
 import android.content.Context;
+import android.net.Uri;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -18,20 +18,22 @@ import com.highmobility.value.Bytes;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
 class WebService {
-    private static final String defaultUrl = "https://high-mobility.com";
-    private static final String xvUrl = "https://xv-platform.high-mobility.com/";
-    private static final String apiUrl = "/hm_cloud/api/v1";
-    
+    private static final String defaultUrl = "https://sandbox.api.high-mobility.com";
+    private static final String testUrl = defaultUrl;
+    private static final String hmxvUrl = "https://api.high-mobility.com";
+    private static final String apiUrl = "/v1";
+
     private static final byte[] testIssuer = new byte[]{0x74, 0x65, 0x73, 0x74};
     private static final byte[] xvIssuer = new byte[]{0x78, 0x76, 0x68, 0x6D};
 
-    private static String baseUrl;
+    private String baseUrl;
     private final RequestQueue queue;
 
     WebService(Context context, Issuer issuer, @Nullable String customUrl) {
@@ -44,10 +46,12 @@ class WebService {
         if (customUrl != null) {
             baseUrl = customUrl;
         } else if (issuer.equals(testIssuer)) {
-            baseUrl = defaultUrl;
+            baseUrl = testUrl;
         } else if (issuer.equals(xvIssuer)) {
-            baseUrl = xvUrl;
-        } else baseUrl = defaultUrl;
+            baseUrl = hmxvUrl;
+        } else {
+            baseUrl = defaultUrl;
+        }
 
         baseUrl += apiUrl;
     }
@@ -58,36 +62,46 @@ class WebService {
                                   final Response.Listener<JSONObject> response,
                                   Response.ErrorListener error) throws IllegalArgumentException {
         String url = baseUrl + "/access_certificates";
+        Bytes accessTokenBytes = new Bytes(accessToken.getBytes());
+        String signature = Crypto.sign(accessTokenBytes, privateKey).getBase64();
+
+        Uri uri = Uri.parse(url)
+                .buildUpon()
+                /*.appendQueryParameter("serial_number", serialNumber.getHex())
+                .appendQueryParameter("access_token", accessToken)
+                .appendQueryParameter("signature", signature)*/
+                .build();
+
+                // TODO: 2018-12-06 remove query param comments when spec finalised
+
+        // payload
+        JSONObject payload = new JSONObject();
+        try {
+            payload.put("serial_number", serialNumber.getHex());
+            payload.put("access_token", accessToken);
+            payload.put("signature", signature);
+        } catch (Exception e) {
+            throw new IllegalArgumentException();
+        }
 
         // headers
         final Map<String, String> headers = new HashMap<>(1);
         headers.put("Content-Type", "application/json");
 
-        // payload
-        JSONObject payload = new JSONObject();
-        try {
-            Bytes accessTokenBytes = new Bytes(accessToken.getBytes("UTF-8"));
-            payload.put("serial_number", serialNumber.getHex());
-            payload.put("access_token", accessToken);
-            payload.put("signature", Crypto.sign(accessTokenBytes, privateKey).getBase64());
-        } catch (Exception e) {
-            throw new IllegalArgumentException();
-        }
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new
-                Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
-                            try {
-                                HMLog.d("response " + jsonObject.toString(2));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        response.onResponse(jsonObject);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, uri.toString(),
+                payload, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
+                    try {
+                        HMLog.d("response " + jsonObject.toString(2));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, error) {
+                }
+                response.onResponse(jsonObject);
+            }
+        }, error) {
             @Override
             public Map<String, String> getHeaders() {
                 return headers;
@@ -104,31 +118,37 @@ class WebService {
         final Map<String, String> headers = new HashMap<>(1);
         headers.put("Content-Type", "application/json");
 
-        // payload
+        Uri uri = Uri.parse(url)
+                .buildUpon()
+                /*.appendQueryParameter("serial_number", serial.getHex())
+                .appendQueryParameter("issuer", issuer.getHex())
+                .appendQueryParameter("data", command.getBase64())*/
+                .build();
+
         JSONObject payload = new JSONObject();
         try {
             payload.put("serial_number", serial.getHex());
             payload.put("issuer", issuer.getHex());
             payload.put("data", command.getBase64());
-        } catch (JSONException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException();
         }
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new
-                Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
-                            try {
-                                HMLog.d("response " + jsonObject.toString(2));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        response.onResponse(jsonObject);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, uri.toString(),
+                payload, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
+                    try {
+                        HMLog.d("response " + jsonObject.toString(2));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, error) {
+                }
+
+                response.onResponse(jsonObject);
+            }
+        }, error) {
             @Override
             public Map<String, String> getHeaders() {
                 return headers;
@@ -146,29 +166,34 @@ class WebService {
         final Map<String, String> headers = new HashMap<>(1);
         headers.put("Content-Type", "application/json");
 
-        // payload
+        // query
+        Uri uri = Uri.parse(url)
+                .buildUpon()
+                /*.appendQueryParameter("serial_number", serial.getHex())*/
+                .build();
+
         JSONObject payload = new JSONObject();
         try {
             payload.put("serial_number", serial.getHex());
-        } catch (JSONException e) {
+        } catch (Exception e) {
             throw new IllegalArgumentException();
         }
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, payload, new
-                Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
-                            try {
-                                HMLog.d("response " + jsonObject.toString(2));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        response.onResponse(jsonObject);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, uri.toString(),
+                payload, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
+                    try {
+                        HMLog.d("response " + jsonObject.toString(2));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, error) {
+                }
+
+                response.onResponse(jsonObject);
+            }
+        }, error) {
             @Override
             public Map<String, String> getHeaders() {
                 return headers;
@@ -194,14 +219,10 @@ class WebService {
             byte[] body = request.getBody();
             String bodyString = body != null ? "\n" + new String(request.getBody()) : "";
             JSONObject headers = new JSONObject(request.getHeaders());
-
-            try {
-                HMLog.d(request.getUrl() + "\n" + headers.toString(2) + bodyString);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } catch (AuthFailureError authFailureError) {
-            authFailureError.printStackTrace();
+            String decodedUrl = URLDecoder.decode(request.getUrl(), "ASCII");
+            HMLog.d(decodedUrl + "\n" + headers.toString(2) + bodyString);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

@@ -51,6 +51,9 @@ public class HMBTCore {
     public native void HMBTCoreCryptoAddSignature(byte[] data, int size, byte[] privateKey, byte[] signature);
     public native int HMBTCoreCryptoValidateSignature(byte[] data, int size, byte[] pubKey, byte[] signature);
 
+    public native int HMBTCoreCryptoJWTAddSignature(byte[] message, int size, byte[] private_key, byte[] signature);
+    public native int HMBTCoreCryptoJWTsha(byte[] nonce, int size, byte[] hash);
+
     //Telematics
     public native void HMBTCoreTelematicsReceiveData(HMBTCoreInterface coreInterface, int length, byte[] data);
     public native void HMBTCoreSendTelematicsCommand(HMBTCoreInterface coreInterface, byte[] serial, byte[] nonce, int length, byte[] data);

@@ -14,6 +14,7 @@ import com.highmobility.crypto.value.PrivateKey;
 import com.highmobility.crypto.value.PublicKey;
 import com.highmobility.hmkit.error.BleNotSupportedException;
 import com.highmobility.hmkit.error.DownloadAccessCertificateError;
+import com.highmobility.hmkit.oauth.OAuth;
 import com.highmobility.utils.Base64;
 import com.highmobility.value.Bytes;
 
@@ -42,9 +43,12 @@ public class HMKit {
     @SuppressLint("StaticFieldLeak") private static HMKit instance;
 
     private Context context;
-    private Scanner scanner;
+
+    // created with device cert
     private Broadcaster broadcaster;
+    private Scanner scanner;
     private Telematics telematics;
+    private OAuth oauth;
 
     // created with context
     private WebService webService;
@@ -70,6 +74,20 @@ public class HMKit {
     }
 
     /**
+     * @return The Scanner Instance. Null if BLE is not supported.
+     */
+    @Nullable Scanner getScanner() {
+        throwIfDeviceCertificateNotSet();
+
+        if (ble == null) return null;
+
+        if (scanner == null) {
+            scanner = new Scanner(core, storage, threadManager, ble);
+        }
+        return scanner;
+    }
+
+    /**
      * @return The Telematics instance.
      */
     public Telematics getTelematics() {
@@ -82,17 +100,15 @@ public class HMKit {
     }
 
     /**
-     * @return The Scanner Instance. Null if BLE is not supported.
+     * @return The Telematics instance.
      */
-    @Nullable Scanner getScanner() {
+    public OAuth getOAuth() {
         throwIfDeviceCertificateNotSet();
 
-        if (ble == null) return null;
+        if (oauth == null)
+            oauth = new OAuth(context, core.getPrivateKey(), getDeviceCertificate().getSerial());
 
-        if (scanner == null) {
-            scanner = new Scanner(core, storage, threadManager, ble);
-        }
-        return scanner;
+        return oauth;
     }
 
     /**
@@ -297,6 +313,9 @@ public class HMKit {
         if (core == null)
             core = new Core(storage, threadManager, certificate, privateKey, issuerPublicKey);
         else core.setDeviceCertificate(certificate, privateKey, issuerPublicKey);
+
+
+        if (oauth != null) oauth.setDeviceCertificate(privateKey, certificate.getSerial());
 
         if (webService == null) webService = new WebService(this.context, certificate.getIssuer(), webUrl);
         else webService.setIssuer(certificate.getIssuer(), webUrl);

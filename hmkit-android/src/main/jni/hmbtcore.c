@@ -318,6 +318,40 @@ jint retvalue = hm_crypto_openssl_verify(data, size, public_key, signature);
 return retvalue;
 }
 
+JNIEXPORT jint JNICALL
+Java_com_highmobility_btcore_HMBTCore_HMBTCoreCryptoJWTAddSignature(JNIEnv *env, jobject instance,
+        jbyteArray message_, jint size,
+        jbyteArray privateKey_, jbyteArray signature_) {
+
+jbyte *message = (*env)->GetByteArrayElements(env, message_, NULL);
+jbyte *private_key = (*env)->GetByteArrayElements(env, privateKey_, NULL);
+jbyte *signature = (*env)->GetByteArrayElements(env, signature_, NULL);
+
+jint retvalue =hm_crypto_openssl_jwt_signature(message, size, private_key, signature);
+
+(*env)->ReleaseByteArrayElements(env, message_, message, 0);
+(*env)->ReleaseByteArrayElements(env, privateKey_, private_key, 0);
+(*env)->ReleaseByteArrayElements(env, signature_, signature, 0);
+
+return retvalue;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_highmobility_btcore_HMBTCore_HMBTCoreCryptoJWTsha(JNIEnv *env, jobject instance,
+        jbyteArray nonce_, jint size,
+        jbyteArray hash_) {
+
+jbyte *nonce = (*env)->GetByteArrayElements(env, nonce_, NULL);
+jbyte *hash = (*env)->GetByteArrayElements(env, hash_, NULL);
+
+jint retvalue = hm_crypto_openssl_jwt_sha(nonce, size, hash);
+
+(*env)->ReleaseByteArrayElements(env, nonce_, nonce, 0);
+(*env)->ReleaseByteArrayElements(env, hash_, hash, 0);
+
+return retvalue;
+}
+
 JNIEXPORT void JNICALL
 Java_com_highmobility_btcore_HMBTCore_HMBTCoreTelematicsReceiveData(JNIEnv *env, jobject instance,jobject coreInterface,
                                                                       jint length, jbyteArray data_) {
