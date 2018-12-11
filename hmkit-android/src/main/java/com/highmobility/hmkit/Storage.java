@@ -259,54 +259,6 @@ public class Storage {
         }
     }
 
-    /*boolean deleteCertificateWithGainingSerial(byte[] serial) {
-        AccessCertificate[] certs = getCertificates();
-
-        int removedIndex = -1;
-        for (int i = 0; i < certs.length; i++) {
-            AccessCertificate cert = certs[i];
-            if (cert.getGainerSerial().equals(serial)) {
-                removedIndex = i;
-                HMLog.d("deleteCertificateWithGainingSerial success: %s", cert.toString());
-                break;
-            }
-        }
-
-        if (removedIndex != -1) {
-            AccessCertificate[] newCerts = removeAtIndex(removedIndex, certs);
-            if (writeCertificates(newCerts) == true) return true;
-        }
-
-        HMLog.d("deleteCertificateWithGainingSerial failed: %s", ByteUtils.hexFromBytes(serial));
-
-        return false;
-    }
-
-    boolean deleteCertificateWithProvidingSerial(byte[] serial) {
-        AccessCertificate[] certs = getCertificates();
-
-        int removedIndex = -1;
-        for (int i = 0; i < certs.length; i++) {
-            AccessCertificate cert = certs[i];
-            if (cert.getProviderSerial().equals(serial)) {
-                removedIndex = i;
-
-                HMLog.d("deleteCertificateWithProvidingSerial " +
-                        "success: %s" + cert.toString());
-
-                break;
-            }
-        }
-
-        if (removedIndex != -1) {
-            AccessCertificate[] newCerts = removeAtIndex(removedIndex, certs);
-            return writeCertificates(newCerts) == true;
-        }
-
-        return false;
-    }*/
-    // TODO: delete ^^
-
     AccessCertificate certWithProvidingSerial(byte[] serial) {
         AccessCertificate[] certs = getCertificates();
 
@@ -361,19 +313,5 @@ public class Storage {
         if (writeCertificates(newCerts) == true) return Result.SUCCESS;
 
         return Result.STORAGE_FULL;
-    }
-
-    private AccessCertificate[] removeAtIndex(int removedIndex, AccessCertificate[] certs) {
-        AccessCertificate[] newCerts = new AccessCertificate[certs.length - 1];
-
-        for (int i = 0; i < certs.length; i++) {
-            if (i < removedIndex) {
-                newCerts[i] = certs[i];
-            } else if (i > removedIndex) {
-                newCerts[i - 1] = certs[i];
-            }
-        }
-
-        return newCerts;
     }
 }
