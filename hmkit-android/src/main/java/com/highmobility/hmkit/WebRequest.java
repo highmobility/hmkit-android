@@ -44,7 +44,6 @@ class WebRequest extends Request<JSONObject> {
         super(method, url, errorListener);
         this.listener = responseListener;
         this.params = params;
-        setShouldCache(false); // TODO: delete if not necessary
     }
 
     protected Map<String, String> getParams() {
