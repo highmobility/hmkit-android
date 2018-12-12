@@ -26,6 +26,10 @@ internal class OAuthViewController(val view: IOAuthView) {
     }
 
     fun onReceivedError(error: String?) {
-        view.showInfo("Web error\n$error", true)
+        view.showInfo("Web Error. Check your internet connection.\n$error", true)
+    }
+
+    fun onCloseClicked() {
+        view.closeActivity()
     }
 }

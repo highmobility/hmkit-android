@@ -1,6 +1,5 @@
 package com.highmobility.hmkit.oauth
 
-
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,7 +11,6 @@ import com.highmobility.hmkit.HMLog
 import com.highmobility.hmkit.R
 import kotlinx.android.synthetic.main.fragment_oauth_web_view.*
 
-
 class WebViewFragment : Fragment() {
     private lateinit var iWebView: IWebView
     private lateinit var url: String
@@ -23,30 +21,12 @@ class WebViewFragment : Fragment() {
 
     }
 
-    /*override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val view = inflater?.inflate(R.layout.fragment_oauth_web_view, container, false)
-        return view!!
-    }*/
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         webView.settings.javaScriptEnabled = true
-        /*webView.settings.loadWithOverviewMode = true
-        webView.settings.useWideViewPort = true*/
-
         webView.webViewClient = webViewClient
         webView.loadUrl(url)
     }
-
-    /*override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        webView.settings.javaScriptEnabled = true
-        *//*webView.settings.loadWithOverviewMode = true
-        webView.settings.useWideViewPort = true*//*
-
-        webView.webViewClient = webViewClient
-        webView.loadUrl(url)
-    }*/
 
     private val webViewClient: WebViewClient = object : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {

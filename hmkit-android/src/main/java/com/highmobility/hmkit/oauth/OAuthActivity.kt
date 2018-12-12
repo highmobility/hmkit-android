@@ -6,20 +6,20 @@ import android.view.Window
 import androidx.fragment.app.FragmentActivity
 
 import com.highmobility.hmkit.R
-import com.highmobility.hmkit.oauth.navigation.NavigationManager
+import com.highmobility.hmkit.oauth.navigation.OAuthNavigationManager
 
 /**
  * Used to start the web browser to get access token code. Will show progress bar while access token
  * is being downloaded.
  *
  */
-internal class OAuthActivity : FragmentActivity(), IOAuthView, IWebView {
+internal class OAuthActivity : FragmentActivity(), IOAuthView, IWebView, IInfoView {
     lateinit var webView: WebViewFragment
-    var info: InfoFragment? = null
+    var info: OAuthInfoFragment? = null
 
     lateinit var controller: OAuthViewController
 
-    private var navigationManager: NavigationManager = NavigationManager(supportFragmentManager)
+    private var navigationManager: OAuthNavigationManager = OAuthNavigationManager(supportFragmentManager)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,8 +39,10 @@ internal class OAuthActivity : FragmentActivity(), IOAuthView, IWebView {
     }
 
     override fun showInfo(text: String, error: Boolean) {
-        if (info == null) info = navigationManager.startInfo()
-        info!!.showText(text, error)
+        if (info == null) info = navigationManager.startInfo(this, text, error)
+        else {
+            info!!.showText(text, error)
+        }
     }
 
     override fun closeActivity() {
@@ -56,6 +58,12 @@ internal class OAuthActivity : FragmentActivity(), IOAuthView, IWebView {
 
     override fun onReceivedError(error: String?) {
         controller.onReceivedError(error)
+    }
+
+    // MARK: IInfoView
+
+    override fun onCloseButtonClicked() {
+        controller.onCloseClicked()
     }
 }
 

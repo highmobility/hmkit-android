@@ -6,8 +6,9 @@ import androidx.fragment.app.FragmentManager
 
 
 import com.highmobility.hmkit.R
+import com.highmobility.hmkit.oauth.IInfoView
 import com.highmobility.hmkit.oauth.IWebView
-import com.highmobility.hmkit.oauth.InfoFragment
+import com.highmobility.hmkit.oauth.OAuthInfoFragment
 import com.highmobility.hmkit.oauth.WebViewFragment
 
 /**
@@ -16,7 +17,7 @@ import com.highmobility.hmkit.oauth.WebViewFragment
  *
  * Taken from https://www.toptal.com/android/android-fragment-navigation-pattern
  */
-internal class NavigationManager(private val fragmentManager: FragmentManager) {
+internal class OAuthNavigationManager(private val fragmentManager: FragmentManager) {
 
     /**
      * Listener interface for navigation events.
@@ -103,8 +104,8 @@ internal class NavigationManager(private val fragmentManager: FragmentManager) {
         return fragment
     }
 
-    fun startInfo(): InfoFragment {
-        val fragment = InfoFragment.newInstance()
+    fun startInfo(infoView: IInfoView, text: String, error: Boolean): OAuthInfoFragment {
+        val fragment = OAuthInfoFragment.newInstance(infoView, text, error)
         openAsRoot(fragment)
         return fragment
     }
