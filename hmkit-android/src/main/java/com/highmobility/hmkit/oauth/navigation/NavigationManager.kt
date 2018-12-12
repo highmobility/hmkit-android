@@ -1,8 +1,10 @@
 package com.highmobility.hmkit.oauth.navigation
 
 import android.app.Activity
-import android.app.Fragment
-import android.app.FragmentManager
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+
+
 import com.highmobility.hmkit.R
 import com.highmobility.hmkit.oauth.IWebView
 import com.highmobility.hmkit.oauth.InfoFragment

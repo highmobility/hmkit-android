@@ -1,9 +1,10 @@
 package com.highmobility.hmkit.oauth
 
-import android.app.Activity
+
 import android.os.Bundle
 import android.view.Window
-import android.view.WindowManager
+import androidx.fragment.app.FragmentActivity
+
 import com.highmobility.hmkit.R
 import com.highmobility.hmkit.oauth.navigation.NavigationManager
 
@@ -12,16 +13,18 @@ import com.highmobility.hmkit.oauth.navigation.NavigationManager
  * is being downloaded.
  *
  */
-internal class OAuthActivity : Activity(), IOAuthView, IWebView {
+internal class OAuthActivity : FragmentActivity(), IOAuthView, IWebView {
     lateinit var webView: WebViewFragment
     var info: InfoFragment? = null
 
     lateinit var controller: OAuthViewController
 
-    private var navigationManager: NavigationManager = NavigationManager(fragmentManager)
+    private var navigationManager: NavigationManager = NavigationManager(supportFragmentManager)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
         requestWindowFeature(Window.FEATURE_NO_TITLE)
 
         setContentView(R.layout.activity_oauth)
@@ -35,9 +38,9 @@ internal class OAuthActivity : Activity(), IOAuthView, IWebView {
         webView = navigationManager.startWebView(this, url)
     }
 
-    override fun showInfo(text: String) {
+    override fun showInfo(text: String, error: Boolean) {
         if (info == null) info = navigationManager.startInfo()
-        info!!.showText(text)
+        info!!.showText(text, error)
     }
 
     override fun closeActivity() {
@@ -50,10 +53,14 @@ internal class OAuthActivity : Activity(), IOAuthView, IWebView {
     override fun onStartedLoadingUrl(url: String?) {
         controller.onStartLoadingUrl(url)
     }
+
+    override fun onReceivedError(error: String?) {
+        controller.onReceivedError(error)
+    }
 }
 
 interface IOAuthView {
     fun openWebView(url: String)
-    fun showInfo(text: String)
+    fun showInfo(text: String, error: Boolean)
     fun closeActivity()
 }

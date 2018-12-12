@@ -13,7 +13,7 @@ internal class OAuthViewController(val view: IOAuthView) {
         val result = oauth.onStartLoadingUrl(url)
 
         if (result == OAuth.UrlLoadResult.CODE_INTERCEPTED) {
-            view.showInfo("Downloading Access Token")
+            view.showInfo("Downloading Access Token", false)
             oauth.downloadAccessToken { accessToken, errorMessage ->
                 // we have the token, close the activity
                 view.closeActivity()
@@ -23,5 +23,9 @@ internal class OAuthViewController(val view: IOAuthView) {
             // something went wrong, close the activity
             view.closeActivity()
         }
+    }
+
+    fun onReceivedError(error: String?) {
+        view.showInfo("Web error\n$error", true)
     }
 }

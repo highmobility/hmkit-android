@@ -1,26 +1,34 @@
 package com.highmobility.hmkit.oauth
 
-import android.app.Fragment
+
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.*
+import androidx.fragment.app.Fragment
 import com.highmobility.hmkit.HMLog
 import com.highmobility.hmkit.R
 import kotlinx.android.synthetic.main.fragment_oauth_web_view.*
+
 
 class WebViewFragment : Fragment() {
     private lateinit var iWebView: IWebView
     private lateinit var url: String
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val view = inflater?.inflate(R.layout.fragment_oauth_web_view, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_oauth_web_view, container, false)
         return view!!
+
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+    /*override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val view = inflater?.inflate(R.layout.fragment_oauth_web_view, container, false)
+        return view!!
+    }*/
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         webView.settings.javaScriptEnabled = true
         /*webView.settings.loadWithOverviewMode = true
@@ -29,6 +37,16 @@ class WebViewFragment : Fragment() {
         webView.webViewClient = webViewClient
         webView.loadUrl(url)
     }
+
+    /*override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        webView.settings.javaScriptEnabled = true
+        *//*webView.settings.loadWithOverviewMode = true
+        webView.settings.useWideViewPort = true*//*
+
+        webView.webViewClient = webViewClient
+        webView.loadUrl(url)
+    }*/
 
     private val webViewClient: WebViewClient = object : WebViewClient() {
         override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -43,17 +61,20 @@ class WebViewFragment : Fragment() {
         }
 
         override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
-            // TODO: 2018-12-05 fail the process 
-            // TODO: 2018-12-05 test with no connection
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 HMLog.d("error ${error?.description}")
+                iWebView.onReceivedError(error?.description as String?)
+            }
+            else {
+                iWebView.onReceivedError(error.toString())
             }
         }
     }
 
     companion object {
         @JvmStatic
-        fun newInstance(webView:IWebView, url:String): WebViewFragment {
+        fun newInstance(webView: IWebView, url: String): WebViewFragment {
             val fragment = WebViewFragment()
             fragment.iWebView = webView
             fragment.url = url
@@ -63,5 +84,6 @@ class WebViewFragment : Fragment() {
 }
 
 interface IWebView {
-    fun onStartedLoadingUrl(url:String?)
+    fun onStartedLoadingUrl(url: String?)
+    fun onReceivedError(error: String?)
 }
