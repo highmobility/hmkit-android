@@ -6,7 +6,10 @@ import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.highmobility.autoapi.*
+import com.highmobility.autoapi.CommandResolver
+import com.highmobility.autoapi.DiagnosticsState
+import com.highmobility.autoapi.Failure
+import com.highmobility.autoapi.GetDiagnosticsState
 import com.highmobility.crypto.value.DeviceSerial
 import com.highmobility.hmkit.HMKit
 import com.highmobility.hmkit.HMLog
@@ -36,7 +39,7 @@ class OAuthTestActivity : Activity() {
         val serial = DeviceSerial("66261204D4609A72A5")
         val cert = HMKit.getInstance().getCertificate(serial)
 
-        if (cert != null) getVs(cert.gainerSerial)
+         if (cert != null) getVs(cert.gainerSerial)
 
         button.setOnClickListener {
             HMKit.getInstance().oAuth.getAccessToken(
