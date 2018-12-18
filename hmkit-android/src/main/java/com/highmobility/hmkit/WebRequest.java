@@ -50,16 +50,6 @@ class WebRequest extends Request<JSONObject> {
         return params;
     }
 
-    /*@Override public byte[] getBody() {
-        try {
-            return new JSONObject(params).toString(2).getBytes("UTF-8");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }*/
-
     @Override public Map<String, String> getHeaders() {
         return headers;
     }
