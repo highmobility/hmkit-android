@@ -25,8 +25,8 @@ import javax.annotation.Nullable;
  * Broadcaster acts as a gateway to the application's capability to broadcast itself and handle
  * ConnectedLink connectivity.
  * <p>
- * Access the broadcaster from {@link HMKit#getBroadcaster()}. Broadcaster is created once and
- * then bound to HMKit instance.
+ * Access the broadcaster from {@link HMKit#getBroadcaster()}. Broadcaster is created once and then
+ * bound to HMKit instance.
  */
 public class Broadcaster extends Core.Broadcaster {
     /**
@@ -48,7 +48,7 @@ public class Broadcaster extends Core.Broadcaster {
 
     private State state = State.IDLE;
 
-    private final ArrayList<ConnectedLink> links = new ArrayList<>();
+    private final List<ConnectedLink> links = new ArrayList<>();
     private BroadcastConfiguration configuration;
 
     Broadcaster(Core core, Storage storage, ThreadManager threadManager, SharedBle ble) {
@@ -309,8 +309,8 @@ public class Broadcaster extends Core.Broadcaster {
     }
 
     /**
-     * Called with {@link HMKit#terminate()}. Broadcasting and alive pinging will be stopped
-     * because ble will be stopped.
+     * Called with {@link HMKit#terminate()}. Broadcasting and alive pinging will be stopped because
+     * ble will be stopped.
      *
      * @throws IllegalStateException when there are still connected links.
      */
@@ -333,10 +333,10 @@ public class Broadcaster extends Core.Broadcaster {
         return true;
     }
 
-    @Override boolean onDeviceExitedProximity(HMDevice device) {
-        HMLog.d("lose link " + ByteUtils.hexFromBytes(device.getMac()));
+    @Override boolean onDeviceExitedProximity(byte[] mac) {
+        HMLog.d("lose link " + ByteUtils.hexFromBytes(mac));
 
-        final ConnectedLink link = getLinkForMac(device.getMac());
+        final ConnectedLink link = getLinkForMac(mac);
         if (link == null) return false;
 
         links.remove(link);
@@ -415,10 +415,7 @@ public class Broadcaster extends Core.Broadcaster {
 
     private void sendAlivePing() {
         if (gattServer.isOpen()) {
-            for (Link link : links) {
-                gattServer.sendAlivePing(link.btDevice);
-
-            }
+            for (Link link : links) gattServer.sendAlivePing(link.btDevice);
         } else {
             HMLog.d("need to start broadcasting before pinging");
         }

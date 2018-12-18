@@ -95,6 +95,7 @@ class GattServer extends BluetoothGattServerCallback {
     }
 
     boolean writeData(BluetoothDevice device, byte[] value, int characteristicId) {
+
         HMLog.d("write %s to %s, char: %s", ByteUtils.hexFromBytes(value),
                 device.getAddress().replaceAll(":", ""), characteristicId);
 
@@ -109,7 +110,7 @@ class GattServer extends BluetoothGattServerCallback {
             return false;
         }
 
-        if (gattServer.notifyCharacteristicChanged(device, characteristic, false) == false) {
+        if (notifyCharacteristicChanged(device, characteristic) == false) {
             HMLog.e("can't notify characteristic changed");
             return false;
         }
@@ -118,7 +119,18 @@ class GattServer extends BluetoothGattServerCallback {
     }
 
     void sendAlivePing(BluetoothDevice btDevice) {
-        gattServer.notifyCharacteristicChanged(btDevice, aliveCharacteristic, false);
+        notifyCharacteristicChanged(btDevice, aliveCharacteristic);
+    }
+
+    private boolean notifyCharacteristicChanged(BluetoothDevice device,
+                                                BluetoothGattCharacteristic characteristic) {
+        // could be that device is disconnected when this is called and android will crash then.
+        // catch the exception.
+        try {
+            return gattServer.notifyCharacteristicChanged(device, characteristic, false);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
@@ -229,22 +241,27 @@ class GattServer extends BluetoothGattServerCallback {
     // MARK: BluetoothGattServerCallback
 
     @Override
-    public void onConnectionStateChange(final BluetoothDevice device, int status, int newState) {
-        if (status != BluetoothGatt.GATT_SUCCESS) {
-            HMLog.e("connecting failed with status" + status);
-        }
+    public void onConnectionStateChange(final BluetoothDevice device, final int status,
+                                        final int newState) {
+        threadManager.postToWork(new Runnable() {
+            // this needs to go straight to work thread, so core is blocked with handling of the
+            // disconnecting of the device. Otherwise a ping or write could come in before
+            // disconnect is finished.
+            @Override
+            public void run() {
+                // even the log needs to be in work thread, otherwise could have a racing condition.
+                HMLog.d("onConnectionStateChange: %s %s", getConnectionState(newState)
+                        , device.getAddress());
 
-        HMLog.d("onConnectionStateChange: %s %s", getConnectionState(newState)
-                , device.getAddress());
+                if (status != BluetoothGatt.GATT_SUCCESS) {
+                    HMLog.e("connecting failed with status" + status);
+                }
 
-        if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            threadManager.postToWork(new Runnable() {
-                @Override
-                public void run() {
+                if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     core.HMBTCorelinkDisconnect(ByteUtils.bytesFromMacString(device.getAddress()));
                 }
-            });
-        }
+            }
+        });
     }
 
     @Override public void onServiceAdded(int status, BluetoothGattService service) {
@@ -383,13 +400,11 @@ class GattServer extends BluetoothGattServerCallback {
     private int getCharacteristicIdForCharacteristic(BluetoothGattCharacteristic characteristic) {
         if (characteristic.getUuid().equals(writeCharacteristic.getUuid())) {
             return 0x03;
-        } else if (characteristic.getUuid().equals(sensingWriteCharacteristic.getUuid
-                ())) {
+        } else if (characteristic.getUuid().equals(sensingWriteCharacteristic.getUuid())) {
             return 0x07;
         } else if (characteristic.getUuid().equals(readCharacteristic.getUuid())) {
             return 0x02;
-        } else if (characteristic.getUuid().equals(sensingReadCharacteristic.getUuid
-                ())) {
+        } else if (characteristic.getUuid().equals(sensingReadCharacteristic.getUuid())) {
             return 0x06;
         } else if (characteristic.getUuid().equals(aliveCharacteristic.getUuid())) {
             return 0x04;
