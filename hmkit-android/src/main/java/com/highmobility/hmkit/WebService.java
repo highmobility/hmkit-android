@@ -62,12 +62,7 @@ class WebService {
         Bytes accessTokenBytes = new Bytes(accessToken.getBytes());
         final String signature = Crypto.sign(accessTokenBytes, privateKey).getBase64();
 
-        Uri uri = Uri.parse(url)
-                .buildUpon()
-                /*.appendQueryParameter("serial_number", serialNumber.getHex())
-                .appendQueryParameter("access_token", accessToken)
-                .appendQueryParameter("signature", signature)*/
-                .build();
+        Uri uri = Uri.parse(url).buildUpon().build();
 
         Map<String, String> params = new HashMap<>();
         params.put("serial_number", serialNumber.getHex());
@@ -96,12 +91,7 @@ class WebService {
             .Listener<JSONObject> response, Response.ErrorListener error) {
         String url = baseUrl + "/telematics_commands";
 
-        Uri uri = Uri.parse(url)
-                .buildUpon()
-                /*.appendQueryParameter("serial_number", serial.getHex())
-                .appendQueryParameter("issuer", issuer.getHex())
-                .appendQueryParameter("data", command.getBase64())*/
-                .build();
+        Uri uri = Uri.parse(url).buildUpon().build();
 
         Map<String, String> params = new HashMap<>();
         params.put("serial_number", serial.getHex());
@@ -132,10 +122,7 @@ class WebService {
         String url = baseUrl + "/nonces";
 
         // query
-        Uri uri = Uri.parse(url)
-                .buildUpon()
-                /*.appendQueryParameter("serial_number", serial.getHex())*/
-                .build();
+        Uri uri = Uri.parse(url).buildUpon().build();
 
         Map<String, String> params = new HashMap<>();
         params.put("serial_number", serial.getHex());
