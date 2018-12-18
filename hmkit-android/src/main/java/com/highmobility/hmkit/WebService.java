@@ -60,6 +60,7 @@ class WebService {
                                   Response.ErrorListener error) throws IllegalArgumentException {
         String url = baseUrl + "/access_certificates";
         Bytes accessTokenBytes = new Bytes(accessToken.getBytes());
+
         final String signature = Crypto.sign(accessTokenBytes, privateKey).getBase64();
 
         Uri uri = Uri.parse(url).buildUpon().build();
@@ -81,6 +82,7 @@ class WebService {
                             }
                         }
                         response.onResponse(jsonObject);
+
                     }
                 }, error);
 
@@ -123,7 +125,6 @@ class WebService {
 
         // query
         Uri uri = Uri.parse(url).buildUpon().build();
-
         Map<String, String> params = new HashMap<>();
         params.put("serial_number", serial.getHex());
 

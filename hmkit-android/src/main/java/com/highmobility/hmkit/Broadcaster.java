@@ -252,8 +252,8 @@ public class Broadcaster extends Core.Broadcaster {
      * @param serial The 9-byte serial number of the access providing broadcaster
      */
     public void revokeCertificate(DeviceSerial serial) {
-        storage.deleteCertificateWithGainingSerial(serial.getByteArray());
-        storage.deleteCertificateWithProvidingSerial(serial.getByteArray());
+        storage.deleteCertificate(serial.getByteArray(), null);
+        storage.deleteCertificate(null, serial.getByteArray());
     }
 
     /**
