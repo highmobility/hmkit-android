@@ -6,8 +6,6 @@ import android.net.Uri;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 import com.highmobility.crypto.Crypto;
 import com.highmobility.crypto.value.DeviceSerial;
@@ -18,7 +16,6 @@ import com.highmobility.value.Bytes;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,9 +26,9 @@ class WebService {
     private static final String testUrl = defaultUrl;
     private static final String hmxvUrl = "https://api.high-mobility.com";
     private static final String apiUrl = "/v1";
-    
-    private static final byte[] testIssuer = new byte[]{ 0x74, 0x65, 0x73, 0x74 };
-    private static final byte[] xvIssuer = new byte[]{ 0x78, 0x76, 0x68, 0x6D };
+
+    private static final byte[] testIssuer = new byte[]{0x74, 0x65, 0x73, 0x74};
+    private static final byte[] xvIssuer = new byte[]{0x78, 0x76, 0x68, 0x6D};
 
     private String baseUrl;
     private final RequestQueue queue;
@@ -56,46 +53,41 @@ class WebService {
         baseUrl += apiUrl;
     }
 
-    void requestAccessCertificate(String accessToken,
+    void requestAccessCertificate(final String accessToken,
                                   PrivateKey privateKey,
-                                  DeviceSerial serialNumber,
+                                  final DeviceSerial serialNumber,
                                   final Response.Listener<JSONObject> response,
                                   Response.ErrorListener error) throws IllegalArgumentException {
         String url = baseUrl + "/access_certificates";
         Bytes accessTokenBytes = new Bytes(accessToken.getBytes());
-        String signature = Crypto.sign(accessTokenBytes, privateKey).getBase64();
+        final String signature = Crypto.sign(accessTokenBytes, privateKey).getBase64();
 
         Uri uri = Uri.parse(url)
                 .buildUpon()
-                .appendQueryParameter("serial_number", serialNumber.getHex())
+                /*.appendQueryParameter("serial_number", serialNumber.getHex())
                 .appendQueryParameter("access_token", accessToken)
-                .appendQueryParameter("signature", signature)
+                .appendQueryParameter("signature", signature)*/
                 .build();
 
+        Map<String, String> params = new HashMap<>();
+        params.put("serial_number", serialNumber.getHex());
+        params.put("access_token", accessToken);
+        params.put("signature", signature);
 
-        // headers
-        final Map<String, String> headers = new HashMap<>(1);
-        headers.put("Content-Type", "application/json");
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, uri.toString(),
-                null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject jsonObject) {
-                if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
-                    try {
-                        HMLog.d("response " + jsonObject.toString(2));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+        WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
+                            try {
+                                HMLog.d("response " + jsonObject.toString(2));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        response.onResponse(jsonObject);
                     }
-                }
-                response.onResponse(jsonObject);
-            }
-        }, error) {
-            @Override
-            public Map<String, String> getHeaders() {
-                return headers;
-            }
-        };
+                }, error);
 
         queueRequest(request);
     }
@@ -103,37 +95,34 @@ class WebService {
     void sendTelematicsCommand(Bytes command, DeviceSerial serial, Issuer issuer, final Response
             .Listener<JSONObject> response, Response.ErrorListener error) {
         String url = baseUrl + "/telematics_commands";
-        // headers
-        final Map<String, String> headers = new HashMap<>(1);
-        headers.put("Content-Type", "application/json");
 
         Uri uri = Uri.parse(url)
                 .buildUpon()
-                .appendQueryParameter("serial_number", serial.getHex())
+                /*.appendQueryParameter("serial_number", serial.getHex())
                 .appendQueryParameter("issuer", issuer.getHex())
-                .appendQueryParameter("data", command.getBase64())
+                .appendQueryParameter("data", command.getBase64())*/
                 .build();
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, uri.toString(),
-                null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject jsonObject) {
-                if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
-                    try {
-                        HMLog.d("response " + jsonObject.toString(2));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
+        Map<String, String> params = new HashMap<>();
+        params.put("serial_number", serial.getHex());
+        params.put("issuer", issuer.getHex());
+        params.put("data", command.getBase64());
 
-                response.onResponse(jsonObject);
-            }
-        }, error) {
-            @Override
-            public Map<String, String> getHeaders() {
-                return headers;
-            }
-        };
+        WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
+                            try {
+                                HMLog.d("response " + jsonObject.toString(2));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        response.onResponse(jsonObject);
+                    }
+                }, error);
 
         queueRequest(request);
     }
@@ -142,60 +131,41 @@ class WebService {
             .ErrorListener error) {
         String url = baseUrl + "/nonces";
 
-        // headers
-        final Map<String, String> headers = new HashMap<>(1);
-        headers.put("Content-Type", "application/json");
-
         // query
         Uri uri = Uri.parse(url)
                 .buildUpon()
-                .appendQueryParameter("serial_number", serial.getHex())
+                /*.appendQueryParameter("serial_number", serial.getHex())*/
                 .build();
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, uri.toString(),
-                null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject jsonObject) {
-                if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
-                    try {
-                        HMLog.d("response " + jsonObject.toString(2));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
+        Map<String, String> params = new HashMap<>();
+        params.put("serial_number", serial.getHex());
 
-                response.onResponse(jsonObject);
-            }
-        }, error) {
-            @Override
-            public Map<String, String> getHeaders() {
-                return headers;
-            }
-        };
+        WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
+                            try {
+                                HMLog.d("response " + jsonObject.toString(2));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        response.onResponse(jsonObject);
+                    }
+                }, error);
 
         queueRequest(request);
     }
 
-    private void queueRequest(JsonObjectRequest request) {
+    private void queueRequest(WebRequest request) {
         request.setTag(this);
-        printRequest(request);
+        request.print();
         queue.add(request);
     }
 
     void cancelAllRequests() {
         queue.cancelAll(this);
-    }
-
-    private static void printRequest(JsonRequest request) {
-        if (HMKit.loggingLevel.getValue() < HMLog.Level.DEBUG.getValue()) return;
-        try {
-            byte[] body = request.getBody();
-            String bodyString = body != null ? "\n" + new String(request.getBody()) : "";
-            JSONObject headers = new JSONObject(request.getHeaders());
-            String decodedUrl = URLDecoder.decode(request.getUrl(), "ASCII");
-            HMLog.d(decodedUrl + "\n" + headers.toString(2) + bodyString);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

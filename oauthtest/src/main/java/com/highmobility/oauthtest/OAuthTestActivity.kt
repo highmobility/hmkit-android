@@ -2,11 +2,15 @@ package com.highmobility.oauthtest
 
 import android.app.Activity
 import android.os.Bundle
+import android.os.Handler
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
-import com.highmobility.autoapi.*
+import com.highmobility.autoapi.CommandResolver
+import com.highmobility.autoapi.DiagnosticsState
+import com.highmobility.autoapi.Failure
+import com.highmobility.autoapi.GetDiagnosticsState
 import com.highmobility.crypto.value.DeviceSerial
 import com.highmobility.hmkit.HMKit
 import com.highmobility.hmkit.HMLog
@@ -36,10 +40,12 @@ class OAuthTestActivity : Activity() {
         val serial = DeviceSerial("66261204D4609A72A5")
         val cert = HMKit.getInstance().getCertificate(serial)
 
-        if (cert != null) getVs(cert.gainerSerial)
+        // if (cert != null) getVs(cert.gainerSerial) // TODO: uncomment
 
         button.setOnClickListener {
-            HMKit.getInstance().oAuth.getAccessToken(
+            onAccessTokenDownloaded("20d70dd3-d01f-4bdd-9d2d-fea3b4ebd199") // TODO: delete
+
+            /*HMKit.getInstance().oAuth.getAccessToken(
                     "***REMOVED***",
                     "https://owner-panel.h-m.space/oauth/new",
                     "***REMOVED***",
@@ -55,7 +61,7 @@ class OAuthTestActivity : Activity() {
                 else {
                     onError(errorMessage!!)
                 }
-            }
+            }*/
         }
     }
 
