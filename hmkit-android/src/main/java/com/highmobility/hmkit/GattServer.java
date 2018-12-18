@@ -95,6 +95,7 @@ class GattServer extends BluetoothGattServerCallback {
     }
 
     boolean writeData(BluetoothDevice device, byte[] value, int characteristicId) {
+
         HMLog.d("write %s to %s, char: %s", ByteUtils.hexFromBytes(value),
                 device.getAddress().replaceAll(":", ""), characteristicId);
 
@@ -109,7 +110,7 @@ class GattServer extends BluetoothGattServerCallback {
             return false;
         }
 
-        if (gattServer.notifyCharacteristicChanged(device, characteristic, false) == false) {
+        if (notifyCharacteristicChanged(device, characteristic) == false) {
             HMLog.e("can't notify characteristic changed");
             return false;
         }
@@ -118,7 +119,18 @@ class GattServer extends BluetoothGattServerCallback {
     }
 
     void sendAlivePing(BluetoothDevice btDevice) {
-        gattServer.notifyCharacteristicChanged(btDevice, aliveCharacteristic, false);
+        notifyCharacteristicChanged(btDevice, aliveCharacteristic);
+    }
+
+    private boolean notifyCharacteristicChanged(BluetoothDevice device,
+                                                BluetoothGattCharacteristic characteristic) {
+        // could be that device is disconnected when this is called and android will crash then.
+        // catch the exception.
+        try {
+            return gattServer.notifyCharacteristicChanged(device, characteristic, false);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
@@ -383,26 +395,16 @@ class GattServer extends BluetoothGattServerCallback {
     public void onNotificationSent(BluetoothDevice device, int status) {
         HMLog.d(HMLog.Level.ALL, "onNotificationSent: %s", (status == BluetoothGatt.GATT_SUCCESS ?
                 "success" : "failed"));
-
-        // TODO: 2018-12-18
-        // https://developer.android.com/reference/android/bluetooth/BluetoothGattServerCallback
-        // #onNotificationSent(android.bluetooth.BluetoothDevice,%20int)
-        //
-        // When multiple notifications are to be sent, an application must wait
-        // for this callback to be received before sending additional notifications.
-        // before sending another ping, wait for the previous one to be sent before.
     }
 
     private int getCharacteristicIdForCharacteristic(BluetoothGattCharacteristic characteristic) {
         if (characteristic.getUuid().equals(writeCharacteristic.getUuid())) {
             return 0x03;
-        } else if (characteristic.getUuid().equals(sensingWriteCharacteristic.getUuid
-                ())) {
+        } else if (characteristic.getUuid().equals(sensingWriteCharacteristic.getUuid())) {
             return 0x07;
         } else if (characteristic.getUuid().equals(readCharacteristic.getUuid())) {
             return 0x02;
-        } else if (characteristic.getUuid().equals(sensingReadCharacteristic.getUuid
-                ())) {
+        } else if (characteristic.getUuid().equals(sensingReadCharacteristic.getUuid())) {
             return 0x06;
         } else if (characteristic.getUuid().equals(aliveCharacteristic.getUuid())) {
             return 0x04;
