@@ -229,22 +229,27 @@ class GattServer extends BluetoothGattServerCallback {
     // MARK: BluetoothGattServerCallback
 
     @Override
-    public void onConnectionStateChange(final BluetoothDevice device, int status, int newState) {
-        if (status != BluetoothGatt.GATT_SUCCESS) {
-            HMLog.e("connecting failed with status" + status);
-        }
+    public void onConnectionStateChange(final BluetoothDevice device, final int status,
+                                        final int newState) {
+        threadManager.postToWork(new Runnable() {
+            // this needs to go straight to work thread, so core is blocked with handling of the
+            // disconnecting of the device. Otherwise a ping or write could come in before
+            // disconnect is finished.
+            @Override
+            public void run() {
+                // even the log needs to be in work thread, otherwise could have a racing condition.
+                HMLog.d("onConnectionStateChange: %s %s", getConnectionState(newState)
+                        , device.getAddress());
 
-        HMLog.d("onConnectionStateChange: %s %s", getConnectionState(newState)
-                , device.getAddress());
+                if (status != BluetoothGatt.GATT_SUCCESS) {
+                    HMLog.e("connecting failed with status" + status);
+                }
 
-        if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-            threadManager.postToWork(new Runnable() {
-                @Override
-                public void run() {
+                if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     core.HMBTCorelinkDisconnect(ByteUtils.bytesFromMacString(device.getAddress()));
                 }
-            });
-        }
+            }
+        });
     }
 
     @Override public void onServiceAdded(int status, BluetoothGattService service) {
@@ -378,6 +383,14 @@ class GattServer extends BluetoothGattServerCallback {
     public void onNotificationSent(BluetoothDevice device, int status) {
         HMLog.d(HMLog.Level.ALL, "onNotificationSent: %s", (status == BluetoothGatt.GATT_SUCCESS ?
                 "success" : "failed"));
+
+        // TODO: 2018-12-18
+        // https://developer.android.com/reference/android/bluetooth/BluetoothGattServerCallback
+        // #onNotificationSent(android.bluetooth.BluetoothDevice,%20int)
+        //
+        // When multiple notifications are to be sent, an application must wait
+        // for this callback to be received before sending additional notifications.
+        // before sending another ping, wait for the previous one to be sent before.
     }
 
     private int getCharacteristicIdForCharacteristic(BluetoothGattCharacteristic characteristic) {
