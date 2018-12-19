@@ -385,7 +385,7 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalremovePublicKey(byte[] serial) {
-        if (storage.deleteCertificateWithGainingSerial(serial)) {
+        if (storage.deleteCertificate(serial, null)) {
             HMLog.d(HMLog.Level.ALL, "HMPersistenceHalremovePublicKey success");
             return 0;
         } else {
@@ -471,7 +471,7 @@ class Core implements HMBTCoreInterface {
     public void HMApiCallbackExitedProximity(HMDevice device) {
         HMLog.d(HMLog.Level.ALL, "HMApiCallbackExitedProximity");
 
-        if (broadcaster != null && broadcaster.onDeviceExitedProximity(device)) return;
+        if (broadcaster != null && broadcaster.onDeviceExitedProximity(device.getMac())) return;
         if (scanner != null) scanner.onDeviceExitedProximity(device.getMac());
     }
 
@@ -564,7 +564,7 @@ class Core implements HMBTCoreInterface {
 
         abstract boolean onChangedAuthenticationState(HMDevice device);
 
-        abstract boolean onDeviceExitedProximity(HMDevice device);
+        abstract boolean onDeviceExitedProximity(byte[] mac);
 
         abstract boolean onCommandReceived(HMDevice device, byte[] bytes);
 

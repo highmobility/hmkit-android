@@ -1,6 +1,5 @@
-package com.highmobility.basicoauth
+package com.highmobility.hmkit.oauth
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -15,7 +14,6 @@ import com.highmobility.crypto.Crypto
 import com.highmobility.crypto.value.DeviceSerial
 import com.highmobility.crypto.value.PrivateKey
 import com.highmobility.hmkit.HMLog.d
-import com.highmobility.hmkit.oauth.OAuthActivity
 import com.highmobility.utils.Base64
 import org.json.JSONException
 import org.json.JSONObject
@@ -32,15 +30,17 @@ typealias CompletionHandler = (accessToken: String?, errorMessage: String?) -> U
 class OAuth internal constructor(private val context: Context,
                                  private var privateKey: PrivateKey,
                                  private var deviceSerial: DeviceSerial) {
-
     // created at the beginning of oauth process
+    internal lateinit var webUrl: String
+
     private lateinit var clientId: String
     private lateinit var redirectScheme: String
     private lateinit var tokenUrl: String
     private lateinit var nonceString: String
     private lateinit var completionHandler: CompletionHandler
+    private lateinit var viewControllerCompletionHandler: CompletionHandler
 
-    private var oauthActivity: Activity? = null
+    private var code: String? = null
 
     fun getAccessToken(appId: String,
                        authUrl: String,
@@ -51,7 +51,6 @@ class OAuth internal constructor(private val context: Context,
                        endDate: Calendar? = null,
                        state: String? = null,
                        completionHandler: CompletionHandler) {
-        val intent = Intent(context, OAuthActivity::class.java)
         createNonce()
 
         this.clientId = clientId
@@ -72,20 +71,30 @@ class OAuth internal constructor(private val context: Context,
         if (startDate != null) webUrl += "&validity_start_date=${df.format(startDate)}"
         if (endDate != null) webUrl += "&validity_end_date=${df.format(endDate)}"
         if (state != null) webUrl += "&state=$state"
+        this.webUrl = webUrl
 
-        intent.putExtra(EXTRA_URI_KEY, webUrl)
-
+        val intent = Intent(context, OAuthActivity::class.java)
         context.startActivity(intent)
     }
 
-    internal fun didReturnFromUri(uri: Uri?, activity: Activity) {
-        oauthActivity = activity
-        val code = uri?.getQueryParameter("code")
+    fun onStartLoadingUrl(url: String?): UrlLoadResult {
+        if (url != null && url.startsWith(redirectScheme)) {
+            val uri = Uri.parse(url)
+            code = uri?.getQueryParameter("code")
 
-        if (code == null) {
-            finishedDownloadingAccessToken(null, "Invalid redirect uri")
-            return
+            if (code == null) {
+                finishedDownloadingAccessToken(null, "Invalid redirect uri")
+                return UrlLoadResult.INVALID_REDIRECT_URL
+            }
+
+            return UrlLoadResult.CODE_INTERCEPTED
         }
+
+        return UrlLoadResult.UNKNOWN_URL
+    }
+
+    fun downloadAccessToken(completionHandler: CompletionHandler) {
+        viewControllerCompletionHandler = completionHandler
 
         var tokenUrl = tokenUrl
 
@@ -118,9 +127,10 @@ class OAuth internal constructor(private val context: Context,
         Volley.newRequestQueue(context).add(request)
     }
 
+
     private fun getJwt(): String {
         val header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}"
-        var body = "{\"code_verifier\":\"$nonceString\",\"serial_number\":\"${deviceSerial.hex}\"}"
+        val body = "{\"code_verifier\":\"$nonceString\",\"serial_number\":\"${deviceSerial.hex}\"}"
 
         val headerBase64 = Base64.encodeUrlSafe(header.toByteArray())
         val bodyBase64 = Base64.encodeUrlSafe(body.toByteArray())
@@ -137,8 +147,8 @@ class OAuth internal constructor(private val context: Context,
     }
 
     private fun finishedDownloadingAccessToken(accessToken: String?, errorMessage: String?) {
+        viewControllerCompletionHandler(accessToken, errorMessage) // finish the view
         completionHandler(accessToken, errorMessage)
-        oauthActivity?.finish()
     }
 
     private fun printRequest(request: JsonRequest<*>) {
@@ -162,7 +172,7 @@ class OAuth internal constructor(private val context: Context,
         nonceString = Crypto.createSerialNumber().hex
     }
 
-    companion object {
-        const val EXTRA_URI_KEY = "EXTRA_URI_KEY"
+    enum class UrlLoadResult {
+        UNKNOWN_URL, CODE_INTERCEPTED, INVALID_REDIRECT_URL
     }
 }
