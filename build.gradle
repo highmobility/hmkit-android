@@ -33,7 +33,7 @@ ext {
     compileSdkVersion = 28
     // these are not release numbers. release numbers are in deploy.settings files.
     cryptoVersion = "1.4.1"
-    utilsVersion = "1.4.1"
+    utilsVersion = "1.4.2"
 
     // 0 no release, local dependencies
     // 1 dev release, remote dependencies
