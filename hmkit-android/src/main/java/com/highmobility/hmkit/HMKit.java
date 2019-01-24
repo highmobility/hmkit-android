@@ -332,10 +332,10 @@ public class HMKit {
      * @throws IllegalStateException when there are links still connected.
      */
     public void terminate() throws IllegalStateException {
-        /**
-         * Broadcaster and ble need to be terminated on app kill. Currently they can be used
-         * again after terminate(they start the processes again automatically) but this is not a
-         * requirement since terminate is supposed to be called once.
+        /*
+          Broadcaster and ble need to be terminated on app kill. Currently they can be used
+          again after terminate(they start the processes again automatically) but this is not a
+          requirement since terminate is supposed to be called once.
          */
         if (broadcaster != null) broadcaster.terminate();
         if (ble != null) ble.terminate();

@@ -1,7 +1,7 @@
 package com.highmobility.hmkit
 
 internal class OAuthViewController(val view: IOAuthView) {
-    val oauth: OAuth = HMKit.getInstance().oAuth
+    private val oauth: OAuth = HMKit.getInstance().oAuth
 
     fun onViewLoad() {
         view.openWebView(oauth.webUrl)
@@ -12,7 +12,7 @@ internal class OAuthViewController(val view: IOAuthView) {
 
         if (result == OAuth.UrlLoadResult.CODE_INTERCEPTED) {
             view.showInfo("Downloading Access Token", false)
-            oauth.downloadAccessToken { accessToken, errorMessage ->
+            oauth.downloadAccessToken { _, _ ->
                 // we have the token, close the activity
                 view.closeActivity()
             }

@@ -6,8 +6,6 @@ import android.util.Log;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nullable;
-
 public class HMLog {
     private static final int MAX_TAG_LENGTH = 23;
     private static final int CALL_STACK_INDEX = 2;
@@ -59,7 +57,7 @@ public class HMLog {
         return LOG_PREFIX + createStackElementTag(stackTrace[CALL_STACK_INDEX]);
     }
 
-    @Nullable static String createStackElementTag(StackTraceElement element) {
+    static String createStackElementTag(StackTraceElement element) {
         String tag = element.getClassName();
         Matcher m = ANONYMOUS_CLASS.matcher(tag);
         if (m.find()) {

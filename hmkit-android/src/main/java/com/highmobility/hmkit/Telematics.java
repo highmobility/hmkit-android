@@ -119,27 +119,31 @@ public class Telematics extends Core.Telematics {
                         try {
                             String status = jsonObject.getString("status");
 
-                            if (status.equals("ok")) {
-                                // decrypt the data
-                                final byte[] data = Base64.decode(jsonObject.getString
-                                        ("response_data"), Base64.NO_WRAP);
+                            switch (status) {
+                                case "ok":
+                                    // decrypt the data
+                                    final byte[] data = Base64.decode(jsonObject.getString
+                                            ("response_data"), Base64.NO_WRAP);
 
-                                threadManager.postToWork(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        interactingCommand = commandSent;
-                                        core.HMBTCoreTelematicsReceiveData(data.length, data);
-                                    }
-                                });
-                            } else if (status.equals("timeout")) {
-                                commandSent.dispatchError(TelematicsError.Type.TIMEOUT, 0,
-                                        jsonObject
-                                                .getString("message"));
-                            } else if (status.equals("error")) {
-                                commandSent.dispatchError(TelematicsError.Type
-                                                .SERVER_ERROR, 0,
-                                        jsonObject
-                                                .getString("message"));
+                                    threadManager.postToWork(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            interactingCommand = commandSent;
+                                            core.HMBTCoreTelematicsReceiveData(data.length, data);
+                                        }
+                                    });
+                                    break;
+                                case "timeout":
+                                    commandSent.dispatchError(TelematicsError.Type.TIMEOUT, 0,
+                                            jsonObject
+                                                    .getString("message"));
+                                    break;
+                                case "error":
+                                    commandSent.dispatchError(TelematicsError.Type
+                                                    .SERVER_ERROR, 0,
+                                            jsonObject
+                                                    .getString("message"));
+                                    break;
                             }
                         } catch (JSONException e) {
                             commandSent.dispatchError(TelematicsError.Type

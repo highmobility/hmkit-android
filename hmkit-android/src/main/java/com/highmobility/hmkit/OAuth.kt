@@ -60,7 +60,7 @@ class OAuth internal constructor(private val webService: WebService,
         webUrl += "&redirect_uri=$redirectScheme"
         webUrl += "&code_challenge=$codeChallenge"
 
-        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
+        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ", Locale.getDefault())
         if (startDate != null) webUrl += "&validity_start_date=${df.format(startDate)}"
         if (endDate != null) webUrl += "&validity_end_date=${df.format(endDate)}"
         if (state != null) webUrl += "&state=$state"
