@@ -1,4 +1,4 @@
-package com.highmobility.hmkit.oauth
+package com.highmobility.hmkit
 
 import android.os.Build
 import android.os.Bundle
@@ -7,11 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.*
 import androidx.fragment.app.Fragment
-import com.highmobility.hmkit.HMLog
-import com.highmobility.hmkit.R
 import kotlinx.android.synthetic.main.fragment_oauth_web_view.*
 
-class WebViewFragment : Fragment() {
+internal class WebViewFragment : Fragment() {
     private lateinit var iWebView: IWebView
     private lateinit var url: String
 

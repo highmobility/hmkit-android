@@ -32,6 +32,7 @@ dependencies {
     implementation project(':hmkit-android')
     implementation project(':hmkit-crypto')
     implementation project(':hmkit-utils')
+    
     implementation 'com.highmobility:hmkit-auto-api:1.9.0', {
         exclude group: 'com.highmobility', module: 'hmkit-utils'
     }

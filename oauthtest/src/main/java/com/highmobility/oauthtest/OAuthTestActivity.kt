@@ -29,25 +29,16 @@ class OAuthTestActivity : Activity() {
         textView = findViewById(R.id.text_view)
         progressBar = findViewById(R.id.progress_bar)
         button = findViewById(R.id.access_token_text_button)
-        HMKit.webUrl = "https://xv-platform.h-m.space"
-        HMKit.getInstance().initialise(
-                "***REMOVED***",
-                "***REMOVED***",
-                "***REMOVED***",
-                applicationContext)
 
-        val serial = DeviceSerial("66261204D4609A72A5")
-        val cert = HMKit.getInstance().getCertificate(serial)
 
-         if (cert != null) getVs(cert.gainerSerial)
 
         button.setOnClickListener {
             HMKit.getInstance().oAuth.getAccessToken(
-                    "***REMOVED***",
-                    "https://owner-panel.h-m.space/oauth/new",
-                    "***REMOVED***",
-                    "com.hm.1542392929-z6dz5swisgnv://in-app",
-                    "https://xv-platform.h-m.space/hm_cloud/api/v1/access_tokens",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
                     null,
                     null,
                     null

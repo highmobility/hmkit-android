@@ -1,12 +1,9 @@
-package com.highmobility.hmkit.oauth
+package com.highmobility.hmkit
 
 
 import android.os.Bundle
 import android.view.Window
 import androidx.fragment.app.FragmentActivity
-
-import com.highmobility.hmkit.R
-import com.highmobility.hmkit.oauth.navigation.OAuthNavigationManager
 
 /**
  * Used to start the web browser to get access token code. Will show progress bar while access token

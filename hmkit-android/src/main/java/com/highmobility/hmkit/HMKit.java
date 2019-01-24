@@ -14,7 +14,6 @@ import com.highmobility.crypto.value.PrivateKey;
 import com.highmobility.crypto.value.PublicKey;
 import com.highmobility.hmkit.error.BleNotSupportedException;
 import com.highmobility.hmkit.error.DownloadAccessCertificateError;
-import com.highmobility.hmkit.oauth.OAuth;
 import com.highmobility.utils.Base64;
 import com.highmobility.value.Bytes;
 
@@ -106,7 +105,8 @@ public class HMKit {
         throwIfDeviceCertificateNotSet();
 
         if (oauth == null)
-            oauth = new OAuth(context, core.getPrivateKey(), getDeviceCertificate().getSerial());
+            oauth = new OAuth(webService, context, core.getPrivateKey(),
+                    getDeviceCertificate().getSerial());
 
         return oauth;
     }
@@ -314,10 +314,10 @@ public class HMKit {
             core = new Core(storage, threadManager, certificate, privateKey, issuerPublicKey);
         else core.setDeviceCertificate(certificate, privateKey, issuerPublicKey);
 
-
         if (oauth != null) oauth.setDeviceCertificate(privateKey, certificate.getSerial());
 
-        if (webService == null) webService = new WebService(this.context, certificate.getIssuer(), webUrl);
+        if (webService == null)
+            webService = new WebService(this.context, certificate.getIssuer(), webUrl);
         else webService.setIssuer(certificate.getIssuer(), webUrl);
 
         HMLog.d(HMLog.Level.NONE, "Set certificate: " + certificate.toString());

@@ -1,6 +1,4 @@
-package com.highmobility.hmkit.oauth
-
-import com.highmobility.hmkit.HMKit
+package com.highmobility.hmkit
 
 internal class OAuthViewController(val view: IOAuthView) {
     val oauth: OAuth = HMKit.getInstance().oAuth

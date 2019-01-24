@@ -1,15 +1,8 @@
-package com.highmobility.hmkit.oauth.navigation
+package com.highmobility.hmkit
 
 import android.app.Activity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-
-
-import com.highmobility.hmkit.R
-import com.highmobility.hmkit.oauth.IInfoView
-import com.highmobility.hmkit.oauth.IWebView
-import com.highmobility.hmkit.oauth.OAuthInfoFragment
-import com.highmobility.hmkit.oauth.WebViewFragment
 
 /**
  * Initialize the NavigationManager with a FragmentManager, which will be used at the
