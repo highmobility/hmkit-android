@@ -53,6 +53,33 @@ class WebService {
         baseUrl += apiUrl;
     }
 
+    void downloadOauthAccessToken(String url, String grantType, String code, String redirectUri,
+                                  String clientId, String jwt,
+                                  final Response.Listener<JSONObject> response,
+                                  final Response.ErrorListener error) {
+        Uri uri = Uri.parse(url).buildUpon().build();
+        Map<String, String> params = new HashMap<>();
+
+        // payload
+        params.put("grant_type", grantType);
+        params.put("code", code);
+        params.put("redirect_uri", redirectUri);
+        params.put("client_id", clientId);
+        params.put("code_verifier", jwt);
+
+        WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        printResponse(jsonObject);
+                        response.onResponse(jsonObject);
+
+                    }
+                }, error);
+
+        queueRequest(request);
+    }
+
     void requestAccessCertificate(final String accessToken,
                                   PrivateKey privateKey,
                                   final DeviceSerial serialNumber,
@@ -74,13 +101,7 @@ class WebService {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
-                        if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
-                            try {
-                                HMLog.d("response " + jsonObject.toString(2));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
+                        printResponse(jsonObject);
                         response.onResponse(jsonObject);
 
                     }
@@ -104,14 +125,7 @@ class WebService {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
-                        if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
-                            try {
-                                HMLog.d("response " + jsonObject.toString(2));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
+                        printResponse(jsonObject);
                         response.onResponse(jsonObject);
                     }
                 }, error);
@@ -132,14 +146,7 @@ class WebService {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
-                        if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
-                            try {
-                                HMLog.d("response " + jsonObject.toString(2));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
+                        printResponse(jsonObject);
                         response.onResponse(jsonObject);
                     }
                 }, error);
@@ -155,5 +162,15 @@ class WebService {
 
     void cancelAllRequests() {
         queue.cancelAll(this);
+    }
+
+    void printResponse(JSONObject jsonObject) {
+        if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
+            try {
+                HMLog.d("response " + jsonObject.toString(2));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
