@@ -105,8 +105,7 @@ public class HMKit {
         throwIfDeviceCertificateNotSet();
 
         if (oauth == null)
-            oauth = new OAuth(webService, context, core.getPrivateKey(),
-                    getDeviceCertificate().getSerial());
+            oauth = new OAuth(webService, core.getPrivateKey(), getDeviceCertificate().getSerial());
 
         return oauth;
     }
@@ -569,7 +568,7 @@ public class HMKit {
             try {
                 ble = new SharedBle(context);
             } catch (BleNotSupportedException e) {
-                HMLog.d(HMLog.Level.ALL, "Ble not supported");
+                HMLog.d(HMLog.Level.ALL, "BLE not supported");
             }
         }
     }
