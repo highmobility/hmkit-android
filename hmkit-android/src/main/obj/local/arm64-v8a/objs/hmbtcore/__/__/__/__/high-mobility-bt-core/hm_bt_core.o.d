@@ -1,5 +1,5 @@
-/Users/maiduule/Workspace/hmkit-android/hmkit-android/src/main/obj/local/arm64-v8a/objs/hmbtcore/__/__/__/__/high-mobility-bt-core/hm_bt_core.o: \
-  /Users/maiduule/Workspace/hmkit-android/hmkit-android/src/main/jni/../../../../high-mobility-bt-core/hm_bt_core.c \
+/Users/maidu/Workspace/hmkit-android/hmkit-android/src/main/obj/local/arm64-v8a/objs/hmbtcore/__/__/__/__/high-mobility-bt-core/hm_bt_core.o: \
+  /Users/maidu/Workspace/hmkit-android/hmkit-android/src/main/jni/../../../../high-mobility-bt-core/hm_bt_core.c \
   ../../../../high-mobility-bt-core/hm_bt_core.h \
   ../../../../high-mobility-bt-core/hm_api.h \
   ../../../../high-mobility-bt-core/hm_conf_access.h \
@@ -11,7 +11,7 @@
   ../../../../high-mobility-bt-core/hm_bt_persistence_hal.h \
   ../../../../high-mobility-bt-core/hm_bt_log.h \
   ../../../../high-mobility-bt-core/hm_error.h \
-  /Users/maiduule/Workspace/hmkit-android/hmkit-android/src/main/jni/hm_config.h
+  /Users/maidu/Workspace/hmkit-android/hmkit-android/src/main/jni/hm_config.h
 
 ../../../../high-mobility-bt-core/hm_bt_core.h:
 
@@ -35,4 +35,4 @@
 
 ../../../../high-mobility-bt-core/hm_error.h:
 
-/Users/maiduule/Workspace/hmkit-android/hmkit-android/src/main/jni/hm_config.h:
+/Users/maidu/Workspace/hmkit-android/hmkit-android/src/main/jni/hm_config.h:
