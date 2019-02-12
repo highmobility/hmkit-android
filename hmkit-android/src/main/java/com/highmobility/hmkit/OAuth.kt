@@ -1,22 +1,14 @@
-package com.highmobility.hmkit.oauth
+package com.highmobility.hmkit
 
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import com.android.volley.AuthFailureError
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.VolleyError
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.JsonRequest
-import com.android.volley.toolbox.Volley
 import com.highmobility.crypto.Crypto
 import com.highmobility.crypto.value.DeviceSerial
 import com.highmobility.crypto.value.PrivateKey
 import com.highmobility.hmkit.HMLog.d
 import com.highmobility.utils.Base64
 import org.json.JSONException
-import org.json.JSONObject
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.*
@@ -25,9 +17,9 @@ typealias CompletionHandler = (accessToken: String?, errorMessage: String?) -> U
 
 /**
  * Used to open the web view to get the oauth access token code. Then requests the access token and
- * returns it to the user.
+ * returns it to the user. User can then use the token to download the Access Certificate.
  */
-class OAuth internal constructor(private val context: Context,
+class OAuth internal constructor(private val webService: WebService,
                                  private var privateKey: PrivateKey,
                                  private var deviceSerial: DeviceSerial) {
     // created at the beginning of oauth process
@@ -42,7 +34,24 @@ class OAuth internal constructor(private val context: Context,
 
     private var code: String? = null
 
-    fun getAccessToken(appId: String,
+
+    /**
+     * Get the access token for downloading an Access Certificate. An activity is started that uses
+     * a web view and a http request to get the access token.
+     *
+     * @param activity The activity the oAuth process is started in.
+     * @param appId The app ID.
+     * @param authUrl The auth URL.
+     * @param clientId The client ID.
+     * @param redirectScheme The redirect scheme.
+     * @param tokenUrl The token URL.
+     * @param startDate The start date.
+     * @param endDate The end date.
+     * @param state The state.
+     * @param completionHandler The completionHandler.
+     */
+    fun getAccessToken(activity: Activity,
+                       appId: String,
                        authUrl: String,
                        clientId: String,
                        redirectScheme: String,
@@ -67,14 +76,14 @@ class OAuth internal constructor(private val context: Context,
         webUrl += "&redirect_uri=$redirectScheme"
         webUrl += "&code_challenge=$codeChallenge"
 
-        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ")
+        val df = SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ", Locale.getDefault())
         if (startDate != null) webUrl += "&validity_start_date=${df.format(startDate)}"
         if (endDate != null) webUrl += "&validity_end_date=${df.format(endDate)}"
         if (state != null) webUrl += "&state=$state"
         this.webUrl = webUrl
 
-        val intent = Intent(context, OAuthActivity::class.java)
-        context.startActivity(intent)
+        val intent = Intent(activity, OAuthActivity::class.java)
+        activity.startActivity(intent)
     }
 
     fun onStartLoadingUrl(url: String?): UrlLoadResult {
@@ -96,16 +105,8 @@ class OAuth internal constructor(private val context: Context,
     fun downloadAccessToken(completionHandler: CompletionHandler) {
         viewControllerCompletionHandler = completionHandler
 
-        var tokenUrl = tokenUrl
-
-        tokenUrl += "?grant_type=authorization_code"
-        tokenUrl += "&code=$code"
-        tokenUrl += "&redirect_uri=$redirectScheme"
-        tokenUrl += "&client_id=$clientId"
-        tokenUrl += "&code_verifier=${getJwt()}"
-
-        val request = JsonObjectRequest(Request.Method.POST, tokenUrl, null,
-                Response.Listener { jsonObject ->
+        webService.downloadOauthAccessToken(tokenUrl, "authorization_code", code!!, redirectScheme, clientId, getJwt(),
+                { jsonObject ->
                     try {
                         d("response " + jsonObject.toString(2))
                         val accessToken = jsonObject["access_token"] as String
@@ -114,7 +115,8 @@ class OAuth internal constructor(private val context: Context,
                         e.printStackTrace()
                         finishedDownloadingAccessToken(null, "invalid download access token response")
                     }
-                }, Response.ErrorListener { error: VolleyError? ->
+
+                }, { error ->
             if (error?.networkResponse != null) {
                 finishedDownloadingAccessToken(null, "" + error.networkResponse.statusCode + ": " + String(error.networkResponse.data))
             }
@@ -122,11 +124,7 @@ class OAuth internal constructor(private val context: Context,
                 finishedDownloadingAccessToken(null, "no internet connection")
             }
         })
-
-        printRequest(request)
-        Volley.newRequestQueue(context).add(request)
     }
-
 
     private fun getJwt(): String {
         val header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}"
@@ -149,23 +147,6 @@ class OAuth internal constructor(private val context: Context,
     private fun finishedDownloadingAccessToken(accessToken: String?, errorMessage: String?) {
         viewControllerCompletionHandler(accessToken, errorMessage) // finish the view
         completionHandler(accessToken, errorMessage)
-    }
-
-    private fun printRequest(request: JsonRequest<*>) {
-        try {
-            val body = request.body
-            val bodyString = if (body != null) "\n" + String(request.body) else ""
-            val headers = JSONObject(request.headers)
-
-            try {
-                d(request.url.toString() + "\n" + headers.toString(2) +
-                        bodyString)
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-        } catch (authFailureError: AuthFailureError) {
-            authFailureError.printStackTrace()
-        }
     }
 
     private fun createNonce() {

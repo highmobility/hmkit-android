@@ -7,3 +7,6 @@
 [submodule "hm-java-crypto"]
 	path = hm-java-crypto
 	url = git@github.com:highmobility/hm-java-crypto.git
+[submodule "hm-android-basic-oauth"]
+	path = hm-android-basic-oauth
+	url = https://github.com/highmobility/hm-android-basic-oauth.git

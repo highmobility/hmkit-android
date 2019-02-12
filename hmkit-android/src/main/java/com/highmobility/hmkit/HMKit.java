@@ -14,7 +14,6 @@ import com.highmobility.crypto.value.PrivateKey;
 import com.highmobility.crypto.value.PublicKey;
 import com.highmobility.hmkit.error.BleNotSupportedException;
 import com.highmobility.hmkit.error.DownloadAccessCertificateError;
-import com.highmobility.hmkit.oauth.OAuth;
 import com.highmobility.utils.Base64;
 import com.highmobility.value.Bytes;
 
@@ -106,7 +105,7 @@ public class HMKit {
         throwIfDeviceCertificateNotSet();
 
         if (oauth == null)
-            oauth = new OAuth(context, core.getPrivateKey(), getDeviceCertificate().getSerial());
+            oauth = new OAuth(webService, core.getPrivateKey(), getDeviceCertificate().getSerial());
 
         return oauth;
     }
@@ -342,10 +341,10 @@ public class HMKit {
      * @throws IllegalStateException when there are links still connected.
      */
     public void terminate() throws IllegalStateException {
-        /**
-         * Broadcaster and ble need to be terminated on app kill. Currently they can be used
-         * again after terminate(they start the processes again automatically) but this is not a
-         * requirement since terminate is supposed to be called once.
+        /*
+          Broadcaster and ble need to be terminated on app kill. Currently they can be used
+          again after terminate(they start the processes again automatically) but this is not a
+          requirement since terminate is supposed to be called once.
          */
         if (broadcaster != null) broadcaster.terminate();
         if (ble != null) ble.terminate();
@@ -579,7 +578,7 @@ public class HMKit {
             try {
                 ble = new SharedBle(context);
             } catch (BleNotSupportedException e) {
-                HMLog.d(HMLog.Level.ALL, "Ble not supported");
+                HMLog.d(HMLog.Level.ALL, "BLE not supported");
             }
         }
     }
