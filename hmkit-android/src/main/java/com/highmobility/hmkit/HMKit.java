@@ -40,7 +40,7 @@ public class HMKit {
     @Nullable public static String webUrl = null;
 
     // Using application context, no chance for leak.
-    @SuppressLint("StaticFieldLeak") private static HMKit instance;
+    @SuppressLint("StaticFieldLeak") private static volatile HMKit instance;
 
     private Context context;
 
@@ -168,12 +168,22 @@ public class HMKit {
      * @return The instance of the HMKit.
      */
     public static HMKit getInstance() {
-        if (instance == null) instance = new HMKit();
+        if (instance == null) {
+            synchronized (HMKit.class) {
+                // If instance is null, make sure its created thread  safely.
+                if (instance == null) instance = new HMKit();
+            }
+        }
 
         return instance;
     }
 
     private HMKit() {
+        // protect against reflection where private is not respected.
+        if (instance != null) {
+            throw new RuntimeException("Use getInstance() to get the HMKit singleton");
+        }
+
         HMLog.init();
     }
 
@@ -314,10 +324,10 @@ public class HMKit {
             core = new Core(storage, threadManager, certificate, privateKey, issuerPublicKey);
         else core.setDeviceCertificate(certificate, privateKey, issuerPublicKey);
 
-
         if (oauth != null) oauth.setDeviceCertificate(privateKey, certificate.getSerial());
 
-        if (webService == null) webService = new WebService(this.context, certificate.getIssuer(), webUrl);
+        if (webService == null)
+            webService = new WebService(this.context, certificate.getIssuer(), webUrl);
         else webService.setIssuer(certificate.getIssuer(), webUrl);
 
         HMLog.d(HMLog.Level.NONE, "Set certificate: " + certificate.toString());
