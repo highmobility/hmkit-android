@@ -34,7 +34,7 @@ ext {
     cryptoVersion = "1.4.2"
     utilsVersion = "1.4.2"
     hmkitVersion = "1.6.5-dev"
-    autoApiVersion = "1.9.0"
+    autoApiVersion = "1.10.0-dev"
     compileSdkVersion = 28
 
     // 0 no release, local dependencies
