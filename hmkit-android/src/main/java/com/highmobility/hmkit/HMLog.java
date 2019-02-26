@@ -20,7 +20,12 @@ public class HMLog {
         if (HMKit.loggingLevel.getValue() >= Level.DEBUG.getValue()) {
             // don't call to this class again, this will mess up stack index and log tag. Always
             // call straight to Timber.d in a method in this class.
-            Log.d(getTag(), String.format(message, args));
+            try {
+                Log.d(getTag(), String.format(message, args));
+            }
+            catch (Exception e) {
+                Log.d(getTag(), message);
+            }
         }
     }
 

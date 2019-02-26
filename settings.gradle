@@ -4,5 +4,5 @@ include ':hmkit-android',
         ':hmkit-utils'
 
 project(':hmkit-crypto').projectDir = new File('hm-java-crypto/')
-project(':basic-oauth').projectDir = new File('hm-android-basic-oauth/app')
+project(':basic-oauth').projectDir = new File('hm-android-basic-oauth/basic-oauth')
 project(':hmkit-utils').projectDir = new File('hm-java-crypto/hm-java-utils')

@@ -8,6 +8,7 @@ import com.highmobility.crypto.value.DeviceSerial
 import com.highmobility.crypto.value.PrivateKey
 import com.highmobility.hmkit.HMLog.d
 import com.highmobility.utils.Base64
+import com.highmobility.value.Bytes
 import org.json.JSONException
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
@@ -28,7 +29,7 @@ class OAuth internal constructor(private val webService: WebService,
     private lateinit var clientId: String
     private lateinit var redirectScheme: String
     private lateinit var tokenUrl: String
-    private lateinit var nonceString: String
+    private lateinit var nonce: Bytes
     private lateinit var completionHandler: CompletionHandler
     private lateinit var viewControllerCompletionHandler: CompletionHandler
 
@@ -60,14 +61,13 @@ class OAuth internal constructor(private val webService: WebService,
                        endDate: Calendar? = null,
                        state: String? = null,
                        completionHandler: CompletionHandler) {
-        createNonce()
-
         this.clientId = clientId
         this.redirectScheme = redirectScheme
         this.tokenUrl = tokenUrl
         this.completionHandler = completionHandler
-        val nonceBytes = nonceString.toByteArray(Charset.forName("ASCII"))
-        val nonceSha256 = Crypto.sha256(nonceBytes).byteArray
+
+        nonce = Crypto.createSerialNumber()
+        val nonceSha256 = Crypto.sha256(nonce.hex.toByteArray(Charset.forName("ASCII"))).byteArray
         val codeChallenge = Base64.encodeUrlSafe(nonceSha256)
 
         var webUrl = authUrl
@@ -128,7 +128,7 @@ class OAuth internal constructor(private val webService: WebService,
 
     private fun getJwt(): String {
         val header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}"
-        val body = "{\"code_verifier\":\"$nonceString\",\"serial_number\":\"${deviceSerial.hex}\"}"
+        val body = "{\"code_verifier\":\"${nonce.hex}\",\"serial_number\":\"${deviceSerial.hex}\"}"
 
         val headerBase64 = Base64.encodeUrlSafe(header.toByteArray())
         val bodyBase64 = Base64.encodeUrlSafe(body.toByteArray())
@@ -147,10 +147,6 @@ class OAuth internal constructor(private val webService: WebService,
     private fun finishedDownloadingAccessToken(accessToken: String?, errorMessage: String?) {
         viewControllerCompletionHandler(accessToken, errorMessage) // finish the view
         completionHandler(accessToken, errorMessage)
-    }
-
-    private fun createNonce() {
-        nonceString = Crypto.createSerialNumber().hex
     }
 
     enum class UrlLoadResult {
