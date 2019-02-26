@@ -1,6 +1,6 @@
 package com.highmobility.hmkit
 
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import com.highmobility.crypto.Crypto
@@ -20,7 +20,6 @@ typealias CompletionHandler = (accessToken: String?, errorMessage: String?) -> U
  * returns it to the user. User can then use the token to download the Access Certificate.
  */
 class OAuth internal constructor(private val webService: WebService,
-                                 private val context: Context,
                                  private var privateKey: PrivateKey,
                                  private var deviceSerial: DeviceSerial) {
     // created at the beginning of oauth process
@@ -35,7 +34,24 @@ class OAuth internal constructor(private val webService: WebService,
 
     private var code: String? = null
 
-    fun getAccessToken(appId: String,
+
+    /**
+     * Get the access token for downloading an Access Certificate. An activity is started that uses
+     * a web view and a http request to get the access token.
+     *
+     * @param activity The activity the oAuth process is started in.
+     * @param appId The app ID.
+     * @param authUrl The auth URL.
+     * @param clientId The client ID.
+     * @param redirectScheme The redirect scheme.
+     * @param tokenUrl The token URL.
+     * @param startDate The start date.
+     * @param endDate The end date.
+     * @param state The state.
+     * @param completionHandler The completionHandler.
+     */
+    fun getAccessToken(activity: Activity,
+                       appId: String,
                        authUrl: String,
                        clientId: String,
                        redirectScheme: String,
@@ -66,9 +82,8 @@ class OAuth internal constructor(private val webService: WebService,
         if (state != null) webUrl += "&state=$state"
         this.webUrl = webUrl
 
-        val intent = Intent(context, OAuthActivity::class.java)
-
-        context.startActivity(intent)
+        val intent = Intent(activity, OAuthActivity::class.java)
+        activity.startActivity(intent)
     }
 
     fun onStartLoadingUrl(url: String?): UrlLoadResult {

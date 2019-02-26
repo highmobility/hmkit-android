@@ -11,6 +11,8 @@ import com.highmobility.value.Bytes;
 
 import java.util.Calendar;
 
+import javax.annotation.Nullable;
+
 public class Link {
     /**
      * The time after which HMKit will fail the command if there has been no response. In ms.
@@ -21,9 +23,9 @@ public class Link {
 
     LinkListener listener;
     BluetoothDevice btDevice;
+    private Bytes mac;
+    @Nullable private DeviceSerial serial; // set after authentication is finished by core
 
-    private HMDevice hmDevice;
-    private DeviceSerial serial;
     private State state = State.CONNECTED;
 
     private LinkCommand sentCommand;
@@ -36,6 +38,7 @@ public class Link {
         this.threadManager = threadManager;
 
         connectionTime = Calendar.getInstance().getTimeInMillis();
+        mac = new Bytes(ByteUtils.bytesFromMacString(btDevice.getAddress()));
     }
 
     /**
@@ -75,9 +78,9 @@ public class Link {
     }
 
     /**
-     * @return The link's serial.
+     * @return The link's serial. Set after authentication process has resolved the serial.
      */
-    public DeviceSerial getSerial() {
+    @Nullable public DeviceSerial getSerial() {
         return serial;
     }
 
@@ -109,8 +112,7 @@ public class Link {
             return;
         }
 
-        HMLog.d("send command %s to %s", bytes, ByteUtils
-                .hexFromBytes(hmDevice.getMac()));
+        HMLog.d("send command %s to %s", bytes, mac);
 
         sentCommand = new LinkCommand(callback, threadManager);
 
@@ -161,8 +163,6 @@ public class Link {
     }
 
     void onChangedAuthenticationState(HMDevice hmDevice) {
-        this.hmDevice = hmDevice;
-
         if (serial == null || serial.equals(hmDevice.getSerial()) == false) {
             serial = new DeviceSerial(hmDevice.getSerial());
         }
@@ -176,8 +176,7 @@ public class Link {
     }
 
     void onCommandReceived(final byte[] bytes) {
-        HMLog.d("did receive command %s from %s", ByteUtils.hexFromBytes
-                (bytes), ByteUtils.hexFromBytes(hmDevice.getMac()));
+        HMLog.d("did receive command %s from %s", ByteUtils.hexFromBytes(bytes), mac);
 
         if (listener == null) {
             HMLog.d("can't dispatch notification: no listener set");
@@ -193,9 +192,8 @@ public class Link {
     }
 
     void onCommandResponseReceived(final byte[] data) {
-        HMLog.d("did receive command response %s from %s in %s ms", ByteUtils
-                .hexFromBytes(data), ByteUtils.hexFromBytes(hmDevice.getMac()), (Calendar
-                .getInstance().getTimeInMillis() - sentCommand.commandStartTime)
+        HMLog.d("did receive command response %s from %s in %s ms", ByteUtils.hexFromBytes(data),
+                mac, (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime)
         );
 
         if (sentCommand == null || sentCommand.finished) {

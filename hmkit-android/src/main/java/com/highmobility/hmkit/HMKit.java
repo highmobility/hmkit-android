@@ -39,7 +39,7 @@ public class HMKit {
     @Nullable public static String webUrl = null;
 
     // Using application context, no chance for leak.
-    @SuppressLint("StaticFieldLeak") private static HMKit instance;
+    @SuppressLint("StaticFieldLeak") private static volatile HMKit instance;
 
     private Context context;
 
@@ -105,8 +105,7 @@ public class HMKit {
         throwIfDeviceCertificateNotSet();
 
         if (oauth == null)
-            oauth = new OAuth(webService, context, core.getPrivateKey(),
-                    getDeviceCertificate().getSerial());
+            oauth = new OAuth(webService, core.getPrivateKey(), getDeviceCertificate().getSerial());
 
         return oauth;
     }
@@ -168,12 +167,22 @@ public class HMKit {
      * @return The instance of the HMKit.
      */
     public static HMKit getInstance() {
-        if (instance == null) instance = new HMKit();
+        if (instance == null) {
+            synchronized (HMKit.class) {
+                // If instance is null, make sure its created thread  safely.
+                if (instance == null) instance = new HMKit();
+            }
+        }
 
         return instance;
     }
 
     private HMKit() {
+        // protect against reflection where private is not respected.
+        if (instance != null) {
+            throw new RuntimeException("Use getInstance() to get the HMKit singleton");
+        }
+
         HMLog.init();
     }
 
@@ -569,7 +578,7 @@ public class HMKit {
             try {
                 ble = new SharedBle(context);
             } catch (BleNotSupportedException e) {
-                HMLog.d(HMLog.Level.ALL, "Ble not supported");
+                HMLog.d(HMLog.Level.ALL, "BLE not supported");
             }
         }
     }
