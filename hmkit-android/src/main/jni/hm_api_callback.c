@@ -57,7 +57,11 @@ void hm_api_callback_entered_proximity(hm_device_t *device)
     (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
 
 
-    return (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackEnteredProximity, obj);
+    (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackEnteredProximity, obj);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+      }
 }
 
 void hm_api_callback_proximity_measured(hm_device_t *device, uint8_t receiver_count, hm_receiver_t *receivers)
@@ -90,7 +94,11 @@ void hm_api_callback_exited_proximity(hm_device_t *device)
     (*envRef)->CallVoidMethod(envRef, obj, setIsAuthenticated, device->is_authorised);
     (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
 
-    return (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackExitedProximity, obj);
+    (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackExitedProximity, obj);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+    }
 }
 
 void hm_api_callback_command_incoming(hm_device_t *device, uint8_t *data, uint16_t length)
@@ -122,6 +130,10 @@ void hm_api_callback_command_incoming(hm_device_t *device, uint8_t *data, uint16
     (*envRef)->SetByteArrayRegion(envRef, data_, 0, length, (const jbyte*) data );
 
     (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackCustomCommandIncoming, obj,data_,length);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+      }
 }
 
 void hm_api_callback_command_response(hm_device_t *device, uint8_t *data, uint16_t length)
@@ -153,6 +165,10 @@ void hm_api_callback_command_response(hm_device_t *device, uint8_t *data, uint16
     (*envRef)->SetByteArrayRegion(envRef, data_, 0, length, (const jbyte*) data );
 
     (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackCustomCommandResponse, obj,data_,length);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+      }
 }
 
 uint32_t hm_api_callback_get_device_certificate_failed(hm_device_t *device, uint8_t *nonce)
@@ -184,6 +200,11 @@ uint32_t hm_api_callback_get_device_certificate_failed(hm_device_t *device, uint
     (*envRef)->SetByteArrayRegion(envRef, nonce_, 0, 9, (const jbyte*) nonce );
 
     jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackGetDeviceCertificateFailed, obj,nonce_);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+        return 0;
+      }
 
     jbyte* nonce_array = (*envRef)->GetByteArrayElements(envRef, nonce_, NULL);
     memcpy(nonce,nonce_array,9);
@@ -223,6 +244,11 @@ uint32_t hm_api_callback_pairing_requested(hm_device_t *device){
 
     jint ret = (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackPairingRequested, obj);
 
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+        return 0;
+      }
+
     return ret;
 }
 
@@ -254,6 +280,10 @@ void hm_api_callback_telematics_command_incoming(hm_device_t *device, uint8_t id
     (*envRef)->SetByteArrayRegion(envRef, data_, 0, length, (const jbyte*) data );
 
     (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackTelematicsCommandIncoming, obj, id, length, data_);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+      }
 }
 
 void hm_api_callback_revoke_response(hm_device_t *device, uint8_t *data, uint16_t length, uint8_t status){
@@ -284,4 +314,8 @@ jclass cls = (*envRef)->FindClass(envRef, "com/highmobility/btcore/HMDevice");
     (*envRef)->SetByteArrayRegion(envRef, data_, 0, length, (const jbyte*) data );
 
     (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackRevokeResponse, obj, data_, length, status);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+      }
 }
