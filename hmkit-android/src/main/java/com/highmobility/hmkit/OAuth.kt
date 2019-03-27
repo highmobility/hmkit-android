@@ -6,15 +6,16 @@ import android.net.Uri
 import com.highmobility.crypto.Crypto
 import com.highmobility.crypto.value.DeviceSerial
 import com.highmobility.crypto.value.PrivateKey
-import com.highmobility.hmkit.HMLog.d
 import com.highmobility.utils.Base64
 import com.highmobility.value.Bytes
 import org.json.JSONException
+import org.json.JSONObject
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.*
 
-typealias CompletionHandler = (accessToken: String?, errorMessage: String?) -> Unit
+data class AccessTokenResponse(val accessToken: String, val refreshToken: String, val expiresIn: Int)
+typealias CompletionHandler = (response: AccessTokenResponse?, errorMessage: String?) -> Unit
 
 /**
  * Used to open the web view to get the oauth access token code. Then requests the access token and
@@ -49,7 +50,7 @@ class OAuth internal constructor(private val webService: WebService,
      * @param startDate The start date.
      * @param endDate The end date.
      * @param state The state.
-     * @param completionHandler The completionHandler.
+     * @param completionHandler The completion handler.
      */
     fun getAccessToken(activity: Activity,
                        appId: String,
@@ -86,7 +87,34 @@ class OAuth internal constructor(private val webService: WebService,
         activity.startActivity(intent)
     }
 
-    fun onStartLoadingUrl(url: String?): UrlLoadResult {
+    /**
+     * Refresh the access token with a previously acquired refresh token. lin
+     *
+     * @param tokenUrl The token URL.
+     * @param clientId The client ID.
+     * @param refreshToken The refresh token.
+     * @param completionHandler The completion handler.
+     */
+    fun refreshAccessToken(tokenUrl: String, clientId: String, refreshToken: String, completionHandler: CompletionHandler) {
+        webService.refreshOauthAccessToken(tokenUrl, clientId, refreshToken, { jsonObject ->
+            try {
+                val responseObject = parseAccessTokenResponse(jsonObject)
+                completionHandler(responseObject, null)
+            } catch (e: JSONException) {
+                e.printStackTrace()
+                finishedDownloadingAccessToken(null, "invalid refresh access token response")
+            }
+        }, { error ->
+            if (error?.networkResponse != null) {
+                completionHandler(null, "${error.networkResponse.statusCode}: ${String(error.networkResponse.data)}")
+            }
+            else {
+                completionHandler(null, "no internet connection")
+            }
+        })
+    }
+
+    internal fun onStartLoadingUrl(url: String?): UrlLoadResult {
         if (url != null && url.startsWith(redirectScheme)) {
             val uri = Uri.parse(url)
             code = uri?.getQueryParameter("code")
@@ -102,23 +130,15 @@ class OAuth internal constructor(private val webService: WebService,
         return UrlLoadResult.UNKNOWN_URL
     }
 
-    fun downloadAccessToken(completionHandler: CompletionHandler) {
+    internal fun downloadAccessToken(completionHandler: CompletionHandler) {
         viewControllerCompletionHandler = completionHandler
 
-        webService.downloadOauthAccessToken(tokenUrl, "authorization_code", code!!, redirectScheme, clientId, getJwt(),
+        webService.downloadOauthAccessToken(tokenUrl, code!!, redirectScheme, clientId, getJwt(),
                 { jsonObject ->
-                    try {
-                        d("response " + jsonObject.toString(2))
-                        val accessToken = jsonObject["access_token"] as String
-                        finishedDownloadingAccessToken(accessToken, null)
-                    } catch (e: JSONException) {
-                        e.printStackTrace()
-                        finishedDownloadingAccessToken(null, "invalid download access token response")
-                    }
-
+                    finishedDownloadingAccessToken(jsonObject, null)
                 }, { error ->
             if (error?.networkResponse != null) {
-                finishedDownloadingAccessToken(null, "" + error.networkResponse.statusCode + ": " + String(error.networkResponse.data))
+                finishedDownloadingAccessToken(null, "${error.networkResponse.statusCode}: ${String(error.networkResponse.data)}")
             }
             else {
                 finishedDownloadingAccessToken(null, "no internet connection")
@@ -144,9 +164,32 @@ class OAuth internal constructor(private val webService: WebService,
         this.deviceSerial = deviceSerial
     }
 
-    private fun finishedDownloadingAccessToken(accessToken: String?, errorMessage: String?) {
-        viewControllerCompletionHandler(accessToken, errorMessage) // finish the view
-        completionHandler(accessToken, errorMessage)
+    private fun finishedDownloadingAccessToken(jsonObject: JSONObject?, errorMessage: String?) {
+        var responseContainer: AccessTokenResponse? = null
+        var errorMessage: String? = errorMessage
+
+        if (jsonObject != null) {
+            try {
+                responseContainer = parseAccessTokenResponse(jsonObject)
+            } catch (e: JSONException) {
+                e.printStackTrace()
+                errorMessage = "invalid download access token response"
+            }
+        }
+
+        viewControllerCompletionHandler(responseContainer, errorMessage) // finish the view
+        completionHandler(responseContainer, errorMessage)
+    }
+
+    private fun parseAccessTokenResponse(jsonObject: JSONObject): AccessTokenResponse {
+        val responseContainer: AccessTokenResponse?
+
+        val accessToken = jsonObject["access_token"] as String
+        val refreshToken = jsonObject["refresh_token"] as String
+        val expiresIn = jsonObject["expires_in"] as Int
+        responseContainer = AccessTokenResponse(accessToken, refreshToken, expiresIn)
+
+        return responseContainer
     }
 
     enum class UrlLoadResult {
