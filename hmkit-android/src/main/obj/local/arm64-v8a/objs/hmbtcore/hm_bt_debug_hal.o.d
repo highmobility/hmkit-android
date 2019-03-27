@@ -1,23 +1,11 @@
-<<<<<<< HEAD
-/Users/maiduule/Workspace/hmkit-android/hmkit-android/src/main/obj/local/arm64-v8a/objs/hmbtcore/hm_bt_debug_hal.o: \
-  /Users/maiduule/Workspace/hmkit-android/hmkit-android/src/main/jni/hm_bt_debug_hal.c \
-  ../../../../high-mobility-bt-core/hm_bt_debug_hal.h
-=======
-/Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/obj/local/arm64-v8a/objs/hmbtcore/hm_bt_debug_hal.o: \
-  /Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/hm_bt_debug_hal.c \
+/Users/maidu/Workspace/hmkit-android/hmkit-android/src/main/obj/local/arm64-v8a/objs/hmbtcore/hm_bt_debug_hal.o: \
+  /Users/maidu/Workspace/hmkit-android/hmkit-android/src/main/jni/hm_bt_debug_hal.c \
   ../../../../high-mobility-bt-core/hm_bt_debug_hal.h \
-  /Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stdarg.h \
-  /Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stl/_cprolog.h \
-  /Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stl/_epilog.h \
-  /Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stl/_config_compat_post.h
->>>>>>> origin/TT-140
+  /Users/maidu/Library/Android/sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include/stdint.h \
+  /Users/maidu/Library/Android/sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include/__config
 
 ../../../../high-mobility-bt-core/hm_bt_debug_hal.h:
 
-/Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stdarg.h:
+/Users/maidu/Library/Android/sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include/stdint.h:
 
-/Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stl/_cprolog.h:
-
-/Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stl/_epilog.h:
-
-/Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stl/_config_compat_post.h:
+/Users/maidu/Library/Android/sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include/__config:

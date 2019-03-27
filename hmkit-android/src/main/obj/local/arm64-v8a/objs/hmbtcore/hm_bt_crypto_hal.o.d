@@ -1,35 +1,30 @@
-/Users/maiduule/Workspace/hmkit-android/hmkit-android/src/main/obj/local/arm64-v8a/objs/hmbtcore/hm_bt_crypto_hal.o: \
-  /Users/maiduule/Workspace/hmkit-android/hmkit-android/src/main/jni/hm_bt_crypto_hal.c \
+/Users/maidu/Workspace/hmkit-android/hmkit-android/src/main/obj/local/arm64-v8a/objs/hmbtcore/hm_bt_crypto_hal.o: \
+  /Users/maidu/Workspace/hmkit-android/hmkit-android/src/main/jni/hm_bt_crypto_hal.c \
   ../../../../high-mobility-bt-core/hm_bt_crypto_hal.h \
+  /Users/maidu/Library/Android/sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include/stdint.h \
+  /Users/maidu/Library/Android/sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include/__config \
   ../../../../high-mobility-bt-core/hm_bt_core.h \
-  /Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/string.h \
-  /Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stl/_cprolog.h \
-  /Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stl/_epilog.h \
-  /Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stl/_config_compat_post.h \
+  /Users/maidu/Library/Android/sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include/stdbool.h \
+  /Users/maidu/Library/Android/sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include/string.h \
   ../../../../high-mobility-bt-core/hm_api.h \
   ../../../../high-mobility-bt-core/hm_bt_persistence_hal.h \
   ../../../../crypto-c/Crypto/Crypto.h \
-<<<<<<< HEAD
-  /Users/maiduule/Workspace/hmkit-android/hmkit-android/src/main/jni/hmbtcore.h \
-=======
-  /Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/time.h \
-  /Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stdlib.h \
-  /Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/hmbtcore.h \
->>>>>>> origin/TT-140
+  /Users/maidu/Library/Android/sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include/stdlib.h \
+  /Users/maidu/Workspace/hmkit-android/hmkit-android/src/main/jni/hmbtcore.h \
   ../../../../high-mobility-bt-core/hm_bt_log.h \
   ../../../../high-mobility-bt-core/hm_cert.h
 
 ../../../../high-mobility-bt-core/hm_bt_crypto_hal.h:
 
+/Users/maidu/Library/Android/sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include/stdint.h:
+
+/Users/maidu/Library/Android/sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include/__config:
+
 ../../../../high-mobility-bt-core/hm_bt_core.h:
 
-/Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/string.h:
+/Users/maidu/Library/Android/sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include/stdbool.h:
 
-/Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stl/_cprolog.h:
-
-/Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stl/_epilog.h:
-
-/Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stl/_config_compat_post.h:
+/Users/maidu/Library/Android/sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include/string.h:
 
 ../../../../high-mobility-bt-core/hm_api.h:
 
@@ -37,15 +32,9 @@
 
 ../../../../crypto-c/Crypto/Crypto.h:
 
-<<<<<<< HEAD
-/Users/maiduule/Workspace/hmkit-android/hmkit-android/src/main/jni/hmbtcore.h:
-=======
-/Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/time.h:
+/Users/maidu/Library/Android/sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include/stdlib.h:
 
-/Users/maiduule/Library/Android/sdk/ndk-bundle/sources/cxx-stl/stlport/stlport/stdlib.h:
-
-/Users/maiduule/Workspace/android-sdk/hmkit-android/src/main/jni/hmbtcore.h:
->>>>>>> origin/TT-140
+/Users/maidu/Workspace/hmkit-android/hmkit-android/src/main/jni/hmbtcore.h:
 
 ../../../../high-mobility-bt-core/hm_bt_log.h:
 

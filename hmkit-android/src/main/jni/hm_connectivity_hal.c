@@ -59,7 +59,7 @@ uint32_t hm_bt_hal_advertisement_stop(){
     return 0;
 }
 
-uint32_t hm_bt_hal_write_data(uint8_t *mac, uint16_t length, uint8_t *data, hm_characteristic characteristic){
+uint32_t hm_bt_hal_write_data(uint64_t btcontxtId, uint8_t *mac, uint16_t length, uint8_t *data, hm_characteristic characteristic){
 
   jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
   (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jbyte*) mac );
@@ -76,7 +76,7 @@ uint32_t hm_bt_hal_write_data(uint8_t *mac, uint16_t length, uint8_t *data, hm_c
     return 0;
 }
 
-uint32_t hm_bt_hal_read_data(uint8_t *mac, uint16_t offset, hm_characteristic characteristic){
+uint32_t hm_bt_hal_read_data(uint64_t btcontxtId, uint8_t *mac, uint16_t offset, hm_characteristic characteristic){
   jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
   (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jbyte*) mac );
 
@@ -111,6 +111,10 @@ uint32_t hm_bt_hal_init(){
   return 0;
 }
 
+uint32_t hm_bt_hal_clock(void){
+  return 0;
+}
+
 uint32_t hm_bt_hal_connect(const uint8_t *mac, uint8_t macType){
   jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
   (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jbyte*) mac );
@@ -123,7 +127,7 @@ uint32_t hm_bt_hal_connect(const uint8_t *mac, uint8_t macType){
   return 0;
 }
 
-uint32_t hm_bt_hal_disconnect(uint8_t *mac){
+uint32_t hm_bt_hal_disconnect(uint64_t btcontxtId, uint8_t *mac){
   jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
   (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jbyte*) mac );
   (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalDisconnect, mac_);
@@ -135,7 +139,7 @@ uint32_t hm_bt_hal_disconnect(uint8_t *mac){
   return 0;
 }
 
-uint32_t hm_bt_hal_read_info(uint8_t *mac, uint16_t offset, hm_characteristic characteristic){
+uint32_t hm_bt_hal_read_info(uint64_t btcontxtId, uint8_t *mac, uint16_t offset, hm_characteristic characteristic){
   return 0; //TODO for sensing
 }
 
@@ -143,7 +147,7 @@ uint32_t hm_bt_hal_get_current_date_time(uint8_t *day, uint8_t *month, uint8_t *
   return 0;
 }
 
-uint32_t hm_bt_hal_telematics_send_data(uint8_t *issuer, uint8_t *serial, uint16_t length, uint8_t *data){
+uint32_t hm_bt_hal_telematics_send_data(uint64_t btcontxtId, uint8_t *issuer, uint8_t *serial, uint16_t length, uint8_t *data){
 
   jbyteArray issuer_ = (*envRef)->NewByteArray(envRef,4);
   (*envRef)->SetByteArrayRegion(envRef, issuer_, 0, 4, (const jbyte*) issuer );
@@ -158,4 +162,6 @@ uint32_t hm_bt_hal_telematics_send_data(uint8_t *issuer, uint8_t *serial, uint16
     if ((*envRef)->ExceptionCheck(envRef)) {
         (*envRef)->ExceptionClear(envRef);
     }
+
+    return 0;
 }
