@@ -53,15 +53,15 @@ class WebService {
         baseUrl += apiUrl;
     }
 
-    void downloadOauthAccessToken(String url, String grantType, String code, String redirectUri,
+    void downloadOauthAccessToken(String url, String code, String redirectUri,
                                   String clientId, String jwt,
                                   final Response.Listener<JSONObject> response,
                                   final Response.ErrorListener error) {
         Uri uri = Uri.parse(url).buildUpon().build();
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new HashMap();
 
         // payload
-        params.put("grant_type", grantType);
+        params.put("grant_type", "authorization_code");
         params.put("code", code);
         params.put("redirect_uri", redirectUri);
         params.put("client_id", clientId);
@@ -78,6 +78,32 @@ class WebService {
                 }, error);
 
         queueRequest(request);
+    }
+
+    void refreshOauthAccessToken(String url,
+                                 String clientId,
+                                 String refreshToken,
+                                 final Response.Listener<JSONObject> response,
+                                 final Response.ErrorListener error) {
+        Uri uri = Uri.parse(url).buildUpon().build();
+        Map<String, String> params = new HashMap();
+
+        params.put("grant_type", "refresh_token");
+        params.put("client_id", clientId);
+        params.put("refresh_token", refreshToken);
+
+        WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        printResponse(jsonObject);
+                        response.onResponse(jsonObject);
+
+                    }
+                }, error);
+
+        queueRequest(request);
+
     }
 
     void requestAccessCertificate(final String accessToken,
