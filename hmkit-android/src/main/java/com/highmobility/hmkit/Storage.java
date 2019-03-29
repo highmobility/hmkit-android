@@ -230,18 +230,15 @@ public class Storage {
 
         ArrayList<AccessCertificate> newCertificates = new ArrayList<>(certs.length);
 
-        boolean checkingGaining = gainingSerial != null;
-        boolean checkingProviding = providingSerial != null;
-        boolean checkingBoth = checkingGaining && checkingProviding;
         boolean foundCertToDelete = false;
 
         for (int i = 0; i < certs.length; i++) {
             AccessCertificate cert = certs[i];
 
-            if ((checkingBoth && cert.getGainerSerial().equals(gainingSerial) &&
-                    cert.getProviderSerial().equals(providingSerial)) ||
-                    (checkingGaining && cert.getGainerSerial().equals(gainingSerial)) ||
-                    (checkingProviding && cert.getProviderSerial().equals(providingSerial))) {
+            boolean certIsToBeDeleted = (gainingSerial == null || cert.getGainerSerial().equals(gainingSerial)) &&
+                    (providingSerial == null || cert.getProviderSerial().equals(providingSerial));
+
+            if (certIsToBeDeleted) {
                 HMLog.d("will delete cert: %s", cert.toString());
                 foundCertToDelete = true;
             } else {

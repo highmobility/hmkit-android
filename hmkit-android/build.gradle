@@ -71,7 +71,7 @@ dependencies {
     implementation('com.google.code.findbugs:jsr305:3.0.2')
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
+    testImplementation 'junit:junit:4.12'
     testImplementation 'org.robolectric:robolectric:4.0.2'
     testImplementation 'androidx.test:core:1.1.0'
 }
