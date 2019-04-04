@@ -17,6 +17,8 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import static timber.log.Timber.d;
+
 /**
  * Access for stored Access Certificates.
  * <p>
@@ -108,8 +110,7 @@ public class Storage {
             throw new Exception("certificate storage failed " + result);
         }
 
-        HMLog.d("storeDownloadedCertificates: deviceCert %s",
-                deviceAccessCertificate.toString());
+        d("storeDownloadedCertificates: deviceCert %s", deviceAccessCertificate.toString());
 
         if (response.has("vehicle_access_certificate") == true) {
             // stored cert. this does not has to exist in the response
@@ -123,7 +124,7 @@ public class Storage {
                     throw new Exception("cannot store vehicle access cert");
                 }
 
-                HMLog.d("storeDownloadedCertificates: vehicleCert %s",
+                d("storeDownloadedCertificates: vehicleCert %s",
                         vehicleAccessCertificate.toString());
             }
         }
@@ -221,7 +222,7 @@ public class Storage {
      * @return true if one or more certificates were deleted.
      */
     boolean deleteCertificate(@Nullable byte[] gainingSerial, @Nullable byte[] providingSerial) {
-        HMLog.d("deleteCertificate for gaining: %s providing: %s",
+        d("deleteCertificate for gaining: %s providing: %s",
                 gainingSerial != null ? ByteUtils.hexFromBytes(gainingSerial) : "any",
                 providingSerial != null ? ByteUtils.hexFromBytes(providingSerial) : "any");
 
@@ -235,11 +236,12 @@ public class Storage {
         for (int i = 0; i < certs.length; i++) {
             AccessCertificate cert = certs[i];
 
-            boolean certIsToBeDeleted = (gainingSerial == null || cert.getGainerSerial().equals(gainingSerial)) &&
+            boolean certIsToBeDeleted =
+                    (gainingSerial == null || cert.getGainerSerial().equals(gainingSerial)) &&
                     (providingSerial == null || cert.getProviderSerial().equals(providingSerial));
 
             if (certIsToBeDeleted) {
-                HMLog.d("will delete cert: %s", cert.toString());
+                d("will delete cert: %s", cert.toString());
                 foundCertToDelete = true;
             } else {
                 newCertificates.add(cert);
@@ -248,10 +250,10 @@ public class Storage {
 
         if (foundCertToDelete) {
             boolean result = writeCertificates(newCertificates.toArray(new AccessCertificate[0]));
-            if (result != true) HMLog.d("deleteCertificate: failed to write");
+            if (result != true) d("deleteCertificate: failed to write");
             return result;
         } else {
-            HMLog.d("deleteCertificate: did not find a cert to delete");
+            d("deleteCertificate: did not find a cert to delete");
             return false;
         }
     }

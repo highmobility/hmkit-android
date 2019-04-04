@@ -22,6 +22,10 @@ import org.json.JSONObject;
 
 import javax.annotation.Nullable;
 
+import static timber.log.Timber.e;
+import static timber.log.Timber.i;
+import static timber.log.Timber.w;
+
 /**
  * HMKit is the entry point for the HMKit library. Use the singleton to access Broadcaster and
  * Telematics.
@@ -30,8 +34,9 @@ public class HMKit {
     /**
      * The logging level of HMKit.
      */
-    public static HMLog.Level loggingLevel = HMLog.Level.ALL;
-
+    // TODO: 2019-04-04 deprecate this first.
+//    public static HMLog.Level loggingLevel = HMLog.Level.ALL;
+    
     /**
      * Custom web environment url. If set, will override the default url or the url from the device
      * certificate.
@@ -182,8 +187,6 @@ public class HMKit {
         if (instance != null) {
             throw new RuntimeException("Use getInstance() to get the HMKit singleton");
         }
-
-        HMLog.init();
     }
 
     /**
@@ -201,7 +204,7 @@ public class HMKit {
                     "setDeviceCertificate() to set new Device Certificate.");
         }
         setContextAndCreateStorage(context);
-        HMLog.d(HMLog.Level.NONE, "Initialised: " + getInfoString());
+        i("Initialised: %s", getInfoString());
         return instance;
     }
 
@@ -329,7 +332,7 @@ public class HMKit {
             webService = new WebService(this.context, certificate.getIssuer(), webUrl);
         else webService.setIssuer(certificate.getIssuer(), webUrl);
 
-        HMLog.d(HMLog.Level.NONE, "Set certificate: " + certificate.toString());
+        i("Set certificate: %s", certificate.toString());
     }
 
     /**
@@ -372,14 +375,13 @@ public class HMKit {
                         AccessCertificate certificate = null;
                         try {
                             certificate = storage.storeDownloadedCertificates(response);
-                        } catch (Exception e) {
-                            HMLog.d("storeDownloadedCertificates error: " + e
-                                    .getMessage());
+                        } catch (Exception ex) {
+                            e("storeDownloadedCertificates error: " + ex.getMessage());
 
                             DownloadAccessCertificateError error = new
                                     DownloadAccessCertificateError(
                                     DownloadAccessCertificateError.Type.INVALID_SERVER_RESPONSE,
-                                    0, e.getMessage());
+                                    0, ex.getMessage());
                             callback.onDownloadFailed(error);
                         }
 
@@ -396,7 +398,7 @@ public class HMKit {
                             try {
                                 JSONObject json = new JSONObject(new String(error.networkResponse
                                         .data));
-                                HMLog.d("onErrorResponse: " + json.toString());
+                                w("onErrorResponse: " + json.toString());
                                 if (json.has("message")) {
                                     dispatchedError = new DownloadAccessCertificateError(
                                             DownloadAccessCertificateError.Type.HTTP_ERROR,
@@ -578,7 +580,7 @@ public class HMKit {
             try {
                 ble = new SharedBle(context);
             } catch (BleNotSupportedException e) {
-                HMLog.d(HMLog.Level.ALL, "BLE not supported");
+                i("BLE not supported");
             }
         }
     }

@@ -14,6 +14,8 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import static timber.log.Timber.d;
+
 class WebRequest extends Request<JSONObject> {
     private static final Map<String, String> headers;
 
@@ -26,13 +28,14 @@ class WebRequest extends Request<JSONObject> {
     private Map<String, String> params;
 
     void print() {
-        if (HMKit.loggingLevel.getValue() < HMLog.Level.DEBUG.getValue()) return;
+        // TODO: 2019-04-04 should not parse this if will not print
+
         try {
             byte[] body = getBody();
             String bodyString = body != null ? "\nbody:\n" + new String(getBody()) : "";
             JSONObject headers = new JSONObject(getHeaders());
             String log = "\n" + getUrl() + "\nheaders:\n" + headers.toString(2) + bodyString;
-            HMLog.d(URLDecoder.decode(log, "ASCII"));
+            d(URLDecoder.decode(log, "ASCII"));
         } catch (Exception e) {
             e.printStackTrace();
         }

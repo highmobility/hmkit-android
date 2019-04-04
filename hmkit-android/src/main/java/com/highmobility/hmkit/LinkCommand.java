@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import static timber.log.Timber.e;
+
 class LinkCommand {
     boolean finished;
     Link.CommandCallback commandCallback;
@@ -43,7 +45,7 @@ class LinkCommand {
         finished = true;
 
         if (commandCallback == null) {
-            HMLog.d("cannot dispatch the result: no callback");
+            e("cannot dispatch the result: no callback");
             return;
         }
 

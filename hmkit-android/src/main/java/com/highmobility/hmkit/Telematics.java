@@ -16,6 +16,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static timber.log.Timber.d;
+
 /**
  * Telematics provides the option to send commands via Telematics.
  */
@@ -66,7 +68,7 @@ public class Telematics extends Core.Telematics {
             return;
         }
 
-        HMLog.d("sendTelematicsCommand: %s", command);
+        d("sendTelematicsCommand: %s", command);
 
         final TelematicsCommand activeCommand = new TelematicsCommand(commandCallback, callback,
                 threadManager);
@@ -186,7 +188,7 @@ public class Telematics extends Core.Telematics {
                     "decrypt web service response.");
         } else {
             final Bytes response = new Bytes(data);
-            HMLog.d("onTelematicsResponseDecrypted: " + response);
+            d("onTelematicsResponseDecrypted: " + response);
             interactingCommand.dispatchResult(response);
         }
     }
