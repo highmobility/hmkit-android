@@ -33,10 +33,12 @@ import static timber.log.Timber.w;
 public class HMKit {
     /**
      * The logging level of HMKit.
+     *
+     * @deprecated d( should be planted if HMKit logs are needed in console.
      */
-    // TODO: 2019-04-04 deprecate this first.
-//    public static HMLog.Level loggingLevel = HMLog.Level.ALL;
-    
+    @Deprecated
+    public static HMLog.Level loggingLevel = HMLog.Level.ALL;
+
     /**
      * Custom web environment url. If set, will override the default url or the url from the device
      * certificate.
