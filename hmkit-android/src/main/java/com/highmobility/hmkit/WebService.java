@@ -21,6 +21,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import timber.log.Timber;
+
 import static timber.log.Timber.d;
 
 class WebService {
@@ -193,7 +195,7 @@ class WebService {
     }
 
     void printResponse(JSONObject jsonObject) {
-        // TODO: 2019-04-04 if debug is not printed, then should even try to parse this.
+        if (Timber.treeCount() == 0) return;
         try {
             String message = jsonObject.toString(2);
             d("response %s", message);

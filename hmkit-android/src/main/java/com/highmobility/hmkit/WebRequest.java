@@ -14,6 +14,8 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import timber.log.Timber;
+
 import static timber.log.Timber.d;
 
 class WebRequest extends Request<JSONObject> {
@@ -28,8 +30,7 @@ class WebRequest extends Request<JSONObject> {
     private Map<String, String> params;
 
     void print() {
-        // TODO: 2019-04-04 should not parse this if will not print
-
+        if (Timber.treeCount() == 0) return;
         try {
             byte[] body = getBody();
             String bodyString = body != null ? "\nbody:\n" + new String(getBody()) : "";
