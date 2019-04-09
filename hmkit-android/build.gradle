@@ -9,11 +9,11 @@ version artifact.version
 
 android {
     testOptions.unitTests.includeAndroidResources = true
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdkVersion ver.compileSdk
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion rootProject.ext.compileSdkVersion
+        targetSdkVersion ver.compileSdk
         versionCode 1
         versionName "${version}"
         multiDexEnabled true
@@ -63,12 +63,13 @@ dependencies {
         implementation project(':hmkit-crypto')
         implementation project(':hmkit-utils')
     } else {
-        implementation("com.highmobility:hmkit-crypto:${project.cryptoVersion}")
+        implementation deps.crypto
     }
 
+    implementation deps.volley
+    implementation deps.timber
+    implementation deps.findBugs
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation('com.android.volley:volley:1.1.1')
-    implementation('com.google.code.findbugs:jsr305:3.0.2')
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     testImplementation 'junit:junit:4.12'
