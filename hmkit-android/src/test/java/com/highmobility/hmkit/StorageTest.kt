@@ -6,10 +6,7 @@ import com.highmobility.crypto.AccessCertificate
 import com.highmobility.crypto.value.DeviceSerial
 import com.highmobility.value.Bytes
 import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Test
-
-
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -121,11 +118,16 @@ class StorageTest {
         // assert other providing stays
         storage.storeCertificate(cert1)
         storage.storeCertificate(cert2)
-        var certs = storage.certificates
-
         assertTrue(storage.deleteCertificate(cert1.gainerSerial.byteArray, cert1.providerSerial.byteArray))
-        certs = storage.certificates
         assertTrue(storage.certificates.size == 1)
         assertTrue(storage.getCertificate(cert2.gainerSerial) != null)
+    }
+
+    @Test
+    fun testDeleteGainingAndProvidingNullDoesNotDelete() {
+        storage.storeCertificate(cert1)
+        storage.storeCertificate(cert2)
+        assertTrue(storage.deleteCertificate(null, null) == false)
+        assertTrue(storage.certificates.size == 2)
     }
 }

@@ -238,7 +238,7 @@ public class Storage {
 
             boolean certIsToBeDeleted =
                     (gainingSerial == null || cert.getGainerSerial().equals(gainingSerial)) &&
-                    (providingSerial == null || cert.getProviderSerial().equals(providingSerial));
+                            (providingSerial == null || cert.getProviderSerial().equals(providingSerial));
 
             if (certIsToBeDeleted) {
                 d("will delete cert: %s", cert.toString());
