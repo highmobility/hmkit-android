@@ -23,7 +23,7 @@ import javax.annotation.Nullable;
 
 import timber.log.Timber;
 
-import static timber.log.Timber.d;
+import static com.highmobility.hmkit.HMLog.d;
 
 class WebService {
     private static final String defaultUrl = "https://sandbox.api.high-mobility.com";

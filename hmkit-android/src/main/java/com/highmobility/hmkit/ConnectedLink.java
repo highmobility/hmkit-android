@@ -6,8 +6,8 @@ import java.util.Calendar;
 
 import javax.annotation.Nullable;
 
-import static timber.log.Timber.d;
-import static timber.log.Timber.e;
+import static com.highmobility.hmkit.HMLog.d;
+import static com.highmobility.hmkit.HMLog.e;
 
 /**
  * The ConnectedLink is a representation of the connection between the Broadcaster and a Device that

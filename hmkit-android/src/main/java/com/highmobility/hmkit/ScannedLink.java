@@ -15,8 +15,8 @@ import com.highmobility.utils.ByteUtils;
 import java.util.List;
 import java.util.UUID;
 
-import static timber.log.Timber.d;
-import static timber.log.Timber.e;
+import static com.highmobility.hmkit.HMLog.d;
+import static com.highmobility.hmkit.HMLog.e;
 
 /**
  * The ScannedLink is a representation of the connection between the Scanner and a device that the

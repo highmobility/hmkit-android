@@ -17,7 +17,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import static timber.log.Timber.d;
+import static com.highmobility.hmkit.HMLog.d;
 
 /**
  * Access for stored Access Certificates.

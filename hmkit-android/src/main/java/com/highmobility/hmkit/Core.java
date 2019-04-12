@@ -17,9 +17,9 @@ import java.util.TimerTask;
 
 import javax.annotation.Nullable;
 
-import static timber.log.Timber.d;
-import static timber.log.Timber.e;
-import static timber.log.Timber.w;
+import static com.highmobility.hmkit.HMLog.d;
+import static com.highmobility.hmkit.HMLog.e;
+import static com.highmobility.hmkit.HMLog.w;
 
 /**
  * Interface to the C core. Keeps a reference to the device certificate as well because core only

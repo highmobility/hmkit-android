@@ -16,7 +16,7 @@ import java.util.Map;
 
 import timber.log.Timber;
 
-import static timber.log.Timber.d;
+import static com.highmobility.hmkit.HMLog.d;
 
 class WebRequest extends Request<JSONObject> {
     private static final Map<String, String> headers;

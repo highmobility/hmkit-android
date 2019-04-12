@@ -6,7 +6,7 @@ import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static timber.log.Timber.e;
+import static com.highmobility.hmkit.HMLog.e;
 
 class LinkCommand {
     boolean finished;

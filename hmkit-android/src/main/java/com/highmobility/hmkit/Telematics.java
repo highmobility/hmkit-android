@@ -16,7 +16,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static timber.log.Timber.d;
+import static com.highmobility.hmkit.HMLog.d;
 
 /**
  * Telematics provides the option to send commands via Telematics.

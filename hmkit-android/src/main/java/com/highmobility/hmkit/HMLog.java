@@ -1,15 +1,12 @@
 package com.highmobility.hmkit;
 
 import android.os.Build;
-import android.util.Log;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * @deprecated Timber tree should be planted for HMKit logs.
- */
-@Deprecated
+import timber.log.Timber;
+
 public class HMLog {
     private static final int MAX_TAG_LENGTH = 23;
     private static final int CALL_STACK_INDEX = 2;
@@ -20,40 +17,52 @@ public class HMLog {
 
     }
 
-    public static void d(String message, Object... args) {
+    static void d(String message, Object... args) {
         if (HMKit.loggingLevel.getValue() >= Level.DEBUG.getValue()) {
             // don't call to this class again, this will mess up stack index and log tag. Always
             // call straight to Timber.d in a method in this class.
+            Timber.tag(getTag());
             try {
-                Log.d(getTag(), String.format(message, args));
+                Timber.d(String.format(message, args));
             } catch (Exception e) {
-                Log.d(getTag(), message);
+                Timber.d(message);
             }
         }
     }
 
-    static void d(Level level, String message, Object... args) {
-        if (HMKit.loggingLevel.getValue() >= level.getValue()) {
-            Log.d(getTag(), String.format(message, args));
-        }
-    }
-
-    void i(Level level, String message, Object... args) {
-        if (HMKit.loggingLevel.getValue() >= level.getValue()) {
-            Log.i(getTag(), String.format(message, args));
+    static void w(String message, Object... args) {
+        if (HMKit.loggingLevel.getValue() >= Level.NONE.getValue()) {
+            // don't call to this class again, this will mess up stack index and log tag. Always
+            // call straight to Timber.d in a method in this class.
+            Timber.tag(getTag());
+            try {
+                Timber.w(String.format(message, args));
+            } catch (Exception e) {
+                Timber.w(message);
+            }
         }
     }
 
     static void i(String message, Object... args) {
-        Log.i(getTag(), String.format(message, args));
+        if (HMKit.loggingLevel.getValue() >= Level.ALL.getValue()) {
+            Timber.tag(getTag());
+            try {
+                Timber.i(String.format(message, args));
+            } catch (Exception e) {
+                Timber.i(message);
+            }
+        }
     }
 
-    static void e(Throwable t, String message, Object... args) {
-        Log.e(getTag(), String.format(message, args), t);
-    }
-
-    public static void e(String message, Object... args) {
-        Log.e(getTag(), String.format(message, args));
+    static void e(String message, Object... args) {
+        if (HMKit.loggingLevel.getValue() >= Level.NONE.getValue()) {
+            Timber.tag(getTag());
+            try {
+                Timber.e(String.format(message, args));
+            } catch (Exception e) {
+                Timber.e(message);
+            }
+        }
     }
 
     static String getTag() {
@@ -81,10 +90,7 @@ public class HMLog {
 
     /**
      * The possible logging levels.
-     *
-     * @deprecated Timber tree should be planted for HMKit logs.
      */
-    @Deprecated
     public enum Level {
         NONE(0), DEBUG(1), ALL(2);
 

@@ -22,9 +22,9 @@ import org.json.JSONObject;
 
 import javax.annotation.Nullable;
 
-import static timber.log.Timber.e;
-import static timber.log.Timber.i;
-import static timber.log.Timber.w;
+import static com.highmobility.hmkit.HMLog.e;
+import static com.highmobility.hmkit.HMLog.i;
+import static com.highmobility.hmkit.HMLog.w;
 
 /**
  * HMKit is the entry point for the HMKit library. Use the singleton to access Broadcaster and
@@ -33,10 +33,7 @@ import static timber.log.Timber.w;
 public class HMKit {
     /**
      * The logging level of HMKit.
-     *
-     * @deprecated d( should be planted if HMKit logs are needed in console.
      */
-    @Deprecated
     public static HMLog.Level loggingLevel = HMLog.Level.ALL;
 
     /**

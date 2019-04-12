@@ -13,9 +13,9 @@ import java.util.Calendar;
 
 import javax.annotation.Nullable;
 
-import static timber.log.Timber.d;
-import static timber.log.Timber.i;
-import static timber.log.Timber.w;
+import static com.highmobility.hmkit.HMLog.d;
+import static com.highmobility.hmkit.HMLog.i;
+import static com.highmobility.hmkit.HMLog.w;
 
 public class Link {
     /**

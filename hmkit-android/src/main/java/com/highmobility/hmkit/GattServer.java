@@ -15,8 +15,8 @@ import com.highmobility.utils.ByteUtils;
 import java.util.Arrays;
 import java.util.List;
 
-import static timber.log.Timber.d;
-import static timber.log.Timber.e;
+import static com.highmobility.hmkit.HMLog.d;
+import static com.highmobility.hmkit.HMLog.e;
 
 /**
  * This is the Broadcaster's GATT server.

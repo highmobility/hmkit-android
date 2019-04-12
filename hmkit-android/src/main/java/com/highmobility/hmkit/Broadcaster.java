@@ -21,9 +21,9 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import static timber.log.Timber.d;
-import static timber.log.Timber.e;
-import static timber.log.Timber.w;
+import static com.highmobility.hmkit.HMLog.d;
+import static com.highmobility.hmkit.HMLog.e;
+import static com.highmobility.hmkit.HMLog.w;
 
 /**
  * Broadcaster acts as a gateway to the application's capability to broadcast itself and handle
