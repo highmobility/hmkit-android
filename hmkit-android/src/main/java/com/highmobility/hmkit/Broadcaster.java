@@ -506,7 +506,7 @@ public class Broadcaster extends Core.Broadcaster {
                     name = "not advertising name";
                 }
 
-                HMLog.d("Start advertise: " + name);
+                HMLog.d("Start advertise: %s", name);
             }
             broadcaster.get().setState(State.BROADCASTING);
             if (broadcaster.get().startCallback != null) {
