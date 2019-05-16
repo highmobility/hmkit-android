@@ -46,7 +46,8 @@ internal class OAuthNavigationManager(private val fragmentManager: FragmentManag
                         R.animator.slide_out_right,
                         R.animator.slide_in_right,
                         R.animator.slide_out_left)
-                .addToBackStack(fragment.toString())
+                // dont add to back stack, otherwise goes from info to empty webView
+                /*.addToBackStack(fragment.toString())*/
                 .commit()
     }
 
