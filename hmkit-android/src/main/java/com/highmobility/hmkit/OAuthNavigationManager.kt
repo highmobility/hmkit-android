@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentManager
  * Initialize the NavigationManager with a FragmentManager, which will be used at the
  * fragment transactions.
  *
+ *
  * Taken from https://www.toptal.com/android/android-fragment-navigation-pattern
  */
 internal class OAuthNavigationManager(private val fragmentManager: FragmentManager) {
@@ -77,7 +78,7 @@ internal class OAuthNavigationManager(private val fragmentManager: FragmentManag
     }
 
     /**
-     * Navigates back by popping teh back stack. If there is no more items left we finish the current activity.
+     * Navigates back by popping the back stack. If there is no more items left we finish the current activity.
      *
      * @param baseActivity
      */

@@ -11,7 +11,7 @@ import androidx.fragment.app.FragmentActivity
  *
  */
 internal class OAuthActivity : FragmentActivity(), IOAuthView, IWebView, IInfoView {
-    lateinit var webView: WebViewFragment
+    private lateinit var webView: WebViewFragment
     var info: OAuthInfoFragment? = null
 
     lateinit var controller: OAuthViewController
@@ -20,13 +20,11 @@ internal class OAuthActivity : FragmentActivity(), IOAuthView, IWebView, IInfoVi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
         requestWindowFeature(Window.FEATURE_NO_TITLE)
 
         setContentView(R.layout.activity_oauth)
         controller = OAuthViewController(this)
-        controller.onViewLoad()
+        controller.onViewLoad(this)
     }
 
     // MARK: IOAuthView
