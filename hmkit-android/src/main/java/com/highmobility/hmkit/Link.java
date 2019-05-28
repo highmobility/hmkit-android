@@ -17,7 +17,7 @@ public class Link {
     /**
      * The time after which HMKit will fail the command if there has been no response. In ms.
      */
-    public static long commandTimeout = 10000;
+    public static long commandTimeout = 60000;
     protected final Core core;
     protected final ThreadManager threadManager;
 
