@@ -21,6 +21,10 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import timber.log.Timber;
+
+import static com.highmobility.hmkit.HMLog.d;
+
 class WebService {
     private static final String defaultUrl = "https://sandbox.api.high-mobility.com";
     private static final String testUrl = defaultUrl;
@@ -191,12 +195,12 @@ class WebService {
     }
 
     void printResponse(JSONObject jsonObject) {
-        if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue()) {
-            try {
-                HMLog.d("response " + jsonObject.toString(2));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        if (Timber.treeCount() == 0) return;
+        try {
+            String message = jsonObject.toString(2);
+            d("response %s", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 }

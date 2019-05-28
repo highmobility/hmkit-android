@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.webkit.*
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_oauth_web_view.*
+import timber.log.Timber.d
 
 internal class WebViewFragment : Fragment() {
     private lateinit var iWebView: IWebView
@@ -42,7 +43,7 @@ internal class WebViewFragment : Fragment() {
         override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                HMLog.d("error ${error?.description}")
+                d("error ${error?.description}")
                 iWebView.onReceivedError(error?.description as String?)
             }
             else {

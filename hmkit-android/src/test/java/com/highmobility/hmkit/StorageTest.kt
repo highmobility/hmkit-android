@@ -1,6 +1,5 @@
 package com.highmobility.hmkit
 
-
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.highmobility.crypto.AccessCertificate

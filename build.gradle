@@ -47,8 +47,8 @@ ext {
 ext.ver = [
         crypto    : "1.4.3",
         utils     : "1.4.3",
-        hmkit     : "1.6.8-dev",
-        autoApi   : "2.10.0",
+        hmkit     : "1.6.8",
+        autoApi   : "2.10.1",
         compileSdk: 28
 ]
 

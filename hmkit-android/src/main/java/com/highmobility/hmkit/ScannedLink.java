@@ -15,6 +15,9 @@ import com.highmobility.utils.ByteUtils;
 import java.util.List;
 import java.util.UUID;
 
+import static com.highmobility.hmkit.HMLog.d;
+import static com.highmobility.hmkit.HMLog.e;
+
 /**
  * The ScannedLink is a representation of the connection between the Scanner and a device that the
  * Scanner has connected to and validated as a High-Mobility broadcaster.
@@ -103,8 +106,7 @@ class ScannedLink extends Link {
 
     void writeValue(byte[] value) {
         if (writeCharacteristic != null) {
-            if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue())
-                HMLog.d("write value " + ByteUtils.hexFromBytes(value));
+            d("write value " + ByteUtils.hexFromBytes(value));
 
             if (writeCharacteristic.setValue(value) == false || gatt.writeCharacteristic
                     (writeCharacteristic) == false) {
@@ -124,12 +126,12 @@ class ScannedLink extends Link {
     }
 
     void connect() {
-        HMLog.d("connect %s %s", btDevice.getAddress(), this);
+        d("connect %s %s", btDevice.getAddress(), this);
         gatt = btDevice.connectGatt(ble.context, false, gattCallback);
     }
 
     void disconnect() {
-        HMLog.d("disconnect " + btDevice.getAddress() + " " + this);
+        d("disconnect %s %s", btDevice.getAddress(), this);
         if (gatt != null) gatt.disconnect();
     }
 
@@ -138,8 +140,7 @@ class ScannedLink extends Link {
             // TSODO: how to failed connection should be handled
             // also remove authenticatingMac from scanner
 
-            if (HMKit.loggingLevel.getValue() >= HMLog.Level.DEBUG.getValue())
-                HMLog.d("cannot initiate discoverServices");
+            d("cannot initiate discoverServices");
         }
     }
 
@@ -150,7 +151,7 @@ class ScannedLink extends Link {
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
 
-                    HMLog.d("STATE_CONNECTED " + this);
+                    d("STATE_CONNECTED %s", this);
                     threadManager.postToWork(new Runnable() {
                         @Override
                         public void run() {
@@ -160,7 +161,7 @@ class ScannedLink extends Link {
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
 
-                    HMLog.d("STATE_DISCONNECTED " + this);
+                    d("STATE_DISCONNECTED %s", this);
 
                     threadManager.postToWork(new Runnable() {
                         @Override
@@ -170,7 +171,7 @@ class ScannedLink extends Link {
                     });
                     break;
                 default:
-                    HMLog.e("INVALID CONNECTION STATE " + this);
+                    e("INVALID CONNECTION STATE %s", this);
             }
         }
 
@@ -180,7 +181,7 @@ class ScannedLink extends Link {
                 // TSODO: how failed service discovery/connection should be handled
                 // also remove authenticatingMac from scanner
 
-                HMLog.d("onServicesDiscovered failure " + status);
+                d("onServicesDiscovered failure " + status);
                 return;
             }
 
@@ -213,7 +214,7 @@ class ScannedLink extends Link {
                 }
             }
 
-            HMLog.d("onServicesDiscovered " + (readCharacteristic != null &&
+            d("onServicesDiscovered " + (readCharacteristic != null &&
                     writeCharacteristic != null));
 
             if (readCharacteristic != null && writeCharacteristic != null) {
@@ -221,8 +222,7 @@ class ScannedLink extends Link {
                     // TSODO: how to failed connection should be handled
                     // also remove authenticatingMac from scanner
 
-                    HMLog.d("cannot initiate " +
-                            "setCharacteristicNotification");
+                    d("cannot initiate setCharacteristicNotification");
                     return;
                 }
 
@@ -233,7 +233,7 @@ class ScannedLink extends Link {
                     // TSODO: how to failed connection should be handled
                     // also remove authenticatingMac from scanner
 
-                    HMLog.d("cannot initiate descriptor.setValue");
+                    d("cannot initiate descriptor.setValue");
                     return;
                 }
 
@@ -241,7 +241,7 @@ class ScannedLink extends Link {
                     // TSODO: how to failed connection should be handled
                     // also remove authenticatingMac from scanner
 
-                    HMLog.d("cannot initiate writeDescriptor");
+                    d("cannot initiate writeDescriptor");
                 }
                 // TSODO: What to do with ping here?
             } else {
@@ -252,13 +252,11 @@ class ScannedLink extends Link {
 
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt,
-                                         final BluetoothGattCharacteristic characteristic, int
-                                                 status) {
+                                         final BluetoothGattCharacteristic characteristic,
+                                         int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
 
-                HMLog.d("onCharacteristicRead " + ByteUtils
-                        .hexFromBytes(characteristic
-                                .getValue()));
+                d("onCharacteristicRead %s", ByteUtils.hexFromBytes(characteristic.getValue()));
                 if (characteristic.getUuid().equals(Constants.READ_CHAR_UUID)) {
                     threadManager.postToWork(new Runnable() {
                         @Override
@@ -271,10 +269,10 @@ class ScannedLink extends Link {
                     });
                 } else if (characteristic.getUuid().equals(Constants.INFO_CHAR_UUID)) {
                     info = characteristic.getStringValue(0);
-                    HMLog.d("read info " + info);
+                    d("read info %s", info);
                 }
             } else {
-                HMLog.d("onCharacteristicRead failed " + status);
+                d("onCharacteristicRead failed %d", status);
             }
         }
 
@@ -290,16 +288,14 @@ class ScannedLink extends Link {
                     }
                 });
             } else {
-                HMLog.d("onCharacteristicWrite failure " + status);
+                d("onCharacteristicWrite failure %d", status);
             }
         }
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, final BluetoothGattCharacteristic
                 characteristic) {
-            HMLog.d("onCharacteristicChanged " + ByteUtils
-                    .hexFromBytes(characteristic
-                            .getValue()));
+            d("onCharacteristicChanged " + ByteUtils.hexFromBytes(characteristic.getValue()));
             threadManager.postToWork(new Runnable() {
                 @Override
                 public void run() {
@@ -323,7 +319,7 @@ class ScannedLink extends Link {
                 });
             } else {
                 // TSODO: fail connection
-                HMLog.d("onDescriptorWrite failure " + status);
+                d("onDescriptorWrite failure %d", status);
             }
         }
 
@@ -334,7 +330,7 @@ class ScannedLink extends Link {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (rssiCallback != null) rssiCallback.response(0);
             } else {
-                HMLog.d("read rssi failure " + status);
+                d("read rssi failure %d", status);
                 if (rssiCallback != null) rssiCallback.response(1); // TSODO: use correct error code
             }
         }

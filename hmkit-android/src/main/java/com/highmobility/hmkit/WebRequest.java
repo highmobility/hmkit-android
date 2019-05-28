@@ -14,6 +14,10 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import timber.log.Timber;
+
+import static com.highmobility.hmkit.HMLog.d;
+
 class WebRequest extends Request<JSONObject> {
     private static final Map<String, String> headers;
 
@@ -26,13 +30,13 @@ class WebRequest extends Request<JSONObject> {
     private Map<String, String> params;
 
     void print() {
-        if (HMKit.loggingLevel.getValue() < HMLog.Level.DEBUG.getValue()) return;
+        if (Timber.treeCount() == 0) return;
         try {
             byte[] body = getBody();
             String bodyString = body != null ? "\nbody:\n" + new String(getBody()) : "";
             JSONObject headers = new JSONObject(getHeaders());
             String log = "\n" + getUrl() + "\nheaders:\n" + headers.toString(2) + bodyString;
-            HMLog.d(URLDecoder.decode(log, "ASCII"));
+            d(URLDecoder.decode(log, "ASCII"));
         } catch (Exception e) {
             e.printStackTrace();
         }
