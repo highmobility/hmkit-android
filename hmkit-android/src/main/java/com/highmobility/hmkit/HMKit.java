@@ -340,7 +340,7 @@ public class HMKit {
      * <p>
      * Stored certificates are not deleted.
      *
-     * @throws IllegalStateException when there are links still connected.
+     * @throws IllegalStateException When there are connected links.
      */
     public void terminate() throws IllegalStateException {
         /*
@@ -486,7 +486,7 @@ public class HMKit {
      * Deletes all of the stored Access Certificates.
      */
     public void deleteCertificates() {
-        throwIfDeviceCertificateNotSet();
+        throwIfContextNotSet();
         storage.deleteCertificates();
     }
 
@@ -609,7 +609,7 @@ public class HMKit {
      */
     public interface DownloadCallback {
         /**
-         * Invoked if the certificate download was successful.
+         * Invoked when the certificate download was successful.
          *
          * @param serial the vehicle or charger serial.
          */
