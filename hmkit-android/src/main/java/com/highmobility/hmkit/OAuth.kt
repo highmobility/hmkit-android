@@ -166,19 +166,21 @@ class OAuth internal constructor(private val webService: WebService,
 
     private fun finishedDownloadingAccessToken(jsonObject: JSONObject?, errorMessage: String?) {
         var responseContainer: AccessTokenResponse? = null
-        var error: String? = errorMessage
+
+        var errorString: String? = errorMessage
 
         if (jsonObject != null) {
             try {
                 responseContainer = parseAccessTokenResponse(jsonObject)
             } catch (e: JSONException) {
                 e.printStackTrace()
-                error = "invalid download access token response"
+
+                errorString = "invalid download access token response"
             }
         }
 
-        viewControllerCompletionHandler(responseContainer, error) // finish the view
-        completionHandler(responseContainer, error)
+        viewControllerCompletionHandler(responseContainer, errorString) // finish the view
+        completionHandler(responseContainer, errorString)
     }
 
     private fun parseAccessTokenResponse(jsonObject: JSONObject): AccessTokenResponse {

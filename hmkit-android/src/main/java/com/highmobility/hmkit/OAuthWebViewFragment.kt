@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.ViewGroup
 import android.webkit.*
 import androidx.fragment.app.Fragment
@@ -17,7 +18,12 @@ internal class WebViewFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_oauth_web_view, container, false)
         return view!!
+    }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        webView.webViewClient = null
+        webView.webChromeClient = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -25,7 +31,15 @@ internal class WebViewFragment : Fragment() {
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.webViewClient = webViewClient
+        webView.webChromeClient = webChromeClient
         webView.loadUrl(url)
+    }
+
+    private val webChromeClient: WebChromeClient = object : WebChromeClient() {
+        override fun onProgressChanged(view: WebView?, newProgress: Int) {
+            super.onProgressChanged(view, newProgress)
+            if (newProgress == 100) progressBar.visibility = GONE
+        }
     }
 
     private val webViewClient: WebViewClient = object : WebViewClient() {
@@ -41,7 +55,6 @@ internal class WebViewFragment : Fragment() {
         }
 
         override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 d("error ${error?.description}")
                 iWebView.onReceivedError(error?.description as String?)
