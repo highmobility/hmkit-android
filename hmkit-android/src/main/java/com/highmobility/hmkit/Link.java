@@ -13,11 +13,15 @@ import java.util.Calendar;
 
 import javax.annotation.Nullable;
 
+import static com.highmobility.hmkit.HMLog.d;
+import static com.highmobility.hmkit.HMLog.i;
+import static com.highmobility.hmkit.HMLog.w;
+
 public class Link {
     /**
      * The time after which HMKit will fail the command if there has been no response. In ms.
      */
-    public static long commandTimeout = 60000;
+    public static long commandTimeout = 120000;
     protected final Core core;
     protected final ThreadManager threadManager;
 
@@ -52,7 +56,7 @@ public class Link {
         if (this.state != state) {
             final State oldState = this.state;
             if (state == State.AUTHENTICATED) {
-                HMLog.d("authenticated in %s ms", (Calendar.getInstance().getTimeInMillis() -
+                d("authenticated in %d ms", (Calendar.getInstance().getTimeInMillis() -
                         connectionTime));
             }
 
@@ -105,14 +109,14 @@ public class Link {
         }
 
         if (sentCommand != null && sentCommand.finished == false) {
-            HMLog.d(HMLog.Level.ALL, "custom command in progress");
+            w("custom command in progress");
 
             callback.onCommandFailed(new LinkError(LinkError.Type.COMMAND_IN_PROGRESS, 0, "custom" +
                     " command in progress"));
             return;
         }
 
-        HMLog.d("send command %s to %s", bytes, mac);
+        d("send command %s to %s", bytes, mac);
 
         sentCommand = new LinkCommand(callback, threadManager);
 
@@ -137,20 +141,22 @@ public class Link {
      */
     public void revoke(RevokeCallback callback) {
         if (state != State.AUTHENTICATED) {
-            HMLog.d("not authenticated");
-            callback.onRevokeFailed(new RevokeError(RevokeError.Type.UNAUTHORIZED, 0, "not " +
-                    "authenticated"));
+            String failureMessage = "not authenticated";
+            w(failureMessage);
+            callback.onRevokeFailed(new RevokeError(RevokeError.Type.UNAUTHORIZED, 0,
+                    failureMessage));
             return;
         }
 
         if (sentCommand != null && sentCommand.finished == false) {
-            HMLog.d(HMLog.Level.ALL, "custom command in progress");
-            callback.onRevokeFailed(new RevokeError(RevokeError.Type.COMMAND_IN_PROGRESS, 0, "a " +
-                    " command is in progress"));
+            String failureMessage = "custom command in progress";
+            w(failureMessage);
+            callback.onRevokeFailed(new RevokeError(RevokeError.Type.COMMAND_IN_PROGRESS, 0,
+                    failureMessage));
             return;
         }
 
-        HMLog.d("revoke " + serial);
+        i("revoke %s", serial);
 
         this.revokeCallback = callback;
 
@@ -176,10 +182,10 @@ public class Link {
     }
 
     void onCommandReceived(final byte[] bytes) {
-        HMLog.d("did receive command %s from %s", ByteUtils.hexFromBytes(bytes), mac);
+        d("did receive command %s from %s", ByteUtils.hexFromBytes(bytes), mac);
 
         if (listener == null) {
-            HMLog.d("can't dispatch notification: no listener set");
+            w("can't dispatch notification: no listener set");
             return;
         }
 
@@ -192,12 +198,12 @@ public class Link {
     }
 
     void onCommandResponseReceived(final byte[] data) {
-        HMLog.d("did receive command response %s from %s in %s ms", ByteUtils.hexFromBytes(data),
+        d("did receive command response %s from %s in %s ms", ByteUtils.hexFromBytes(data),
                 mac, (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime)
         );
 
         if (sentCommand == null || sentCommand.finished) {
-            HMLog.d("can't dispatch command response: sentCommand = null || " +
+            w("can't dispatch command response: sentCommand = null || " +
                     "finished");
             return;
         }

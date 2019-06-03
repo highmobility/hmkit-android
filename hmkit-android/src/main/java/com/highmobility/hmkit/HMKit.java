@@ -22,6 +22,10 @@ import org.json.JSONObject;
 
 import javax.annotation.Nullable;
 
+import static com.highmobility.hmkit.HMLog.e;
+import static com.highmobility.hmkit.HMLog.i;
+import static com.highmobility.hmkit.HMLog.w;
+
 /**
  * HMKit is the entry point for the HMKit library. Use the singleton to access Broadcaster and
  * Telematics.
@@ -182,8 +186,6 @@ public class HMKit {
         if (instance != null) {
             throw new RuntimeException("Use getInstance() to get the HMKit singleton");
         }
-
-        HMLog.init();
     }
 
     /**
@@ -201,7 +203,7 @@ public class HMKit {
                     "setDeviceCertificate() to set new Device Certificate.");
         }
         setContextAndCreateStorage(context);
-        HMLog.d(HMLog.Level.NONE, "Initialised: " + getInfoString());
+        i("Initialised: %s", getInfoString());
         return instance;
     }
 
@@ -329,7 +331,7 @@ public class HMKit {
             webService = new WebService(this.context, certificate.getIssuer(), webUrl);
         else webService.setIssuer(certificate.getIssuer(), webUrl);
 
-        HMLog.d(HMLog.Level.NONE, "Set certificate: " + certificate.toString());
+        i("Set certificate: %s", certificate.toString());
     }
 
     /**
@@ -338,7 +340,7 @@ public class HMKit {
      * <p>
      * Stored certificates are not deleted.
      *
-     * @throws IllegalStateException when there are links still connected.
+     * @throws IllegalStateException When there are connected links.
      */
     public void terminate() throws IllegalStateException {
         /*
@@ -372,14 +374,13 @@ public class HMKit {
                         AccessCertificate certificate = null;
                         try {
                             certificate = storage.storeDownloadedCertificates(response);
-                        } catch (Exception e) {
-                            HMLog.d("storeDownloadedCertificates error: " + e
-                                    .getMessage());
+                        } catch (Exception ex) {
+                            e("storeDownloadedCertificates error: " + ex.getMessage());
 
                             DownloadAccessCertificateError error = new
                                     DownloadAccessCertificateError(
                                     DownloadAccessCertificateError.Type.INVALID_SERVER_RESPONSE,
-                                    0, e.getMessage());
+                                    0, ex.getMessage());
                             callback.onDownloadFailed(error);
                         }
 
@@ -396,7 +397,7 @@ public class HMKit {
                             try {
                                 JSONObject json = new JSONObject(new String(error.networkResponse
                                         .data));
-                                HMLog.d("onErrorResponse: " + json.toString());
+                                w("onErrorResponse: " + json.toString());
                                 if (json.has("message")) {
                                     dispatchedError = new DownloadAccessCertificateError(
                                             DownloadAccessCertificateError.Type.HTTP_ERROR,
@@ -485,7 +486,7 @@ public class HMKit {
      * Deletes all of the stored Access Certificates.
      */
     public void deleteCertificates() {
-        throwIfDeviceCertificateNotSet();
+        throwIfContextNotSet();
         storage.deleteCertificates();
     }
 
@@ -578,7 +579,7 @@ public class HMKit {
             try {
                 ble = new SharedBle(context);
             } catch (BleNotSupportedException e) {
-                HMLog.d(HMLog.Level.ALL, "BLE not supported");
+                i("BLE not supported");
             }
         }
     }
@@ -608,7 +609,7 @@ public class HMKit {
      */
     public interface DownloadCallback {
         /**
-         * Invoked if the certificate download was successful.
+         * Invoked when the certificate download was successful.
          *
          * @param serial the vehicle or charger serial.
          */

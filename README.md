@@ -20,6 +20,10 @@ ndk-build
 
 ### Release
 
+#### Pre checks
+* run the unit-tests in hmkit-android
+* run the instrumentation tests in hmkit-sandbox
+
 This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypto and hmkit-utils.
 
 For a release, update the "version = 1.5.0" in all of the deploy.settings files(if needed).
