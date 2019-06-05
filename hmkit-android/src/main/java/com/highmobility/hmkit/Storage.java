@@ -155,7 +155,7 @@ public class Storage {
         HashSet<String> stringSet = new HashSet<>();
 
         for (Certificate cert : certificates) {
-            stringSet.add(cert.getBytes().getHex());
+            stringSet.add(cert.getHex());
         }
 
         editor.putStringSet(ACCESS_CERTIFICATE_STORAGE_KEY, stringSet);

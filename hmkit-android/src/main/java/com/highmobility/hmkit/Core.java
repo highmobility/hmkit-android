@@ -309,7 +309,7 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetDeviceCertificate(byte[] cert) {
-        copyBytes(this.deviceCertificate.getBytes(), cert);
+        copyBytes(this.deviceCertificate, cert);
         return 0;
     }
 
@@ -348,8 +348,8 @@ class Core implements HMBTCoreInterface {
             return 1;
         }
 
-        copyBytes(certificate.getBytes(), cert);
-        size[0] = certificate.getBytes().getLength();
+        copyBytes(certificate, cert);
+        size[0] = certificate.getLength();
 
         return 0;
     }
@@ -361,8 +361,8 @@ class Core implements HMBTCoreInterface {
 
         if (certificates.length >= index) {
             AccessCertificate certificate = certificates[index];
-            copyBytes(certificate.getBytes(), cert);
-            size[0] = certificate.getBytes().getLength();
+            copyBytes(certificate, cert);
+            size[0] = certificate.getLength();
             return 0;
         }
 
@@ -414,8 +414,8 @@ class Core implements HMBTCoreInterface {
 
         for (AccessCertificate storedCert : storedCerts) {
             if (storedCert.getProviderSerial().equals(serial)) {
-                copyBytes(storedCert.getBytes(), cert);
-                size[0] = storedCert.getBytes().getLength();
+                copyBytes(storedCert, cert);
+                size[0] = storedCert.getLength();
                 d("Returned stored cert for serial %s", ByteUtils.hexFromBytes(serial));
                 return 0;
             }
