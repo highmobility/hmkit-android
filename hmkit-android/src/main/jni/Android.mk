@@ -1,4 +1,4 @@
-LOCAL_PATH := $(call my-dir)
+LOCAL_PATH := ../../../../hm-java-core-jni/src/main/jni
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := crypto
@@ -20,13 +20,12 @@ LOCAL_LDLIBS += -lz
 LOCAL_C_INCLUDES += ../../../../high-mobility-bt-core
 LOCAL_C_INCLUDES += ../../../../crypto-c/Crypto
 
-LOCAL_SRC_FILES := hmbtcore.c
-
-LOCAL_SRC_FILES += hm_bt_crypto_hal.c
-LOCAL_SRC_FILES += hm_bt_debug_hal.c
-LOCAL_SRC_FILES += hm_connectivity_hal.c
-LOCAL_SRC_FILES += hm_bt_persistence_hal.c
-LOCAL_SRC_FILES += hm_api_callback.c
+LOCAL_SRC_FILES := $(LOCAL_PATH)/hmbtcore.c
+LOCAL_SRC_FILES += $(LOCAL_PATH)/hm_bt_crypto_hal.c
+LOCAL_SRC_FILES += $(LOCAL_PATH)/hm_bt_debug_hal.c
+LOCAL_SRC_FILES += $(LOCAL_PATH)/hm_connectivity_hal.c
+LOCAL_SRC_FILES += $(LOCAL_PATH)/hm_bt_persistence_hal.c
+LOCAL_SRC_FILES += $(LOCAL_PATH)/hm_api_callback.c
 
 LOCAL_SRC_FILES += ../../../../crypto-c/Crypto/Crypto.c
 

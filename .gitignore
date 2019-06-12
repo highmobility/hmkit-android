@@ -78,3 +78,10 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+#NDK
+obj
+.externalNativeBuild
+*.so
+*.o
+*.o.d

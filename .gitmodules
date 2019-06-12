@@ -10,3 +10,6 @@
 [submodule "hm-android-basic-oauth"]
 	path = hm-android-basic-oauth
 	url = https://github.com/highmobility/hm-android-basic-oauth.git
+[submodule "hm-java-core-jni"]
+	path = hm-java-core-jni
+	url = git@bitbucket.org:highmobility/hm-java-core-jni.git

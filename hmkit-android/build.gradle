@@ -46,7 +46,7 @@ android {
         abi {
             enable true
             reset()
-            include 'x86', 'armeabi-v7a'
+            include 'arm64-v8a', 'armeabi', 'armeabi-v7a', 'mips', 'mips64', 'x86', 'x86_64'
             universalApk true
         }
     }
@@ -59,6 +59,8 @@ android {
 }
 
 dependencies {
+    api project(':hmkit-core-jni')
+
     if (project.releaseType == 0) {
         implementation project(':hmkit-crypto')
         implementation project(':hmkit-utils')
