@@ -36,6 +36,10 @@ public class HMKit {
      */
     public static HMLog.Level loggingLevel = HMLog.Level.ALL;
 
+    static {
+        System.loadLibrary("hmbtcore");
+    }
+
     /**
      * Custom web environment url. If set, will override the default url or the url from the device
      * certificate.

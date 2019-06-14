@@ -18,6 +18,7 @@ Supported devices: Lollipop 5.0+ with chipset support for BLE peripheral mode, h
 ### Release
 
 #### Pre checks
+
 * run the unit-tests in hmkit-android
 * run the instrumentation tests in hmkit-sandbox
 
