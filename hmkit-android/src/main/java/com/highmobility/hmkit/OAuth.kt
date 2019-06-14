@@ -3,6 +3,7 @@ package com.highmobility.hmkit
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.webkit.URLUtil
 import com.highmobility.crypto.Crypto
 import com.highmobility.crypto.value.DeviceSerial
 import com.highmobility.crypto.value.PrivateKey
@@ -62,6 +63,12 @@ class OAuth internal constructor(private val webService: WebService,
                        endDate: Calendar? = null,
                        state: String? = null,
                        completionHandler: CompletionHandler) {
+        if (URLUtil.isValidUrl(authUrl) == false ||
+            URLUtil.isValidUrl(tokenUrl) == false) {
+            completionHandler(null, "Invalid OAuth parameters")
+            return
+        }
+
         this.clientId = clientId
         this.redirectScheme = redirectScheme
         this.tokenUrl = tokenUrl
