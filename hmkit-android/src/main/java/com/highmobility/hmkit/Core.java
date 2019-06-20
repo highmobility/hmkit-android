@@ -218,6 +218,12 @@ class Core implements HMBTCoreInterface {
     }
 
     @Override
+    public int HMBTHalLog(int level, byte[] string) {
+        d(new String(string));
+        return 0;
+    }
+
+    @Override
     public int HMBTHalScanStart() {
         // ignored, controlled by the user
         return 0;
