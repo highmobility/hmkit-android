@@ -120,6 +120,3 @@ if (project.releaseType > 0) {
         }
     }
 }
-repositories {
-    mavenCentral()
-}
