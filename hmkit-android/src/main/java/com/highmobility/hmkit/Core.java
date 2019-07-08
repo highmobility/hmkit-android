@@ -4,6 +4,7 @@ import com.highmobility.btcore.HMBTCore;
 import com.highmobility.btcore.HMBTCoreInterface;
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.crypto.AccessCertificate;
+import com.highmobility.crypto.Crypto;
 import com.highmobility.crypto.DeviceCertificate;
 import com.highmobility.crypto.value.PrivateKey;
 import com.highmobility.crypto.value.PublicKey;
@@ -26,7 +27,7 @@ import static com.highmobility.hmkit.HMLog.w;
  * handles one device certificate.
  */
 class Core implements HMBTCoreInterface {
-    private final HMBTCore core = new HMBTCore();
+    static final HMBTCore core = new HMBTCore();
     private final Storage storage;
     private final ThreadManager threadManager;
 
@@ -315,7 +316,7 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetDeviceCertificate(byte[] cert) {
-        copyBytes(this.deviceCertificate.getBytes(), cert);
+        copyBytes(this.deviceCertificate, cert);
         return 0;
     }
 
@@ -354,8 +355,8 @@ class Core implements HMBTCoreInterface {
             return 1;
         }
 
-        copyBytes(certificate.getBytes(), cert);
-        size[0] = certificate.getBytes().getLength();
+        copyBytes(certificate, cert);
+        size[0] = certificate.getLength();
 
         return 0;
     }
@@ -367,8 +368,8 @@ class Core implements HMBTCoreInterface {
 
         if (certificates.length >= index) {
             AccessCertificate certificate = certificates[index];
-            copyBytes(certificate.getBytes(), cert);
-            size[0] = certificate.getBytes().getLength();
+            copyBytes(certificate, cert);
+            size[0] = certificate.getLength();
             return 0;
         }
 
@@ -420,8 +421,8 @@ class Core implements HMBTCoreInterface {
 
         for (AccessCertificate storedCert : storedCerts) {
             if (storedCert.getProviderSerial().equals(serial)) {
-                copyBytes(storedCert.getBytes(), cert);
-                size[0] = storedCert.getBytes().getLength();
+                copyBytes(storedCert, cert);
+                size[0] = storedCert.getLength();
                 d("Returned stored cert for serial %s", ByteUtils.hexFromBytes(serial));
                 return 0;
             }

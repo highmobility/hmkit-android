@@ -7,8 +7,7 @@ This is the HMKit Android project.
 * Build the core:  
 Install NDK through Android SDK Manager(Tools tab). Then:
 ```
-cd {PROJECT_DIR}/hmkit-android/src/main/jni 
-ndk-build
+cd hmkit-android/src/main/jni && ndk-build && cd -
 ```
 * Build hmkit-android module.
 * If there are errors: Try `Gradle clean`, `File > Invalidate caches and restart`.
@@ -19,8 +18,8 @@ Supported devices: Lollipop 5.0+ with chipset support for BLE peripheral mode, h
 
 #### Pre checks
 
-* run the unit-tests in hmkit-android
-* run the instrumentation tests in hmkit-sandbox
+* run the unit-tests and instrumentation tests: 
+    ```./gradlew test && ./gradlew cAT```
 
 This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypto and hmkit-utils.
 

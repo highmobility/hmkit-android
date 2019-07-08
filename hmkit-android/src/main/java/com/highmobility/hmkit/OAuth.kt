@@ -23,6 +23,7 @@ typealias CompletionHandler = (response: AccessTokenResponse?, errorMessage: Str
  * returns it to the user. User can then use the token to download the Access Certificate.
  */
 class OAuth internal constructor(private val webService: WebService,
+                                 private val crypto: Crypto,
                                  private var privateKey: PrivateKey,
                                  private var deviceSerial: DeviceSerial) {
     // created at the beginning of oauth process
@@ -74,8 +75,8 @@ class OAuth internal constructor(private val webService: WebService,
         this.tokenUrl = tokenUrl
         this.completionHandler = completionHandler
 
-        nonce = Crypto.createSerialNumber()
-        val nonceSha256 = Crypto.sha256(nonce.hex.toByteArray(Charset.forName("ASCII"))).byteArray
+        nonce = crypto.createSerialNumber()
+        val nonceSha256 = crypto.sha256(nonce.hex.toByteArray(Charset.forName("ASCII"))).byteArray
         val codeChallenge = Base64.encodeUrlSafe(nonceSha256)
 
         var webUrl = authUrl
@@ -161,7 +162,7 @@ class OAuth internal constructor(private val webService: WebService,
         val bodyBase64 = Base64.encodeUrlSafe(body.toByteArray())
 
         val jwtContent = String.format("%s.%s", headerBase64, bodyBase64)
-        val jwtSignature = Crypto.signJWT(jwtContent.toByteArray(), privateKey)
+        val jwtSignature = crypto.signJWT(jwtContent.toByteArray(), privateKey)
 
         return String.format("%s.%s", jwtContent, jwtSignature.base64UrlSafe)
     }
