@@ -144,7 +144,6 @@ public class HMKit {
      * @return The HM crypto.
      */
     public Crypto getCrypto() {
-        throwIfContextNotSet();
         return crypto;
     }
 
@@ -202,6 +201,7 @@ public class HMKit {
         if (instance != null) {
             throw new RuntimeException("Use getInstance() to get the HMKit singleton");
         }
+        crypto = new Crypto(Core.core);
     }
 
     /**
@@ -591,7 +591,6 @@ public class HMKit {
             this.context = context.getApplicationContext();
             storage = new Storage(this.context);
             threadManager = new ThreadManager(this.context);
-            crypto = new Crypto(Core.core);
             try {
                 ble = new SharedBle(context);
             } catch (BleNotSupportedException e) {
