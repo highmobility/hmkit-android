@@ -6,13 +6,13 @@ import com.highmobility.crypto.AccessCertificate
 import com.highmobility.crypto.value.DeviceSerial
 import com.highmobility.value.Bytes
 import org.junit.Assert.assertTrue
-
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class StorageTest {
+
     /*
         issuer: 746D6373
         providingSerial: 10342C3CBB9E845017
@@ -111,5 +111,24 @@ class StorageTest {
         storage.deleteCertificate(Bytes("10342C3CBB9E845017").byteArray, null)
         // 0 left
         assertTrue(storage.certificates.count() == 0)
+    }
+
+    @Test
+    fun testOtherCertWithSameSerialNotDeleted() {
+        // have 2 certs with same providing. delete 1 with specific gaining and providing
+        // assert other providing stays
+        storage.storeCertificate(cert1)
+        storage.storeCertificate(cert2)
+        assertTrue(storage.deleteCertificate(cert1.gainerSerial.byteArray, cert1.providerSerial.byteArray))
+        assertTrue(storage.certificates.size == 1)
+        assertTrue(storage.getCertificate(cert2.gainerSerial) != null)
+    }
+
+    @Test
+    fun testDeleteGainingAndProvidingNullDoesNotDelete() {
+        storage.storeCertificate(cert1)
+        storage.storeCertificate(cert2)
+        assertTrue(storage.deleteCertificate(null, null) == false)
+        assertTrue(storage.certificates.size == 2)
     }
 }

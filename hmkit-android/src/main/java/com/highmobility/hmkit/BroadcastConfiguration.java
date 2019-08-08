@@ -36,7 +36,9 @@ public class BroadcastConfiguration {
     }
 
     /**
-     * @return Whether HM name is
+     * @return Whether bluetooth name is set to HM one (eg: HM 1CADD). Default is yes.
+     * @discussion Bluetooth name is changed on every broadcast start by default. This is a security
+     * feature.
      */
     public boolean isOverridingAdvertisementName() {
         return overrideAdvertisementName;
@@ -99,7 +101,8 @@ public class BroadcastConfiguration {
          * Indicates whether HMKit will overwrite the phone's bluetooth name. By default this
          * behaviour is on. If this is false the Chrome emulator will not recognize the device.
          *
-         * @param overridesAdvertisementName Indication on whether to overwrite the phone's bluetooth name
+         * @param overridesAdvertisementName Indication on whether to overwrite the phone's
+         *                                   bluetooth name
          */
         public Builder setOverridesAdvertisementName(boolean overridesAdvertisementName) {
             this.overridesAdvertisementName = overridesAdvertisementName;

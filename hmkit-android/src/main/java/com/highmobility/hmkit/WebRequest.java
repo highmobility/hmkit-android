@@ -1,5 +1,6 @@
 package com.highmobility.hmkit;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
 import com.android.volley.Request;
@@ -14,6 +15,10 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import timber.log.Timber;
+
+import static com.highmobility.hmkit.HMLog.d;
+
 class WebRequest extends Request<JSONObject> {
     private static final Map<String, String> headers;
 
@@ -26,13 +31,13 @@ class WebRequest extends Request<JSONObject> {
     private Map<String, String> params;
 
     void print() {
-        if (HMKit.loggingLevel.getValue() < HMLog.Level.DEBUG.getValue()) return;
+        if (Timber.treeCount() == 0) return;
         try {
             byte[] body = getBody();
             String bodyString = body != null ? "\nbody:\n" + new String(getBody()) : "";
             JSONObject headers = new JSONObject(getHeaders());
             String log = "\n" + getUrl() + "\nheaders:\n" + headers.toString(2) + bodyString;
-            HMLog.d(URLDecoder.decode(log, "ASCII"));
+            d(URLDecoder.decode(log, "ASCII"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -44,6 +49,11 @@ class WebRequest extends Request<JSONObject> {
         super(method, url, errorListener);
         this.listener = responseListener;
         this.params = params;
+
+        setRetryPolicy(new DefaultRetryPolicy(
+                60000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
     }
 
     protected Map<String, String> getParams() {

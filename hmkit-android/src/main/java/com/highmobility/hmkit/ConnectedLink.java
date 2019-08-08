@@ -6,6 +6,9 @@ import java.util.Calendar;
 
 import javax.annotation.Nullable;
 
+import static com.highmobility.hmkit.HMLog.d;
+import static com.highmobility.hmkit.HMLog.e;
+
 /**
  * The ConnectedLink is a representation of the connection between the Broadcaster and a Device that
  * has connected to it. The ConnectedLink is created by the other Device via discovering and
@@ -32,7 +35,7 @@ public class ConnectedLink extends Link {
 
     int didReceivePairingRequest() {
         if (listener == null) {
-            HMLog.e("link listener not set");
+            e("link listener not set");
             return 1;
         }
 
@@ -75,7 +78,7 @@ public class ConnectedLink extends Link {
                         }
                     });
 
-                    HMLog.d("pairing timer exceeded");
+                    d("pairing timer exceeded");
                     return 1; // TOD1O: use correct code
                 }
             }

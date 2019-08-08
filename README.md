@@ -14,11 +14,15 @@ Supported devices: Lollipop 5.0+ with chipset support for BLE peripheral mode, h
 To compile the bt core, you need to install the NDK through Android SDK Manager(in SDK tools tab).
 
 ```
-cd {PROJECT_DIR}/hmlink/src/main/jni 
+cd {PROJECT_DIR}/hmkit-android/src/main/jni 
 ndk-build
 ```
 
 ### Release
+
+#### Pre checks
+* run the unit-tests in hmkit-android
+* run the instrumentation tests in hmkit-sandbox
 
 This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypto and hmkit-utils.
 
