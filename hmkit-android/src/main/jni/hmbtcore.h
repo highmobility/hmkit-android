@@ -49,4 +49,6 @@ jmethodID interfaceMethodHMCryptoHalGenerateNonce;
 
 jmethodID interfaceMethodHMApiCallbackRevokeResponse;
 
+jmethodID interfaceMethodHMApiCallbackErrorCommandIncoming;
+
 #endif //ANDROID_WEAR_DIGITAL_KEY_HMBTCORE_H

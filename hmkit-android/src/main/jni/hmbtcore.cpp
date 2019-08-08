@@ -62,6 +62,8 @@ void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterfa
 
     interfaceMethodHMApiCallbackRevokeResponse = env->GetMethodID(interfaceClassRef, "HMApiCallbackRevokeResponse","(Lcom/highmobility/btcore/HMDevice;[BII)V");
 
+    interfaceMethodHMApiCallbackErrorCommandIncoming = env->GetMethodID(interfaceClassRef, "HMApiCallbackErrorCommandIncoming","(Lcom/highmobility/btcore/HMDevice;II)V");
+
     envRef = env;
     coreInterfaceRef = coreInterface;
 }
@@ -479,4 +481,22 @@ Java_com_highmobility_btcore_HMBTCore_HMBTCoreSetLogLevel(JNIEnv *env, jobject i
     CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
 
 }
+
+JNIEXPORT void JNICALL
+Java_com_highmobility_btcore_HMBTCore_HMBTCoreSetMTU(JNIEnv *env, jobject instance,jobject coreInterface,
+                                                                      jbyteArray mac_, jint mtu) {
+    try{
+          prepareCallbackFunctions(env,instance,coreInterface);
+
+          jbyte *mac = env->GetByteArrayElements( mac_, NULL);
+
+          hm_bt_core_set_mtu((uint8_t*)mac, mtu);
+
+          env->ReleaseByteArrayElements( mac_, mac, 0);
+
+    }
+    CATCH_CPP_EXCEPTION_AND_THROW_JAVA_EXCEPTION
+
+}
+
 }

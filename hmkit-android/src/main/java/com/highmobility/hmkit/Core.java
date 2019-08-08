@@ -531,6 +531,11 @@ class Core implements HMBTCoreInterface {
         }
     }
 
+    @Override
+    public void HMApiCallbackErrorCommandIncoming(HMDevice device, int error, int errorType){
+        //TODO TT
+    }
+
     void copyBytes(byte[] from, byte[] to) {
         System.arraycopy(from, 0, to, 0, from.length);
     }

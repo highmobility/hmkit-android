@@ -173,6 +173,34 @@ void hm_api_callback_command_response(uint64_t appContxtId, hm_device_t *device,
 
 void hm_api_callback_error_command_incoming(uint64_t appContxtId, hm_device_t *device, uint8_t command, uint8_t errorType){
 
+    jclass cls = (*envRef)->FindClass(envRef, "com/highmobility/btcore/HMDevice");
+    jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
+    jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
+    jmethodID setSerial = (*envRef)->GetMethodID(envRef,cls, "setSerial", "([B)V");
+    jmethodID setIsAuthenticated = (*envRef)->GetMethodID(envRef,cls, "setIsAuthenticated", "(I)V");
+    jmethodID setAppId = (*envRef)->GetMethodID(envRef,cls, "setAppId", "([B)V");
+
+    jobject obj = (*envRef)->NewObject(envRef,cls, constructor);
+
+    jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
+    (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jint*) device->mac );
+
+    jbyteArray serial_ = (*envRef)->NewByteArray(envRef,9);
+    (*envRef)->SetByteArrayRegion(envRef, serial_, 0, 9, (const jint*) device->serial_number );
+
+    jbyteArray appid_ = (*envRef)->NewByteArray(envRef,12);
+    (*envRef)->SetByteArrayRegion(envRef, appid_, 0, 12, (const jint*) device->app_id );
+
+    (*envRef)->CallVoidMethod(envRef, obj, setMac, mac_);
+    (*envRef)->CallVoidMethod(envRef, obj, setSerial, serial_);
+    (*envRef)->CallVoidMethod(envRef, obj, setIsAuthenticated, device->is_authorised);
+    (*envRef)->CallVoidMethod(envRef, obj, setAppId, appid_);
+
+    (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackErrorCommandIncoming, obj, command, errorType);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+      }
 }
 
 uint32_t hm_api_callback_get_device_certificate_failed(uint64_t appContxtId, hm_device_t *device, uint8_t *nonce)
