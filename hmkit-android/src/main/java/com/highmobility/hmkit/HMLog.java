@@ -94,6 +94,7 @@ public class HMLog {
 
         Level(int level) {
             this.level = level;
+            //TODO TT set also core log level HMBTCoreSetLogLevel
         }
 
         public int getValue() {

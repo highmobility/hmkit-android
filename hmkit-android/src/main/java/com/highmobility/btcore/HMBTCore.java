@@ -59,4 +59,6 @@ public class HMBTCore {
     public native void HMBTCoreSendTelematicsCommand(HMBTCoreInterface coreInterface, byte[] serial, byte[] nonce, int length, byte[] data);
 
     public native void HMBTCoreSendRevoke(HMBTCoreInterface coreInterface, byte[] serial);
+
+    public native void HMBTCoreSetLogLevel(HMBTCoreInterface coreInterface, int level);
 }
