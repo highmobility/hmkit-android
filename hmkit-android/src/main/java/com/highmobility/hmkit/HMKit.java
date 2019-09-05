@@ -103,7 +103,7 @@ public class HMKit {
     }
 
     /**
-     * @return The Telematics instance.
+     * @return The OAuth instance.
      */
     public OAuth getOAuth() {
         throwIfDeviceCertificateNotSet();

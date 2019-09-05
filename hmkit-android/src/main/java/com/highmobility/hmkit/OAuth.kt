@@ -18,8 +18,8 @@ data class AccessTokenResponse(val accessToken: String, val refreshToken: String
 typealias CompletionHandler = (response: AccessTokenResponse?, errorMessage: String?) -> Unit
 
 /**
- * Used to open the web view to get the oauth access token code. Then requests the access token and
- * returns it to the user. User can then use the token to download the Access Certificate.
+ * OAuth is used to open a web view and get the access token that can be used to download an Access
+ * Certificate for the vehicle.
  */
 class OAuth internal constructor(private val webService: WebService,
                                  private var privateKey: PrivateKey,
@@ -88,7 +88,7 @@ class OAuth internal constructor(private val webService: WebService,
     }
 
     /**
-     * Refresh the access token with a previously acquired refresh token. lin
+     * Refresh the access token with a previously acquired refresh token.
      *
      * @param tokenUrl The token URL.
      * @param clientId The client ID.
@@ -150,6 +150,11 @@ class OAuth internal constructor(private val webService: WebService,
         })
     }
 
+    protected fun setDeviceCertificate(privateKey: PrivateKey, deviceSerial: DeviceSerial) {
+        this.privateKey = privateKey
+        this.deviceSerial = deviceSerial
+    }
+
     private fun getJwt(): String {
         val header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}"
         val body = "{\"code_verifier\":\"${nonce.hex}\",\"serial_number\":\"${deviceSerial.hex}\"}"
@@ -161,11 +166,6 @@ class OAuth internal constructor(private val webService: WebService,
         val jwtSignature = Crypto.signJWT(jwtContent.toByteArray(), privateKey)
 
         return String.format("%s.%s", jwtContent, jwtSignature.base64UrlSafe)
-    }
-
-    fun setDeviceCertificate(privateKey: PrivateKey, deviceSerial: DeviceSerial) {
-        this.privateKey = privateKey
-        this.deviceSerial = deviceSerial
     }
 
     private fun finishedDownloadingAccessToken(jsonObject: JSONObject?, errorMessage: String?) {
