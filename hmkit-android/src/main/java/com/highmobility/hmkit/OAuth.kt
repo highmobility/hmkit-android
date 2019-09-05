@@ -120,7 +120,11 @@ class OAuth internal constructor(private val webService: WebService,
             code = uri?.getQueryParameter("code")
 
             if (code == null) {
-                finishedDownloadingAccessToken(null, "Invalid redirect uri")
+                var errorText = uri?.getQueryParameter("error")
+                var errorDescription = uri?.getQueryParameter("error_description")
+                if (errorDescription.isNullOrBlank() == false) errorText += ": $errorDescription"
+                var error = if (errorText != null) "$errorText" else "Invalid redirect uri"
+                finishedDownloadingAccessToken(null, error)
                 return UrlLoadResult.INVALID_REDIRECT_URL
             }
 
