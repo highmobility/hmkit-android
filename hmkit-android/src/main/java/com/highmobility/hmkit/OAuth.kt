@@ -32,7 +32,7 @@ class OAuth internal constructor(private val webService: WebService,
     private lateinit var tokenUrl: String
     private lateinit var nonce: Bytes
     private lateinit var completionHandler: CompletionHandler
-    private lateinit var viewControllerCompletionHandler: CompletionHandler
+    private var viewControllerCompletionHandler: CompletionHandler? = null
 
     private var code: String? = null
 
@@ -174,12 +174,11 @@ class OAuth internal constructor(private val webService: WebService,
                 responseContainer = parseAccessTokenResponse(jsonObject)
             } catch (e: JSONException) {
                 e.printStackTrace()
-
                 errorString = "invalid download access token response"
             }
         }
 
-        viewControllerCompletionHandler(responseContainer, errorString) // finish the view
+        viewControllerCompletionHandler?.invoke(responseContainer, errorString) // finish the view
         completionHandler(responseContainer, errorString)
     }
 
