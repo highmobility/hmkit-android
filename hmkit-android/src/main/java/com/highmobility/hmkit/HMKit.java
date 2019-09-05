@@ -419,8 +419,7 @@ public class HMKit {
                             dispatchedError = new DownloadAccessCertificateError(
                                     DownloadAccessCertificateError.Type.NO_CONNECTION,
                                     -1,
-                                    "Cannot connect to the web service. Check your internet " +
-                                            "connection");
+                                    WebService.NO_CONNECTION_ERROR);
                         }
 
                         callback.onDownloadFailed(dispatchedError);

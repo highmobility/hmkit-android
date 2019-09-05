@@ -31,6 +31,9 @@ class WebService {
     private static final String hmxvUrl = "https://api.high-mobility.com";
     private static final String apiUrl = "/v1";
 
+    static final String NO_CONNECTION_ERROR = "Cannot connect to the web service. Check your " +
+            "internet connection.";
+
     private static final byte[] testIssuer = new byte[]{0x74, 0x65, 0x73, 0x74};
     private static final byte[] xvIssuer = new byte[]{0x78, 0x76, 0x68, 0x6D};
 
