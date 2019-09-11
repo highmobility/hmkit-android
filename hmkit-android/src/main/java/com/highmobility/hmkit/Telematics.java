@@ -104,8 +104,7 @@ public class Telematics extends Core.Telematics {
                     activeCommand.dispatchError(TelematicsError.Type.HTTP_ERROR, error
                             .networkResponse.statusCode, new String(error.networkResponse.data));
                 } else {
-                    activeCommand.dispatchError(TelematicsError.Type.NO_CONNECTION, 0, "Cannot " +
-                            "connect to the web service. Check your internet connection");
+                    activeCommand.dispatchError(TelematicsError.Type.NO_CONNECTION, 0, WebService.NO_CONNECTION_ERROR);
                 }
             }
         });
@@ -175,8 +174,7 @@ public class Telematics extends Core.Telematics {
                             }
                         } else {
                             commandSent.dispatchError(TelematicsError.Type.NO_CONNECTION, 0,
-                                    "Cannot connect " +
-                                            "to the web service. Check your internet connection");
+                                    WebService.NO_CONNECTION_ERROR);
                         }
                     }
                 });

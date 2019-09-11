@@ -18,8 +18,8 @@ data class AccessTokenResponse(val accessToken: String, val refreshToken: String
 typealias CompletionHandler = (response: AccessTokenResponse?, errorMessage: String?) -> Unit
 
 /**
- * Used to open the web view to get the oauth access token code. Then requests the access token and
- * returns it to the user. User can then use the token to download the Access Certificate.
+ * OAuth is used to open a web view and get the access token that can be used to download an Access
+ * Certificate for the vehicle.
  */
 class OAuth internal constructor(private val webService: WebService,
                                  private var privateKey: PrivateKey,
@@ -32,7 +32,7 @@ class OAuth internal constructor(private val webService: WebService,
     private lateinit var tokenUrl: String
     private lateinit var nonce: Bytes
     private lateinit var completionHandler: CompletionHandler
-    private lateinit var viewControllerCompletionHandler: CompletionHandler
+    private var viewControllerCompletionHandler: CompletionHandler? = null
 
     private var code: String? = null
 
@@ -88,7 +88,7 @@ class OAuth internal constructor(private val webService: WebService,
     }
 
     /**
-     * Refresh the access token with a previously acquired refresh token. lin
+     * Refresh the access token with a previously acquired refresh token.
      *
      * @param tokenUrl The token URL.
      * @param clientId The client ID.
@@ -120,7 +120,11 @@ class OAuth internal constructor(private val webService: WebService,
             code = uri?.getQueryParameter("code")
 
             if (code == null) {
-                finishedDownloadingAccessToken(null, "Invalid redirect uri")
+                var errorText = uri?.getQueryParameter("error")
+                var errorDescription = uri?.getQueryParameter("error_description")
+                if (errorDescription.isNullOrBlank() == false) errorText += ": $errorDescription"
+                var error = if (errorText != null) "$errorText" else "Invalid redirect uri"
+                finishedDownloadingAccessToken(null, error)
                 return UrlLoadResult.INVALID_REDIRECT_URL
             }
 
@@ -146,6 +150,11 @@ class OAuth internal constructor(private val webService: WebService,
         })
     }
 
+    protected fun setDeviceCertificate(privateKey: PrivateKey, deviceSerial: DeviceSerial) {
+        this.privateKey = privateKey
+        this.deviceSerial = deviceSerial
+    }
+
     private fun getJwt(): String {
         val header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}"
         val body = "{\"code_verifier\":\"${nonce.hex}\",\"serial_number\":\"${deviceSerial.hex}\"}"
@@ -159,11 +168,6 @@ class OAuth internal constructor(private val webService: WebService,
         return String.format("%s.%s", jwtContent, jwtSignature.base64UrlSafe)
     }
 
-    fun setDeviceCertificate(privateKey: PrivateKey, deviceSerial: DeviceSerial) {
-        this.privateKey = privateKey
-        this.deviceSerial = deviceSerial
-    }
-
     private fun finishedDownloadingAccessToken(jsonObject: JSONObject?, errorMessage: String?) {
         var responseContainer: AccessTokenResponse? = null
 
@@ -174,12 +178,11 @@ class OAuth internal constructor(private val webService: WebService,
                 responseContainer = parseAccessTokenResponse(jsonObject)
             } catch (e: JSONException) {
                 e.printStackTrace()
-
                 errorString = "invalid download access token response"
             }
         }
 
-        viewControllerCompletionHandler(responseContainer, errorString) // finish the view
+        viewControllerCompletionHandler?.invoke(responseContainer, errorString) // finish the view
         completionHandler(responseContainer, errorString)
     }
 

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.ViewGroup
 import android.webkit.*
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_oauth_web_view.*
 import timber.log.Timber.d
@@ -43,9 +44,18 @@ internal class WebViewFragment : Fragment() {
     }
 
     private val webViewClient: WebViewClient = object : WebViewClient() {
-        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-            val url = request?.url.toString()
+        @SuppressWarnings("deprecation")
+        override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+            if (url == null) return false
+            return shouldOverrideUrlLoading(url)
+        }
 
+        @RequiresApi(Build.VERSION_CODES.N)
+        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+            return shouldOverrideUrlLoading(request?.url.toString())
+        }
+
+        fun shouldOverrideUrlLoading(url:String) : Boolean {
             if (URLUtil.isNetworkUrl(url) == false) {
                 iWebView.onStartedLoadingUrl(url)
                 return true

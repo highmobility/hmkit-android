@@ -23,7 +23,7 @@ internal class OAuthViewController(val view: IOAuthView) {
         }
     }
 
-    fun onStartLoadingUrl(url: String?) {
+    fun onStartedLoadingUrl(url: String?) {
         val result = oauth.onStartLoadingUrl(url)
 
         if (result == OAuth.UrlLoadResult.CODE_INTERCEPTED) {

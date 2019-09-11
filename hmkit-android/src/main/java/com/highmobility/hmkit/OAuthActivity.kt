@@ -48,7 +48,7 @@ internal class OAuthActivity : FragmentActivity(), IOAuthView, IWebView, IInfoVi
     // MARK: IWebView
 
     override fun onStartedLoadingUrl(url: String?) {
-        controller.onStartLoadingUrl(url)
+        controller.onStartedLoadingUrl(url)
     }
 
     override fun onReceivedError(error: String?) {
