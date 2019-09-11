@@ -21,8 +21,10 @@ ndk-build
 ### Release
 
 #### Pre checks
-* run the unit-tests in hmkit-android
-* run the instrumentation tests in hmkit-sandbox
+
+* run the unit-tests in
+* run the instrumentation tests in hmkit-sandbox repository (It is preferred to release from 
+hmkit-sandbox repository for that reason)
 
 This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypto and hmkit-utils.
 
@@ -30,7 +32,7 @@ For a release, update the "version = 1.5.0" in all of the deploy.settings files(
 
 Set the release environment in root build.gradle (ext property release = 0/1/2).
 call ./gradlew artifactoryPublish to release all of the packages.
-call ./gradlew :hmkit-android:artifactoryPublish to release a specific package.
+call ./gradlew :hmkit-utils:artifactoryPublish to release a specific package.
 
 If pushing the same version number, in dev package will be overwritten, in release rejected.
 
