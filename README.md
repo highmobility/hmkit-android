@@ -22,9 +22,8 @@ ndk-build
 
 #### Pre checks
 
-* run the unit-tests in
-* run the instrumentation tests in hmkit-sandbox repository (It is preferred to release from 
-hmkit-sandbox repository for that reason)
+* run the unit-tests in hmkit-android
+* run the instrumentation tests in hm-android-bluetooth-auto-api-explorer submodule.
 
 This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypto and hmkit-utils.
 
