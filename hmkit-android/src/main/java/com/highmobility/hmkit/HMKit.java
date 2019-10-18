@@ -32,11 +32,6 @@ import static com.highmobility.hmkit.HMLog.w;
  */
 public class HMKit {
     /**
-     * The logging level of HMKit.
-     */
-    public static HMLog.Level loggingLevel = HMLog.Level.ALL;
-
-    /**
      * Custom web environment url. If set, will override the default url or the url from the device
      * certificate.
      */
@@ -150,6 +145,25 @@ public class HMKit {
         }
 
         return infoString + "unknown";
+    }
+
+    /**
+     * Set the logging level of HMKit.
+     *
+     * @param level The logging level.
+     */
+    public void setLoggingLevel(HMLog.Level level) {
+        HMLog.level = level;
+        if (core != null) core.HMBTCoreSetLogLevel(level.getValue());
+    }
+
+    /**
+     * Get the logging level of HMKit.
+     *
+     * @return The logging level
+     */
+    public HMLog.Level getLoggingLevel() {
+        return HMLog.level;
     }
 
     static String infoStringPrefix() {
@@ -321,9 +335,10 @@ public class HMKit {
                     "link exists with the Scanner. Disconnect from all of the links.");
         }
 
-        if (core == null)
-            core = new Core(storage, threadManager, certificate, privateKey, issuerPublicKey);
-        else core.setDeviceCertificate(certificate, privateKey, issuerPublicKey);
+        if (core == null) {
+            core = new Core(storage, threadManager, certificate, privateKey, issuerPublicKey,
+                    getLoggingLevel());
+        } else core.setDeviceCertificate(certificate, privateKey, issuerPublicKey);
 
         if (oauth != null) oauth.setDeviceCertificate(privateKey, certificate.getSerial());
 
@@ -581,26 +596,6 @@ public class HMKit {
             } catch (BleNotSupportedException e) {
                 i("BLE not supported");
             }
-        }
-    }
-
-    /**
-     * The logging level.
-     *
-     * @deprecated use {@link HMLog.Level} instead.
-     */
-    @Deprecated
-    public enum LoggingLevel {
-        NONE(0), DEBUG(1), ALL(2);
-
-        private final Integer level;
-
-        LoggingLevel(int level) {
-            this.level = level;
-        }
-
-        public int getValue() {
-            return level;
         }
     }
 

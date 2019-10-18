@@ -13,12 +13,14 @@ public class HMLog {
     private static final Pattern ANONYMOUS_CLASS = Pattern.compile("(\\$\\d+)+$");
     private static final String LOG_PREFIX = "hmkit-";
 
+    protected static Level level = Level.ALL;
+
     static void init() {
 
     }
 
     static void d(String message, Object... args) {
-        if (HMKit.loggingLevel.getValue() >= Level.DEBUG.getValue()) {
+        if (level.getValue() >= Level.DEBUG.getValue()) {
             Timber.tag(getTag());
             try {
                 Timber.d(String.format(message, args));
@@ -29,7 +31,7 @@ public class HMLog {
     }
 
     static void w(String message, Object... args) {
-        if (HMKit.loggingLevel.getValue() >= Level.NONE.getValue()) {
+        if (level.getValue() >= Level.NONE.getValue()) {
             Timber.tag(getTag());
             try {
                 Timber.w(String.format(message, args));
@@ -40,7 +42,7 @@ public class HMLog {
     }
 
     static void i(String message, Object... args) {
-        if (HMKit.loggingLevel.getValue() >= Level.ALL.getValue()) {
+        if (level.getValue() >= Level.ALL.getValue()) {
             Timber.tag(getTag());
             try {
                 Timber.i(String.format(message, args));
@@ -51,7 +53,7 @@ public class HMLog {
     }
 
     static void e(String message, Object... args) {
-        if (HMKit.loggingLevel.getValue() >= Level.NONE.getValue()) {
+        if (level.getValue() >= Level.NONE.getValue()) {
             Timber.tag(getTag());
             try {
                 Timber.e(String.format(message, args));
@@ -94,7 +96,6 @@ public class HMLog {
 
         Level(int level) {
             this.level = level;
-            //TODO TT set also core log level HMBTCoreSetLogLevel
         }
 
         public int getValue() {
