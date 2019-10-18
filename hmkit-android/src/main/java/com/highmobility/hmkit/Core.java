@@ -217,6 +217,11 @@ class Core implements HMBTCoreInterface {
         core.HMBTCoreSetLogLevel(this, level);
     }
 
+    void HMBTCoreSetMTU(byte[] mac, int mtu) {
+        // TODO: 18/10/2019 core should probably accept int not byte[]
+        core.HMBTCoreSetMTU(this, mac, new byte[]{(byte) mtu});
+    }
+
     // MARK: HMBTCoreInterface
 
     @Override

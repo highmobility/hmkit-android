@@ -398,6 +398,19 @@ class GattServer extends BluetoothGattServerCallback {
         d("onNotificationSent: %s", (status == BluetoothGatt.GATT_SUCCESS ? "success" : "failed"));
     }
 
+    @Override public void onMtuChanged(BluetoothDevice device, int mtu) {
+        core.HMBTCoreSetMTU(ByteUtils.bytesFromMacString(device.getAddress()), mtu);
+
+        String mtuCharValue = "MTU" + String.format("%03d", mtu);
+        String currentCharValue = infoCharacteristic.getStringValue(0);
+
+        if (currentCharValue.contains("MTU")) {
+            infoCharacteristic.setValue(currentCharValue.split("MTU")[0] + mtuCharValue);
+        } else {
+            infoCharacteristic.setValue(currentCharValue + mtuCharValue);
+        }
+    }
+
     private int getCharacteristicIdForCharacteristic(BluetoothGattCharacteristic characteristic) {
         if (characteristic.getUuid().equals(writeCharacteristic.getUuid())) {
             return 0x03;
