@@ -235,6 +235,13 @@ public class Link {
     /**
      * The possible states of the Link.
      *
+     * States can go from:
+     * AUTHENTICATING > AUTHENTICATED
+     * or
+     * AUTHENTICATING > AUTHENTICATION_FAILED (then the LinkListener's authenticationFailed is called as well)
+     *
+     * After this, it can go to REVOKING (if initiated) and to REVOKED/AUTHENTICATED(if revoke failed)
+     *
      * @see LinkListener#onStateChanged(Link, State)
      */
     public enum State {

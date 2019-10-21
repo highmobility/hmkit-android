@@ -1,5 +1,6 @@
 package com.highmobility.hmkit;
 
+import com.highmobility.hmkit.error.AuthenticationError;
 import com.highmobility.value.Bytes;
 
 public interface LinkListener {
@@ -10,6 +11,14 @@ public interface LinkListener {
      * @param oldState The old state of the link.
      */
     void onStateChanged(Link link, Link.State oldState);
+
+    /**
+     * @param link  The link.
+     * @param error The authentication error.
+     */
+    // TODO: 21/10/2019 call this after onErrorCommand. Also in HMApiCallbackEnteredProximity if that
+    //  stays in the flow after maidu answer
+    void onAuthenticationFailed(Link link, AuthenticationError error);
 
     /**
      * Callback for when a command has been received by the Link.
