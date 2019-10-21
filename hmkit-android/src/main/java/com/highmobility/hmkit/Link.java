@@ -30,7 +30,7 @@ public class Link {
     private Bytes mac;
     @Nullable private DeviceSerial serial; // set after authentication is finished by core
 
-    private State state = State.CONNECTED;
+    private State state = State.AUTHENTICATING;
 
     private LinkCommand sentCommand;
     private final long connectionTime;
@@ -132,7 +132,7 @@ public class Link {
     /**
      * Revoke authorisation for this device. {@link RevokeCallback} will be called with the result.
      * If successful, the {@link LinkListener#onStateChanged(Link, State)} will be called with the
-     * {@link State#CONNECTED} state.
+     * {@link State#REVOKED} state.
      * <p>
      * After this has succeeded it is up to the user to finish the flow related to this link -
      * disconnect, stop broadcasting or something else.
@@ -168,6 +168,7 @@ public class Link {
         });
     }
 
+
     void onChangedAuthenticationState(HMDevice hmDevice) {
         if (serial == null || serial.equals(hmDevice.getSerial()) == false) {
             serial = new DeviceSerial(hmDevice.getSerial());
@@ -175,7 +176,8 @@ public class Link {
 
         if (hmDevice.getIsAuthenticated() == 0) {
             // either authentication failed(wrong signature) or after revoke
-            setState(State.NOT_AUTHENTICATED);
+            // TODO: 21/10/2019 if after revoke, should go to REVOKED state
+            setState(State.AUTHENTICATION_FAILED);
         } else {
             setState(State.AUTHENTICATED);
         }
@@ -236,7 +238,7 @@ public class Link {
      * @see LinkListener#onStateChanged(Link, State)
      */
     public enum State {
-        DISCONNECTED, CONNECTED, NOT_AUTHENTICATED, AUTHENTICATED
+        AUTHENTICATING, AUTHENTICATION_FAILED, AUTHENTICATED, REVOKING, REVOKED
     }
 
     /**
@@ -262,7 +264,7 @@ public class Link {
     public interface RevokeCallback {
 
         /**
-         * Invoked when the revoke succeeded. After this the link will go to {@link State#CONNECTED}
+         * Invoked when the revoke succeeded. After this the link will go to {@link State#REVOKED}
          * state.
          *
          * @param customData The customer specific data, if exists.

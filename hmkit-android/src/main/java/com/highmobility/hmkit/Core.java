@@ -532,8 +532,24 @@ class Core implements HMBTCoreInterface {
     }
 
     @Override
-    public void HMApiCallbackErrorCommandIncoming(HMDevice device, int error, int errorType){
-        //TODO TT
+    public void HMApiCallbackErrorCommandIncoming(HMDevice device, int commandId, int errorType) {
+        //TODO TT - could happen when auth is ongoing.
+        /*
+        Data[2]: Request id (Command ID of the response that contains Error data)
+        Data[3]: Error type
+        Ack:
+        Empty
+        Error:
+        0x01 - Internal error
+         */
+
+
+        d("HMApiCallbackErrorCommandIncoming %s, %s, %s",
+                ByteUtils.hexFromBytes(device.getMac()), commandId, errorType);
+
+        if (broadcaster != null && broadcaster.onErrorCommand(device, commandId, errorType) == false) {
+            if (scanner != null) scanner.onErrorCommand(device, commandId, errorType);
+        }
     }
 
     void copyBytes(byte[] from, byte[] to) {
@@ -571,6 +587,8 @@ class Core implements HMBTCoreInterface {
         abstract int onReceivedPairingRequest(HMDevice device);
 
         abstract boolean onRevokeResult(HMDevice device, byte[] bytes, int status);
+
+        public abstract boolean onErrorCommand(HMDevice device, int commandId, int errorType);
     }
 
     abstract static class Scanner {
@@ -594,5 +612,7 @@ class Core implements HMBTCoreInterface {
         abstract boolean onCommandResponseReceived(HMDevice device, byte[] bytes);
 
         abstract boolean onRevokeResult(HMDevice device, byte[] bytes, int status);
+
+        public abstract boolean onErrorCommand(HMDevice device, int commandId, int errorType);
     }
 }

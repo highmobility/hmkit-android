@@ -383,6 +383,14 @@ public class Broadcaster extends Core.Broadcaster {
         return true;
     }
 
+    @Override public boolean onErrorCommand(HMDevice device, int commandId, int errorType) {
+        // TODO: 21/10/2019
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+
+        return false;
+    }
+
     @Override int onReceivedPairingRequest(HMDevice device) {
         ConnectedLink link = getLinkForMac(device.getMac());
         if (link != null) {
