@@ -401,7 +401,7 @@ class GattServer extends BluetoothGattServerCallback {
     @Override public void onMtuChanged(BluetoothDevice device, int mtu) {
         core.HMBTCoreSetMTU(ByteUtils.bytesFromMacString(device.getAddress()), mtu);
 
-        String mtuCharValue = "MTU" + String.format("%03d", mtu);
+        String mtuCharValue = " MTU" + String.format("%03d", mtu);
         String currentCharValue = infoCharacteristic.getStringValue(0);
 
         if (currentCharValue.contains("MTU")) {
