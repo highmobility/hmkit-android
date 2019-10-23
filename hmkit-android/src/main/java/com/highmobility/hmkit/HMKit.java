@@ -8,6 +8,7 @@ import android.os.Build;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.highmobility.crypto.AccessCertificate;
+import com.highmobility.crypto.Crypto;
 import com.highmobility.crypto.DeviceCertificate;
 import com.highmobility.crypto.value.DeviceSerial;
 import com.highmobility.crypto.value.PrivateKey;
@@ -47,13 +48,14 @@ public class HMKit {
     private Scanner scanner;
     private Telematics telematics;
     private OAuth oauth;
+    private Core core;
 
     // created with context
     private WebService webService;
     @Nullable private SharedBle ble;
     private Storage storage;
-    private Core core;
     private ThreadManager threadManager;
+    private Crypto crypto;
 
     /**
      * @return The Broadcaster instance. Null if BLE is not supported.
@@ -104,7 +106,8 @@ public class HMKit {
         throwIfDeviceCertificateNotSet();
 
         if (oauth == null)
-            oauth = new OAuth(webService, core.getPrivateKey(), getDeviceCertificate().getSerial());
+            oauth = new OAuth(webService, crypto, core.getPrivateKey(),
+                    getDeviceCertificate().getSerial());
 
         return oauth;
     }
@@ -125,6 +128,13 @@ public class HMKit {
     public Storage getStorage() {
         throwIfContextNotSet();
         return storage;
+    }
+
+    /**
+     * @return The HM crypto.
+     */
+    public Crypto getCrypto() {
+        return crypto;
     }
 
     /**
@@ -200,6 +210,7 @@ public class HMKit {
         if (instance != null) {
             throw new RuntimeException("Use getInstance() to get the HMKit singleton");
         }
+        crypto = new Crypto(Core.core);
     }
 
     /**
@@ -313,8 +324,8 @@ public class HMKit {
      * @param certificate     The device certificate.
      * @param privateKey      32 byte private key with elliptic curve Prime 256v1.
      * @param issuerPublicKey 64 byte public key of the Certificate Authority.
-     * @throws IllegalStateException if there are connected links with the Broadcaster or an ongoing
-     *                               Telematics command.
+     * @throws IllegalStateException if there are connected links with the Broadcaster or ongoing
+     *                               Telematics commands.
      */
     public void setDeviceCertificate(DeviceCertificate certificate, PrivateKey privateKey,
                                      PublicKey issuerPublicKey) throws IllegalStateException {
@@ -326,8 +337,8 @@ public class HMKit {
         }
 
         if (telematics != null && telematics.isSendingCommand()) {
-            throw new IllegalStateException("Cannot set a new Device Certificate sending " +
-                    "a Telematics command. Wait for the commands to finish.");
+            throw new IllegalStateException("Cannot set a new Device Certificate while sending " +
+                    "a Telematics command. Wait for the command to finish.");
         }
 
         if (scanner != null && scanner.getLinks().size() > 0) {
@@ -343,7 +354,7 @@ public class HMKit {
         if (oauth != null) oauth.setDeviceCertificate(privateKey, certificate.getSerial());
 
         if (webService == null)
-            webService = new WebService(this.context, certificate.getIssuer(), webUrl);
+            webService = new WebService(context, crypto, certificate.getIssuer(), webUrl);
         else webService.setIssuer(certificate.getIssuer(), webUrl);
 
         i("Set certificate: %s", certificate.toString());
@@ -589,7 +600,6 @@ public class HMKit {
             this.context = context.getApplicationContext();
             storage = new Storage(this.context);
             threadManager = new ThreadManager(this.context);
-
             try {
                 ble = new SharedBle(context);
             } catch (BleNotSupportedException e) {

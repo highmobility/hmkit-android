@@ -3,6 +3,7 @@ package com.highmobility.hmkit
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.webkit.URLUtil
 import com.highmobility.crypto.Crypto
 import com.highmobility.crypto.value.DeviceSerial
 import com.highmobility.crypto.value.PrivateKey
@@ -22,6 +23,7 @@ typealias CompletionHandler = (response: AccessTokenResponse?, errorMessage: Str
  * Certificate for the vehicle.
  */
 class OAuth internal constructor(private val webService: WebService,
+                                 private val crypto: Crypto,
                                  private var privateKey: PrivateKey,
                                  private var deviceSerial: DeviceSerial) {
     // created at the beginning of oauth process
@@ -62,13 +64,19 @@ class OAuth internal constructor(private val webService: WebService,
                        endDate: Calendar? = null,
                        state: String? = null,
                        completionHandler: CompletionHandler) {
+        if (URLUtil.isValidUrl(authUrl) == false ||
+            URLUtil.isValidUrl(tokenUrl) == false) {
+            completionHandler(null, "Invalid OAuth parameters")
+            return
+        }
+
         this.clientId = clientId
         this.redirectScheme = redirectScheme
         this.tokenUrl = tokenUrl
         this.completionHandler = completionHandler
 
-        nonce = Crypto.createSerialNumber()
-        val nonceSha256 = Crypto.sha256(nonce.hex.toByteArray(Charset.forName("ASCII"))).byteArray
+        nonce = crypto.createSerialNumber()
+        val nonceSha256 = crypto.sha256(nonce.hex.toByteArray(Charset.forName("ASCII"))).byteArray
         val codeChallenge = Base64.encodeUrlSafe(nonceSha256)
 
         var webUrl = authUrl
@@ -163,7 +171,7 @@ class OAuth internal constructor(private val webService: WebService,
         val bodyBase64 = Base64.encodeUrlSafe(body.toByteArray())
 
         val jwtContent = String.format("%s.%s", headerBase64, bodyBase64)
-        val jwtSignature = Crypto.signJWT(jwtContent.toByteArray(), privateKey)
+        val jwtSignature = crypto.signJWT(jwtContent.toByteArray(), privateKey)
 
         return String.format("%s.%s", jwtContent, jwtSignature.base64UrlSafe)
     }

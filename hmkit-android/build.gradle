@@ -8,7 +8,6 @@ artifact.load(new FileInputStream("$projectDir/deploy.settings"))
 version artifact.version
 
 android {
-    testOptions.unitTests.includeAndroidResources = true
     compileSdkVersion ver.compileSdk
 
     defaultConfig {
@@ -22,6 +21,8 @@ android {
             moduleName = "hmbtcore"
             ldLibs "log"
         }
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -31,14 +32,14 @@ android {
         }
     }
 
-    android {
-        lintOptions {
-            abortOnError false
-        }
-        testOptions {
-            unitTests {
-                includeAndroidResources = true
-            }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
         }
     }
 
@@ -46,7 +47,7 @@ android {
         abi {
             enable true
             reset()
-            include 'x86', 'armeabi-v7a'
+            include 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
             universalApk true
         }
     }
@@ -59,6 +60,8 @@ android {
 }
 
 dependencies {
+    api project(':hmkit-core-jni')
+
     if (project.releaseType == 0) {
         implementation project(':hmkit-crypto')
         implementation project(':hmkit-utils')
@@ -72,9 +75,18 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
+    // its not easy to use ndk with junit(should build separate binary)
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.robolectric:robolectric:4.0.2'
+    testImplementation('org.robolectric:robolectric:4.0.2') {
+        exclude group: 'org.apache.maven'
+    }
     testImplementation 'androidx.test:core:1.1.0'
+
+    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
+    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
+    androidTestImplementation 'androidx.test:rules:1.1.0-alpha4'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
+    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.1.0'
 }
 
 if (project.releaseType > 0) {

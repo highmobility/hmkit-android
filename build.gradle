@@ -45,6 +45,7 @@ ext {
 
 // these are not release numbers. release numbers are in deploy.settings files.
 ext.ver = [
+        corejni   : "1.0.0",
         crypto    : "1.4.3",
         utils     : "1.4.3",
         hmkit     : "1.6.10",
@@ -56,6 +57,7 @@ ext.deps = [
         "hmkit"   : "com.highmobility:hmkit-android:${ver.hmkit}@aar",
         "crypto"  : "com.highmobility:hmkit-crypto:${ver.crypto}",
         "utils"   : "com.highmobility:hmkit-utils:${ver.utils}",
+        "corejni" : "com.highmobility:hmkit-core-jni:${ver.corejni}",
         "autoApi" : "com.highmobility:hmkit-auto-api:${ver.autoApi}",
         "timber"  : "com.jakewharton.timber:timber:4.7.1",
         "volley"  : "com.android.volley:volley:1.1.1",

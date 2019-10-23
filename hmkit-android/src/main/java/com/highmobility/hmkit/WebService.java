@@ -39,10 +39,12 @@ class WebService {
 
     private String baseUrl;
     private final RequestQueue queue;
+    private final Crypto crypto;
 
-    WebService(Context context, Issuer issuer, @Nullable String customUrl) {
+    WebService(Context context, Crypto crypto, Issuer issuer, @Nullable String customUrl) {
         // ignoreSslErrors();
         queue = Volley.newRequestQueue(context);
+        this.crypto = crypto;
         setIssuer(issuer, customUrl);
     }
 
@@ -120,8 +122,7 @@ class WebService {
                                   Response.ErrorListener error) throws IllegalArgumentException {
         String url = baseUrl + "/access_certificates";
         Bytes accessTokenBytes = new Bytes(accessToken.getBytes());
-
-        final String signature = Crypto.sign(accessTokenBytes, privateKey).getBase64();
+        final String signature = crypto.sign(accessTokenBytes, privateKey).getBase64();
 
         Uri uri = Uri.parse(url).buildUpon().build();
 
