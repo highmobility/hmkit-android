@@ -343,7 +343,6 @@ public class Broadcaster extends Core.Broadcaster {
         if (link == null) return false;
 
         links.remove(link);
-        link.setState(Link.State.DISCONNECTED);
 
         // invoke the listener listener
         if (listener != null) {
@@ -380,6 +379,13 @@ public class Broadcaster extends Core.Broadcaster {
         Link link = getLinkForMac(device.getMac());
         if (link == null) return false;
         link.onRevokeResponse(data, result);
+        return true;
+    }
+
+    @Override public boolean onErrorCommand(HMDevice device, int commandId, int errorType) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onErrorCommand(commandId, errorType);
         return true;
     }
 

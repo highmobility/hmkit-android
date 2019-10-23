@@ -4,7 +4,7 @@ public interface ConnectedLinkListener extends LinkListener {
     /**
      * This interface is used by the user to either approve or decline the authorization request.
      */
-    interface AuthorizationCallback {
+    interface AuthenticationRequestCallback {
         /**
          * Approve the authorization request
          */
@@ -23,7 +23,7 @@ public interface ConnectedLinkListener extends LinkListener {
      * @param link The link that received the authorization request.
      * @param callback Object containing approve and decline functions.
      */
-    void onAuthorizationRequested(ConnectedLink link, AuthorizationCallback callback);
+    void onAuthenticationRequested(ConnectedLink link, AuthenticationRequestCallback callback);
 
     /**
      * Callback for when the authorization request has timed out.
@@ -33,5 +33,5 @@ public interface ConnectedLinkListener extends LinkListener {
      *
      * @param link The link that received the authorization request.
      */
-    void onAuthorizationTimeout(ConnectedLink link);
+    void onAuthenticationRequestTimeout(ConnectedLink link);
 }

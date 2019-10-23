@@ -122,7 +122,7 @@ class ScannedLink extends Link {
     }
 
     void onDeviceExitedProximity() {
-        setState(State.DISCONNECTED);
+        // TSODO: remove the link from the array
     }
 
     void connect() {

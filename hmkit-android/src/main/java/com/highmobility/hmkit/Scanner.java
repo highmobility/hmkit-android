@@ -220,7 +220,6 @@ class Scanner extends Core.Scanner implements SharedBleListener {
         device.onDeviceExitedProximity();
 
         if (listener != null) {
-
             threadManager.postToMain(new Runnable() {
                 @Override
                 public void run() {
@@ -278,6 +277,13 @@ class Scanner extends Core.Scanner implements SharedBleListener {
         Link link = getLinkForMac(device.getMac());
         if (link == null) return false;
         link.onRevokeResponse(data, result);
+        return true;
+    }
+
+    @Override public boolean onErrorCommand(HMDevice device, int commandId, int errorType) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        // TSODO: fail auth or other process
         return true;
     }
 

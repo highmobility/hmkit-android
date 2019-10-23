@@ -49,8 +49,8 @@ public class ConnectedLink extends Link {
                     return;
                 }
 
-                ((ConnectedLinkListener) listener).onAuthorizationRequested(reference, new
-                        ConnectedLinkListener.AuthorizationCallback() {
+                ((ConnectedLinkListener) listener).onAuthenticationRequested(reference, new
+                        ConnectedLinkListener.AuthenticationRequestCallback() {
                             @Override
                             public void approve() {
                                 pairingResponse = 0;
@@ -74,7 +74,7 @@ public class ConnectedLink extends Link {
                     threadManager.postToMain(new Runnable() {
                         @Override public void run() {
                             if (listener == null) return;
-                            ((ConnectedLinkListener) listener).onAuthorizationTimeout(reference);
+                            ((ConnectedLinkListener) listener).onAuthenticationRequestTimeout(reference);
                         }
                     });
 

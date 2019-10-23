@@ -30,7 +30,7 @@ public class Link {
     private Bytes mac;
     @Nullable private DeviceSerial serial; // set after authentication is finished by core
 
-    private State state = State.CONNECTED;
+    private State state = State.AUTHENTICATING;
 
     private LinkCommand sentCommand;
     private final long connectionTime;
@@ -55,6 +55,7 @@ public class Link {
     void setState(State state) {
         if (this.state != state) {
             final State oldState = this.state;
+            d("setState(): %s", state); // TODO: delete
             if (state == State.AUTHENTICATED) {
                 d("authenticated in %d ms", (Calendar.getInstance().getTimeInMillis() -
                         connectionTime));
@@ -132,7 +133,7 @@ public class Link {
     /**
      * Revoke authorisation for this device. {@link RevokeCallback} will be called with the result.
      * If successful, the {@link LinkListener#onStateChanged(Link, State)} will be called with the
-     * {@link State#CONNECTED} state.
+     * {@link State#REVOKED} state.
      * <p>
      * After this has succeeded it is up to the user to finish the flow related to this link -
      * disconnect, stop broadcasting or something else.
@@ -157,6 +158,7 @@ public class Link {
         }
 
         i("revoke %s", serial);
+        setState(State.REVOKING);
 
         this.revokeCallback = callback;
 
@@ -168,14 +170,38 @@ public class Link {
         });
     }
 
+
     void onChangedAuthenticationState(HMDevice hmDevice) {
+        State previousState = state;
+
         if (serial == null || serial.equals(hmDevice.getSerial()) == false) {
             serial = new DeviceSerial(hmDevice.getSerial());
         }
 
         if (hmDevice.getIsAuthenticated() == 0) {
             // either authentication failed(wrong signature) or after revoke
-            setState(State.NOT_AUTHENTICATED);
+            // TODO: 21/10/2019 if after revoke, should go to REVOKED state
+            //  if there is an error command set, dispatch it here?
+            //  or revoke before
+
+            if (state == State.AUTHENTICATING){
+
+                // TODO: 22/10/2019 dispatch the error that was received before
+                setState(State.AUTHENTICATION_FAILED);
+            }
+            else {
+                // state should be revoking
+                if (state != State.REVOKING) d("onChangedAuthenticationState(): %s %s", "bad state", state);
+
+
+                // TODO: 22/10/2019 dispatch the error that was received before (if exists)
+                //  onRevokeFailed seems to be unnecessary cb.
+
+                // TODO: 22/10/2019 from emulator side revoke, there is no indication that revoking is going on
+
+                setState(State.REVOKED);
+            }
+
         } else {
             setState(State.AUTHENTICATED);
         }
@@ -212,6 +238,7 @@ public class Link {
     }
 
     void onRevokeResponse(final byte[] data, final int result) {
+        // TODO: 22/10/2019 if this is before changedAuthenticationState, wait for that cb to come in (then core is finished)
         threadManager.postToMain(new Runnable() {
             @Override public void run() {
                 if (revokeCallback == null) return;
@@ -226,17 +253,30 @@ public class Link {
         });
     }
 
+    Integer errorCommand;
+    void onErrorCommand(int commandId, int errorType) {
+
+    }
+
     byte[] getAddressBytes() {
         return ByteUtils.bytesFromMacString(btDevice.getAddress());
     }
 
+
     /**
      * The possible states of the Link.
+     *
+     * States can go from:
+     * AUTHENTICATING > AUTHENTICATED
+     * or
+     * AUTHENTICATING > AUTHENTICATION_FAILED (then the LinkListener's authenticationFailed is called as well)
+     *
+     * After this, it can go to REVOKING (if initiated) and to REVOKED/AUTHENTICATED(if revoke failed)
      *
      * @see LinkListener#onStateChanged(Link, State)
      */
     public enum State {
-        DISCONNECTED, CONNECTED, NOT_AUTHENTICATED, AUTHENTICATED
+        AUTHENTICATING, AUTHENTICATION_FAILED, AUTHENTICATED, REVOKING, REVOKED
     }
 
     /**
@@ -262,7 +302,7 @@ public class Link {
     public interface RevokeCallback {
 
         /**
-         * Invoked when the revoke succeeded. After this the link will go to {@link State#CONNECTED}
+         * Invoked when the revoke succeeded. After this the link will go to {@link State#REVOKED}
          * state.
          *
          * @param customData The customer specific data, if exists.

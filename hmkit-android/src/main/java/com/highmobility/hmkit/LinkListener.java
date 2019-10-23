@@ -1,26 +1,25 @@
 package com.highmobility.hmkit;
 
+import com.highmobility.hmkit.error.AuthenticationError;
 import com.highmobility.value.Bytes;
 
 public interface LinkListener {
     /**
      * Callback that is invoked when the Link's state changes.
-     * <p>
-     * The state can go from
-     * <ul>
-     * <li>Connected > Authenticated > Disconnected - normal flow</li>
-     * <li>Connected > Authenticated > Not Authenticated > Authenticated/Disconnected - flow with
-     * revoke({@link Link#revoke(Link.RevokeCallback)}).</li>
-     * <li>Connected > Not Authenticated > Disconnected - flow with failed authentication (invalid
-     * signature)</li>
-     * </ul>
-     * <p>
-     * If the state is Disconnected the link is gone and should be released from memory.
      *
      * @param link     The link that had a state change.
      * @param oldState The old state of the link.
      */
     void onStateChanged(Link link, Link.State oldState);
+
+    /**
+     * @param link  The link.
+     * @param error The authentication error.
+     */
+    // TODO: 21/10/2019 call this after onErrorCommand. (or any time state is set to not_authenticated)
+    //  Also in HMApiCallbackEnteredProximity if the state is not authenticated. But only if error
+    //  command was not called before(then this was called)
+    void onAuthenticationFailed(Link link, AuthenticationError error);
 
     /**
      * Callback for when a command has been received by the Link.
