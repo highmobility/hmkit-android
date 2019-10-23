@@ -38,6 +38,11 @@ public class HMKit {
      */
     @Nullable public static String webUrl = null;
 
+    static {
+        if (Build.DEVICE.equals("robolectric") == false)
+            System.loadLibrary("hmbtcore");
+    }
+
     // Using application context, no chance for leak.
     @SuppressLint("StaticFieldLeak") private static volatile HMKit instance;
 
