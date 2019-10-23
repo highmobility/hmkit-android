@@ -15,11 +15,23 @@ void hm_bt_hal_delay_ms(uint32_t number_of_ms){
 }
 
 uint32_t hm_bt_hal_scan_start(){
-  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalScanStart);
+  (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalScanStart);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+    }
+
+    return 0;
 }
 
 uint32_t hm_bt_hal_scan_stop(){
-  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalScanStop);
+  (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalScanStop);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+    }
+
+    return 0;
 }
 
 uint32_t hm_bt_hal_advertisement_start(uint8_t *issuerId, uint8_t *appId){
@@ -28,14 +40,26 @@ uint32_t hm_bt_hal_advertisement_start(uint8_t *issuerId, uint8_t *appId){
 
   jbyteArray appId_ = (*envRef)->NewByteArray(envRef,12);
   (*envRef)->SetByteArrayRegion(envRef, appId_, 0, 12, (const jbyte*) appId );
-  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalAdvertisementStart,issuer_,appId_);
+  (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalAdvertisementStart,issuer_,appId_);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+    }
+
+    return 0;
 }
 
 uint32_t hm_bt_hal_advertisement_stop(){
-  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalAdvertisementStop);
+  (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalAdvertisementStop);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+    }
+
+    return 0;
 }
 
-uint32_t hm_bt_hal_write_data(uint8_t *mac, uint16_t length, uint8_t *data, hm_characteristic characteristic){
+uint32_t hm_bt_hal_write_data(uint64_t btcontxtId, uint8_t *mac, uint16_t length, uint8_t *data, hm_characteristic characteristic){
 
   jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
   (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jbyte*) mac );
@@ -43,39 +67,79 @@ uint32_t hm_bt_hal_write_data(uint8_t *mac, uint16_t length, uint8_t *data, hm_c
   jbyteArray data_ = (*envRef)->NewByteArray(envRef,length);
   (*envRef)->SetByteArrayRegion(envRef, data_, 0, length, (const jbyte*) data );
 
-  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalWriteData, mac_, length, data_, characteristic);
+  (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalWriteData, mac_, length, data_, characteristic);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+    }
+
+    return 0;
 }
 
-uint32_t hm_bt_hal_read_data(uint8_t *mac, uint16_t offset, hm_characteristic characteristic){
+uint32_t hm_bt_hal_read_data(uint64_t btcontxtId, uint8_t *mac, uint16_t offset, hm_characteristic characteristic){
   jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
   (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jbyte*) mac );
 
-  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalReadData, mac_, offset, characteristic);
+  (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalReadData, mac_, offset, characteristic);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+    }
+
+    return 0;
 }
 
 uint32_t hm_bt_hal_service_discovery(uint8_t *mac){
   jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
   (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jbyte*) mac );
-  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalServiceDiscovery, mac_);
+  (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalServiceDiscovery, mac_);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+    }
+
+    return 0;
 }
 
 uint32_t hm_bt_hal_init(){
-  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalInit);
+  (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalInit);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+    }
+
+  return 0;
+}
+
+uint32_t hm_bt_hal_clock(void){
+  return 0;
 }
 
 uint32_t hm_bt_hal_connect(const uint8_t *mac, uint8_t macType){
   jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
   (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jbyte*) mac );
-  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalConnect, mac_);
+  (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalConnect, mac_);
+
+  if ((*envRef)->ExceptionCheck(envRef)) {
+      (*envRef)->ExceptionClear(envRef);
+  }
+
+  return 0;
 }
 
-uint32_t hm_bt_hal_disconnect(uint8_t *mac){
+uint32_t hm_bt_hal_disconnect(uint64_t btcontxtId, uint8_t *mac){
   jbyteArray mac_ = (*envRef)->NewByteArray(envRef,6);
   (*envRef)->SetByteArrayRegion(envRef, mac_, 0, 6, (const jbyte*) mac );
-  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalDisconnect, mac_);
+  (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalDisconnect, mac_);
+
+  if ((*envRef)->ExceptionCheck(envRef)) {
+      (*envRef)->ExceptionClear(envRef);
+  }
+
+  return 0;
 }
 
-uint32_t hm_bt_hal_read_info(uint8_t *mac, uint16_t offset, hm_characteristic characteristic){
+uint32_t hm_bt_hal_read_info(uint64_t btcontxtId, uint8_t *mac, uint16_t offset, hm_characteristic characteristic){
   return 0; //TODO for sensing
 }
 
@@ -83,7 +147,7 @@ uint32_t hm_bt_hal_get_current_date_time(uint8_t *day, uint8_t *month, uint8_t *
   return 0;
 }
 
-uint32_t hm_bt_hal_telematics_send_data(uint8_t *issuer, uint8_t *serial, uint16_t length, uint8_t *data){
+uint32_t hm_bt_hal_telematics_send_data(uint64_t btcontxtId, uint8_t *issuer, uint8_t *serial, uint16_t length, uint8_t *data){
 
   jbyteArray issuer_ = (*envRef)->NewByteArray(envRef,4);
   (*envRef)->SetByteArrayRegion(envRef, issuer_, 0, 4, (const jbyte*) issuer );
@@ -93,5 +157,11 @@ uint32_t hm_bt_hal_telematics_send_data(uint8_t *issuer, uint8_t *serial, uint16
   jbyteArray data_ = (*envRef)->NewByteArray(envRef,length);
   (*envRef)->SetByteArrayRegion(envRef, data_, 0, length, (const jbyte*) data );
 
-  return (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalTelematicsSendData, issuer_, serial_, length, data_);
+  (*envRef)->CallIntMethod(envRef, coreInterfaceRef, interfaceMethodHMBTHalTelematicsSendData, issuer_, serial_, length, data_);
+
+    if ((*envRef)->ExceptionCheck(envRef)) {
+        (*envRef)->ExceptionClear(envRef);
+    }
+
+    return 0;
 }

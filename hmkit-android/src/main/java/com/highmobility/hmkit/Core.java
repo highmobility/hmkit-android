@@ -64,11 +64,12 @@ class Core implements HMBTCoreInterface {
     }
 
     Core(Storage storage, ThreadManager threadManager, DeviceCertificate
-            deviceCertificate, PrivateKey privateKey, PublicKey issuerPublicKey) {
+            deviceCertificate, PrivateKey privateKey, PublicKey issuerPublicKey, HMLog.Level logLevel) {
         setDeviceCertificate(deviceCertificate, privateKey, issuerPublicKey);
         this.storage = storage;
         this.threadManager = threadManager;
 
+        core.HMBTCoreSetLogLevel(this, logLevel.getValue());
         // core init needs to be done once, only initialises structs(but requires device cert)
         core.HMBTCoreInit(this);
     }
@@ -206,8 +207,19 @@ class Core implements HMBTCoreInterface {
         core.HMBTCoreSendTelematicsCommand(this, serial, nonce, length, data);
     }
 
+    // MARK: other
+
     void HMBTCoreSendRevoke(byte[] serial) {
         core.HMBTCoreSendRevoke(this, serial);
+    }
+
+    void HMBTCoreSetLogLevel(int level) {
+        core.HMBTCoreSetLogLevel(this, level);
+    }
+
+    void HMBTCoreSetMTU(byte[] mac, int mtu) {
+        // TODO: 18/10/2019 core should probably accept int not byte[]
+        core.HMBTCoreSetMTU(this, mac, new byte[]{(byte) mtu});
     }
 
     // MARK: HMBTCoreInterface
@@ -529,6 +541,11 @@ class Core implements HMBTCoreInterface {
                 false) {
             if (scanner != null) scanner.onRevokeResult(device, trimmedBytes, status);
         }
+    }
+
+    @Override
+    public void HMApiCallbackErrorCommandIncoming(HMDevice device, int error, int errorType) {
+        //TODO TT
     }
 
     void copyBytes(byte[] from, byte[] to) {

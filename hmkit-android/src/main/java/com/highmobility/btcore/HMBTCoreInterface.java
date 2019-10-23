@@ -87,4 +87,6 @@ public interface HMBTCoreInterface {
     void HMCryptoHalGenerateNonce(byte[] nonce);
 
     void HMApiCallbackRevokeResponse(HMDevice device, byte[] data, int length, int status);
+
+    void HMApiCallbackErrorCommandIncoming(HMDevice device, int error, int errorType);
 }
