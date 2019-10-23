@@ -18,8 +18,10 @@ Supported devices: Lollipop 5.0+ with chipset support for BLE peripheral mode, h
 
 #### Pre checks
 
-* run the unit-tests and instrumentation tests: 
-    ```./gradlew test && ./gradlew cAT```
+
+* run the unit-tests in hmkit-android
+* run the instrumentation tests in hm-android-bluetooth-auto-api-explorer submodule.
+```./gradlew test && ./gradlew cAT```
 
 This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypto and hmkit-utils.
 

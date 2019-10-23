@@ -16,3 +16,6 @@
 [submodule "hm-java-utils"]
 	path = hm-java-utils
 	url = git@github.com:highmobility/hm-java-utils.git
+[submodule "hm-android-bluetooth-auto-api-explorer"]
+	path = hm-android-bluetooth-auto-api-explorer
+	url = git@github.com:highmobility/hm-android-bluetooth-auto-api-explorer.git
