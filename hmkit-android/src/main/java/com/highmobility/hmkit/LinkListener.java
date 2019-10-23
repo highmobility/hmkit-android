@@ -16,8 +16,9 @@ public interface LinkListener {
      * @param link  The link.
      * @param error The authentication error.
      */
-    // TODO: 21/10/2019 call this after onErrorCommand. Also in HMApiCallbackEnteredProximity if that
-    //  stays in the flow after maidu answer
+    // TODO: 21/10/2019 call this after onErrorCommand. (or any time state is set to not_authenticated)
+    //  Also in HMApiCallbackEnteredProximity if the state is not authenticated. But only if error
+    //  command was not called before(then this was called)
     void onAuthenticationFailed(Link link, AuthenticationError error);
 
     /**

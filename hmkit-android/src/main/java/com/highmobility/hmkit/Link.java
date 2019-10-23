@@ -55,6 +55,7 @@ public class Link {
     void setState(State state) {
         if (this.state != state) {
             final State oldState = this.state;
+            d("setState(): %s", state); // TODO: delete
             if (state == State.AUTHENTICATED) {
                 d("authenticated in %d ms", (Calendar.getInstance().getTimeInMillis() -
                         connectionTime));
@@ -157,6 +158,7 @@ public class Link {
         }
 
         i("revoke %s", serial);
+        setState(State.REVOKING);
 
         this.revokeCallback = callback;
 
@@ -170,6 +172,8 @@ public class Link {
 
 
     void onChangedAuthenticationState(HMDevice hmDevice) {
+        State previousState = state;
+
         if (serial == null || serial.equals(hmDevice.getSerial()) == false) {
             serial = new DeviceSerial(hmDevice.getSerial());
         }
@@ -177,7 +181,27 @@ public class Link {
         if (hmDevice.getIsAuthenticated() == 0) {
             // either authentication failed(wrong signature) or after revoke
             // TODO: 21/10/2019 if after revoke, should go to REVOKED state
-            setState(State.AUTHENTICATION_FAILED);
+            //  if there is an error command set, dispatch it here?
+            //  or revoke before
+
+            if (state == State.AUTHENTICATING){
+
+                // TODO: 22/10/2019 dispatch the error that was received before
+                setState(State.AUTHENTICATION_FAILED);
+            }
+            else {
+                // state should be revoking
+                if (state != State.REVOKING) d("onChangedAuthenticationState(): %s %s", "bad state", state);
+
+
+                // TODO: 22/10/2019 dispatch the error that was received before (if exists)
+                //  onRevokeFailed seems to be unnecessary cb.
+
+                // TODO: 22/10/2019 from emulator side revoke, there is no indication that revoking is going on
+
+                setState(State.REVOKED);
+            }
+
         } else {
             setState(State.AUTHENTICATED);
         }
@@ -214,6 +238,7 @@ public class Link {
     }
 
     void onRevokeResponse(final byte[] data, final int result) {
+        // TODO: 22/10/2019 if this is before changedAuthenticationState, wait for that cb to come in (then core is finished)
         threadManager.postToMain(new Runnable() {
             @Override public void run() {
                 if (revokeCallback == null) return;
@@ -228,9 +253,15 @@ public class Link {
         });
     }
 
+    Integer errorCommand;
+    void onErrorCommand(int commandId, int errorType) {
+
+    }
+
     byte[] getAddressBytes() {
         return ByteUtils.bytesFromMacString(btDevice.getAddress());
     }
+
 
     /**
      * The possible states of the Link.

@@ -3,7 +3,7 @@ package com.highmobility.hmkit.error;
 public class AuthenticationError {
     public enum Type {
         NONE,
-        INTERNAL_ERROR,
+        INTERNAL_ERROR
     }
 
     private final Type errorType;

@@ -533,17 +533,6 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public void HMApiCallbackErrorCommandIncoming(HMDevice device, int commandId, int errorType) {
-        //TODO TT - could happen when auth is ongoing.
-        /*
-        Data[2]: Request id (Command ID of the response that contains Error data)
-        Data[3]: Error type
-        Ack:
-        Empty
-        Error:
-        0x01 - Internal error
-         */
-
-
         d("HMApiCallbackErrorCommandIncoming %s, %s, %s",
                 ByteUtils.hexFromBytes(device.getMac()), commandId, errorType);
 

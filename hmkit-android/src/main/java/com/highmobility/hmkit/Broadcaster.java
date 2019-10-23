@@ -343,7 +343,6 @@ public class Broadcaster extends Core.Broadcaster {
         if (link == null) return false;
 
         links.remove(link);
-        link.setState(Link.State.DISCONNECTED);
 
         // invoke the listener listener
         if (listener != null) {
@@ -384,11 +383,10 @@ public class Broadcaster extends Core.Broadcaster {
     }
 
     @Override public boolean onErrorCommand(HMDevice device, int commandId, int errorType) {
-        // TODO: 21/10/2019
         Link link = getLinkForMac(device.getMac());
         if (link == null) return false;
-
-        return false;
+        link.onErrorCommand(commandId, errorType);
+        return true;
     }
 
     @Override int onReceivedPairingRequest(HMDevice device) {
