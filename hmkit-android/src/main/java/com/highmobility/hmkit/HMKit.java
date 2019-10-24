@@ -169,7 +169,6 @@ public class HMKit {
      */
     public void setLoggingLevel(HMLog.Level level) {
         HMLog.level = level;
-        if (core != null) core.HMBTCoreSetLogLevel(level.getValue());
     }
 
     /**

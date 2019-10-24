@@ -70,7 +70,6 @@ class Core implements HMBTCoreInterface {
         this.storage = storage;
         this.threadManager = threadManager;
 
-        core.HMBTCoreSetLogLevel(this, logLevel.getValue());
         // core init needs to be done once, only initialises structs(but requires device cert)
         core.HMBTCoreInit(this);
     }
@@ -214,10 +213,6 @@ class Core implements HMBTCoreInterface {
         core.HMBTCoreSendRevoke(this, serial);
     }
 
-    void HMBTCoreSetLogLevel(int level) {
-        core.HMBTCoreSetLogLevel(this, level);
-    }
-
     void HMBTCoreSetMTU(byte[] mac, int mtu) {
         // TODO: 18/10/2019 core should probably accept int not byte[]
         core.HMBTCoreSetMTU(this, mac, new byte[]{(byte) mtu});
@@ -232,7 +227,7 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public int HMBTHalLog(int level, byte[] string) {
-        d(new String(string));
+        if (HMLog.level.getValue() >= level) d(new String(string));
         return 0;
     }
 
