@@ -31,8 +31,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
-
+    
     lintOptions {
         abortOnError false
     }
@@ -97,7 +96,7 @@ if (project.releaseType > 0) {
     def repo = project.hasProperty("repo") ? project.property("repo") : artifact.repo
 
     task sourcesJar(type: Jar) {
-        classifier = 'sources'
+        archiveClassifier.set('sources')
         from android.sourceSets.main.java.srcDirs
     }
 
