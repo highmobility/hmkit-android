@@ -24,7 +24,7 @@ class WebRequest extends Request<JSONObject> {
 
     static {
         headers = new HashMap<>();
-        headers.put("Content-Type", "application/x-www-form-urlencoded");
+        headers.put("Content-Type", "application/json");
     }
 
     private Response.Listener<JSONObject> listener;
@@ -56,8 +56,8 @@ class WebRequest extends Request<JSONObject> {
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
     }
 
-    protected Map<String, String> getParams() {
-        return params;
+    @Override public byte[] getBody() {
+        return new JSONObject(params).toString().getBytes();
     }
 
     @Override public Map<String, String> getHeaders() {
