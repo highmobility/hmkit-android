@@ -9,7 +9,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.0'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.9.7"
-        classpath 'digital.wup:android-maven-publish:3.3.0'
+        classpath 'digital.wup:android-maven-publish:3.6.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -48,7 +48,7 @@ ext.ver = [
         corejni   : "1.0.0",
         crypto    : "1.4.4-dev",
         utils     : "1.4.4-dev",
-        hmkit     : "1.6.10",
+        hmkit     : "2.0.0-dev",
         autoApi   : "3.0.0-dev4",
         compileSdk: 28
 ]
