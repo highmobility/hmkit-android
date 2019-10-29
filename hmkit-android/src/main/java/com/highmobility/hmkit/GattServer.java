@@ -11,6 +11,7 @@ import android.bluetooth.BluetoothProfile;
 
 import com.highmobility.btcore.HMBTCoreInterface;
 import com.highmobility.utils.ByteUtils;
+import com.highmobility.value.Bytes;
 
 import java.util.Arrays;
 import java.util.List;
@@ -103,15 +104,15 @@ class GattServer extends BluetoothGattServerCallback {
             d("writeData(): %s", "set random byte in data for error testing");
             value[value.length-10] = (byte) 0xAB;
             value[value.length-11] = (byte) 0xAB;
-        }*/
+        }*/ // TODO: delete 
 
         // fail revoke with invalid answer
-        Link link = HMKit.getInstance().getBroadcaster().getLinks().get(0);
+        /*Link link = HMKit.getInstance().getBroadcaster().getLinks().get(0);
         if (link.getState() == Link.State.REVOKING) {
             d("writeData(): %s", "set random byte in data for error testing");
             value[2] = (byte) 0xAB;
             value[3] = (byte) 0xAB;
-        }
+        }*/ // TODO: delete 
 
         d("write %s to %s, char: %s", ByteUtils.hexFromBytes(value),
                 device.getAddress().replaceAll(":", ""), characteristicId);
@@ -299,6 +300,17 @@ class GattServer extends BluetoothGattServerCallback {
         d("onCharacteristicReadRequest %s %s", characteristicId,
                 ByteUtils.hexFromBytes(offsetBytes));
 
+/*        Link link = HMKit.getInstance().getBroadcaster().getLinks().get(0);
+        if (link.getState() == Link.State.REVOKING) {
+            d("writeData(): %s\n%s", "set random byte in data for error testing for", new Bytes(offsetBytes));
+            offsetBytes[offsetBytes.length - 5] = (byte) 0xAB;
+            offsetBytes[offsetBytes.length - 6] = (byte) 0xAB;
+            for (int i = 4; i < offsetBytes.length-5; i++) {
+                offsetBytes[i] = (byte) 0xAB;
+            }
+            d("new bytes\n%s", new Bytes(offsetBytes));
+        }*/ // TODO: delete 
+
         boolean result = gattServer.sendResponse(device,
                 requestId,
                 BluetoothGatt.GATT_SUCCESS,
@@ -347,6 +359,14 @@ class GattServer extends BluetoothGattServerCallback {
             threadManager.postToWork(new Runnable() {
                 @Override
                 public void run() {
+
+                    /*Link link = HMKit.getInstance().getBroadcaster().getLinks().get(0);
+                    if (link.getState() == Link.State.REVOKING) {
+                        for (int i = 0; i < value.length; i++) {
+                            value[i] = (byte) 0xAB;
+                        }
+                    }*/ // TODO: delete 
+
                     core.HMBTCorelinkIncomingData(value, value.length, ByteUtils
                             .bytesFromMacString(device.getAddress()), characteristicId);
                 }
