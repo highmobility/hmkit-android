@@ -307,8 +307,14 @@ class GattServer extends BluetoothGattServerCallback {
 
         if (result == false) {
             e("onCharacteristicReadRequest: failed to send response");
+            // TODO: 30/10/2019 if the read failed, core should be notified
+            return;
         }
 
+        d("onCharacteristicReadRequest %s %s %b", characteristicId,
+                ByteUtils.hexFromBytes(offsetBytes), result);
+
+        // give a chance for the other side to read the data?
         threadManager.postDelayed(new Runnable() {
             @Override
             public void run() {
