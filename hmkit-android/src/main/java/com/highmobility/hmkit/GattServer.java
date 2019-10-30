@@ -296,9 +296,6 @@ class GattServer extends BluetoothGattServerCallback {
         byte[] offsetBytes = Arrays.copyOfRange(value, offset, value.length);
         final int characteristicId = getCharacteristicIdForCharacteristic(characteristic);
 
-        d("onCharacteristicReadRequest %s %s", characteristicId,
-                ByteUtils.hexFromBytes(offsetBytes));
-
         boolean result = gattServer.sendResponse(device,
                 requestId,
                 BluetoothGatt.GATT_SUCCESS,
