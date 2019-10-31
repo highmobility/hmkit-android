@@ -98,21 +98,6 @@ class GattServer extends BluetoothGattServerCallback {
     }
 
     boolean writeData(BluetoothDevice device, byte[] value, int characteristicId) {
-        /*if (value[1] == 0x01 && value[2] == 0x35) {
-            // fail auth with invalid answer
-            d("writeData(): %s", "set random byte in data for error testing");
-            value[value.length-10] = (byte) 0xAB;
-            value[value.length-11] = (byte) 0xAB;
-        }*/
-
-        // fail revoke with invalid answer
-        Link link = HMKit.getInstance().getBroadcaster().getLinks().get(0);
-        if (link.getState() == Link.State.REVOKING) {
-            d("writeData(): %s", "set random byte in data for error testing");
-            value[2] = (byte) 0xAB;
-            value[3] = (byte) 0xAB;
-        }
-
         d("write %s to %s, char: %s", ByteUtils.hexFromBytes(value),
                 device.getAddress().replaceAll(":", ""), characteristicId);
 
@@ -304,7 +289,6 @@ class GattServer extends BluetoothGattServerCallback {
 
         if (result == false) {
             e("onCharacteristicReadRequest: failed to send response");
-            // TODO: 30/10/2019 if the read failed, core should be notified
             return;
         }
 
