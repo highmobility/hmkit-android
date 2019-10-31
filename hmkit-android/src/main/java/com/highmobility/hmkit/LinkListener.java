@@ -5,20 +5,18 @@ import com.highmobility.value.Bytes;
 
 public interface LinkListener {
     /**
-     * Callback that is invoked when the Link's state changes.
+     * Callback to notify about Link state changes.
      *
-     * @param link     The link that had a state change.
-     * @param oldState The old state of the link.
+     * @param link     The link whose state changed.
+     * @param newState The new link state.
+     * @param oldState The old link state.
      */
-    void onStateChanged(Link link, Link.State oldState);
+    void onStateChanged(Link link, Link.State newState, Link.State oldState);
 
     /**
      * @param link  The link.
      * @param error The authentication error.
      */
-    // TODO: 21/10/2019 call this after onErrorCommand. (or any time state is set to not_authenticated)
-    //  Also in HMApiCallbackEnteredProximity if the state is not authenticated. But only if error
-    //  command was not called before(then this was called)
     void onAuthenticationFailed(Link link, AuthenticationError error);
 
     /**
