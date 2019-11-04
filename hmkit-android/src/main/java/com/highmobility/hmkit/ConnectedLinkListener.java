@@ -23,7 +23,7 @@ public interface ConnectedLinkListener extends LinkListener {
      * @param link The link that received the authorization request.
      * @param callback Object containing approve and decline functions.
      */
-    void onAuthenticationRequested(ConnectedLink link, AuthenticationRequestCallback callback);
+    void onAuthenticationRequest(ConnectedLink link, AuthenticationRequestCallback callback);
 
     /**
      * Callback for when the authorization request has timed out.
