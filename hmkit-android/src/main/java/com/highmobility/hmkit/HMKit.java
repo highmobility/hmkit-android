@@ -72,7 +72,6 @@ public class HMKit {
 
         if (broadcaster == null) {
             broadcaster = new Broadcaster(core, storage, threadManager, ble);
-
         }
 
         return broadcaster;

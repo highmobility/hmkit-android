@@ -14,6 +14,8 @@ public interface LinkListener {
     void onStateChanged(Link link, Link.State newState, Link.State oldState);
 
     /**
+     * Callback to notify about authentication failure.
+     *
      * @param link  The link.
      * @param error The authentication error.
      */
