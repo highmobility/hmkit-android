@@ -49,7 +49,7 @@ public class ConnectedLink extends Link {
                     return;
                 }
 
-                ((ConnectedLinkListener) listener).onAuthenticationRequested(reference, new
+                ((ConnectedLinkListener) listener).onAuthenticationRequest(reference, new
                         ConnectedLinkListener.AuthenticationRequestCallback() {
                             @Override
                             public void approve() {
