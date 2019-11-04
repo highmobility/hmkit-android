@@ -167,7 +167,7 @@ public class HMKit {
      *
      * @param level The logging level.
      */
-    public void setLoggingLevel(HMLog.Level level) {
+    public static void setLoggingLevel(HMLog.Level level) {
         HMLog.level = level;
     }
 
@@ -176,7 +176,7 @@ public class HMKit {
      *
      * @return The logging level
      */
-    public HMLog.Level getLoggingLevel() {
+    public static HMLog.Level getLoggingLevel() {
         return HMLog.level;
     }
 
