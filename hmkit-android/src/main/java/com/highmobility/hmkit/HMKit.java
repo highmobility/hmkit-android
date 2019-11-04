@@ -255,39 +255,6 @@ public class HMKit {
     /**
      * Initialise the SDK with a Device Certificate. Call this before using the HMKit.
      *
-     * @param certificate The broadcaster certificate.
-     * @param privateKey  32 byte private key with elliptic curve Prime 256v1.
-     * @param caPublicKey 64 byte public key of the Certificate Authority.
-     * @param context     The Application Context.
-     * @deprecated Use {@link #initialise(DeviceCertificate, PrivateKey, PublicKey, Context)}
-     * instead.
-     */
-    @Deprecated
-    public void initialize(DeviceCertificate certificate,
-                           PrivateKey privateKey,
-                           PublicKey caPublicKey,
-                           Context context) {
-        initialise(certificate, privateKey, caPublicKey, context);
-    }
-
-    /**
-     * Initialise the SDK with a Device Certificate. Call this before using the HMKit.
-     *
-     * @param certificate     The device certificate in Base64 or hex.
-     * @param privateKey      32 byte private key with elliptic curve Prime 256v1 in Base64 or hex.
-     * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64 or hex.
-     * @param context         the application context
-     * @deprecated Use {@link #initialise(String, String, String, Context)} instead.
-     */
-    @Deprecated
-    public void initialize(String certificate, String privateKey, String issuerPublicKey, Context
-            context) {
-        initialise(certificate, privateKey, issuerPublicKey, context);
-    }
-
-    /**
-     * Initialise the SDK with a Device Certificate. Call this before using the HMKit.
-     *
      * @param certificate     The device certificate in Base64 or hex.
      * @param privateKey      32 byte private key with elliptic curve Prime 256v1 in Base64 or hex.
      * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64 or hex.
@@ -458,20 +425,6 @@ public class HMKit {
     }
 
     /**
-     * Download and store the access certificate for the given access token. The access token needs
-     * to be provided by the certificate provider.
-     *
-     * @param accessToken The token that is used to download the certificates.
-     * @param callback    A {@link DownloadCallback} object that is invoked after the download is
-     *                    finished or failed.
-     * @deprecated Use {@link #downloadAccessCertificate(String, DownloadCallback)} instead.
-     */
-    @Deprecated
-    public void downloadCertificate(String accessToken, final DownloadCallback callback) {
-        downloadAccessCertificate(accessToken, callback);
-    }
-
-    /**
      * @return All Access Certificates where this device is providing access.
      */
     public AccessCertificate[] getCertificates() {
@@ -517,70 +470,6 @@ public class HMKit {
     public void deleteCertificates() {
         throwIfContextNotSet();
         storage.deleteCertificates();
-    }
-
-    /**
-     * Delete an access certificate.
-     *
-     * @param serial  The serial of the device that is gaining access.
-     * @param context The context.
-     * @return true if the certificate existed and was deleted successfully, otherwise false.
-     * @deprecated Use {@link #deleteCertificate(DeviceSerial)} instead.
-     */
-    @Deprecated
-    public boolean deleteCertificate(DeviceSerial serial, Context context) {
-        // this method should be deleted. cannot be initialised without context
-        throwIfDeviceCertificateNotSet();
-        return storage.deleteCertificate(serial.getByteArray(), core.getDeviceCertificate()
-                .getSerial().getByteArray());
-    }
-
-    /**
-     * @param context The context.
-     * @param serial  The serial of the device that is providing access (eg this device).
-     * @return All stored Access Certificates where the device with the given serial is providing
-     * access.
-     * @deprecated Use {@link #getStorage()#getCertificates(DeviceSerial)} instead.
-     */
-    @Deprecated
-    public AccessCertificate[] getCertificates(DeviceSerial serial, Context context) {
-        try {
-            initialise(context);
-        } finally {
-            return storage.getCertificates(serial);
-        }
-    }
-
-    /**
-     * Find an Access Certificate with the given serial number.
-     *
-     * @param serial  The serial number of the device that is gaining access.
-     * @param context The context.
-     * @return An Access Certificate for the given serial if one exists, otherwise null.
-     * @deprecated Use {@link #getStorage()#getCertificate(DeviceSerial)} instead.
-     */
-    @Deprecated
-    @Nullable public AccessCertificate getCertificate(DeviceSerial serial, Context context) {
-        try {
-            initialise(context);
-        } finally {
-            return storage.getCertificate(serial);
-        }
-    }
-
-    /**
-     * Deletes all of the stored Access Certificates.
-     *
-     * @param context The context.
-     * @deprecated Use {@link #getStorage()#deleteCertificates()} instead.
-     */
-    @Deprecated
-    public void deleteCertificates(Context context) {
-        try {
-            initialise(context);
-        } finally {
-            storage.deleteCertificates();
-        }
     }
 
     void throwIfDeviceCertificateNotSet() throws IllegalStateException {
