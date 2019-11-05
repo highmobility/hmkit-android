@@ -532,6 +532,11 @@ class Core implements HMBTCoreInterface {
     }
 
     @Override
+    public void HMApiCallbackRevokeIncoming(HMDevice device, byte[] data, int length) {
+        //TODO TT Revoke Incoming
+    }
+
+    @Override
     public void HMApiCallbackErrorCommandIncoming(HMDevice device, int commandId, int errorType) {
         d("HMApiCallbackErrorCommandIncoming %s, %s, %s",
                 ByteUtils.hexFromBytes(device.getMac()), commandId, errorType);
