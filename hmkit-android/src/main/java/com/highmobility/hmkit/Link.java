@@ -133,7 +133,7 @@ public class Link {
     /**
      * Revoke authorisation for this device. {@link RevokeCallback} will be called with the result.
      * If successful, the {@link LinkListener#onStateChanged(Link, State, State)} will be called with the
-     * {@link State#REVOKED} state.
+     * {@link State#NOT_AUTHENTICATED} state.
      * <p>
      * After this has succeeded it is up to the user to finish the flow related to this link -
      * disconnect, stop broadcasting or something else.
@@ -179,14 +179,15 @@ public class Link {
         if (hmDevice.getIsAuthenticated() == 0) {
             if (state == State.AUTHENTICATING) {
                 // authentication failed with wrong signature. no errorCommand
-                setState(State.AUTHENTICATION_FAILED);
+                setState(State.NOT_AUTHENTICATED);
                 AuthenticationError error =
                         new AuthenticationError(AuthenticationError.Type.INTERNAL_ERROR, 0,
                                 "Authentication failed.");
                 callAuthenticationFailed(error);
             } else if (state == State.AUTHENTICATED || state == State.REVOKING) {
                 // AUTHENTICATED = Called after car revoke
-                setState(State.REVOKED);
+                // TODO: 05/11/2019 If car revoke has a cb, the state can be REVOKING only ^^
+                setState(State.NOT_AUTHENTICATED);
                 threadManager.postToMain(new Runnable() {
                     @Override public void run() {
                         if (revokeCallback == null) return;
@@ -251,8 +252,8 @@ public class Link {
     void onErrorCommand(int commandId, int errorType) {
         if (getState() == State.AUTHENTICATING) {
             // this is only called when authenticating. After this EnteredProximity is not called,
-            // so can set the state here as well.
-            setState(State.AUTHENTICATION_FAILED);
+            // so can set the state here.
+            setState(State.NOT_AUTHENTICATED);
             AuthenticationError error =
                     new AuthenticationError(AuthenticationError.Type.INTERNAL_ERROR, errorType,
                             "Command " + commandId + " failed.");
@@ -288,7 +289,7 @@ public class Link {
      * @see LinkListener#onStateChanged(Link, State, State)
      */
     public enum State {
-        AUTHENTICATING, AUTHENTICATION_FAILED, AUTHENTICATED, REVOKING, REVOKED
+        AUTHENTICATING, NOT_AUTHENTICATED, AUTHENTICATED, REVOKING
     }
 
     /**
@@ -314,7 +315,7 @@ public class Link {
     public interface RevokeCallback {
 
         /**
-         * Invoked when the revoke succeeded. After this the link will go to {@link State#REVOKED}
+         * Invoked when the revoke succeeded. Link will go to {@link State#NOT_AUTHENTICATED}
          * state.
          *
          * @param customData The customer specific data, if exists.
