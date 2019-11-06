@@ -525,15 +525,19 @@ class Core implements HMBTCoreInterface {
 
         byte[] trimmedBytes = trimmedBytes(data, length);
 
-        if (broadcaster != null && broadcaster.onRevokeResult(device, trimmedBytes, status) ==
-                false) {
+        if (broadcaster != null && broadcaster.onRevokeResult(device, trimmedBytes, status) == false) {
             if (scanner != null) scanner.onRevokeResult(device, trimmedBytes, status);
         }
     }
 
     @Override
     public void HMApiCallbackRevokeIncoming(HMDevice device, byte[] data, int length) {
-        //TODO TT Revoke Incoming
+        d("HMApiCallbackRevokeIncoming %s, %s",
+                ByteUtils.hexFromBytes(device.getMac()), ByteUtils.hexFromBytes(trimmedBytes(data
+                        , length)));
+        if (broadcaster != null && broadcaster.onRevokeIncoming(device) == false) {
+            if (scanner != null) scanner.onRevokeIncoming(device);
+        }
     }
 
     @Override
@@ -582,7 +586,9 @@ class Core implements HMBTCoreInterface {
 
         abstract boolean onRevokeResult(HMDevice device, byte[] bytes, int status);
 
-        public abstract boolean onErrorCommand(HMDevice device, int commandId, int errorType);
+        abstract boolean onRevokeIncoming(HMDevice device);
+
+        abstract boolean onErrorCommand(HMDevice device, int commandId, int errorType);
     }
 
     abstract static class Scanner {
@@ -607,6 +613,8 @@ class Core implements HMBTCoreInterface {
 
         abstract boolean onRevokeResult(HMDevice device, byte[] bytes, int status);
 
-        public abstract boolean onErrorCommand(HMDevice device, int commandId, int errorType);
+        abstract boolean onRevokeIncoming(HMDevice device);
+
+        abstract boolean onErrorCommand(HMDevice device, int commandId, int errorType);
     }
 }

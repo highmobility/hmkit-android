@@ -15,20 +15,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class Scanner extends Core.Scanner implements SharedBleListener {
+import static com.highmobility.hmkit.HMLog.d;
+
+class Scanner extends Core.Scanner {
     private final Core core;
     private final SharedBle ble;
     private final ThreadManager threadManager;
     private final Storage storage;
 
-    /**
-     * Called when ble state has changed to available or not. Not available state can be called
-     * multiple times.
-     *
-     * @param available true if bluetooth is available
-     */
-    @Override public void bluetoothChangedToAvailable(boolean available) {
 
+    private final BleListener bleListener = new BleListener();
+
+    private class BleListener implements SharedBleListener {
+        // we don't want this method to be publicly available, so we create the class here
+        @Override public void bluetoothChangedToAvailable(boolean available) {
+            d("bluetoothChangedToAvailable(): available = %b", available);
+
+        }
     }
 
     public enum State {
@@ -55,7 +58,7 @@ class Scanner extends Core.Scanner implements SharedBleListener {
     }
 
     boolean initialise() {
-        ble.addListener(this);
+        ble.addListener(bleListener);
         return true;
     }
 
@@ -137,7 +140,7 @@ class Scanner extends Core.Scanner implements SharedBleListener {
 
         // scanner could have already initialised the ble, then we need to add the listener and
         // check for initial ble state.
-        ble.addListener(this);
+        ble.addListener(bleListener);
         if (ble.isBluetoothOn() == false) setState(State.BLUETOOTH_UNAVAILABLE);
     }
 
@@ -280,10 +283,17 @@ class Scanner extends Core.Scanner implements SharedBleListener {
         return true;
     }
 
-    @Override public boolean onErrorCommand(HMDevice device, int commandId, int errorType) {
+    @Override boolean onErrorCommand(HMDevice device, int commandId, int errorType) {
         Link link = getLinkForMac(device.getMac());
         if (link == null) return false;
-        // TSODO: fail auth or other process
+        link.onErrorCommand(commandId, errorType);
+        return true;
+    }
+
+    @Override boolean onRevokeIncoming(HMDevice device) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onRevokeIncoming();
         return true;
     }
 

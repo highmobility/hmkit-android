@@ -277,6 +277,10 @@ public class Link {
         return ByteUtils.bytesFromMacString(btDevice.getAddress());
     }
 
+    void onRevokeIncoming() {
+        setState(State.REVOKING);
+    }
+
     /**
      * The possible states of the Link.
      * <p>
