@@ -396,6 +396,13 @@ public class Broadcaster extends Core.Broadcaster {
         return true;
     }
 
+    @Override boolean onRegisterCertificate(byte[] serial) {
+        Link link = getLinkForSerial(serial);
+        if (link == null) return false;
+        link.onRegisterCertificate();
+        return true;
+    }
+
     @Override int onReceivedPairingRequest(HMDevice device) {
         ConnectedLink link = getLinkForMac(device.getMac());
         if (link != null) {
@@ -414,10 +421,16 @@ public class Broadcaster extends Core.Broadcaster {
     private ConnectedLink getLinkForMac(byte[] mac) {
         for (int i = 0; i < links.size(); i++) {
             ConnectedLink link = links.get(i);
+            if (Arrays.equals(link.getAddressBytes(), mac)) return link;
+        }
 
-            if (Arrays.equals(link.getAddressBytes(), mac)) {
-                return link;
-            }
+        return null;
+    }
+
+    private ConnectedLink getLinkForSerial(byte[] serial) {
+        for (int i = 0; i < links.size(); i++) {
+            ConnectedLink link = links.get(i);
+            if (link.getSerial().equals(serial)) return link;
         }
 
         return null;

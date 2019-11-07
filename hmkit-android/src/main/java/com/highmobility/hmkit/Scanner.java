@@ -23,7 +23,6 @@ class Scanner extends Core.Scanner {
     private final ThreadManager threadManager;
     private final Storage storage;
 
-
     private final BleListener bleListener = new BleListener();
 
     private class BleListener implements SharedBleListener {
@@ -40,7 +39,7 @@ class Scanner extends Core.Scanner {
 
     Map<byte[], byte[]> CaPublicKeyMap = new HashMap<>();
 
-    List<ScannedLink> devices = new ArrayList<>();
+    List<ScannedLink> links = new ArrayList<>();
     ScannerListener listener;
 
     State state = State.IDLE;
@@ -66,7 +65,7 @@ class Scanner extends Core.Scanner {
      * @return The links currently in proximity
      */
     public List<ScannedLink> getLinks() {
-        return devices;
+        return links;
     }
 
     /**
@@ -196,7 +195,7 @@ class Scanner extends Core.Scanner {
         addAuthenticatingMac(mac);
         BluetoothDevice bluetoothDevice = ble.getAdapter().getRemoteDevice(mac);
 
-        for (ScannedLink existingDevice : devices) {
+        for (ScannedLink existingDevice : links) {
             if (existingDevice.btDevice.getAddress().equals(bluetoothDevice.getAddress())) {
                 existingDevice.connect();
                 return;
@@ -204,7 +203,7 @@ class Scanner extends Core.Scanner {
         }
 
         ScannedLink device = new ScannedLink(ble, core, threadManager, bluetoothDevice);
-        devices.add(device);
+        links.add(device);
         device.connect();
     }
 
@@ -214,7 +213,7 @@ class Scanner extends Core.Scanner {
 
         device.disconnect();
         removeAuthenticatingMac(mac);
-        devices.remove(device);
+        links.remove(device);
     }
 
     boolean onDeviceExitedProximity(byte[] mac) {
@@ -233,7 +232,7 @@ class Scanner extends Core.Scanner {
         }
 
         removeAuthenticatingMac(device.getAddressBytes());
-        devices.remove(device);
+        links.remove(device);
         return true;
     }
 
@@ -290,6 +289,14 @@ class Scanner extends Core.Scanner {
         return true;
     }
 
+    @Override boolean onRegisterCertificate(byte[] serial) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onErrorCommand(commandId, errorType);
+        // TSODO: is this necessary?
+        return false;
+    }
+
     @Override boolean onRevokeIncoming(HMDevice device) {
         Link link = getLinkForMac(device.getMac());
         if (link == null) return false;
@@ -315,11 +322,18 @@ class Scanner extends Core.Scanner {
     }
 
     private ScannedLink getLinkForMac(byte[] mac) {
-        for (ScannedLink existingDevice : devices) {
-            if (Arrays.equals(ByteUtils.bytesFromMacString(existingDevice.btDevice.getAddress()),
-                    mac)) {
-                return existingDevice;
-            }
+        for (int i = 0; i < links.size(); i++) {
+            ScannedLink link = links.get(i);
+            if (Arrays.equals(link.getAddressBytes(), mac)) return link;
+        }
+
+        return null;
+    }
+
+    private ScannedLink getLinkForSerial(byte[] serial) {
+        for (int i = 0; i < links.size(); i++) {
+            ScannedLink link = links.get(i);
+            if (link.getSerial().equals(serial)) return link;
         }
 
         return null;
