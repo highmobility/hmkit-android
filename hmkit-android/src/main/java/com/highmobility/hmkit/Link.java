@@ -34,7 +34,7 @@ public class Link {
     private State state = State.AUTHENTICATING;
 
     private LinkCommand sentCommand;
-    private final long connectionTime;
+    private long authenticationStartTime;
     private RevokeCallback revokeCallback;
     private byte[] revokeData;
 
@@ -42,9 +42,8 @@ public class Link {
         this.btDevice = btDevice;
         this.core = core;
         this.threadManager = threadManager;
-
-        connectionTime = Calendar.getInstance().getTimeInMillis();
         mac = new Bytes(ByteUtils.bytesFromMacString(btDevice.getAddress()));
+        authenticationStartTime = Calendar.getInstance().getTimeInMillis();
     }
 
     /**
@@ -58,9 +57,11 @@ public class Link {
         if (this.state != state) {
             final State oldState = this.state;
 
-            if (oldState == State.AUTHENTICATING && state == State.AUTHENTICATED) {
+            if (state == State.AUTHENTICATING) {
+                authenticationStartTime = Calendar.getInstance().getTimeInMillis();
+            } else if (state == State.AUTHENTICATED) {
                 d("authenticated in %d ms", (Calendar.getInstance().getTimeInMillis() -
-                        connectionTime));
+                        authenticationStartTime));
             }
 
             this.state = state;
@@ -132,8 +133,8 @@ public class Link {
 
     /**
      * Revoke authorisation for this device. {@link RevokeCallback} will be called with the result.
-     * If successful, the {@link LinkListener#onStateChanged(Link, State, State)} will be called with the
-     * {@link State#NOT_AUTHENTICATED} state.
+     * If successful, the {@link LinkListener#onStateChanged(Link, State, State)} will be called
+     * with the {@link State#NOT_AUTHENTICATED} state.
      * <p>
      * After this has succeeded it is up to the user to finish the flow related to this link -
      * disconnect, stop broadcasting or something else.
@@ -275,6 +276,15 @@ public class Link {
 
     byte[] getAddressBytes() {
         return ByteUtils.bytesFromMacString(btDevice.getAddress());
+    }
+
+    void onRevokeIncoming() {
+        setState(State.REVOKING);
+    }
+
+    void onRegisterCertificate() {
+        // authentication after revoke
+        setState(State.AUTHENTICATING);
     }
 
     /**

@@ -348,6 +348,12 @@ class Core implements HMBTCoreInterface {
         int errorCode = storage.storeCertificate(certificate).getValue();
         if (errorCode != 0) {
             e("Cant register certificate %s: %d", ByteUtils.hexFromBytes(serial), errorCode);
+        } else {
+            // set the state authenticating. this could happen after revoke, when emulator starts
+            //  authenticating again. then the serial is known from previous authentication.
+            if (broadcaster != null && broadcaster.onRegisterCertificate(serial) == false) {
+                if (scanner != null) scanner.onRegisterCertificate(serial);
+            }
         }
 
         return 0;
@@ -539,9 +545,18 @@ class Core implements HMBTCoreInterface {
 
         byte[] trimmedBytes = trimmedBytes(data, length);
 
-        if (broadcaster != null && broadcaster.onRevokeResult(device, trimmedBytes, status) ==
-                false) {
+        if (broadcaster != null && broadcaster.onRevokeResult(device, trimmedBytes, status) == false) {
             if (scanner != null) scanner.onRevokeResult(device, trimmedBytes, status);
+        }
+    }
+
+    @Override
+    public void HMApiCallbackRevokeIncoming(HMDevice device, byte[] data, int length) {
+        d("HMApiCallbackRevokeIncoming %s, %s",
+                ByteUtils.hexFromBytes(device.getMac()), ByteUtils.hexFromBytes(trimmedBytes(data
+                        , length)));
+        if (broadcaster != null && broadcaster.onRevokeIncoming(device) == false) {
+            if (scanner != null) scanner.onRevokeIncoming(device);
         }
     }
 
@@ -576,25 +591,32 @@ class Core implements HMBTCoreInterface {
         abstract void onTelematicsResponseDecrypted(byte[] serial, int resultCode, byte[] data);
     }
 
-    abstract static class Broadcaster {
-        abstract boolean writeData(byte[] mac, byte[] data, int characteristic);
-
+    abstract static class Bluetooth {
         abstract boolean onChangedAuthenticationState(HMDevice device);
 
         abstract boolean onDeviceExitedProximity(byte[] mac);
+
+        abstract boolean writeData(byte[] mac, byte[] data, int characteristic);
 
         abstract boolean onCommandReceived(HMDevice device, byte[] bytes);
 
         abstract boolean onCommandResponseReceived(HMDevice device, byte[] trimmedBytes);
 
-        abstract int onReceivedPairingRequest(HMDevice device);
-
         abstract boolean onRevokeResult(HMDevice device, byte[] bytes, int status);
 
-        public abstract boolean onErrorCommand(HMDevice device, int commandId, int errorType);
+        abstract boolean onRevokeIncoming(HMDevice device);
+
+        abstract boolean onErrorCommand(HMDevice device, int commandId, int errorType);
+
+        // invoked after revoke, when emulator starts authorize
+        abstract boolean onRegisterCertificate(byte[] serial);
     }
 
-    abstract static class Scanner {
+    abstract static class Broadcaster extends Bluetooth {
+        abstract int onReceivedPairingRequest(HMDevice device);
+    }
+
+    abstract static class Scanner extends Bluetooth {
 
         abstract void connect(byte[] bytes);
 
@@ -602,20 +624,7 @@ class Core implements HMBTCoreInterface {
 
         abstract void startServiceDiscovery(byte[] bytes);
 
-        abstract boolean writeData(byte[] mac, byte[] data, int characteristic);
-
         abstract boolean readValue(byte[] mac, int characteristic);
 
-        abstract boolean onChangedAuthenticationState(HMDevice device);
-
-        abstract boolean onDeviceExitedProximity(byte[] mac);
-
-        abstract boolean onCommandReceived(HMDevice device, byte[] bytes);
-
-        abstract boolean onCommandResponseReceived(HMDevice device, byte[] bytes);
-
-        abstract boolean onRevokeResult(HMDevice device, byte[] bytes, int status);
-
-        public abstract boolean onErrorCommand(HMDevice device, int commandId, int errorType);
     }
 }

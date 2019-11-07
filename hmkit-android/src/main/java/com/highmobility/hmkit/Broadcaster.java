@@ -319,7 +319,7 @@ public class Broadcaster extends Core.Broadcaster {
      */
     void terminate() throws IllegalStateException {
         if (getLinks().size() > 0) {
-            // re startBle(new device cert) would mess up communication with previous links
+            // restarting ble(new device cert) would mess up communication with previous links
             throw new IllegalStateException("Broadcaster cannot terminate if a connected " +
                     "link exists. Disconnect from all of the links.");
         }
@@ -382,10 +382,24 @@ public class Broadcaster extends Core.Broadcaster {
         return true;
     }
 
-    @Override public boolean onErrorCommand(HMDevice device, int commandId, int errorType) {
+    @Override boolean onRevokeIncoming(HMDevice device) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onRevokeIncoming();
+        return false;
+    }
+
+    @Override boolean onErrorCommand(HMDevice device, int commandId, int errorType) {
         Link link = getLinkForMac(device.getMac());
         if (link == null) return false;
         link.onErrorCommand(commandId, errorType);
+        return true;
+    }
+
+    @Override boolean onRegisterCertificate(byte[] serial) {
+        Link link = getLinkForSerial(serial);
+        if (link == null) return false;
+        link.onRegisterCertificate();
         return true;
     }
 
@@ -407,10 +421,16 @@ public class Broadcaster extends Core.Broadcaster {
     private ConnectedLink getLinkForMac(byte[] mac) {
         for (int i = 0; i < links.size(); i++) {
             ConnectedLink link = links.get(i);
+            if (Arrays.equals(link.getAddressBytes(), mac)) return link;
+        }
 
-            if (Arrays.equals(link.getAddressBytes(), mac)) {
-                return link;
-            }
+        return null;
+    }
+
+    private ConnectedLink getLinkForSerial(byte[] serial) {
+        for (int i = 0; i < links.size(); i++) {
+            ConnectedLink link = links.get(i);
+            if (link.getSerial().equals(serial)) return link;
         }
 
         return null;
