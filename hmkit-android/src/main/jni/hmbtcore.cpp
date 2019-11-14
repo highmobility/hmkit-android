@@ -61,7 +61,7 @@ void prepareCallbackFunctions(JNIEnv *env, jobject instance, jobject coreInterfa
     interfaceMethodHMCryptoHalGenerateNonce  = env->GetMethodID(interfaceClassRef, "HMCryptoHalGenerateNonce","([B)V");
 
     interfaceMethodHMApiCallbackRevokeResponse = env->GetMethodID(interfaceClassRef, "HMApiCallbackRevokeResponse","(Lcom/highmobility/btcore/HMDevice;[BII)V");
-    interfaceMethodHMApiCallbackRevokeIncoming = env->GetMethodID(interfaceClassRef, "HMApiCallbackRevokeIncoming","(Lcom/highmobility/btcore/HMDevice;[BI)V");
+    interfaceMethodHMApiCallbackRevokeIncoming = env->GetMethodID(interfaceClassRef, "HMApiCallbackRevokeIncoming","(Lcom/highmobility/btcore/HMDevice;[B[I)V");
 
     interfaceMethodHMApiCallbackErrorCommandIncoming = env->GetMethodID(interfaceClassRef, "HMApiCallbackErrorCommandIncoming","(Lcom/highmobility/btcore/HMDevice;II)V");
 
