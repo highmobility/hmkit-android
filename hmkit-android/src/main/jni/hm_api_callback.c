@@ -352,7 +352,7 @@ jclass cls = (*envRef)->FindClass(envRef, "com/highmobility/btcore/HMDevice");
       }
 }
 
-void hm_api_callback_revoke_incoming(uint64_t appContxtId, hm_device_t *device, uint8_t *data, uint16_t size){
+void hm_api_callback_revoke_incoming(uint64_t appContxtId, hm_device_t *device, uint8_t *data, uint16_t *size){
     jclass cls = (*envRef)->FindClass(envRef, "com/highmobility/btcore/HMDevice");
     jmethodID constructor = (*envRef)->GetMethodID(envRef,cls, "<init>", "()V");
     jmethodID setMac = (*envRef)->GetMethodID(envRef,cls, "setMac", "([B)V");
@@ -379,7 +379,7 @@ void hm_api_callback_revoke_incoming(uint64_t appContxtId, hm_device_t *device, 
     jbyteArray data_ = (*envRef)->NewByteArray(envRef,size);
     (*envRef)->SetByteArrayRegion(envRef, data_, 0, size, (const jbyte*) data );
 
-    (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackRevokeIncoming, obj, data_, size);
+    (*envRef)->CallVoidMethod(envRef, coreInterfaceRef, interfaceMethodHMApiCallbackRevokeIncoming, obj, data_, *size);
 
     if ((*envRef)->ExceptionCheck(envRef)) {
         (*envRef)->ExceptionClear(envRef);
