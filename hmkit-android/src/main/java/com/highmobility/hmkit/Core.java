@@ -551,10 +551,7 @@ class Core implements HMBTCoreInterface {
     }
 
     @Override
-    public void HMApiCallbackRevokeIncoming(HMDevice device, byte[] data, int[] length) {
-        d("HMApiCallbackRevokeIncoming %s, %s",
-                ByteUtils.hexFromBytes(device.getMac()), ByteUtils.hexFromBytes(trimmedBytes(data
-                        , length[0])));
+    public void HMApiCallbackRevokeIncoming(HMDevice device) {
         if (broadcaster != null && broadcaster.onRevokeIncoming(device) == false) {
             if (scanner != null) scanner.onRevokeIncoming(device);
         }
