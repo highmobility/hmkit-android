@@ -22,8 +22,8 @@ allprojects {
         maven {
             url "http://jfrog.high-mobility.com/artifactory/gradle-dev-local/"
             credentials {
-                username System.properties['devReadUser']
-                password System.properties['devReadPassword']
+                username devReadUser
+                password devReadPassword
             }
         }
     }
