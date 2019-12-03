@@ -293,8 +293,8 @@ public class Link {
      * States can go from: AUTHENTICATING > AUTHENTICATED or AUTHENTICATING > AUTHENTICATION_FAILED
      * (then the LinkListener's authenticationFailed is called as well)
      * <p>
-     * After this, it can go to REVOKING (if initiated) and then to REVOKED/AUTHENTICATED(revoke
-     * failed). Also, it can go straight to REVOKED if the car revokes.
+     * After this, it can go to REVOKING (if initiated) and then to NOT_AUTHNETICATED/AUTHENTICATED(revoke
+     * failed).
      *
      * @see LinkListener#onStateChanged(Link, State, State)
      */
