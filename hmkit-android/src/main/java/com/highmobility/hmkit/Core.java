@@ -506,6 +506,11 @@ class Core implements HMBTCoreInterface {
     }
 
     @Override
+    public void HMApiCallbackCustomCommandResponseError(HMDevice device, int errorType) {
+        //TODO TT
+    }
+
+    @Override
     public int HMApiCallbackGetDeviceCertificateFailed(HMDevice device, byte[] nonce) {
         d("HMApiCallbackGetDeviceCertificateFailed ");
         // should ask the CA for the signature for the nonce
