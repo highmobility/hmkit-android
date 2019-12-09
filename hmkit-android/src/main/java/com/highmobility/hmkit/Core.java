@@ -4,7 +4,6 @@ import com.highmobility.btcore.HMBTCore;
 import com.highmobility.btcore.HMBTCoreInterface;
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.crypto.AccessCertificate;
-import com.highmobility.crypto.Crypto;
 import com.highmobility.crypto.DeviceCertificate;
 import com.highmobility.crypto.value.PrivateKey;
 import com.highmobility.crypto.value.PublicKey;
@@ -65,7 +64,8 @@ class Core implements HMBTCoreInterface {
     }
 
     Core(Storage storage, ThreadManager threadManager, DeviceCertificate
-            deviceCertificate, PrivateKey privateKey, PublicKey issuerPublicKey, HMLog.Level logLevel) {
+            deviceCertificate, PrivateKey privateKey, PublicKey issuerPublicKey,
+         HMLog.Level logLevel) {
         setDeviceCertificate(deviceCertificate, privateKey, issuerPublicKey);
         this.storage = storage;
         this.threadManager = threadManager;
@@ -499,15 +499,18 @@ class Core implements HMBTCoreInterface {
     public void HMApiCallbackCustomCommandResponse(HMDevice device, byte[] data, int length) {
         byte[] trimmedBytes = trimmedBytes(data, length);
 
-        if (broadcaster != null && broadcaster.onCommandResponseReceived(device, trimmedBytes))
+        if (broadcaster != null && broadcaster.onCommandResponse(device, trimmedBytes))
             return;
 
-        if (scanner != null) scanner.onCommandResponseReceived(device, trimmedBytes);
+        if (scanner != null) scanner.onCommandResponse(device, trimmedBytes);
     }
 
     @Override
     public void HMApiCallbackCustomCommandResponseError(HMDevice device, int errorType) {
-        //TODO TT
+        if (broadcaster != null && broadcaster.onCommandErrorResponse(device, errorType))
+            return;
+
+        if (scanner != null) scanner.onCommandErrorResponse(device, errorType);
     }
 
     @Override
@@ -600,14 +603,20 @@ class Core implements HMBTCoreInterface {
 
         abstract boolean writeData(byte[] mac, byte[] data, int characteristic);
 
+        // A command from the device, can be a response command or some other update
         abstract boolean onCommandReceived(HMDevice device, byte[] bytes);
 
-        abstract boolean onCommandResponseReceived(HMDevice device, byte[] trimmedBytes);
+        // command ack
+        abstract boolean onCommandResponse(HMDevice device, byte[] trimmedBytes);
+
+        // command error
+        abstract boolean onCommandErrorResponse(HMDevice device, int errorType);
 
         abstract boolean onRevokeResult(HMDevice device, byte[] bytes, int status);
 
         abstract boolean onRevokeIncoming(HMDevice device);
 
+        // error in authentication
         abstract boolean onErrorCommand(HMDevice device, int commandId, int errorType);
 
         // invoked after revoke, when emulator starts authorize

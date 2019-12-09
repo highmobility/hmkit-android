@@ -361,10 +361,17 @@ public class Broadcaster extends Core.Broadcaster {
         return true;
     }
 
-    @Override boolean onCommandResponseReceived(HMDevice device, byte[] data) {
+    @Override boolean onCommandResponse(HMDevice device, byte[] data) {
         Link link = getLinkForMac(device.getMac());
         if (link == null) return false;
-        link.onCommandResponseReceived(data);
+        link.onCommandResponse(data);
+        return true;
+    }
+
+    @Override boolean onCommandErrorResponse(HMDevice device, int errorType) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onCommandError(errorType);
         return true;
     }
 

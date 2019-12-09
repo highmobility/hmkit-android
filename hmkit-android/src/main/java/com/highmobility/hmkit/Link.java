@@ -219,18 +219,30 @@ public class Link {
         });
     }
 
-    void onCommandResponseReceived(final byte[] data) {
+    void onCommandResponse(final byte[] data) {
         d("did receive command response %s from %s in %s ms", ByteUtils.hexFromBytes(data),
-                mac, (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime)
-        );
+                mac, getCommandDuration());
 
+        if (isSendingCommand()) sentCommand.dispatchResponse(data);
+    }
+
+    void onCommandError(int errorType) {
+        d("did receive command error %d from %s in %s ms", errorType, mac, getCommandDuration());
+
+        if (isSendingCommand()) sentCommand.dispatchError(errorType);
+    }
+
+    private long getCommandDuration() {
+        return Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime;
+    }
+
+    private boolean isSendingCommand() {
         if (sentCommand == null || sentCommand.finished) {
-            w("can't dispatch command response: sentCommand = null || " +
-                    "finished");
-            return;
+            w("can't dispatch command response: sentCommand = null || finished");
+            return false;
         }
 
-        sentCommand.dispatchResult(data);
+        return true;
     }
 
     void onRevokeResponse(final byte[] data, final int result) {
@@ -293,7 +305,8 @@ public class Link {
      * States can go from: AUTHENTICATING > AUTHENTICATED or AUTHENTICATING > AUTHENTICATION_FAILED
      * (then the LinkListener's authenticationFailed is called as well)
      * <p>
-     * After this, it can go to REVOKING (if initiated) and then to NOT_AUTHNETICATED/AUTHENTICATED(revoke
+     * After this, it can go to REVOKING (if initiated) and then to
+     * NOT_AUTHNETICATED/AUTHENTICATED(revoke
      * failed).
      *
      * @see LinkListener#onStateChanged(Link, State, State)

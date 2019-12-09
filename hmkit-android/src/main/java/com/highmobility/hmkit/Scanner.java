@@ -268,10 +268,17 @@ class Scanner extends Core.Scanner {
         return true;
     }
 
-    boolean onCommandResponseReceived(HMDevice device, byte[] data) {
+    boolean onCommandResponse(HMDevice device, byte[] data) {
         ScannedLink scannedLink = getLinkForMac(device.getMac());
         if (scannedLink == null) return false;
-        scannedLink.onCommandResponseReceived(data);
+        scannedLink.onCommandResponse(data);
+        return true;
+    }
+
+    @Override boolean onCommandErrorResponse(HMDevice device, int errorType) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onCommandError(errorType);
         return true;
     }
 

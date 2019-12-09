@@ -24,37 +24,45 @@ class LinkCommand {
         commandStartTime = Calendar.getInstance().getTimeInMillis();
     }
 
-    void dispatchResult(byte[] response) {
-        final LinkError.Type errorCode = getErrorCode(response);
-        if (errorCode == LinkError.Type.NONE) {
-            cancelTimeoutTimer();
-            finished = true;
-            threadManager.postToMain(new Runnable() {
-                @Override
-                public void run() {
-                    commandCallback.onCommandSent();
-                }
-            });
-        } else {
-            dispatchError(errorCode, 0, "");
-        }
-    }
-
-    void dispatchError(final LinkError.Type type, final int errorCode, final String message) {
+    void dispatchResponse(byte[] response) {
         cancelTimeoutTimer();
         finished = true;
-
-        if (commandCallback == null) {
-            e("cannot dispatch the result: no callback");
-            return;
-        }
-
         threadManager.postToMain(new Runnable() {
             @Override
             public void run() {
-                commandCallback.onCommandFailed(new LinkError(type, errorCode, message));
+                if (commandCallbackExists()) {
+                    commandCallback.onCommandSent();
+                }
             }
         });
+    }
+
+    void dispatchError(final int error) {
+        cancelTimeoutTimer();
+        finished = true;
+
+        final LinkError.Type errorType = getErrorType(error);
+        dispatchError(errorType, error, getErrorMessage(errorType));
+    }
+
+    private void dispatchError(final LinkError.Type error, final int code, final String message) {
+        threadManager.postToMain(new Runnable() {
+            @Override
+            public void run() {
+                if (commandCallbackExists()) {
+                    commandCallback.onCommandFailed(new LinkError(error, code, message));
+                }
+            }
+        });
+    }
+
+    private boolean commandCallbackExists() {
+        if (commandCallback == null) {
+            e("cannot dispatch the result: no callback");
+            return false;
+        }
+
+        return true;
     }
 
     void startTimeoutTimer() {
@@ -74,24 +82,31 @@ class LinkCommand {
         }
     }
 
-    static LinkError.Type getErrorCode(byte[] bytes) {
-        if (bytes == null || bytes.length < 2) return LinkError.Type.NONE;
-        if (bytes[0] != 0x02) return LinkError.Type.NONE;
-        return errorCodeForByte(bytes[1]);
-    }
-
-    static LinkError.Type errorCodeForByte(byte errorByte) {
-        switch (errorByte) {
-            case 0x05:
+    static LinkError.Type getErrorType(int errorType) {
+        switch (errorType) {
+            case 5:
                 return LinkError.Type.STORAGE_FULL;
-            case 0x09:
+            case 9:
                 return LinkError.Type.TIME_OUT;
-            case 0x07:
-            case 0x06:
-            case 0x08:
+            case 7:
+            case 6:
+            case 8:
                 return LinkError.Type.UNAUTHORIZED;
             default:
                 return LinkError.Type.INTERNAL_ERROR;
+        }
+    }
+
+    static String getErrorMessage(LinkError.Type type) {
+        switch (type) {
+            case STORAGE_FULL:
+                return "Storage is full";
+            case TIME_OUT:
+                return "Time out";
+            case UNAUTHORIZED:
+                return "Unauthorised";
+            default:
+                return "Internal error";
         }
     }
 }
