@@ -87,7 +87,6 @@ class LinkCommand {
             case 0x09:
                 return LinkError.Type.TIME_OUT;
             case 0x07:
-                return LinkError.Type.UNAUTHORIZED;
             case 0x06:
             case 0x08:
                 return LinkError.Type.UNAUTHORIZED;
