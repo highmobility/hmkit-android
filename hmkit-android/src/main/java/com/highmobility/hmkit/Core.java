@@ -172,8 +172,8 @@ class Core implements HMBTCoreInterface {
         core.HMBTCorelinkWriteResponse(this, mac, characteristic);
     }
 
-    void HMBTCoreSendCustomCommand(byte[] data, int size, byte[] mac) {
-        core.HMBTCoreSendCustomCommand(this, data, size, mac);
+    void HMBTCoreSendCustomCommand(int contentType, byte[] data, int size, byte[] mac) {
+        core.HMBTCoreSendCustomCommand(this, contentType, data, size, mac);
     }
 
     void HMBTCoreSendReadDeviceCertificate(byte[] mac, byte[] nonce, byte[] caSignature) {
@@ -203,8 +203,9 @@ class Core implements HMBTCoreInterface {
         core.HMBTCoreTelematicsReceiveData(this, length, data);
     }
 
-    void HMBTCoreSendTelematicsCommand(byte[] serial, byte[] nonce, int length, byte[] data) {
-        core.HMBTCoreSendTelematicsCommand(this, serial, nonce, length, data);
+    void HMBTCoreSendTelematicsCommand(byte[] serial, byte[] nonce, int contentType, int length,
+                                       byte[] data) {
+        core.HMBTCoreSendTelematicsCommand(this, serial, nonce, contentType, length, data);
     }
 
     // MARK: other
@@ -488,7 +489,8 @@ class Core implements HMBTCoreInterface {
     }
 
     @Override
-    public void HMApiCallbackCustomCommandIncoming(HMDevice device, byte[] data, int length) {
+    public void HMApiCallbackCustomCommandIncoming(HMDevice device, int contentType, byte[] data,
+                                                   int length) {
         byte[] trimmedBytes = trimmedBytes(data, length);
 
         if (broadcaster != null && broadcaster.onCommandReceived(device, trimmedBytes)) return;
@@ -496,7 +498,8 @@ class Core implements HMBTCoreInterface {
     }
 
     @Override
-    public void HMApiCallbackCustomCommandResponse(HMDevice device, byte[] data, int length) {
+    public void HMApiCallbackCustomCommandResponse(HMDevice device, int contentType, byte[] data,
+                                                   int length) {
         byte[] trimmedBytes = trimmedBytes(data, length);
 
         if (broadcaster != null && broadcaster.onCommandResponse(device, trimmedBytes))
@@ -529,8 +532,8 @@ class Core implements HMBTCoreInterface {
     }
 
     @Override
-    public void HMApiCallbackTelematicsCommandIncoming(HMDevice device, int id, int length,
-                                                       byte[] data) {
+    public void HMApiCallbackTelematicsCommandIncoming(HMDevice device, int id, int contentType,
+                                                       int length, byte[] data) {
         if (telematics != null) {
             telematics.onTelematicsResponseDecrypted(device.getSerial(), id, trimmedBytes(data,
                     length));

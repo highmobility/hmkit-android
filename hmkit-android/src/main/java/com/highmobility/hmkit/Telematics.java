@@ -45,12 +45,13 @@ public class Telematics extends Core.Telematics {
     /**
      * Send a command to a device via telematics.
      *
-     * @param command  the bytes to send to the device
-     * @param serial   serial of the device
-     * @param callback A {@link CommandCallback} object that is invoked with the command result.
+     * @param contentType The content type. See {@link ContentType} for possible types.
+     * @param command     the bytes to send to the device
+     * @param serial      serial of the device
+     * @param callback    A {@link CommandCallback} object that is invoked with the command result.
      */
-    public void sendCommand(final Bytes command, DeviceSerial serial, final CommandCallback
-            callback) {
+    public void sendCommand(final ContentType contentType, final Bytes command, DeviceSerial serial,
+                            final CommandCallback callback) {
         core.start();
         if (command.getLength() > Constants.MAX_COMMAND_LENGTH) {
             TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_TOO_BIG, 0,
@@ -87,14 +88,13 @@ public class Telematics extends Core.Telematics {
                         public void run() {
                             interactingCommand = activeCommand;
                             core.HMBTCoreSendTelematicsCommand(certificate.getGainerSerial()
-                                    .getByteArray(), nonce, command.getLength(), command
-                                    .getByteArray());
+                                            .getByteArray(), nonce, contentType.asInt(),
+                                    command.getLength(), command.getByteArray());
                         }
                     });
                 } catch (JSONException e) {
                     activeCommand.dispatchError(TelematicsError.Type
-                                    .INVALID_SERVER_RESPONSE, 0,
-                            "Invalid nonce response from server.");
+                            .INVALID_SERVER_RESPONSE, 0, "Invalid nonce response from server.");
                 }
             }
         }, new Response.ErrorListener() {
@@ -104,10 +104,23 @@ public class Telematics extends Core.Telematics {
                     activeCommand.dispatchError(TelematicsError.Type.HTTP_ERROR, error
                             .networkResponse.statusCode, new String(error.networkResponse.data));
                 } else {
-                    activeCommand.dispatchError(TelematicsError.Type.NO_CONNECTION, 0, WebService.NO_CONNECTION_ERROR);
+                    activeCommand.dispatchError(TelematicsError.Type.NO_CONNECTION, 0,
+                            WebService.NO_CONNECTION_ERROR);
                 }
             }
         });
+    }
+
+    /**
+     * Send a command to a device via telematics.
+     *
+     * @param command  the bytes to send to the device
+     * @param serial   serial of the device
+     * @param callback A {@link CommandCallback} object that is invoked with the command result.
+     */
+    public void sendCommand(final Bytes command, DeviceSerial serial, final CommandCallback
+            callback) {
+        sendCommand(ContentType.AUTO_API, command, serial, callback);
     }
 
     @Override void onTelematicsCommandEncrypted(byte[] serial, byte[] issuer, byte[] command) {
