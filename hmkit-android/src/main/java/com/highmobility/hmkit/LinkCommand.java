@@ -38,14 +38,14 @@ class LinkCommand {
     }
 
     void dispatchError(final int error) {
-        cancelTimeoutTimer();
-        finished = true;
-
         final LinkError.Type errorType = getErrorType(error);
         dispatchError(errorType, error, getErrorMessage(errorType));
     }
 
     private void dispatchError(final LinkError.Type error, final int code, final String message) {
+        cancelTimeoutTimer();
+        finished = true;
+
         threadManager.postToMain(new Runnable() {
             @Override
             public void run() {
