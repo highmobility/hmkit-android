@@ -75,8 +75,7 @@ public class Telematics extends Core.Telematics {
                 threadManager);
         activeCommands.add(activeCommand);
 
-        webService.getNonce(certificate.getProviderSerial(), new Response
-                .Listener<JSONObject>() {
+        webService.getNonce(certificate.getProviderSerial(), new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonResponse) {
                 try {
