@@ -33,11 +33,10 @@ class WebRequest extends Request<JSONObject> {
     void print() {
         if (Timber.treeCount() == 0) return;
         try {
-            byte[] body = getBody();
-            String bodyString = body != null ? "\nbody:\n" + new String(getBody()) : "";
             JSONObject headers = new JSONObject(getHeaders());
-            String log = "\n" + getUrl() + "\nheaders:\n" + headers.toString(2) + bodyString;
-            d(URLDecoder.decode(log, "ASCII"));
+            String log = "\n" + URLDecoder.decode(getUrl(), "ASCII") +
+                    "\nheaders:\n" + headers + "\nbody:\n" + params;
+            d(log);
         } catch (Exception e) {
             e.printStackTrace();
         }
