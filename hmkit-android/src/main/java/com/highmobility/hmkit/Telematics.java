@@ -2,7 +2,6 @@ package com.highmobility.hmkit;
 
 import android.util.Base64;
 
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.value.DeviceSerial;
@@ -75,7 +74,7 @@ public class Telematics extends Core.Telematics {
                 threadManager);
         activeCommands.add(activeCommand);
 
-        webService.getNonce(certificate.getProviderSerial(), new Response.Listener<JSONObject>() {
+        webService.getNonce(certificate.getProviderSerial(), new WebService.ResponseListener() {
             @Override
             public void onResponse(JSONObject jsonResponse) {
                 try {
@@ -96,9 +95,8 @@ public class Telematics extends Core.Telematics {
                             .INVALID_SERVER_RESPONSE, 0, "Invalid nonce response from server.");
                 }
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+
+            @Override public void onError(VolleyError error) {
                 if (error.networkResponse != null) {
                     activeCommand.dispatchError(TelematicsError.Type.HTTP_ERROR, error
                             .networkResponse.statusCode, new String(error.networkResponse.data));
@@ -126,7 +124,7 @@ public class Telematics extends Core.Telematics {
         final TelematicsCommand commandSent = interactingCommand; // need this for command response
         webService.sendTelematicsCommand(new Bytes(command), new DeviceSerial(serial),
                 new Issuer(issuer),
-                new Response.Listener<JSONObject>() {
+                new WebService.ResponseListener() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
                         try {
@@ -164,10 +162,8 @@ public class Telematics extends Core.Telematics {
                                     "Invalid response from server.");
                         }
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
+
+                    @Override public void onError(VolleyError error) {
                         if (error.networkResponse != null) {
                             try {
                                 JSONObject json = new JSONObject(new String(error.networkResponse

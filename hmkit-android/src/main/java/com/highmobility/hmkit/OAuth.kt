@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.webkit.URLUtil
+import com.android.volley.VolleyError
 import com.highmobility.crypto.Crypto
 import com.highmobility.crypto.value.DeviceSerial
 import com.highmobility.crypto.value.PrivateKey
@@ -104,20 +105,25 @@ class OAuth internal constructor(private val webService: WebService,
      * @param completionHandler The completion handler.
      */
     fun refreshAccessToken(tokenUrl: String, clientId: String, refreshToken: String, completionHandler: CompletionHandler) {
-        webService.refreshOauthAccessToken(tokenUrl, clientId, refreshToken, { jsonObject ->
-            try {
-                val responseObject = parseAccessTokenResponse(jsonObject)
-                completionHandler(responseObject, null)
-            } catch (e: JSONException) {
-                e.printStackTrace()
-                finishedDownloadingAccessToken(null, "invalid refresh access token response")
+        webService.refreshOauthAccessToken(tokenUrl, clientId, refreshToken, object : WebService.ResponseListener() {
+            override fun onResponse(jsonObject: JSONObject?) {
+                try {
+                    val responseObject = parseAccessTokenResponse(jsonObject!!)
+                    completionHandler(responseObject, null)
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                    finishedDownloadingAccessToken(null, "invalid refresh access token response")
+                }
             }
-        }, { error ->
-            if (error?.networkResponse != null) {
-                completionHandler(null, "${error.networkResponse.statusCode}: ${String(error.networkResponse.data)}")
-            }
-            else {
-                completionHandler(null, "no internet connection")
+
+            override fun onError(error: VolleyError?) {
+                if (error?.networkResponse != null) {
+                    completionHandler(null, "${error.networkResponse.statusCode}: ${String(error.networkResponse.data)}")
+                }
+                else {
+                    completionHandler(null, "no internet connection")
+                }
+
             }
         })
     }
@@ -146,16 +152,20 @@ class OAuth internal constructor(private val webService: WebService,
         viewControllerCompletionHandler = completionHandler
 
         webService.downloadOauthAccessToken(tokenUrl, code!!, redirectScheme, clientId, getJwt(),
-                { jsonObject ->
-                    finishedDownloadingAccessToken(jsonObject, null)
-                }, { error ->
-            if (error?.networkResponse != null) {
-                finishedDownloadingAccessToken(null, "${error.networkResponse.statusCode}: ${String(error.networkResponse.data)}")
-            }
-            else {
-                finishedDownloadingAccessToken(null, "no internet connection")
-            }
-        })
+                object : WebService.ResponseListener() {
+                    override fun onResponse(jsonObject: JSONObject?) {
+                        finishedDownloadingAccessToken(jsonObject, null)
+                    }
+
+                    override fun onError(error: VolleyError?) {
+                        if (error?.networkResponse != null) {
+                            finishedDownloadingAccessToken(null, "${error.networkResponse.statusCode}: ${String(error.networkResponse.data)}")
+                        }
+                        else {
+                            finishedDownloadingAccessToken(null, "no internet connection")
+                        }
+                    }
+                })
     }
 
     protected fun setDeviceCertificate(privateKey: PrivateKey, deviceSerial: DeviceSerial) {

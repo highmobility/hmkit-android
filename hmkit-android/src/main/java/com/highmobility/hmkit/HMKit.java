@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.Crypto;
@@ -211,7 +210,7 @@ public class HMKit {
 
         if (Build.DEVICE.equals("robolectric") == false)
             System.loadLibrary("hmbtcore");
-        
+
         crypto = new Crypto(Core.core);
     }
 
@@ -360,12 +359,12 @@ public class HMKit {
      */
     public void downloadAccessCertificate(String accessToken, final DownloadCallback callback) {
         throwIfDeviceCertificateNotSet();
+
         webService.requestAccessCertificate(accessToken,
                 core.getPrivateKey(),
                 getDeviceCertificate().getSerial(),
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
+                new WebService.ResponseListener() {
+                    @Override public void onResponse(JSONObject response) {
                         AccessCertificate certificate = null;
                         try {
                             certificate = storage.storeDownloadedCertificates(response);
@@ -381,18 +380,16 @@ public class HMKit {
 
                         if (certificate != null)
                             callback.onDownloaded(certificate.getGainerSerial());
+
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
+
+                    @Override public void onError(VolleyError error) {
                         DownloadAccessCertificateError dispatchedError;
 
                         if (error.networkResponse != null) {
                             try {
                                 JSONObject json = new JSONObject(new String(error.networkResponse
                                         .data));
-                                w("onErrorResponse: " + json.toString());
                                 if (json.has("message")) {
                                     dispatchedError = new DownloadAccessCertificateError(
                                             DownloadAccessCertificateError.Type.HTTP_ERROR,
@@ -420,6 +417,7 @@ public class HMKit {
                         callback.onDownloadFailed(dispatchedError);
                     }
                 });
+
     }
 
     /**

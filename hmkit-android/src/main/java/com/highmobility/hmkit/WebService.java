@@ -6,6 +6,7 @@ import android.net.Uri;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.highmobility.crypto.Crypto;
 import com.highmobility.crypto.value.DeviceSerial;
@@ -64,8 +65,7 @@ class WebService {
 
     void downloadOauthAccessToken(String url, String code, String redirectUri,
                                   String clientId, String jwt,
-                                  final Response.Listener<JSONObject> response,
-                                  final Response.ErrorListener error) {
+                                  final ResponseListener response) {
         Uri uri = Uri.parse(url).buildUpon().build();
         Map<String, String> params = new HashMap();
 
@@ -77,14 +77,7 @@ class WebService {
         params.put("code_verifier", jwt);
 
         WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        printResponse(jsonObject);
-                        response.onResponse(jsonObject);
-
-                    }
-                }, error);
+                response.response, response.error);
 
         queueRequest(request);
     }
@@ -92,8 +85,7 @@ class WebService {
     void refreshOauthAccessToken(String url,
                                  String clientId,
                                  String refreshToken,
-                                 final Response.Listener<JSONObject> response,
-                                 final Response.ErrorListener error) {
+                                 ResponseListener response) {
         Uri uri = Uri.parse(url).buildUpon().build();
         Map<String, String> params = new HashMap();
 
@@ -102,24 +94,15 @@ class WebService {
         params.put("refresh_token", refreshToken);
 
         WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        printResponse(jsonObject);
-                        response.onResponse(jsonObject);
-
-                    }
-                }, error);
+                response.response, response.error);
 
         queueRequest(request);
-
     }
 
     void requestAccessCertificate(final String accessToken,
                                   PrivateKey privateKey,
                                   final DeviceSerial serialNumber,
-                                  final Response.Listener<JSONObject> response,
-                                  Response.ErrorListener error) throws IllegalArgumentException {
+                                  ResponseListener response) {
         String url = baseUrl + "/access_certificates";
         Bytes accessTokenBytes = new Bytes(accessToken.getBytes());
         final String signature = crypto.sign(accessTokenBytes, privateKey).getBase64();
@@ -132,20 +115,13 @@ class WebService {
         params.put("signature", signature);
 
         WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        printResponse(jsonObject);
-                        response.onResponse(jsonObject);
-
-                    }
-                }, error);
+                response.response, response.error);
 
         queueRequest(request);
     }
 
-    void sendTelematicsCommand(Bytes command, DeviceSerial serial, Issuer issuer, final Response
-            .Listener<JSONObject> response, Response.ErrorListener error) {
+    void sendTelematicsCommand(Bytes command, DeviceSerial serial, Issuer issuer,
+                               ResponseListener response) {
         String url = baseUrl + "/telematics_commands";
 
         Uri uri = Uri.parse(url).buildUpon().build();
@@ -156,19 +132,12 @@ class WebService {
         params.put("data", command.getBase64());
 
         WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        printResponse(jsonObject);
-                        response.onResponse(jsonObject);
-                    }
-                }, error);
+                response.response, response.error);
 
         queueRequest(request);
     }
 
-    void getNonce(DeviceSerial serial, final Response.Listener<JSONObject> response, Response
-            .ErrorListener error) {
+    void getNonce(DeviceSerial serial, ResponseListener response) {
         String url = baseUrl + "/nonces";
 
         // query
@@ -177,13 +146,7 @@ class WebService {
         params.put("serial_number", serial.getHex());
 
         WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        printResponse(jsonObject);
-                        response.onResponse(jsonObject);
-                    }
-                }, error);
+                response.response, response.error);
 
         queueRequest(request);
     }
@@ -198,13 +161,51 @@ class WebService {
         queue.cancelAll(this);
     }
 
-    void printResponse(JSONObject jsonObject) {
-        if (Timber.treeCount() == 0) return;
-        try {
-            String message = jsonObject.toString(2);
-            d("response %s", message);
-        } catch (JSONException e) {
-            e.printStackTrace();
+    // this class is to log out the response for all requests
+    public static class ResponseListener {
+        InternalResponseListener response = new InternalResponseListener();
+        InternalErrorListener error = new InternalErrorListener();
+
+        public void onResponse(JSONObject jsonObject) {
+
+        }
+
+        public void onError(VolleyError error) {
+
+        }
+
+        class InternalResponseListener implements Response.Listener<JSONObject> {
+            @Override public void onResponse(JSONObject jsonObject) {
+                printResponse(jsonObject);
+                ResponseListener.this.onResponse(jsonObject);
+            }
+
+            void printResponse(JSONObject jsonObject) {
+                if (Timber.treeCount() == 0) return;
+                try {
+                    String message = jsonObject.toString(2);
+                    d("response %s", message);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        class InternalErrorListener implements Response.ErrorListener {
+            @Override public void onErrorResponse(VolleyError error) {
+                printError(error);
+                ResponseListener.this.onError(error);
+            }
+
+            void printError(VolleyError error) {
+                if (Timber.treeCount() == 0) return;
+                if (error.networkResponse != null) {
+                    String responseData = "";
+                    if (error.networkResponse.data != null) responseData = new String(error.networkResponse.data);
+                    d("\nerror %d, %s", error.networkResponse.statusCode, responseData);
+                    // TODO: 19.12.2019 now dont have to log this out in callbacks.
+                }
+            }
         }
     }
 }
