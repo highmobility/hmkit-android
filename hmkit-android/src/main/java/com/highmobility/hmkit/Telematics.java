@@ -74,7 +74,7 @@ public class Telematics extends Core.Telematics {
                 threadManager);
         activeCommands.add(activeCommand);
 
-        webService.getNonce(certificate.getProviderSerial(), new WebService.ResponseListener() {
+        webService.getNonce(certificate.getProviderSerial(), new WebRequestListener() {
             @Override
             public void onResponse(JSONObject jsonResponse) {
                 try {
@@ -124,7 +124,7 @@ public class Telematics extends Core.Telematics {
         final TelematicsCommand commandSent = interactingCommand; // need this for command response
         webService.sendTelematicsCommand(new Bytes(command), new DeviceSerial(serial),
                 new Issuer(issuer),
-                new WebService.ResponseListener() {
+                new WebRequestListener() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
                         try {

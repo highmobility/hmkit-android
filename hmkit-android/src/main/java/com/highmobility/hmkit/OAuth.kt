@@ -105,7 +105,7 @@ class OAuth internal constructor(private val webService: WebService,
      * @param completionHandler The completion handler.
      */
     fun refreshAccessToken(tokenUrl: String, clientId: String, refreshToken: String, completionHandler: CompletionHandler) {
-        webService.refreshOauthAccessToken(tokenUrl, clientId, refreshToken, object : WebService.ResponseListener() {
+        webService.refreshOauthAccessToken(tokenUrl, clientId, refreshToken, object : WebRequestListener() {
             override fun onResponse(jsonObject: JSONObject?) {
                 try {
                     val responseObject = parseAccessTokenResponse(jsonObject!!)
@@ -152,7 +152,7 @@ class OAuth internal constructor(private val webService: WebService,
         viewControllerCompletionHandler = completionHandler
 
         webService.downloadOauthAccessToken(tokenUrl, code!!, redirectScheme, clientId, getJwt(),
-                object : WebService.ResponseListener() {
+                object : WebRequestListener() {
                     override fun onResponse(jsonObject: JSONObject?) {
                         finishedDownloadingAccessToken(jsonObject, null)
                     }

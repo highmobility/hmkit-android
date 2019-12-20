@@ -24,7 +24,6 @@ import javax.annotation.Nullable;
 
 import static com.highmobility.hmkit.HMLog.e;
 import static com.highmobility.hmkit.HMLog.i;
-import static com.highmobility.hmkit.HMLog.w;
 
 /**
  * HMKit is the entry point for the HMKit library. Use the singleton to access Broadcaster and
@@ -363,7 +362,7 @@ public class HMKit {
         webService.requestAccessCertificate(accessToken,
                 core.getPrivateKey(),
                 getDeviceCertificate().getSerial(),
-                new WebService.ResponseListener() {
+                new WebRequestListener() {
                     @Override public void onResponse(JSONObject response) {
                         AccessCertificate certificate = null;
                         try {

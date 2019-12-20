@@ -5,8 +5,6 @@ import android.net.Uri;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.highmobility.crypto.Crypto;
 import com.highmobility.crypto.value.DeviceSerial;
@@ -14,17 +12,10 @@ import com.highmobility.crypto.value.Issuer;
 import com.highmobility.crypto.value.PrivateKey;
 import com.highmobility.value.Bytes;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
-
-import timber.log.Timber;
-
-import static com.highmobility.hmkit.HMLog.d;
 
 class WebService {
     private static final String defaultUrl = "https://sandbox.api.high-mobility.com";
@@ -65,7 +56,7 @@ class WebService {
 
     void downloadOauthAccessToken(String url, String code, String redirectUri,
                                   String clientId, String jwt,
-                                  final ResponseListener response) {
+                                  final WebRequestListener response) {
         Uri uri = Uri.parse(url).buildUpon().build();
         Map<String, String> params = new HashMap();
 
@@ -85,7 +76,7 @@ class WebService {
     void refreshOauthAccessToken(String url,
                                  String clientId,
                                  String refreshToken,
-                                 ResponseListener response) {
+                                 WebRequestListener response) {
         Uri uri = Uri.parse(url).buildUpon().build();
         Map<String, String> params = new HashMap();
 
@@ -102,7 +93,7 @@ class WebService {
     void requestAccessCertificate(final String accessToken,
                                   PrivateKey privateKey,
                                   final DeviceSerial serialNumber,
-                                  ResponseListener response) {
+                                  WebRequestListener response) {
         String url = baseUrl + "/access_certificates";
         Bytes accessTokenBytes = new Bytes(accessToken.getBytes());
         final String signature = crypto.sign(accessTokenBytes, privateKey).getBase64();
@@ -121,7 +112,7 @@ class WebService {
     }
 
     void sendTelematicsCommand(Bytes command, DeviceSerial serial, Issuer issuer,
-                               ResponseListener response) {
+                               WebRequestListener response) {
         String url = baseUrl + "/telematics_commands";
 
         Uri uri = Uri.parse(url).buildUpon().build();
@@ -137,7 +128,7 @@ class WebService {
         queueRequest(request);
     }
 
-    void getNonce(DeviceSerial serial, ResponseListener response) {
+    void getNonce(DeviceSerial serial, WebRequestListener response) {
         String url = baseUrl + "/nonces";
 
         // query
@@ -159,53 +150,5 @@ class WebService {
 
     void cancelAllRequests() {
         queue.cancelAll(this);
-    }
-
-    // this class is to log out the response for all requests
-    public static class ResponseListener {
-        InternalResponseListener response = new InternalResponseListener();
-        InternalErrorListener error = new InternalErrorListener();
-
-        public void onResponse(JSONObject jsonObject) {
-
-        }
-
-        public void onError(VolleyError error) {
-
-        }
-
-        class InternalResponseListener implements Response.Listener<JSONObject> {
-            @Override public void onResponse(JSONObject jsonObject) {
-                printResponse(jsonObject);
-                ResponseListener.this.onResponse(jsonObject);
-            }
-
-            void printResponse(JSONObject jsonObject) {
-                if (Timber.treeCount() == 0) return;
-                try {
-                    String message = jsonObject.toString(2);
-                    d("response %s", message);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        class InternalErrorListener implements Response.ErrorListener {
-            @Override public void onErrorResponse(VolleyError error) {
-                printError(error);
-                ResponseListener.this.onError(error);
-            }
-
-            void printError(VolleyError error) {
-                if (Timber.treeCount() == 0) return;
-                if (error.networkResponse != null) {
-                    String responseData = "";
-                    if (error.networkResponse.data != null) responseData = new String(error.networkResponse.data);
-                    d("\nerror %d, %s", error.networkResponse.statusCode, responseData);
-                    // TODO: 19.12.2019 now dont have to log this out in callbacks.
-                }
-            }
-        }
     }
 }
