@@ -10,7 +10,7 @@ import timber.log.Timber;
 
 import static com.highmobility.hmkit.HMLog.d;
 
-// this class is to log out the response for all requests
+// This class logs out the response for all requests
 class WebRequestListener {
     InternalResponseListener response = new InternalResponseListener();
     InternalErrorListener error = new InternalErrorListener();
@@ -53,7 +53,6 @@ class WebRequestListener {
                 if (error.networkResponse.data != null)
                     responseData = new String(error.networkResponse.data);
                 d("\nerror %d, %s", error.networkResponse.statusCode, responseData);
-                // TODO: 19.12.2019 now dont have to log this out in callbacks.
             }
         }
     }
