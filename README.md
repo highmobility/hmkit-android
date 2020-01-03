@@ -1,4 +1,43 @@
-This is the HMKit Android project.
+# HMKit Android
+
+HMKit Android provides access to vehicles via Bluetooth or Telematics.
+
+### Requirements
+
+* Android 5.0 Lollipop or higher.
+
+### Install
+
+Releases are pushed to our jfrog artifactory. To include hmkit-android in your project, add to the 
+build.gradle:
+
+```
+repositories {
+  maven { url "http://jfrog.high-mobility.com/artifactory/gradle-release-local/" }
+}
+
+dependencies {
+  implementation('com.highmobility:hmkit-android:2.0.0@aar') {
+      transitive=true
+    }
+}
+```
+
+Please not Java 1.8 support is required:
+
+```
+android {
+  ...
+
+  compileOptions {
+      targetCompatibility 1.8
+      sourceCompatibility 1.8
+  }
+}
+```
+
+Find the latest version name in [the developer center](https://develop.high-mobility.net/downloads/).
+
 
 ### Setup
 
@@ -18,9 +57,7 @@ Supported devices: Lollipop 5.0+ with chipset support for BLE peripheral mode, h
 
 #### Pre checks
 
-
-* run the unit-tests in hmkit-android
-* run the instrumentation tests in hm-android-bluetooth-auto-api-explorer submodule.
+* run the unit and instrumentation tests:
 ```./gradlew test && ./gradlew cAT```
 
 This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypto and hmkit-utils.
