@@ -23,7 +23,7 @@ dependencies {
 }
 ```
 
-Please not Java 1.8 support is required:
+Please note Java 1.8 support is required:
 
 ```
 android {
@@ -51,7 +51,7 @@ cd hmkit-android/src/main/jni && ndk-build && cd -
 * Build hmkit-android module.
 * If there are errors: Try `Gradle clean`, `File > Invalidate caches and restart`.
 
-Supported devices: Lollipop 5.0+ with chipset support for BLE peripheral mode, https://stackoverflow.com/questions/26482611/chipsets-devices-supporting-android-5-ble-peripheral-mode https://altbeacon.github.io/android-beacon-library/beacon-transmitter-devices.html - list of some devices.
+Supported devices: Lollipop 5.0+. For Bluetooth, chipset support for BLE peripheral mode is required. https://stackoverflow.com/questions/26482611/chipsets-devices-supporting-android-5-ble-peripheral-mode https://altbeacon.github.io/android-beacon-library/beacon-transmitter-devices.html - list of some devices.
 
 ### Release
 
