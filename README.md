@@ -61,6 +61,7 @@ Supported devices: Lollipop 5.0+. For Bluetooth, chipset support for BLE periphe
 ```./gradlew test && ./gradlew cAT```
 
 This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypto and hmkit-utils.
+AutoAPI project is also present.
 
 For a release, update the "version = 1.5.0" in all of the deploy.settings files(if needed).
 

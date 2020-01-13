@@ -1,6 +1,26 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.13.0"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+        classpath 'digital.wup:android-maven-publish:3.6.3'
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-android-extensions"
+// deploy
+apply plugin: "maven"
+apply plugin: "com.jfrog.artifactory"
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'digital.wup.android-maven-publish'
+
+repositories {
+    jcenter()
+}
 
 def artifact = new Properties()
 artifact.load(new FileInputStream("$projectDir/deploy.settings"))
@@ -59,14 +79,14 @@ android {
 }
 
 dependencies {
-    api project(':hmkit-core-jni')
-
     if (project.releaseType == 0) {
+        api project(':hmkit-core-jni')
         implementation project(':hmkit-crypto')
         implementation project(':hmkit-utils')
     } else {
-        implementation deps.crypto
-        implementation deps.utils
+        api deps.crypto
+        api deps.utils
+        api deps.corejni
     }
 
     implementation deps.volley
@@ -89,9 +109,6 @@ dependencies {
 
 if (project.releaseType > 0) {
     // deploy
-    apply plugin: 'com.jfrog.artifactory'
-    apply plugin: 'digital.wup.android-maven-publish'
-
     def repo = project.hasProperty("repo") ? project.property("repo") : artifact.repo
 
     task sourcesJar(type: Jar) {
@@ -111,13 +128,13 @@ if (project.releaseType > 0) {
 
 // artifactory
     artifactory {
-        contextUrl = System.properties['hmArtifactoryUrl']
+        contextUrl = hmArtifactoryUrl
 
         publish {
             repository {
                 repoKey = repo
-                username = System.properties['hmArtifactoryPublishUser']
-                password = System.properties['hmArtifactoryPublishPassword']
+                username = hmArtifactoryPublishUser
+                password = hmArtifactoryPublishPassword
                 maven = true
             }
 
