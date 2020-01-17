@@ -1,32 +1,67 @@
-This is the HMKit Android project.
+# HMKit Android
+
+HMKit Android provides access to vehicles via Bluetooth or Telematics.
+
+### Requirements
+
+* Android 5.0 Lollipop or higher.
+
+### Install
+
+Releases are pushed to our jfrog artifactory. To include hmkit-android in your project, add to the 
+build.gradle:
+
+```
+repositories {
+  maven { url "http://jfrog.high-mobility.com/artifactory/gradle-release-local/" }
+}
+
+dependencies {
+  implementation('com.highmobility:hmkit-android:2.0.0@aar') {
+      transitive=true
+    }
+}
+```
+
+Please note Java 1.8 support is required:
+
+```
+android {
+  ...
+
+  compileOptions {
+      targetCompatibility 1.8
+      sourceCompatibility 1.8
+  }
+}
+```
+
+Find the latest version name in [the developer center](https://develop.high-mobility.net/downloads/).
+
 
 ### Setup
 
 * git submodule update --init --recursive
 * import the Gradle project.
+* Build the core:  
+Install NDK through Android SDK Manager(Tools tab). Then:
+```
+cd hmkit-android/src/main/jni && ndk-build && cd -
+```
 * Build hmkit-android module.
 * If there are errors: Try `Gradle clean`, `File > Invalidate caches and restart`.
 
-Supported devices: Lollipop 5.0+ with chipset support for BLE peripheral mode, https://stackoverflow.com/questions/26482611/chipsets-devices-supporting-android-5-ble-peripheral-mode https://altbeacon.github.io/android-beacon-library/beacon-transmitter-devices.html - list of some devices.
-
-### Compile core
-
-To compile the bt core, you need to install the NDK through Android SDK Manager(in SDK tools tab).
-
-```
-cd {PROJECT_DIR}/hmkit-android/src/main/jni 
-ndk-build
-```
+Supported devices: Lollipop 5.0+. For Bluetooth, chipset support for BLE peripheral mode is required. https://stackoverflow.com/questions/26482611/chipsets-devices-supporting-android-5-ble-peripheral-mode https://altbeacon.github.io/android-beacon-library/beacon-transmitter-devices.html - list of some devices.
 
 ### Release
 
 #### Pre checks
 
-* run the unit-tests in
-* run the instrumentation tests in hmkit-sandbox repository (It is preferred to release from 
-hmkit-sandbox repository for that reason)
+* run the unit and instrumentation tests:
+```./gradlew test && ./gradlew cAT```
 
 This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypto and hmkit-utils.
+AutoAPI project is also present.
 
 For a release, update the "version = 1.5.0" in all of the deploy.settings files(if needed).
 

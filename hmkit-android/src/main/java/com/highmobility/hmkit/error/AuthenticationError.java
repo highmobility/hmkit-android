@@ -23,40 +23,28 @@
  */
 package com.highmobility.hmkit.error;
 
-/**
- * Created by root on 6/22/17.
- */
-
-public class DownloadAccessCertificateError {
+public class AuthenticationError {
     public enum Type {
-        /// Internal error
-        INTERNAL_ERROR,
-        /// HTTP ERROR occurred. Result code is included in field code
-        HTTP_ERROR,
-        /// Invalid data from the server.
-        INVALID_SERVER_RESPONSE,
-        /// There is a problem connecting to the server
-        NO_CONNECTION,
-        /// Server returned an error
-        SERVER_ERROR
+        NONE,
+        INTERNAL_ERROR
     }
 
-    private final DownloadAccessCertificateError.Type type;
-    final int code;
-    final String message;
+    private final Type errorType;
+    private final int errorCode;
+    private final String message;
 
-    public DownloadAccessCertificateError(DownloadAccessCertificateError.Type type, int errorCode, String message) {
-        this.code = errorCode;
-        this.type = type;
+    public AuthenticationError(Type type, int errorCode, String message) {
+        this.errorCode = errorCode;
+        this.errorType = type;
         this.message = message;
     }
 
-    public DownloadAccessCertificateError.Type getType() {
-        return type;
+    public Type getType() {
+        return errorType;
     }
 
     public int getCode() {
-        return code;
+        return errorCode;
     }
 
     public String getMessage() {

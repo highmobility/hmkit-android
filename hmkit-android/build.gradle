@@ -1,6 +1,26 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.13.0"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+        classpath 'digital.wup:android-maven-publish:3.6.3'
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-android-extensions"
+// deploy
+apply plugin: "maven"
+apply plugin: "com.jfrog.artifactory"
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'digital.wup.android-maven-publish'
+
+repositories {
+    jcenter()
+}
 
 def artifact = new Properties()
 artifact.load(new FileInputStream("$projectDir/deploy.settings"))
@@ -8,7 +28,6 @@ artifact.load(new FileInputStream("$projectDir/deploy.settings"))
 version artifact.version
 
 android {
-    testOptions.unitTests.includeAndroidResources = true
     compileSdkVersion ver.compileSdk
 
     defaultConfig {
@@ -22,6 +41,8 @@ android {
             moduleName = "hmbtcore"
             ldLibs "log"
         }
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -31,14 +52,13 @@ android {
         }
     }
 
-    android {
-        lintOptions {
-            abortOnError false
-        }
-        testOptions {
-            unitTests {
-                includeAndroidResources = true
-            }
+    lintOptions {
+        abortOnError false
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
         }
     }
 
@@ -46,7 +66,7 @@ android {
         abi {
             enable true
             reset()
-            include 'x86', 'armeabi-v7a'
+            include 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
             universalApk true
         }
     }
@@ -60,10 +80,13 @@ android {
 
 dependencies {
     if (project.releaseType == 0) {
+        api project(':hmkit-core-jni')
         implementation project(':hmkit-crypto')
         implementation project(':hmkit-utils')
     } else {
-        implementation deps.crypto
+        api deps.crypto
+        api deps.utils
+        api deps.corejni
     }
 
     implementation deps.volley
@@ -72,20 +95,24 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
+    // its not easy to use ndk with junit(should build separate binary)
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.robolectric:robolectric:4.0.2'
     testImplementation 'androidx.test:core:1.1.0'
+
+    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
+    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
+    androidTestImplementation 'androidx.test:rules:1.1.0-alpha4'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
+    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.1.0'
 }
 
 if (project.releaseType > 0) {
     // deploy
-    apply plugin: 'com.jfrog.artifactory'
-    apply plugin: 'digital.wup.android-maven-publish'
-
     def repo = project.hasProperty("repo") ? project.property("repo") : artifact.repo
 
     task sourcesJar(type: Jar) {
-        classifier = 'sources'
+        archiveClassifier.set('sources')
         from android.sourceSets.main.java.srcDirs
     }
 
@@ -101,13 +128,13 @@ if (project.releaseType > 0) {
 
 // artifactory
     artifactory {
-        contextUrl = System.properties['hmArtifactoryUrl']
+        contextUrl = hmArtifactoryUrl
 
         publish {
             repository {
                 repoKey = repo
-                username = System.properties['hmArtifactoryPublishUser']
-                password = System.properties['hmArtifactoryPublishPassword']
+                username = hmArtifactoryPublishUser
+                password = hmArtifactoryPublishPassword
                 maven = true
             }
 

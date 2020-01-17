@@ -1,12 +1,15 @@
-[submodule "high-mobility-bt-core"]
-	path = high-mobility-bt-core
-	url = https://bitbucket.org/highmobility/high-mobility-bt-core.git
-[submodule "crypto-c"]
-	path = crypto-c
-	url = https://bitbucket.org/highmobility/crypto-c.git
 [submodule "hm-java-crypto"]
 	path = hm-java-crypto
 	url = git@github.com:highmobility/hm-java-crypto.git
 [submodule "hm-android-basic-oauth"]
 	path = hm-android-basic-oauth
 	url = https://github.com/highmobility/hm-android-basic-oauth.git
+[submodule "hm-java-core-jni"]
+	path = hm-java-core-jni
+	url = git@bitbucket.org:highmobility/hm-java-core-jni.git
+[submodule "hm-java-utils"]
+	path = hm-java-utils
+	url = git@github.com:highmobility/hm-java-utils.git
+[submodule "hm-android-bluetooth-auto-api-explorer"]
+	path = hm-android-bluetooth-auto-api-explorer
+	url = git@github.com:highmobility/hm-android-bluetooth-auto-api-explorer.git

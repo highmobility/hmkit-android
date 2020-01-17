@@ -21,45 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.highmobility.hmkit.error;
+package com.highmobility.hmkit;
 
-/**
- * Created by root on 6/22/17.
- */
+public enum ContentType {
+    UNKNOWN(0), AUTO_API(1), VSS(2);
 
-public class DownloadAccessCertificateError {
-    public enum Type {
-        /// Internal error
-        INTERNAL_ERROR,
-        /// HTTP ERROR occurred. Result code is included in field code
-        HTTP_ERROR,
-        /// Invalid data from the server.
-        INVALID_SERVER_RESPONSE,
-        /// There is a problem connecting to the server
-        NO_CONNECTION,
-        /// Server returned an error
-        SERVER_ERROR
+    public static ContentType fromInt(int intValue) {
+        ContentType[] values = ContentType.values();
+
+        for (int i = 0; i < values.length; i++) {
+            ContentType state = values[i];
+            if (state.asInt() == intValue) {
+                return state;
+            }
+        }
+
+        throw new IllegalArgumentException();
     }
 
-    private final DownloadAccessCertificateError.Type type;
-    final int code;
-    final String message;
+    private int value;
 
-    public DownloadAccessCertificateError(DownloadAccessCertificateError.Type type, int errorCode, String message) {
-        this.code = errorCode;
-        this.type = type;
-        this.message = message;
+    ContentType(int value) {
+        this.value = value;
     }
 
-    public DownloadAccessCertificateError.Type getType() {
-        return type;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
+    public int asInt() {
+        return value;
     }
 }

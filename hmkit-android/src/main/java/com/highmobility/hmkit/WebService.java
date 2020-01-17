@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2014- High-Mobility GmbH (https://high-mobility.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.highmobility.hmkit;
 
 import android.content.Context;
@@ -5,7 +28,6 @@ import android.net.Uri;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.toolbox.Volley;
 import com.highmobility.crypto.Crypto;
 import com.highmobility.crypto.value.DeviceSerial;
@@ -13,17 +35,10 @@ import com.highmobility.crypto.value.Issuer;
 import com.highmobility.crypto.value.PrivateKey;
 import com.highmobility.value.Bytes;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
-
-import timber.log.Timber;
-
-import static com.highmobility.hmkit.HMLog.d;
 
 class WebService {
     private static final String defaultUrl = "https://sandbox.api.high-mobility.com";
@@ -39,10 +54,12 @@ class WebService {
 
     private String baseUrl;
     private final RequestQueue queue;
+    private final Crypto crypto;
 
-    WebService(Context context, Issuer issuer, @Nullable String customUrl) {
+    WebService(Context context, Crypto crypto, Issuer issuer, @Nullable String customUrl) {
         // ignoreSslErrors();
         queue = Volley.newRequestQueue(context);
+        this.crypto = crypto;
         setIssuer(issuer, customUrl);
     }
 
@@ -62,8 +79,7 @@ class WebService {
 
     void downloadOauthAccessToken(String url, String code, String redirectUri,
                                   String clientId, String jwt,
-                                  final Response.Listener<JSONObject> response,
-                                  final Response.ErrorListener error) {
+                                  final WebRequestListener response) {
         Uri uri = Uri.parse(url).buildUpon().build();
         Map<String, String> params = new HashMap();
 
@@ -75,14 +91,7 @@ class WebService {
         params.put("code_verifier", jwt);
 
         WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        printResponse(jsonObject);
-                        response.onResponse(jsonObject);
-
-                    }
-                }, error);
+                response.response, response.error);
 
         queueRequest(request);
     }
@@ -90,8 +99,7 @@ class WebService {
     void refreshOauthAccessToken(String url,
                                  String clientId,
                                  String refreshToken,
-                                 final Response.Listener<JSONObject> response,
-                                 final Response.ErrorListener error) {
+                                 WebRequestListener response) {
         Uri uri = Uri.parse(url).buildUpon().build();
         Map<String, String> params = new HashMap();
 
@@ -100,28 +108,18 @@ class WebService {
         params.put("refresh_token", refreshToken);
 
         WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        printResponse(jsonObject);
-                        response.onResponse(jsonObject);
-
-                    }
-                }, error);
+                response.response, response.error);
 
         queueRequest(request);
-
     }
 
     void requestAccessCertificate(final String accessToken,
                                   PrivateKey privateKey,
                                   final DeviceSerial serialNumber,
-                                  final Response.Listener<JSONObject> response,
-                                  Response.ErrorListener error) throws IllegalArgumentException {
+                                  WebRequestListener response) {
         String url = baseUrl + "/access_certificates";
         Bytes accessTokenBytes = new Bytes(accessToken.getBytes());
-
-        final String signature = Crypto.sign(accessTokenBytes, privateKey).getBase64();
+        final String signature = crypto.sign(accessTokenBytes, privateKey).getBase64();
 
         Uri uri = Uri.parse(url).buildUpon().build();
 
@@ -131,20 +129,13 @@ class WebService {
         params.put("signature", signature);
 
         WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        printResponse(jsonObject);
-                        response.onResponse(jsonObject);
-
-                    }
-                }, error);
+                response.response, response.error);
 
         queueRequest(request);
     }
 
-    void sendTelematicsCommand(Bytes command, DeviceSerial serial, Issuer issuer, final Response
-            .Listener<JSONObject> response, Response.ErrorListener error) {
+    void sendTelematicsCommand(Bytes command, DeviceSerial serial, Issuer issuer,
+                               WebRequestListener response) {
         String url = baseUrl + "/telematics_commands";
 
         Uri uri = Uri.parse(url).buildUpon().build();
@@ -155,19 +146,12 @@ class WebService {
         params.put("data", command.getBase64());
 
         WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        printResponse(jsonObject);
-                        response.onResponse(jsonObject);
-                    }
-                }, error);
+                response.response, response.error);
 
         queueRequest(request);
     }
 
-    void getNonce(DeviceSerial serial, final Response.Listener<JSONObject> response, Response
-            .ErrorListener error) {
+    void getNonce(DeviceSerial serial, WebRequestListener response) {
         String url = baseUrl + "/nonces";
 
         // query
@@ -176,13 +160,7 @@ class WebService {
         params.put("serial_number", serial.getHex());
 
         WebRequest request = new WebRequest(Request.Method.POST, uri.toString(), params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        printResponse(jsonObject);
-                        response.onResponse(jsonObject);
-                    }
-                }, error);
+                response.response, response.error);
 
         queueRequest(request);
     }
@@ -195,15 +173,5 @@ class WebService {
 
     void cancelAllRequests() {
         queue.cancelAll(this);
-    }
-
-    void printResponse(JSONObject jsonObject) {
-        if (Timber.treeCount() == 0) return;
-        try {
-            String message = jsonObject.toString(2);
-            d("response %s", message);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 }

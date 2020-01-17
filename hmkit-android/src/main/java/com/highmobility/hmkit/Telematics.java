@@ -1,8 +1,30 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2014- High-Mobility GmbH (https://high-mobility.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.highmobility.hmkit;
 
 import android.util.Base64;
 
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.highmobility.crypto.AccessCertificate;
 import com.highmobility.crypto.value.DeviceSerial;
@@ -45,12 +67,13 @@ public class Telematics extends Core.Telematics {
     /**
      * Send a command to a device via telematics.
      *
-     * @param command  the bytes to send to the device
-     * @param serial   serial of the device
-     * @param callback A {@link CommandCallback} object that is invoked with the command result.
+     * @param contentType The content type. See {@link ContentType} for possible types.
+     * @param command     the bytes to send to the device
+     * @param serial      serial of the device
+     * @param callback    A {@link CommandCallback} object that is invoked with the command result.
      */
-    public void sendCommand(final Bytes command, DeviceSerial serial, final CommandCallback
-            callback) {
+    public void sendCommand(final ContentType contentType, final Bytes command, DeviceSerial serial,
+                            final CommandCallback callback) {
         core.start();
         if (command.getLength() > Constants.MAX_COMMAND_LENGTH) {
             TelematicsError error = new TelematicsError(TelematicsError.Type.COMMAND_TOO_BIG, 0,
@@ -74,8 +97,7 @@ public class Telematics extends Core.Telematics {
                 threadManager);
         activeCommands.add(activeCommand);
 
-        webService.getNonce(certificate.getProviderSerial(), new Response
-                .Listener<JSONObject>() {
+        webService.getNonce(certificate.getProviderSerial(), new WebRequestListener() {
             @Override
             public void onResponse(JSONObject jsonResponse) {
                 try {
@@ -87,34 +109,45 @@ public class Telematics extends Core.Telematics {
                         public void run() {
                             interactingCommand = activeCommand;
                             core.HMBTCoreSendTelematicsCommand(certificate.getGainerSerial()
-                                    .getByteArray(), nonce, command.getLength(), command
-                                    .getByteArray());
+                                            .getByteArray(), nonce, contentType.asInt(),
+                                    command.getLength(), command.getByteArray());
                         }
                     });
                 } catch (JSONException e) {
                     activeCommand.dispatchError(TelematicsError.Type
-                                    .INVALID_SERVER_RESPONSE, 0,
-                            "Invalid nonce response from server.");
+                            .INVALID_SERVER_RESPONSE, 0, "Invalid nonce response from server.");
                 }
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+
+            @Override public void onError(VolleyError error) {
                 if (error.networkResponse != null) {
                     activeCommand.dispatchError(TelematicsError.Type.HTTP_ERROR, error
                             .networkResponse.statusCode, new String(error.networkResponse.data));
                 } else {
-                    activeCommand.dispatchError(TelematicsError.Type.NO_CONNECTION, 0, WebService.NO_CONNECTION_ERROR);
+                    activeCommand.dispatchError(TelematicsError.Type.NO_CONNECTION, 0,
+                            WebService.NO_CONNECTION_ERROR);
                 }
             }
         });
+    }
+
+    /**
+     * Send a command to a device via telematics.
+     *
+     * @param command  the bytes to send to the device
+     * @param serial   serial of the device
+     * @param callback A {@link CommandCallback} object that is invoked with the command result.
+     */
+    public void sendCommand(final Bytes command, DeviceSerial serial, final CommandCallback
+            callback) {
+        sendCommand(ContentType.AUTO_API, command, serial, callback);
     }
 
     @Override void onTelematicsCommandEncrypted(byte[] serial, byte[] issuer, byte[] command) {
         final TelematicsCommand commandSent = interactingCommand; // need this for command response
         webService.sendTelematicsCommand(new Bytes(command), new DeviceSerial(serial),
                 new Issuer(issuer),
-                new Response.Listener<JSONObject>() {
+                new WebRequestListener() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
                         try {
@@ -152,10 +185,8 @@ public class Telematics extends Core.Telematics {
                                     "Invalid response from server.");
                         }
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
+
+                    @Override public void onError(VolleyError error) {
                         if (error.networkResponse != null) {
                             try {
                                 JSONObject json = new JSONObject(new String(error.networkResponse

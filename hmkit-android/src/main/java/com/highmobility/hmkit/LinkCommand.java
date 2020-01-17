@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2014- High-Mobility GmbH (https://high-mobility.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.highmobility.hmkit;
 
 import com.highmobility.hmkit.error.LinkError;
@@ -24,37 +47,45 @@ class LinkCommand {
         commandStartTime = Calendar.getInstance().getTimeInMillis();
     }
 
-    void dispatchResult(byte[] response) {
-        final LinkError.Type errorCode = getErrorCode(response);
-        if (errorCode == LinkError.Type.NONE) {
-            cancelTimeoutTimer();
-            finished = true;
-            threadManager.postToMain(new Runnable() {
-                @Override
-                public void run() {
-                    commandCallback.onCommandSent();
-                }
-            });
-        } else {
-            dispatchError(errorCode, 0, "");
-        }
-    }
-
-    void dispatchError(final LinkError.Type type, final int errorCode, final String message) {
+    void dispatchResponse(byte[] response) {
         cancelTimeoutTimer();
         finished = true;
+        threadManager.postToMain(new Runnable() {
+            @Override
+            public void run() {
+                if (commandCallbackExists()) {
+                    commandCallback.onCommandSent();
+                }
+            }
+        });
+    }
 
-        if (commandCallback == null) {
-            e("cannot dispatch the result: no callback");
-            return;
-        }
+    void dispatchError(final int error) {
+        final LinkError.Type errorType = getErrorType(error);
+        dispatchError(errorType, error, getErrorMessage(errorType));
+    }
+
+    private void dispatchError(final LinkError.Type error, final int code, final String message) {
+        cancelTimeoutTimer();
+        finished = true;
 
         threadManager.postToMain(new Runnable() {
             @Override
             public void run() {
-                commandCallback.onCommandFailed(new LinkError(type, errorCode, message));
+                if (commandCallbackExists()) {
+                    commandCallback.onCommandFailed(new LinkError(error, code, message));
+                }
             }
         });
+    }
+
+    private boolean commandCallbackExists() {
+        if (commandCallback == null) {
+            e("cannot dispatch the result: no callback");
+            return false;
+        }
+
+        return true;
     }
 
     void startTimeoutTimer() {
@@ -74,25 +105,31 @@ class LinkCommand {
         }
     }
 
-    static LinkError.Type getErrorCode(byte[] bytes) {
-        if (bytes == null || bytes.length < 2) return LinkError.Type.NONE;
-        if (bytes[0] != 0x02) return LinkError.Type.NONE;
-        return errorCodeForByte(bytes[1]);
-    }
-
-    static LinkError.Type errorCodeForByte(byte errorByte) {
-        switch (errorByte) {
-            case 0x05:
+    static LinkError.Type getErrorType(int errorType) {
+        switch (errorType) {
+            case 5:
                 return LinkError.Type.STORAGE_FULL;
-            case 0x09:
+            case 9:
                 return LinkError.Type.TIME_OUT;
-            case 0x07:
-                return LinkError.Type.UNAUTHORIZED;
-            case 0x06:
-            case 0x08:
+            case 7:
+            case 6:
+            case 8:
                 return LinkError.Type.UNAUTHORIZED;
             default:
                 return LinkError.Type.INTERNAL_ERROR;
+        }
+    }
+
+    static String getErrorMessage(LinkError.Type type) {
+        switch (type) {
+            case STORAGE_FULL:
+                return "Storage is full";
+            case TIME_OUT:
+                return "Time out";
+            case UNAUTHORIZED:
+                return "Unauthorised";
+            default:
+                return "Internal error";
         }
     }
 }

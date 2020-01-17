@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2014- High-Mobility GmbH (https://high-mobility.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.highmobility.hmkit;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -24,7 +47,7 @@ class WebRequest extends Request<JSONObject> {
 
     static {
         headers = new HashMap<>();
-        headers.put("Content-Type", "application/x-www-form-urlencoded");
+        headers.put("Content-Type", "application/json");
     }
 
     private Response.Listener<JSONObject> listener;
@@ -33,11 +56,10 @@ class WebRequest extends Request<JSONObject> {
     void print() {
         if (Timber.treeCount() == 0) return;
         try {
-            byte[] body = getBody();
-            String bodyString = body != null ? "\nbody:\n" + new String(getBody()) : "";
             JSONObject headers = new JSONObject(getHeaders());
-            String log = "\n" + getUrl() + "\nheaders:\n" + headers.toString(2) + bodyString;
-            d(URLDecoder.decode(log, "ASCII"));
+            String log = "\n" + URLDecoder.decode(getUrl(), "ASCII") +
+                    "\nheaders:\n" + headers + "\nbody:\n" + params;
+            d(log);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -56,8 +78,8 @@ class WebRequest extends Request<JSONObject> {
                 DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
     }
 
-    protected Map<String, String> getParams() {
-        return params;
+    @Override public byte[] getBody() {
+        return new JSONObject(params).toString().getBytes();
     }
 
     @Override public Map<String, String> getHeaders() {

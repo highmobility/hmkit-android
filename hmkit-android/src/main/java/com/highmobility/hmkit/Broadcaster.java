@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2014- High-Mobility GmbH (https://high-mobility.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.highmobility.hmkit;
 
 import android.bluetooth.BluetoothDevice;
@@ -319,7 +342,7 @@ public class Broadcaster extends Core.Broadcaster {
      */
     void terminate() throws IllegalStateException {
         if (getLinks().size() > 0) {
-            // re startBle(new device cert) would mess up communication with previous links
+            // restarting ble(new device cert) would mess up communication with previous links
             throw new IllegalStateException("Broadcaster cannot terminate if a connected " +
                     "link exists. Disconnect from all of the links.");
         }
@@ -343,7 +366,6 @@ public class Broadcaster extends Core.Broadcaster {
         if (link == null) return false;
 
         links.remove(link);
-        link.setState(Link.State.DISCONNECTED);
 
         // invoke the listener listener
         if (listener != null) {
@@ -362,10 +384,17 @@ public class Broadcaster extends Core.Broadcaster {
         return true;
     }
 
-    @Override boolean onCommandResponseReceived(HMDevice device, byte[] data) {
+    @Override boolean onCommandResponse(HMDevice device, byte[] data) {
         Link link = getLinkForMac(device.getMac());
         if (link == null) return false;
-        link.onCommandResponseReceived(data);
+        link.onCommandResponse(data);
+        return true;
+    }
+
+    @Override boolean onCommandErrorResponse(HMDevice device, int errorType) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onCommandError(errorType);
         return true;
     }
 
@@ -380,6 +409,27 @@ public class Broadcaster extends Core.Broadcaster {
         Link link = getLinkForMac(device.getMac());
         if (link == null) return false;
         link.onRevokeResponse(data, result);
+        return true;
+    }
+
+    @Override boolean onRevokeIncoming(HMDevice device) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onRevokeIncoming();
+        return false;
+    }
+
+    @Override boolean onErrorCommand(HMDevice device, int commandId, int errorType) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onErrorCommand(commandId, errorType);
+        return true;
+    }
+
+    @Override boolean onRegisterCertificate(byte[] serial) {
+        Link link = getLinkForSerial(serial);
+        if (link == null) return false;
+        link.onRegisterCertificate();
         return true;
     }
 
@@ -401,10 +451,16 @@ public class Broadcaster extends Core.Broadcaster {
     private ConnectedLink getLinkForMac(byte[] mac) {
         for (int i = 0; i < links.size(); i++) {
             ConnectedLink link = links.get(i);
+            if (Arrays.equals(link.getAddressBytes(), mac)) return link;
+        }
 
-            if (Arrays.equals(link.getAddressBytes(), mac)) {
-                return link;
-            }
+        return null;
+    }
+
+    private ConnectedLink getLinkForSerial(byte[] serial) {
+        for (int i = 0; i < links.size(); i++) {
+            ConnectedLink link = links.get(i);
+            if (link.getSerial().equals(serial)) return link;
         }
 
         return null;

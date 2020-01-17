@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2014- High-Mobility GmbH (https://high-mobility.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.highmobility.hmkit;
 
 import android.bluetooth.BluetoothDevice;
@@ -15,20 +38,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class Scanner extends Core.Scanner implements SharedBleListener {
+import static com.highmobility.hmkit.HMLog.d;
+
+class Scanner extends Core.Scanner {
     private final Core core;
     private final SharedBle ble;
     private final ThreadManager threadManager;
     private final Storage storage;
 
-    /**
-     * Called when ble state has changed to available or not. Not available state can be called
-     * multiple times.
-     *
-     * @param available true if bluetooth is available
-     */
-    @Override public void bluetoothChangedToAvailable(boolean available) {
+    private final BleListener bleListener = new BleListener();
 
+    private class BleListener implements SharedBleListener {
+        // we don't want this method to be publicly available, so we create the class here
+        @Override public void bluetoothChangedToAvailable(boolean available) {
+            d("bluetoothChangedToAvailable(): available = %b", available);
+
+        }
     }
 
     public enum State {
@@ -37,7 +62,7 @@ class Scanner extends Core.Scanner implements SharedBleListener {
 
     Map<byte[], byte[]> CaPublicKeyMap = new HashMap<>();
 
-    List<ScannedLink> devices = new ArrayList<>();
+    List<ScannedLink> links = new ArrayList<>();
     ScannerListener listener;
 
     State state = State.IDLE;
@@ -55,7 +80,7 @@ class Scanner extends Core.Scanner implements SharedBleListener {
     }
 
     boolean initialise() {
-        ble.addListener(this);
+        ble.addListener(bleListener);
         return true;
     }
 
@@ -63,7 +88,7 @@ class Scanner extends Core.Scanner implements SharedBleListener {
      * @return The links currently in proximity
      */
     public List<ScannedLink> getLinks() {
-        return devices;
+        return links;
     }
 
     /**
@@ -137,7 +162,7 @@ class Scanner extends Core.Scanner implements SharedBleListener {
 
         // scanner could have already initialised the ble, then we need to add the listener and
         // check for initial ble state.
-        ble.addListener(this);
+        ble.addListener(bleListener);
         if (ble.isBluetoothOn() == false) setState(State.BLUETOOTH_UNAVAILABLE);
     }
 
@@ -193,7 +218,7 @@ class Scanner extends Core.Scanner implements SharedBleListener {
         addAuthenticatingMac(mac);
         BluetoothDevice bluetoothDevice = ble.getAdapter().getRemoteDevice(mac);
 
-        for (ScannedLink existingDevice : devices) {
+        for (ScannedLink existingDevice : links) {
             if (existingDevice.btDevice.getAddress().equals(bluetoothDevice.getAddress())) {
                 existingDevice.connect();
                 return;
@@ -201,7 +226,7 @@ class Scanner extends Core.Scanner implements SharedBleListener {
         }
 
         ScannedLink device = new ScannedLink(ble, core, threadManager, bluetoothDevice);
-        devices.add(device);
+        links.add(device);
         device.connect();
     }
 
@@ -211,7 +236,7 @@ class Scanner extends Core.Scanner implements SharedBleListener {
 
         device.disconnect();
         removeAuthenticatingMac(mac);
-        devices.remove(device);
+        links.remove(device);
     }
 
     boolean onDeviceExitedProximity(byte[] mac) {
@@ -220,7 +245,6 @@ class Scanner extends Core.Scanner implements SharedBleListener {
         device.onDeviceExitedProximity();
 
         if (listener != null) {
-
             threadManager.postToMain(new Runnable() {
                 @Override
                 public void run() {
@@ -231,7 +255,7 @@ class Scanner extends Core.Scanner implements SharedBleListener {
         }
 
         removeAuthenticatingMac(device.getAddressBytes());
-        devices.remove(device);
+        links.remove(device);
         return true;
     }
 
@@ -267,10 +291,17 @@ class Scanner extends Core.Scanner implements SharedBleListener {
         return true;
     }
 
-    boolean onCommandResponseReceived(HMDevice device, byte[] data) {
+    boolean onCommandResponse(HMDevice device, byte[] data) {
         ScannedLink scannedLink = getLinkForMac(device.getMac());
         if (scannedLink == null) return false;
-        scannedLink.onCommandResponseReceived(data);
+        scannedLink.onCommandResponse(data);
+        return true;
+    }
+
+    @Override boolean onCommandErrorResponse(HMDevice device, int errorType) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onCommandError(errorType);
         return true;
     }
 
@@ -278,6 +309,27 @@ class Scanner extends Core.Scanner implements SharedBleListener {
         Link link = getLinkForMac(device.getMac());
         if (link == null) return false;
         link.onRevokeResponse(data, result);
+        return true;
+    }
+
+    @Override boolean onErrorCommand(HMDevice device, int commandId, int errorType) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onErrorCommand(commandId, errorType);
+        return true;
+    }
+
+    @Override boolean onRegisterCertificate(byte[] serial) {
+        Link link = getLinkForSerial(serial);
+        if (link == null) return false;
+        link.onRegisterCertificate();
+        return false;
+    }
+
+    @Override boolean onRevokeIncoming(HMDevice device) {
+        Link link = getLinkForMac(device.getMac());
+        if (link == null) return false;
+        link.onRevokeIncoming();
         return true;
     }
 
@@ -299,11 +351,18 @@ class Scanner extends Core.Scanner implements SharedBleListener {
     }
 
     private ScannedLink getLinkForMac(byte[] mac) {
-        for (ScannedLink existingDevice : devices) {
-            if (Arrays.equals(ByteUtils.bytesFromMacString(existingDevice.btDevice.getAddress()),
-                    mac)) {
-                return existingDevice;
-            }
+        for (int i = 0; i < links.size(); i++) {
+            ScannedLink link = links.get(i);
+            if (Arrays.equals(link.getAddressBytes(), mac)) return link;
+        }
+
+        return null;
+    }
+
+    private ScannedLink getLinkForSerial(byte[] serial) {
+        for (int i = 0; i < links.size(); i++) {
+            ScannedLink link = links.get(i);
+            if (link.getSerial().equals(serial)) return link;
         }
 
         return null;

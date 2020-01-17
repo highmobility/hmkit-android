@@ -1,9 +1,33 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2014- High-Mobility GmbH (https://high-mobility.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.highmobility.hmkit;
 
 import android.bluetooth.BluetoothDevice;
 
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.crypto.value.DeviceSerial;
+import com.highmobility.hmkit.error.AuthenticationError;
 import com.highmobility.hmkit.error.LinkError;
 import com.highmobility.hmkit.error.RevokeError;
 import com.highmobility.utils.ByteUtils;
@@ -30,19 +54,19 @@ public class Link {
     private Bytes mac;
     @Nullable private DeviceSerial serial; // set after authentication is finished by core
 
-    private State state = State.CONNECTED;
+    private State state = State.AUTHENTICATING;
 
     private LinkCommand sentCommand;
-    private final long connectionTime;
+    private long authenticationStartTime;
     private RevokeCallback revokeCallback;
+    private byte[] revokeData;
 
     Link(Core core, ThreadManager threadManager, BluetoothDevice btDevice) {
         this.btDevice = btDevice;
         this.core = core;
         this.threadManager = threadManager;
-
-        connectionTime = Calendar.getInstance().getTimeInMillis();
         mac = new Bytes(ByteUtils.bytesFromMacString(btDevice.getAddress()));
+        authenticationStartTime = Calendar.getInstance().getTimeInMillis();
     }
 
     /**
@@ -52,25 +76,26 @@ public class Link {
         return state;
     }
 
-    void setState(State state) {
+    void setState(final State state) {
         if (this.state != state) {
             final State oldState = this.state;
-            if (state == State.AUTHENTICATED) {
+
+            if (state == State.AUTHENTICATING) {
+                authenticationStartTime = Calendar.getInstance().getTimeInMillis();
+            } else if (state == State.AUTHENTICATED) {
                 d("authenticated in %d ms", (Calendar.getInstance().getTimeInMillis() -
-                        connectionTime));
+                        authenticationStartTime));
             }
 
             this.state = state;
 
-            if (listener != null) {
-                final Link linkPointer = this;
-                threadManager.postToMain(new Runnable() {
-                    @Override public void run() {
-                        if (linkPointer.listener == null) return;
-                        linkPointer.listener.onStateChanged(linkPointer, oldState);
-                    }
-                });
-            }
+            final Link linkPointer = this;
+            threadManager.postToMain(new Runnable() {
+                @Override public void run() {
+                    if (linkPointer.listener == null) return;
+                    linkPointer.listener.onStateChanged(linkPointer, state, oldState);
+                }
+            });
         }
     }
 
@@ -95,6 +120,18 @@ public class Link {
      * @param callback A {@link CommandCallback} object that is invoked with the command result.
      */
     public void sendCommand(final Bytes bytes, CommandCallback callback) {
+        sendCommand(ContentType.AUTO_API, bytes, callback);
+    }
+
+    /**
+     * Send a command to the Link.
+     *
+     * @param contentType The command content type. See {@link ContentType} for possible options.
+     * @param bytes       The command bytes that will be sent to the link.
+     * @param callback    A {@link CommandCallback} object that is invoked with the command result.
+     */
+    public void sendCommand(final ContentType contentType, final Bytes bytes,
+                            CommandCallback callback) {
         if (bytes.getLength() > Constants.MAX_COMMAND_LENGTH) {
             LinkError error = new LinkError(LinkError.Type.COMMAND_TOO_BIG, 0,
                     "Command size is bigger than " + Constants.MAX_COMMAND_LENGTH + " bytes");
@@ -123,16 +160,16 @@ public class Link {
         threadManager.postToWork(new Runnable() {
             @Override
             public void run() {
-                core.HMBTCoreSendCustomCommand(bytes.getByteArray(), bytes.getLength(),
-                        getAddressBytes());
+                core.HMBTCoreSendCustomCommand(contentType.asInt(), bytes.getByteArray(),
+                        bytes.getLength(), getAddressBytes());
             }
         });
     }
 
     /**
      * Revoke authorisation for this device. {@link RevokeCallback} will be called with the result.
-     * If successful, the {@link LinkListener#onStateChanged(Link, State)} will be called with the
-     * {@link State#CONNECTED} state.
+     * If successful, the {@link LinkListener#onStateChanged(Link, State, State)} will be called
+     * with the {@link State#NOT_AUTHENTICATED} state.
      * <p>
      * After this has succeeded it is up to the user to finish the flow related to this link -
      * disconnect, stop broadcasting or something else.
@@ -157,6 +194,7 @@ public class Link {
         }
 
         i("revoke %s", serial);
+        setState(State.REVOKING);
 
         this.revokeCallback = callback;
 
@@ -169,13 +207,32 @@ public class Link {
     }
 
     void onChangedAuthenticationState(HMDevice hmDevice) {
+        // EnteredProximity cb
         if (serial == null || serial.equals(hmDevice.getSerial()) == false) {
             serial = new DeviceSerial(hmDevice.getSerial());
         }
 
         if (hmDevice.getIsAuthenticated() == 0) {
-            // either authentication failed(wrong signature) or after revoke
-            setState(State.NOT_AUTHENTICATED);
+            if (state == State.AUTHENTICATING) {
+                // authentication failed with wrong signature. no errorCommand
+                setState(State.NOT_AUTHENTICATED);
+                AuthenticationError error =
+                        new AuthenticationError(AuthenticationError.Type.INTERNAL_ERROR, 0,
+                                "Authentication failed.");
+                callAuthenticationFailed(error);
+            } else if (state == State.AUTHENTICATED || state == State.REVOKING) {
+                // AUTHENTICATED = Called after car revoke
+                // TODO: 05/11/2019 If car revoke has a cb, the state can be REVOKING only ^^
+                setState(State.NOT_AUTHENTICATED);
+                threadManager.postToMain(new Runnable() {
+                    @Override public void run() {
+                        if (revokeCallback == null) return;
+                        // REVOKING = called after mobile revoke
+                        revokeCallback.onRevokeSuccess(new Bytes(revokeData));
+                        revokeData = null;
+                    }
+                });
+            }
         } else {
             setState(State.AUTHENTICATED);
         }
@@ -197,18 +254,30 @@ public class Link {
         });
     }
 
-    void onCommandResponseReceived(final byte[] data) {
+    void onCommandResponse(final byte[] data) {
         d("did receive command response %s from %s in %s ms", ByteUtils.hexFromBytes(data),
-                mac, (Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime)
-        );
+                mac, getCommandDuration());
 
+        if (isSendingCommand()) sentCommand.dispatchResponse(data);
+    }
+
+    void onCommandError(int errorType) {
+        d("did receive command error %d from %s in %s ms", errorType, mac, getCommandDuration());
+
+        if (isSendingCommand()) sentCommand.dispatchError(errorType);
+    }
+
+    private long getCommandDuration() {
+        return Calendar.getInstance().getTimeInMillis() - sentCommand.commandStartTime;
+    }
+
+    private boolean isSendingCommand() {
         if (sentCommand == null || sentCommand.finished) {
-            w("can't dispatch command response: sentCommand = null || " +
-                    "finished");
-            return;
+            w("can't dispatch command response: sentCommand = null || finished");
+            return false;
         }
 
-        sentCommand.dispatchResult(data);
+        return true;
     }
 
     void onRevokeResponse(final byte[] data, final int result) {
@@ -217,8 +286,10 @@ public class Link {
                 if (revokeCallback == null) return;
 
                 if (result == 0) {
-                    revokeCallback.onRevokeSuccess(new Bytes(data));
+                    // remember the data. To be sent on EnteredProximity.
+                    revokeData = data;
                 } else {
+                    setState(State.AUTHENTICATED);
                     revokeCallback.onRevokeFailed(new RevokeError(RevokeError.Type.FAILED, 0,
                             "Revoke failed."));
                 }
@@ -226,17 +297,57 @@ public class Link {
         });
     }
 
+    void onErrorCommand(int commandId, int errorType) {
+        if (getState() == State.AUTHENTICATING) {
+            // this is only called when authenticating. After this EnteredProximity is not called,
+            // so can set the state here.
+            setState(State.NOT_AUTHENTICATED);
+            AuthenticationError error =
+                    new AuthenticationError(AuthenticationError.Type.INTERNAL_ERROR, errorType,
+                            "Command " + commandId + " failed.");
+            callAuthenticationFailed(error);
+        }
+    }
+
+    private void callAuthenticationFailed(final AuthenticationError error) {
+        if (listener != null) {
+            final Link linkPointer = this;
+            threadManager.postToMain(new Runnable() {
+                @Override public void run() {
+                    if (linkPointer.listener == null) return;
+                    linkPointer.listener.onAuthenticationFailed(linkPointer, error);
+                }
+            });
+        }
+    }
+
     byte[] getAddressBytes() {
         return ByteUtils.bytesFromMacString(btDevice.getAddress());
     }
 
+    void onRevokeIncoming() {
+        setState(State.REVOKING);
+    }
+
+    void onRegisterCertificate() {
+        // authentication after revoke
+        setState(State.AUTHENTICATING);
+    }
+
     /**
      * The possible states of the Link.
+     * <p>
+     * States can go from: AUTHENTICATING > AUTHENTICATED or AUTHENTICATING > AUTHENTICATION_FAILED
+     * (then the LinkListener's authenticationFailed is called as well)
+     * <p>
+     * After this, it can go to REVOKING (if initiated) and then to
+     * NOT_AUTHNETICATED/AUTHENTICATED(revoke
+     * failed).
      *
-     * @see LinkListener#onStateChanged(Link, State)
+     * @see LinkListener#onStateChanged(Link, State, State)
      */
     public enum State {
-        DISCONNECTED, CONNECTED, NOT_AUTHENTICATED, AUTHENTICATED
+        AUTHENTICATING, NOT_AUTHENTICATED, AUTHENTICATED, REVOKING
     }
 
     /**
@@ -262,7 +373,7 @@ public class Link {
     public interface RevokeCallback {
 
         /**
-         * Invoked when the revoke succeeded. After this the link will go to {@link State#CONNECTED}
+         * Invoked when the revoke succeeded. Link will go to {@link State#NOT_AUTHENTICATED}
          * state.
          *
          * @param customData The customer specific data, if exists.

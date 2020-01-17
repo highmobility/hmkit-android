@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2014- High-Mobility GmbH (https://high-mobility.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.highmobility.hmkit;
 
 import com.highmobility.btcore.HMBTCore;
@@ -26,7 +49,7 @@ import static com.highmobility.hmkit.HMLog.w;
  * handles one device certificate.
  */
 class Core implements HMBTCoreInterface {
-    private final HMBTCore core = new HMBTCore();
+    static final HMBTCore core = new HMBTCore();
     private final Storage storage;
     private final ThreadManager threadManager;
 
@@ -64,7 +87,8 @@ class Core implements HMBTCoreInterface {
     }
 
     Core(Storage storage, ThreadManager threadManager, DeviceCertificate
-            deviceCertificate, PrivateKey privateKey, PublicKey issuerPublicKey) {
+            deviceCertificate, PrivateKey privateKey, PublicKey issuerPublicKey,
+         HMLog.Level logLevel) {
         setDeviceCertificate(deviceCertificate, privateKey, issuerPublicKey);
         this.storage = storage;
         this.threadManager = threadManager;
@@ -171,8 +195,8 @@ class Core implements HMBTCoreInterface {
         core.HMBTCorelinkWriteResponse(this, mac, characteristic);
     }
 
-    void HMBTCoreSendCustomCommand(byte[] data, int size, byte[] mac) {
-        core.HMBTCoreSendCustomCommand(this, data, size, mac);
+    void HMBTCoreSendCustomCommand(int contentType, byte[] data, int size, byte[] mac) {
+        core.HMBTCoreSendCustomCommand(this, contentType, data, size, mac);
     }
 
     void HMBTCoreSendReadDeviceCertificate(byte[] mac, byte[] nonce, byte[] caSignature) {
@@ -202,18 +226,32 @@ class Core implements HMBTCoreInterface {
         core.HMBTCoreTelematicsReceiveData(this, length, data);
     }
 
-    void HMBTCoreSendTelematicsCommand(byte[] serial, byte[] nonce, int length, byte[] data) {
-        core.HMBTCoreSendTelematicsCommand(this, serial, nonce, length, data);
+    void HMBTCoreSendTelematicsCommand(byte[] serial, byte[] nonce, int contentType, int length,
+                                       byte[] data) {
+        core.HMBTCoreSendTelematicsCommand(this, serial, nonce, contentType, length, data);
     }
+
+    // MARK: other
 
     void HMBTCoreSendRevoke(byte[] serial) {
         core.HMBTCoreSendRevoke(this, serial);
+    }
+
+    void HMBTCoreSetMTU(byte[] mac, int mtu) {
+        // TODO: 18/10/2019 core should probably accept int not byte[]
+        core.HMBTCoreSetMTU(this, mac, new byte[]{(byte) mtu});
     }
 
     // MARK: HMBTCoreInterface
 
     @Override
     public int HMBTHalInit() {
+        return 0;
+    }
+
+    @Override
+    public int HMBTHalLog(int level, byte[] string) {
+        if (HMLog.level.getValue() >= level) d(new String(string));
         return 0;
     }
 
@@ -309,7 +347,7 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public int HMPersistenceHalgetDeviceCertificate(byte[] cert) {
-        copyBytes(this.deviceCertificate.getBytes(), cert);
+        copyBytes(this.deviceCertificate, cert);
         return 0;
     }
 
@@ -334,6 +372,12 @@ class Core implements HMBTCoreInterface {
         int errorCode = storage.storeCertificate(certificate).getValue();
         if (errorCode != 0) {
             e("Cant register certificate %s: %d", ByteUtils.hexFromBytes(serial), errorCode);
+        } else {
+            // set the state authenticating. this could happen after revoke, when emulator starts
+            //  authenticating again. then the serial is known from previous authentication.
+            if (broadcaster != null && broadcaster.onRegisterCertificate(serial) == false) {
+                if (scanner != null) scanner.onRegisterCertificate(serial);
+            }
         }
 
         return 0;
@@ -348,8 +392,8 @@ class Core implements HMBTCoreInterface {
             return 1;
         }
 
-        copyBytes(certificate.getBytes(), cert);
-        size[0] = certificate.getBytes().getLength();
+        copyBytes(certificate, cert);
+        size[0] = certificate.getLength();
 
         return 0;
     }
@@ -361,8 +405,8 @@ class Core implements HMBTCoreInterface {
 
         if (certificates.length >= index) {
             AccessCertificate certificate = certificates[index];
-            copyBytes(certificate.getBytes(), cert);
-            size[0] = certificate.getBytes().getLength();
+            copyBytes(certificate, cert);
+            size[0] = certificate.getLength();
             return 0;
         }
 
@@ -414,8 +458,8 @@ class Core implements HMBTCoreInterface {
 
         for (AccessCertificate storedCert : storedCerts) {
             if (storedCert.getProviderSerial().equals(serial)) {
-                copyBytes(storedCert.getBytes(), cert);
-                size[0] = storedCert.getBytes().getLength();
+                copyBytes(storedCert, cert);
+                size[0] = storedCert.getLength();
                 d("Returned stored cert for serial %s", ByteUtils.hexFromBytes(serial));
                 return 0;
             }
@@ -468,7 +512,8 @@ class Core implements HMBTCoreInterface {
     }
 
     @Override
-    public void HMApiCallbackCustomCommandIncoming(HMDevice device, byte[] data, int length) {
+    public void HMApiCallbackCustomCommandIncoming(HMDevice device, int contentType, byte[] data,
+                                                   int length) {
         byte[] trimmedBytes = trimmedBytes(data, length);
 
         if (broadcaster != null && broadcaster.onCommandReceived(device, trimmedBytes)) return;
@@ -476,13 +521,22 @@ class Core implements HMBTCoreInterface {
     }
 
     @Override
-    public void HMApiCallbackCustomCommandResponse(HMDevice device, byte[] data, int length) {
+    public void HMApiCallbackCustomCommandResponse(HMDevice device, int contentType, byte[] data,
+                                                   int length) {
         byte[] trimmedBytes = trimmedBytes(data, length);
 
-        if (broadcaster != null && broadcaster.onCommandResponseReceived(device, trimmedBytes))
+        if (broadcaster != null && broadcaster.onCommandResponse(device, trimmedBytes))
             return;
 
-        if (scanner != null) scanner.onCommandResponseReceived(device, trimmedBytes);
+        if (scanner != null) scanner.onCommandResponse(device, trimmedBytes);
+    }
+
+    @Override
+    public void HMApiCallbackCustomCommandResponseError(HMDevice device, int errorType) {
+        if (broadcaster != null && broadcaster.onCommandErrorResponse(device, errorType))
+            return;
+
+        if (scanner != null) scanner.onCommandErrorResponse(device, errorType);
     }
 
     @Override
@@ -501,8 +555,8 @@ class Core implements HMBTCoreInterface {
     }
 
     @Override
-    public void HMApiCallbackTelematicsCommandIncoming(HMDevice device, int id, int length,
-                                                       byte[] data) {
+    public void HMApiCallbackTelematicsCommandIncoming(HMDevice device, int id, int contentType,
+                                                       int length, byte[] data) {
         if (telematics != null) {
             telematics.onTelematicsResponseDecrypted(device.getSerial(), id, trimmedBytes(data,
                     length));
@@ -525,9 +579,25 @@ class Core implements HMBTCoreInterface {
 
         byte[] trimmedBytes = trimmedBytes(data, length);
 
-        if (broadcaster != null && broadcaster.onRevokeResult(device, trimmedBytes, status) ==
-                false) {
+        if (broadcaster != null && broadcaster.onRevokeResult(device, trimmedBytes, status) == false) {
             if (scanner != null) scanner.onRevokeResult(device, trimmedBytes, status);
+        }
+    }
+
+    @Override
+    public void HMApiCallbackRevokeIncoming(HMDevice device) {
+        if (broadcaster != null && broadcaster.onRevokeIncoming(device) == false) {
+            if (scanner != null) scanner.onRevokeIncoming(device);
+        }
+    }
+
+    @Override
+    public void HMApiCallbackErrorCommandIncoming(HMDevice device, int commandId, int errorType) {
+        d("HMApiCallbackErrorCommandIncoming %s, %s, %s",
+                ByteUtils.hexFromBytes(device.getMac()), commandId, errorType);
+
+        if (broadcaster != null && broadcaster.onErrorCommand(device, commandId, errorType) == false) {
+            if (scanner != null) scanner.onErrorCommand(device, commandId, errorType);
         }
     }
 
@@ -552,23 +622,38 @@ class Core implements HMBTCoreInterface {
         abstract void onTelematicsResponseDecrypted(byte[] serial, int resultCode, byte[] data);
     }
 
-    abstract static class Broadcaster {
-        abstract boolean writeData(byte[] mac, byte[] data, int characteristic);
-
+    abstract static class Bluetooth {
         abstract boolean onChangedAuthenticationState(HMDevice device);
 
         abstract boolean onDeviceExitedProximity(byte[] mac);
 
+        abstract boolean writeData(byte[] mac, byte[] data, int characteristic);
+
+        // A command from the device, can be a response command or some other update
         abstract boolean onCommandReceived(HMDevice device, byte[] bytes);
 
-        abstract boolean onCommandResponseReceived(HMDevice device, byte[] trimmedBytes);
+        // command ack
+        abstract boolean onCommandResponse(HMDevice device, byte[] trimmedBytes);
 
-        abstract int onReceivedPairingRequest(HMDevice device);
+        // command error
+        abstract boolean onCommandErrorResponse(HMDevice device, int errorType);
 
         abstract boolean onRevokeResult(HMDevice device, byte[] bytes, int status);
+
+        abstract boolean onRevokeIncoming(HMDevice device);
+
+        // error in authentication
+        abstract boolean onErrorCommand(HMDevice device, int commandId, int errorType);
+
+        // invoked after revoke, when emulator starts authorize
+        abstract boolean onRegisterCertificate(byte[] serial);
     }
 
-    abstract static class Scanner {
+    abstract static class Broadcaster extends Bluetooth {
+        abstract int onReceivedPairingRequest(HMDevice device);
+    }
+
+    abstract static class Scanner extends Bluetooth {
 
         abstract void connect(byte[] bytes);
 
@@ -576,18 +661,7 @@ class Core implements HMBTCoreInterface {
 
         abstract void startServiceDiscovery(byte[] bytes);
 
-        abstract boolean writeData(byte[] mac, byte[] data, int characteristic);
-
         abstract boolean readValue(byte[] mac, int characteristic);
 
-        abstract boolean onChangedAuthenticationState(HMDevice device);
-
-        abstract boolean onDeviceExitedProximity(byte[] mac);
-
-        abstract boolean onCommandReceived(HMDevice device, byte[] bytes);
-
-        abstract boolean onCommandResponseReceived(HMDevice device, byte[] bytes);
-
-        abstract boolean onRevokeResult(HMDevice device, byte[] bytes, int status);
     }
 }

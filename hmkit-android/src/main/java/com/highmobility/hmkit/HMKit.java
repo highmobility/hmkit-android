@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2014- High-Mobility GmbH (https://high-mobility.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.highmobility.hmkit;
 
 import android.annotation.SuppressLint;
@@ -5,9 +28,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.highmobility.crypto.AccessCertificate;
+import com.highmobility.crypto.Crypto;
 import com.highmobility.crypto.DeviceCertificate;
 import com.highmobility.crypto.value.DeviceSerial;
 import com.highmobility.crypto.value.PrivateKey;
@@ -24,18 +47,12 @@ import javax.annotation.Nullable;
 
 import static com.highmobility.hmkit.HMLog.e;
 import static com.highmobility.hmkit.HMLog.i;
-import static com.highmobility.hmkit.HMLog.w;
 
 /**
  * HMKit is the entry point for the HMKit library. Use the singleton to access Broadcaster and
  * Telematics.
  */
 public class HMKit {
-    /**
-     * The logging level of HMKit.
-     */
-    public static HMLog.Level loggingLevel = HMLog.Level.ALL;
-
     /**
      * Custom web environment url. If set, will override the default url or the url from the device
      * certificate.
@@ -52,13 +69,14 @@ public class HMKit {
     private Scanner scanner;
     private Telematics telematics;
     private OAuth oauth;
+    private Core core;
 
     // created with context
     private WebService webService;
     @Nullable private SharedBle ble;
     private Storage storage;
-    private Core core;
     private ThreadManager threadManager;
+    private Crypto crypto;
 
     /**
      * @return The Broadcaster instance. Null if BLE is not supported.
@@ -70,7 +88,6 @@ public class HMKit {
 
         if (broadcaster == null) {
             broadcaster = new Broadcaster(core, storage, threadManager, ble);
-
         }
 
         return broadcaster;
@@ -109,7 +126,8 @@ public class HMKit {
         throwIfDeviceCertificateNotSet();
 
         if (oauth == null)
-            oauth = new OAuth(webService, core.getPrivateKey(), getDeviceCertificate().getSerial());
+            oauth = new OAuth(webService, crypto, core.getPrivateKey(),
+                    getDeviceCertificate().getSerial());
 
         return oauth;
     }
@@ -133,6 +151,13 @@ public class HMKit {
     }
 
     /**
+     * @return The HM crypto.
+     */
+    public Crypto getCrypto() {
+        return crypto;
+    }
+
+    /**
      * @return An SDK description string containing version name and type(mobile or wear).
      */
     public String getInfoString() {
@@ -150,6 +175,24 @@ public class HMKit {
         }
 
         return infoString + "unknown";
+    }
+
+    /**
+     * Set the logging level of HMKit.
+     *
+     * @param level The logging level.
+     */
+    public static void setLoggingLevel(HMLog.Level level) {
+        HMLog.level = level;
+    }
+
+    /**
+     * Get the logging level of HMKit.
+     *
+     * @return The logging level
+     */
+    public static HMLog.Level getLoggingLevel() {
+        return HMLog.level;
     }
 
     static String infoStringPrefix() {
@@ -186,13 +229,18 @@ public class HMKit {
         if (instance != null) {
             throw new RuntimeException("Use getInstance() to get the HMKit singleton");
         }
+
+        if (Build.DEVICE.equals("robolectric") == false)
+            System.loadLibrary("hmbtcore");
+
+        crypto = new Crypto(Core.core);
     }
 
     /**
      * Initialise the SDK with context to get access to storage only. Call {@link
      * #setDeviceCertificate (DeviceCertificate, PrivateKey, PublicKey)} later to send Commands.
      *
-     * @param context The application context.
+     * @param context The context.
      * @return The HMKit instance.
      */
     public HMKit initialise(Context context) {
@@ -221,39 +269,6 @@ public class HMKit {
         initialise(context);
         setDeviceCertificate(certificate, privateKey, issuerPublicKey);
         return this;
-    }
-
-    /**
-     * Initialise the SDK with a Device Certificate. Call this before using the HMKit.
-     *
-     * @param certificate The broadcaster certificate.
-     * @param privateKey  32 byte private key with elliptic curve Prime 256v1.
-     * @param caPublicKey 64 byte public key of the Certificate Authority.
-     * @param context     The Application Context.
-     * @deprecated Use {@link #initialise(DeviceCertificate, PrivateKey, PublicKey, Context)}
-     * instead.
-     */
-    @Deprecated
-    public void initialize(DeviceCertificate certificate,
-                           PrivateKey privateKey,
-                           PublicKey caPublicKey,
-                           Context context) {
-        initialise(certificate, privateKey, caPublicKey, context);
-    }
-
-    /**
-     * Initialise the SDK with a Device Certificate. Call this before using the HMKit.
-     *
-     * @param certificate     The device certificate in Base64 or hex.
-     * @param privateKey      32 byte private key with elliptic curve Prime 256v1 in Base64 or hex.
-     * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64 or hex.
-     * @param context         the application context
-     * @deprecated Use {@link #initialise(String, String, String, Context)} instead.
-     */
-    @Deprecated
-    public void initialize(String certificate, String privateKey, String issuerPublicKey, Context
-            context) {
-        initialise(certificate, privateKey, issuerPublicKey, context);
     }
 
     /**
@@ -299,8 +314,8 @@ public class HMKit {
      * @param certificate     The device certificate.
      * @param privateKey      32 byte private key with elliptic curve Prime 256v1.
      * @param issuerPublicKey 64 byte public key of the Certificate Authority.
-     * @throws IllegalStateException if there are connected links with the Broadcaster or an ongoing
-     *                               Telematics command.
+     * @throws IllegalStateException if there are connected links with the Broadcaster or ongoing
+     *                               Telematics commands.
      */
     public void setDeviceCertificate(DeviceCertificate certificate, PrivateKey privateKey,
                                      PublicKey issuerPublicKey) throws IllegalStateException {
@@ -312,8 +327,8 @@ public class HMKit {
         }
 
         if (telematics != null && telematics.isSendingCommand()) {
-            throw new IllegalStateException("Cannot set a new Device Certificate sending " +
-                    "a Telematics command. Wait for the commands to finish.");
+            throw new IllegalStateException("Cannot set a new Device Certificate while sending " +
+                    "a Telematics command. Wait for the command to finish.");
         }
 
         if (scanner != null && scanner.getLinks().size() > 0) {
@@ -321,14 +336,15 @@ public class HMKit {
                     "link exists with the Scanner. Disconnect from all of the links.");
         }
 
-        if (core == null)
-            core = new Core(storage, threadManager, certificate, privateKey, issuerPublicKey);
-        else core.setDeviceCertificate(certificate, privateKey, issuerPublicKey);
+        if (core == null) {
+            core = new Core(storage, threadManager, certificate, privateKey, issuerPublicKey,
+                    getLoggingLevel());
+        } else core.setDeviceCertificate(certificate, privateKey, issuerPublicKey);
 
         if (oauth != null) oauth.setDeviceCertificate(privateKey, certificate.getSerial());
 
         if (webService == null)
-            webService = new WebService(this.context, certificate.getIssuer(), webUrl);
+            webService = new WebService(context, crypto, certificate.getIssuer(), webUrl);
         else webService.setIssuer(certificate.getIssuer(), webUrl);
 
         i("Set certificate: %s", certificate.toString());
@@ -365,12 +381,12 @@ public class HMKit {
      */
     public void downloadAccessCertificate(String accessToken, final DownloadCallback callback) {
         throwIfDeviceCertificateNotSet();
+
         webService.requestAccessCertificate(accessToken,
                 core.getPrivateKey(),
                 getDeviceCertificate().getSerial(),
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
+                new WebRequestListener() {
+                    @Override public void onResponse(JSONObject response) {
                         AccessCertificate certificate = null;
                         try {
                             certificate = storage.storeDownloadedCertificates(response);
@@ -386,18 +402,16 @@ public class HMKit {
 
                         if (certificate != null)
                             callback.onDownloaded(certificate.getGainerSerial());
+
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
+
+                    @Override public void onError(VolleyError error) {
                         DownloadAccessCertificateError dispatchedError;
 
                         if (error.networkResponse != null) {
                             try {
                                 JSONObject json = new JSONObject(new String(error.networkResponse
                                         .data));
-                                w("onErrorResponse: " + json.toString());
                                 if (json.has("message")) {
                                     dispatchedError = new DownloadAccessCertificateError(
                                             DownloadAccessCertificateError.Type.HTTP_ERROR,
@@ -425,20 +439,7 @@ public class HMKit {
                         callback.onDownloadFailed(dispatchedError);
                     }
                 });
-    }
 
-    /**
-     * Download and store the access certificate for the given access token. The access token needs
-     * to be provided by the certificate provider.
-     *
-     * @param accessToken The token that is used to download the certificates.
-     * @param callback    A {@link DownloadCallback} object that is invoked after the download is
-     *                    finished or failed.
-     * @deprecated Use {@link #downloadAccessCertificate(String, DownloadCallback)} instead.
-     */
-    @Deprecated
-    public void downloadCertificate(String accessToken, final DownloadCallback callback) {
-        downloadAccessCertificate(accessToken, callback);
     }
 
     /**
@@ -489,70 +490,6 @@ public class HMKit {
         storage.deleteCertificates();
     }
 
-    /**
-     * Delete an access certificate.
-     *
-     * @param serial  The serial of the device that is gaining access.
-     * @param context The application context.
-     * @return true if the certificate existed and was deleted successfully, otherwise false.
-     * @deprecated Use {@link #deleteCertificate(DeviceSerial)} instead.
-     */
-    @Deprecated
-    public boolean deleteCertificate(DeviceSerial serial, Context context) {
-        // this method should be deleted. cannot be initialised without context
-        throwIfDeviceCertificateNotSet();
-        return storage.deleteCertificate(serial.getByteArray(), core.getDeviceCertificate()
-                .getSerial().getByteArray());
-    }
-
-    /**
-     * @param context The application context.
-     * @param serial  The serial of the device that is providing access (eg this device).
-     * @return All stored Access Certificates where the device with the given serial is providing
-     * access.
-     * @deprecated Use {@link #getStorage()#getCertificates(DeviceSerial)} instead.
-     */
-    @Deprecated
-    public AccessCertificate[] getCertificates(DeviceSerial serial, Context context) {
-        try {
-            initialise(context);
-        } finally {
-            return storage.getCertificates(serial);
-        }
-    }
-
-    /**
-     * Find an Access Certificate with the given serial number.
-     *
-     * @param serial  The serial number of the device that is gaining access.
-     * @param context The application context.
-     * @return An Access Certificate for the given serial if one exists, otherwise null.
-     * @deprecated Use {@link #getStorage()#getCertificate(DeviceSerial)} instead.
-     */
-    @Deprecated
-    @Nullable public AccessCertificate getCertificate(DeviceSerial serial, Context context) {
-        try {
-            initialise(context);
-        } finally {
-            return storage.getCertificate(serial);
-        }
-    }
-
-    /**
-     * Deletes all of the stored Access Certificates.
-     *
-     * @param context The application context.
-     * @deprecated Use {@link #getStorage()#deleteCertificates()} instead.
-     */
-    @Deprecated
-    public void deleteCertificates(Context context) {
-        try {
-            initialise(context);
-        } finally {
-            storage.deleteCertificates();
-        }
-    }
-
     void throwIfDeviceCertificateNotSet() throws IllegalStateException {
         // if device cert exists, context has to exist as well.
         if (core == null) {
@@ -574,32 +511,11 @@ public class HMKit {
             this.context = context.getApplicationContext();
             storage = new Storage(this.context);
             threadManager = new ThreadManager(this.context);
-
             try {
-                ble = new SharedBle(context);
+                ble = new SharedBle(this.context);
             } catch (BleNotSupportedException e) {
                 i("BLE not supported");
             }
-        }
-    }
-
-    /**
-     * The logging level.
-     *
-     * @deprecated use {@link HMLog.Level} instead.
-     */
-    @Deprecated
-    public enum LoggingLevel {
-        NONE(0), DEBUG(1), ALL(2);
-
-        private final Integer level;
-
-        LoggingLevel(int level) {
-            this.level = level;
-        }
-
-        public int getValue() {
-            return level;
         }
     }
 

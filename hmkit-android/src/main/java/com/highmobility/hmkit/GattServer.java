@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2014- High-Mobility GmbH (https://high-mobility.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.highmobility.hmkit;
 
 import android.bluetooth.BluetoothDevice;
@@ -281,9 +304,6 @@ class GattServer extends BluetoothGattServerCallback {
         byte[] offsetBytes = Arrays.copyOfRange(value, offset, value.length);
         final int characteristicId = getCharacteristicIdForCharacteristic(characteristic);
 
-        d("onCharacteristicReadRequest %s %s", characteristicId,
-                ByteUtils.hexFromBytes(offsetBytes));
-
         boolean result = gattServer.sendResponse(device,
                 requestId,
                 BluetoothGatt.GATT_SUCCESS,
@@ -292,8 +312,13 @@ class GattServer extends BluetoothGattServerCallback {
 
         if (result == false) {
             e("onCharacteristicReadRequest: failed to send response");
+            return;
         }
 
+        d("onCharacteristicReadRequest %s %s %b", characteristicId,
+                ByteUtils.hexFromBytes(offsetBytes), result);
+
+        // give a chance for the other side to read the data?
         threadManager.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -396,6 +421,19 @@ class GattServer extends BluetoothGattServerCallback {
     @Override
     public void onNotificationSent(BluetoothDevice device, int status) {
         d("onNotificationSent: %s", (status == BluetoothGatt.GATT_SUCCESS ? "success" : "failed"));
+    }
+
+    @Override public void onMtuChanged(BluetoothDevice device, int mtu) {
+        core.HMBTCoreSetMTU(ByteUtils.bytesFromMacString(device.getAddress()), mtu);
+
+        String mtuCharValue = " MTU" + String.format("%03d", mtu);
+        String currentCharValue = infoCharacteristic.getStringValue(0);
+
+        if (currentCharValue.contains("MTU")) {
+            infoCharacteristic.setValue(currentCharValue.split("MTU")[0] + mtuCharValue);
+        } else {
+            infoCharacteristic.setValue(currentCharValue + mtuCharValue);
+        }
     }
 
     private int getCharacteristicIdForCharacteristic(BluetoothGattCharacteristic characteristic) {

@@ -1,3 +1,26 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2014- High-Mobility GmbH (https://high-mobility.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.highmobility.hmkit;
 
 import android.os.Build;
@@ -13,12 +36,14 @@ public class HMLog {
     private static final Pattern ANONYMOUS_CLASS = Pattern.compile("(\\$\\d+)+$");
     private static final String LOG_PREFIX = "hmkit-";
 
+    protected static Level level = Level.ALL;
+
     static void init() {
 
     }
 
     static void d(String message, Object... args) {
-        if (HMKit.loggingLevel.getValue() >= Level.DEBUG.getValue()) {
+        if (level.getValue() >= Level.DEBUG.getValue()) {
             Timber.tag(getTag());
             try {
                 Timber.d(String.format(message, args));
@@ -29,7 +54,7 @@ public class HMLog {
     }
 
     static void w(String message, Object... args) {
-        if (HMKit.loggingLevel.getValue() >= Level.NONE.getValue()) {
+        if (level.getValue() >= Level.NONE.getValue()) {
             Timber.tag(getTag());
             try {
                 Timber.w(String.format(message, args));
@@ -40,7 +65,7 @@ public class HMLog {
     }
 
     static void i(String message, Object... args) {
-        if (HMKit.loggingLevel.getValue() >= Level.ALL.getValue()) {
+        if (level.getValue() >= Level.ALL.getValue()) {
             Timber.tag(getTag());
             try {
                 Timber.i(String.format(message, args));
@@ -51,7 +76,7 @@ public class HMLog {
     }
 
     static void e(String message, Object... args) {
-        if (HMKit.loggingLevel.getValue() >= Level.NONE.getValue()) {
+        if (level.getValue() >= Level.NONE.getValue()) {
             Timber.tag(getTag());
             try {
                 Timber.e(String.format(message, args));

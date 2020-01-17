@@ -1,8 +1,33 @@
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2014- High-Mobility GmbH (https://high-mobility.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package com.highmobility.hmkit
 
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.webkit.URLUtil
+import com.android.volley.VolleyError
 import com.highmobility.crypto.Crypto
 import com.highmobility.crypto.value.DeviceSerial
 import com.highmobility.crypto.value.PrivateKey
@@ -22,6 +47,7 @@ typealias CompletionHandler = (response: AccessTokenResponse?, errorMessage: Str
  * Certificate for the vehicle.
  */
 class OAuth internal constructor(private val webService: WebService,
+                                 private val crypto: Crypto,
                                  private var privateKey: PrivateKey,
                                  private var deviceSerial: DeviceSerial) {
     // created at the beginning of oauth process
@@ -62,13 +88,19 @@ class OAuth internal constructor(private val webService: WebService,
                        endDate: Calendar? = null,
                        state: String? = null,
                        completionHandler: CompletionHandler) {
+        if (URLUtil.isValidUrl(authUrl) == false ||
+            URLUtil.isValidUrl(tokenUrl) == false) {
+            completionHandler(null, "Invalid OAuth parameters")
+            return
+        }
+
         this.clientId = clientId
         this.redirectScheme = redirectScheme
         this.tokenUrl = tokenUrl
         this.completionHandler = completionHandler
 
-        nonce = Crypto.createSerialNumber()
-        val nonceSha256 = Crypto.sha256(nonce.hex.toByteArray(Charset.forName("ASCII"))).byteArray
+        nonce = crypto.createSerialNumber()
+        val nonceSha256 = crypto.sha256(nonce.hex.toByteArray(Charset.forName("ASCII"))).byteArray
         val codeChallenge = Base64.encodeUrlSafe(nonceSha256)
 
         var webUrl = authUrl
@@ -96,20 +128,25 @@ class OAuth internal constructor(private val webService: WebService,
      * @param completionHandler The completion handler.
      */
     fun refreshAccessToken(tokenUrl: String, clientId: String, refreshToken: String, completionHandler: CompletionHandler) {
-        webService.refreshOauthAccessToken(tokenUrl, clientId, refreshToken, { jsonObject ->
-            try {
-                val responseObject = parseAccessTokenResponse(jsonObject)
-                completionHandler(responseObject, null)
-            } catch (e: JSONException) {
-                e.printStackTrace()
-                finishedDownloadingAccessToken(null, "invalid refresh access token response")
+        webService.refreshOauthAccessToken(tokenUrl, clientId, refreshToken, object : WebRequestListener() {
+            override fun onResponse(jsonObject: JSONObject?) {
+                try {
+                    val responseObject = parseAccessTokenResponse(jsonObject!!)
+                    completionHandler(responseObject, null)
+                } catch (e: JSONException) {
+                    e.printStackTrace()
+                    finishedDownloadingAccessToken(null, "invalid refresh access token response")
+                }
             }
-        }, { error ->
-            if (error?.networkResponse != null) {
-                completionHandler(null, "${error.networkResponse.statusCode}: ${String(error.networkResponse.data)}")
-            }
-            else {
-                completionHandler(null, "no internet connection")
+
+            override fun onError(error: VolleyError?) {
+                if (error?.networkResponse != null) {
+                    completionHandler(null, "${error.networkResponse.statusCode}: ${String(error.networkResponse.data)}")
+                }
+                else {
+                    completionHandler(null, "no internet connection")
+                }
+
             }
         })
     }
@@ -138,16 +175,20 @@ class OAuth internal constructor(private val webService: WebService,
         viewControllerCompletionHandler = completionHandler
 
         webService.downloadOauthAccessToken(tokenUrl, code!!, redirectScheme, clientId, getJwt(),
-                { jsonObject ->
-                    finishedDownloadingAccessToken(jsonObject, null)
-                }, { error ->
-            if (error?.networkResponse != null) {
-                finishedDownloadingAccessToken(null, "${error.networkResponse.statusCode}: ${String(error.networkResponse.data)}")
-            }
-            else {
-                finishedDownloadingAccessToken(null, "no internet connection")
-            }
-        })
+                object : WebRequestListener() {
+                    override fun onResponse(jsonObject: JSONObject?) {
+                        finishedDownloadingAccessToken(jsonObject, null)
+                    }
+
+                    override fun onError(error: VolleyError?) {
+                        if (error?.networkResponse != null) {
+                            finishedDownloadingAccessToken(null, "${error.networkResponse.statusCode}: ${String(error.networkResponse.data)}")
+                        }
+                        else {
+                            finishedDownloadingAccessToken(null, "no internet connection")
+                        }
+                    }
+                })
     }
 
     protected fun setDeviceCertificate(privateKey: PrivateKey, deviceSerial: DeviceSerial) {
@@ -163,7 +204,7 @@ class OAuth internal constructor(private val webService: WebService,
         val bodyBase64 = Base64.encodeUrlSafe(body.toByteArray())
 
         val jwtContent = String.format("%s.%s", headerBase64, bodyBase64)
-        val jwtSignature = Crypto.signJWT(jwtContent.toByteArray(), privateKey)
+        val jwtSignature = crypto.signJWT(jwtContent.toByteArray(), privateKey)
 
         return String.format("%s.%s", jwtContent, jwtSignature.base64UrlSafe)
     }
