@@ -35,7 +35,7 @@ In addition the SDK provides a UI component to initate OAuth2 for the end-user i
 
 Get started with HMKit Android 📘[browse the documentation](https://high-mobility.com/learn/tutorials/sdk/android/).
 
-## Contributing
+### Contributing
 
 Before starting please read our contribution rules 📘[Contributing](CONTRIBUTE.md)
 
@@ -66,5 +66,5 @@ All of the HMKit Android packages can be released from this project. This includ
 
 If pushing the same version number, the package will be overwritten in dev, rejected in release.
 
-## Licence
+### Licence
 This repository is using MIT licence. See more in 📘[LICENCE](LICENCE.md)
