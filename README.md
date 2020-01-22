@@ -55,9 +55,11 @@ Before starting please read our contribution rules 📘[Contributing](CONTRIBUTE
 All of the HMKit Android packages can be released from this project. This includes hmkit-android, hmkit-crypto, hmkit-utils and hmkit-auto-api.
 
 **Pre checks**
+
 * Run the unit and instrumentation tests: `./gradlew test && ./gradlew cAT`
 
 **Release**
+
 * Update the "version = 1.5.0" in all of the deploy.settings files(if needed).
 * Set the release environment in root build.gradle (ext property release = 0/1/2).
 * Call `./gradlew artifactoryPublish` to release all of the packages.
