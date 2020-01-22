@@ -1,74 +1,70 @@
 # HMKit Android
 
-HMKit Android provides access to vehicles via Bluetooth or Telematics.
+The HMKit Android SDK makes it easy to work with car data using the HIGH MOBILITY API platform. The SDK implements a strong security layer between your iOS app and the platform while giving you straightforward native interface to read and write to connected cars.
+In addition the SDK provides a UI component to initate OAuth2 for the end-user in order to retrieve data sharing consent.
+
+# Table of contents
+
+* [Architecture](#architecture)
+* [Requirements](#requirements)
+* [Getting Started](#getting-started)
+* [Contributing](#contributing)
+* [Release](#release)
+* [Licence](#Licence)
+
+### Architecture
+
+**General**: HMKit Android is a Java/Kotlin library that handles Bluetooth/Telematics connectivity. Security is implemented via JNI to the HMKit Core C module.
+
+**hmkit-android**: Contains HMKit Android Java/Kotlin classes.
+
+**hmkit-core-jni**: Contains JNI classes to HMKit Core.
+
+**hm-java-crypto**: Contains necessary crypto classes and functions.
+
+**hm-java-utils**: Contains general helper methods and classes.
+
+**hm-android-basic-oauth** and **hm-android-bluetooth-auto-api-explorer**: Sample apps for testing.
 
 ### Requirements
 
-* Android 5.0 Lollipop or higher.
+* Android 5.0 Lollipop or higher. 
+* For Bluetooth, chipset support for BLE peripheral mode. https://stackoverflow.com/questions/26482611/chipsets-devices-supporting-android-5-ble-peripheral-mode https://altbeacon.github.io/android-beacon-library/beacon-transmitter-devices.html - list of some devices. 
 
-### Install
+### Getting Started
 
-Releases are pushed to our jfrog artifactory. To include hmkit-android in your project, add to the 
-build.gradle:
+Get started with HMKit Android 📘[browse the documentation](https://high-mobility.com/learn/tutorials/sdk/android/).
 
-```
-repositories {
-  maven { url "http://jfrog.high-mobility.com/artifactory/gradle-release-local/" }
-}
+## Contributing
 
-dependencies {
-  implementation('com.highmobility:hmkit-android:2.0.0@aar') {
-      transitive=true
-    }
-}
-```
-
-Please note Java 1.8 support is required:
-
-```
-android {
-  ...
-
-  compileOptions {
-      targetCompatibility 1.8
-      sourceCompatibility 1.8
-  }
-}
-```
-
-Find the latest version name in [the developer center](https://develop.high-mobility.net/downloads/).
-
+Before starting please read our contribution rules 📘[Contributing](CONTRIBUTE.md)
 
 ### Setup
 
-* git submodule update --init --recursive
+* `git submodule update --init --recursive`
 * import the Gradle project.
-* Build the core:  
-Install NDK through Android SDK Manager(Tools tab). Then:
-```
-cd hmkit-android/src/main/jni && ndk-build && cd -
-```
-* Build hmkit-android module.
+* Build HMKit Core:  
+  * Install NDK through Android SDK Manager(Tools tab)
+  * `cd hmkit-android/src/main/jni && ndk-build && cd -`
+* Run the unit tests: `./gradlew test`
 * If there are errors: Try `Gradle clean`, `File > Invalidate caches and restart`.
-
-Supported devices: Lollipop 5.0+. For Bluetooth, chipset support for BLE peripheral mode is required. https://stackoverflow.com/questions/26482611/chipsets-devices-supporting-android-5-ble-peripheral-mode https://altbeacon.github.io/android-beacon-library/beacon-transmitter-devices.html - list of some devices.
+* Now **hm-android-basic-oauth** or **hm-android-bluetooth-auto-api-explorer** targets can be run with local code.
 
 ### Release
 
-#### Pre checks
+All of the HMKit Android packages can be released from this project. This includes hmkit-android, hmkit-crypto, hmkit-utils and hmkit-auto-api.
 
-* run the unit and instrumentation tests:
-```./gradlew test && ./gradlew cAT```
+**Pre checks**
+* Run the unit and instrumentation tests: `./gradlew test && ./gradlew cAT`
 
-This project bundles all of the Android SDK packages: hmkit-android, hmkit-crypto and hmkit-utils.
-AutoAPI project is also present.
+**Release**
+* Update the "version = 1.5.0" in all of the deploy.settings files(if needed).
+* Set the release environment in root build.gradle (ext property release = 0/1/2).
+* Call `./gradlew artifactoryPublish` to release all of the packages.
+* Call `./gradlew :hmkit-utils:artifactoryPublish` to release a specific package.
+* If releasing to prod, also call `./gradlew bintrayUpload`.
 
-For a release, update the "version = 1.5.0" in all of the deploy.settings files(if needed).
+If pushing the same version number, the package will be overwritten in dev, rejected in release.
 
-Set the release environment in root build.gradle (ext property release = 0/1/2).
-call ./gradlew artifactoryPublish to release all of the packages.
-call ./gradlew :hmkit-utils:artifactoryPublish to release a specific package.
-
-If pushing the same version number, in dev package will be overwritten, in release rejected.
-
-If releasing to prod, also call "./gradlew bintrayUpload".
+## Licence
+This repository is using MIT licence. See more in 📘[LICENCE](LICENCE.md)
