@@ -21,7 +21,7 @@ LOCAL_LDLIBS += -lz
 LOCAL_C_INCLUDES += $(CORE_PATH)/high-mobility-bt-core
 LOCAL_C_INCLUDES += $(CORE_PATH)/crypto-c/Crypto
 
-LOCAL_SRC_FILES := $(LOCAL_PATH)/hmbtcore.cpp
+LOCAL_SRC_FILES := $(LOCAL_PATH)/hmbtcore.c
 LOCAL_SRC_FILES += $(LOCAL_PATH)/hm_bt_crypto_hal.c
 LOCAL_SRC_FILES += $(LOCAL_PATH)/hm_bt_debug_hal.c
 LOCAL_SRC_FILES += $(LOCAL_PATH)/hm_connectivity_hal.c
