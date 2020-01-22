@@ -1,6 +1,6 @@
 # HMKit Android
 
-The HMKit Android SDK makes it easy to work with car data using the HIGH MOBILITY API platform. The SDK implements a strong security layer between your iOS app and the platform while giving you straightforward native interface to read and write to connected cars.
+The HMKit Android SDK makes it easy to work with car data using the HIGH MOBILITY API platform. The SDK implements a strong security layer between your Android app and the platform while giving you straightforward native interface to read and write to connected cars.
 In addition the SDK provides a UI component to initate OAuth2 for the end-user in order to retrieve data sharing consent.
 
 # Table of contents
