@@ -1,12 +1,12 @@
-[submodule "hm-java-crypto"]
-	path = hm-java-crypto
-	url = git@github.com:highmobility/hm-java-crypto.git
+[submodule "hmkit-crypto"]
+	path = hmkit-crypto
+	url = git@github.com:highmobility/hmkit-crypto-java.git
 [submodule "hm-android-basic-oauth"]
 	path = hm-android-basic-oauth
 	url = https://github.com/highmobility/hm-android-basic-oauth.git
-[submodule "hm-java-utils"]
-	path = hm-java-utils
-	url = git@github.com:highmobility/hm-java-utils.git
+[submodule "hmkit-utils"]
+	path = hmkit-utils
+	url = git@github.com:highmobility/hmkit-utils-java.git
 [submodule "hm-android-bluetooth-auto-api-explorer"]
 	path = hm-android-bluetooth-auto-api-explorer
 	url = git@github.com:highmobility/hm-android-bluetooth-auto-api-explorer.git
