@@ -1,4 +1,4 @@
-CORE_PATH := ../../../../hm-java-core-jni
+CORE_PATH := ../../../../hmkit-core-jni
 LOCAL_PATH := $(CORE_PATH)/src/main/jni
 
 include $(CLEAR_VARS)
