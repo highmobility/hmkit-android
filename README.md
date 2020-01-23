@@ -20,9 +20,9 @@ In addition the SDK provides a UI component to initate OAuth2 for the end-user i
 
 **hmkit-core-jni**: Contains JNI classes to HMKit Core.
 
-**hm-java-crypto**: Contains necessary crypto classes and functions.
+**hmkit-crypto**: Contains necessary crypto classes and functions.
 
-**hm-java-utils**: Contains general helper methods and classes.
+**hmkit-utils**: Contains general helper methods and classes.
 
 **hm-android-basic-oauth** and **hm-android-bluetooth-auto-api-explorer**: Sample apps for testing.
 

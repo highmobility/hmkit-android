@@ -8,8 +8,6 @@ include ':hmkit-android',
         ':hmkit-auto-api'
 
 project(':basic-oauth').projectDir = new File('hm-android-basic-oauth/basic-oauth')
-project(':hmkit-crypto').projectDir = new File('hm-java-crypto/')
-project(':hmkit-utils').projectDir = new File('hm-java-utils')
 project(':sandboxui').projectDir = new File('hm-android-bluetooth-auto-api-explorer/sandboxui')
 project(':ble-explorer-app').projectDir = new File('hm-android-bluetooth-auto-api-explorer/ble-explorer-app')
-project(':hmkit-auto-api').projectDir = new File('hm-android-bluetooth-auto-api-explorer/hm-java-auto-api')
+project(':hmkit-auto-api').projectDir = new File('hm-android-bluetooth-auto-api-explorer/auto-api-java')
