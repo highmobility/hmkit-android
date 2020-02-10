@@ -221,14 +221,12 @@ public class Link {
                                 "Authentication failed.");
                 callAuthenticationFailed(error);
             } else if (state == State.AUTHENTICATED || state == State.REVOKING) {
-                // AUTHENTICATED = Called after car revoke
-                // TODO: 05/11/2019 If car revoke has a cb, the state can be REVOKING only ^^
                 setState(State.NOT_AUTHENTICATED);
                 threadManager.postToMain(new Runnable() {
                     @Override public void run() {
                         if (revokeCallback == null) return;
-                        // REVOKING = called after mobile revoke
                         revokeCallback.onRevokeSuccess(new Bytes(revokeData));
+                        revokeCallback = null;
                         revokeData = null;
                     }
                 });
@@ -340,8 +338,8 @@ public class Link {
      * States can go from: AUTHENTICATING > AUTHENTICATED or AUTHENTICATING > AUTHENTICATION_FAILED
      * (then the LinkListener's authenticationFailed is called as well)
      * <p>
-     * After this, it can go to REVOKING (if initiated) and then to
-     * NOT_AUTHNETICATED/AUTHENTICATED(revoke failed).
+     * After this, it can go to REVOKING (if initiated) and then to NOT_AUTHNETICATED/AUTHENTICATED
+     * (revoke failed).
      *
      * @see LinkListener#onStateChanged(Link, State, State)
      */
