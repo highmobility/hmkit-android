@@ -120,17 +120,18 @@ public class Link {
      * @param callback A {@link CommandCallback} object that is invoked with the command result.
      */
     public void sendCommand(final Bytes bytes, CommandCallback callback) {
-        sendCommand(ContentType.AUTO_API, bytes, callback);
+        sendCommand(bytes, ContentType.AUTO_API, 2, callback);
     }
 
     /**
      * Send a command to the Link.
      *
-     * @param contentType The command content type. See {@link ContentType} for possible options.
      * @param bytes       The command bytes that will be sent to the link.
+     * @param contentType The command content type. See {@link ContentType} for possible options.
+     * @param version     The command version.
      * @param callback    A {@link CommandCallback} object that is invoked with the command result.
      */
-    public void sendCommand(final ContentType contentType, final Bytes bytes,
+    public void sendCommand(final Bytes bytes, final ContentType contentType, final int version,
                             CommandCallback callback) {
         if (bytes.getLength() > Constants.MAX_COMMAND_LENGTH) {
             LinkError error = new LinkError(LinkError.Type.COMMAND_TOO_BIG, 0,
@@ -161,7 +162,7 @@ public class Link {
             @Override
             public void run() {
                 core.HMBTCoreSendCustomCommand(contentType.asInt(), bytes.getByteArray(),
-                        bytes.getLength(), getAddressBytes());
+                        bytes.getLength(), getAddressBytes(), version);
             }
         });
     }
