@@ -89,8 +89,8 @@ dependencies {
         api deps.corejni
     }
 
+    api deps.timber
     implementation deps.volley
-    implementation deps.timber
     implementation deps.findBugs
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
