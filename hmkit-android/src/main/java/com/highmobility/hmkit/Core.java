@@ -239,8 +239,7 @@ class Core implements HMBTCoreInterface {
     }
 
     void HMBTCoreSetMTU(byte[] mac, int mtu) {
-        // TODO: 18/10/2019 core should probably accept int not byte[]
-        core.HMBTCoreSetMTU(this, mac, new byte[]{(byte) mtu});
+        core.HMBTCoreSetMTU(this, mac, mtu);
     }
 
     // MARK: HMBTCoreInterface
