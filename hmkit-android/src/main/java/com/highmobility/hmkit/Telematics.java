@@ -73,7 +73,8 @@ public class Telematics extends Core.Telematics {
      * @param version     The command version.
      * @param callback    A {@link CommandCallback} object that is invoked with the command result.
      */
-    public void sendCommand(final Bytes command, DeviceSerial serial,
+    public void sendCommand(final Bytes command,
+                            DeviceSerial serial,
                             final ContentType contentType,
                             final int version,
                             final CommandCallback callback) {
