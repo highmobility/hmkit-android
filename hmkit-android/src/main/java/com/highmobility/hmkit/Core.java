@@ -195,8 +195,9 @@ class Core implements HMBTCoreInterface {
         core.HMBTCorelinkWriteResponse(this, mac, characteristic);
     }
 
-    void HMBTCoreSendCustomCommand(int contentType, byte[] data, int size, byte[] mac) {
-        core.HMBTCoreSendCustomCommand(this, contentType, data, size, mac);
+    void HMBTCoreSendCustomCommand(int contentType, byte[] data, int size, byte[] mac,
+                                   int version) {
+        core.HMBTCoreSendCustomCommand(this, contentType, data, size, mac, version);
     }
 
     void HMBTCoreSendReadDeviceCertificate(byte[] mac, byte[] nonce, byte[] caSignature) {
@@ -227,8 +228,8 @@ class Core implements HMBTCoreInterface {
     }
 
     void HMBTCoreSendTelematicsCommand(byte[] serial, byte[] nonce, int contentType, int length,
-                                       byte[] data) {
-        core.HMBTCoreSendTelematicsCommand(this, serial, nonce, contentType, length, data);
+                                       byte[] data, int version) {
+        core.HMBTCoreSendTelematicsCommand(this, serial, nonce, contentType, length, data, version);
     }
 
     // MARK: other
@@ -238,8 +239,7 @@ class Core implements HMBTCoreInterface {
     }
 
     void HMBTCoreSetMTU(byte[] mac, int mtu) {
-        // TODO: 18/10/2019 core should probably accept int not byte[]
-        core.HMBTCoreSetMTU(this, mac, new byte[]{(byte) mtu});
+        core.HMBTCoreSetMTU(this, mac, mtu);
     }
 
     // MARK: HMBTCoreInterface

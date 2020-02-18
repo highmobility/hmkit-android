@@ -120,17 +120,18 @@ public class Link {
      * @param callback A {@link CommandCallback} object that is invoked with the command result.
      */
     public void sendCommand(final Bytes bytes, CommandCallback callback) {
-        sendCommand(ContentType.AUTO_API, bytes, callback);
+        sendCommand(bytes, ContentType.AUTO_API, 2, callback);
     }
 
     /**
      * Send a command to the Link.
      *
-     * @param contentType The command content type. See {@link ContentType} for possible options.
      * @param bytes       The command bytes that will be sent to the link.
+     * @param contentType The command content type. See {@link ContentType} for possible options.
+     * @param version     The command version.
      * @param callback    A {@link CommandCallback} object that is invoked with the command result.
      */
-    public void sendCommand(final ContentType contentType, final Bytes bytes,
+    public void sendCommand(final Bytes bytes, final ContentType contentType, final int version,
                             CommandCallback callback) {
         if (bytes.getLength() > Constants.MAX_COMMAND_LENGTH) {
             LinkError error = new LinkError(LinkError.Type.COMMAND_TOO_BIG, 0,
@@ -161,7 +162,7 @@ public class Link {
             @Override
             public void run() {
                 core.HMBTCoreSendCustomCommand(contentType.asInt(), bytes.getByteArray(),
-                        bytes.getLength(), getAddressBytes());
+                        bytes.getLength(), getAddressBytes(), version);
             }
         });
     }
@@ -221,14 +222,12 @@ public class Link {
                                 "Authentication failed.");
                 callAuthenticationFailed(error);
             } else if (state == State.AUTHENTICATED || state == State.REVOKING) {
-                // AUTHENTICATED = Called after car revoke
-                // TODO: 05/11/2019 If car revoke has a cb, the state can be REVOKING only ^^
                 setState(State.NOT_AUTHENTICATED);
                 threadManager.postToMain(new Runnable() {
                     @Override public void run() {
                         if (revokeCallback == null) return;
-                        // REVOKING = called after mobile revoke
                         revokeCallback.onRevokeSuccess(new Bytes(revokeData));
+                        revokeCallback = null;
                         revokeData = null;
                     }
                 });
@@ -340,8 +339,8 @@ public class Link {
      * States can go from: AUTHENTICATING > AUTHENTICATED or AUTHENTICATING > AUTHENTICATION_FAILED
      * (then the LinkListener's authenticationFailed is called as well)
      * <p>
-     * After this, it can go to REVOKING (if initiated) and then to
-     * NOT_AUTHNETICATED/AUTHENTICATED(revoke failed).
+     * After this, it can go to REVOKING (if initiated) and then to NOT_AUTHNETICATED/AUTHENTICATED
+     * (revoke failed).
      *
      * @see LinkListener#onStateChanged(Link, State, State)
      */

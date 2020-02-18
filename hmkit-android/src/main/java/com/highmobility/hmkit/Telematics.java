@@ -67,12 +67,16 @@ public class Telematics extends Core.Telematics {
     /**
      * Send a command to a device via telematics.
      *
-     * @param contentType The content type. See {@link ContentType} for possible types.
      * @param command     the bytes to send to the device
      * @param serial      serial of the device
+     * @param contentType The content type. See {@link ContentType} for possible types.
+     * @param version     The command version.
      * @param callback    A {@link CommandCallback} object that is invoked with the command result.
      */
-    public void sendCommand(final ContentType contentType, final Bytes command, DeviceSerial serial,
+    public void sendCommand(final Bytes command,
+                            DeviceSerial serial,
+                            final ContentType contentType,
+                            final int version,
                             final CommandCallback callback) {
         core.start();
         if (command.getLength() > Constants.MAX_COMMAND_LENGTH) {
@@ -110,7 +114,7 @@ public class Telematics extends Core.Telematics {
                             interactingCommand = activeCommand;
                             core.HMBTCoreSendTelematicsCommand(certificate.getGainerSerial()
                                             .getByteArray(), nonce, contentType.asInt(),
-                                    command.getLength(), command.getByteArray());
+                                    command.getLength(), command.getByteArray(), version);
                         }
                     });
                 } catch (JSONException e) {
@@ -140,7 +144,7 @@ public class Telematics extends Core.Telematics {
      */
     public void sendCommand(final Bytes command, DeviceSerial serial, final CommandCallback
             callback) {
-        sendCommand(ContentType.AUTO_API, command, serial, callback);
+        sendCommand(command, serial, ContentType.AUTO_API, 2, callback);
     }
 
     @Override void onTelematicsCommandEncrypted(byte[] serial, byte[] issuer, byte[] command) {
