@@ -38,7 +38,7 @@ ext {
     // 0 no release, local dependencies
     // 1 dev release, remote dependencies
     // 2 prod release, remote dependencies
-    releaseType = 0
+    releaseType = 1
 
     // override deploy.settings repos
     if (releaseType == 1) {
