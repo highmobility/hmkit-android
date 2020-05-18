@@ -64,6 +64,7 @@ ext.deps = [
         "utils"   : "com.highmobility:hmkit-utils:${ver.utils}",
         "corejni" : "com.highmobility:hmkit-core-jni:${ver.corejni}",
         "autoApi" : "com.highmobility:hmkit-auto-api:${ver.autoApi}",
+        "commandQueue" : "com.highmobility:command-queue:1.0",
         "timber"  : "com.jakewharton.timber:timber:4.7.1",
         "volley"  : "com.android.volley:volley:1.1.1",
         "findBugs": 'com.google.code.findbugs:jsr305:3.0.2'
