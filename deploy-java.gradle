@@ -1,6 +1,11 @@
-// deploy
-//
 if (project.hasProperty("hmArtifactoryUrl")) {
+    apply plugin: "maven"
+    apply plugin: "com.jfrog.artifactory"
+    apply plugin: 'com.jfrog.bintray'
+
+    def artifact = new Properties()
+    artifact.load(new FileInputStream("$projectDir/deploy.settings"))
+
     // add the sources and doc artifacts
 
     task sourcesJar(type: Jar) {
