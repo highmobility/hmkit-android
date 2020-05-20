@@ -35,7 +35,6 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class StorageTest {
-
     /*
         issuer: 746D6373
         providingSerial: 10342C3CBB9E845017
