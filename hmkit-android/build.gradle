@@ -17,10 +17,10 @@ repositories {
     jcenter()
 }
 
-def artifact = new Properties()
-artifact.load(new FileInputStream("$projectDir/deploy.settings"))
+def deploy = new Properties()
+deploy.load(new FileInputStream("$projectDir/deploy.settings"))
 
-version artifact.version
+version deploy.version
 
 android {
     compileSdkVersion ver.compileSdk
@@ -103,4 +103,4 @@ dependencies {
 }
 
 // deploy script
-apply from: "https://bitbucket.org/tonisives/tools/raw/master/scripts/deploy-android.gradle"
+apply from: "https://raw.githubusercontent.com/tonisives/tools/master/scripts/deploy-android.gradle"
