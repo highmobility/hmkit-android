@@ -63,10 +63,10 @@ All of the HMKit Android packages can be released from this project. This includ
 **Release**
 
 * Update the "version = 1.5.0" in all of the deploy.settings files (if necessary).
-* Set the release environment in root build.gradle (ext property release = 0/1/2).
-* Call `./gradlew artifactoryPublish` to release all of the packages.
+* Call `./gradlew artifactoryPublish` to release all of the packages to dev depo.
 * Call `./gradlew :hmkit-utils:artifactoryPublish` to release a specific package.
-* If releasing to prod, also call `./gradlew bintrayUpload`.
+* Call `./gradlew :hmkit-utils:artifactoryPublish -Prepo=gradle-release-local` to specify the repo.
+* If releasing to bintray, also call `./gradlew bintrayUpload`.
 
 If pushing the same version number, the package will be overwritten in dev, rejected in release.
 

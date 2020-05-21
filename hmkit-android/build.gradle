@@ -74,7 +74,7 @@ android {
 }
 
 dependencies {
-    if (project.releaseType == 0) {
+    if (project.depLocation == 0) {
         api project(':hmkit-core-jni')
         implementation project(':hmkit-crypto')
         implementation project(':hmkit-utils')

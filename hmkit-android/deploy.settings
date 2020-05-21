@@ -4,4 +4,3 @@ version = 2.0.2
 groupId = com.highmobility
 licenses = MIT
 id = hmkit-android
-repo = gradle-dev-local
