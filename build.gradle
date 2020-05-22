@@ -47,7 +47,7 @@ ext.ver = [
         corejni   : "1.0.1",
         crypto    : "1.4.5",
         utils     : "1.4.4",
-        hmkit     : "2.0.2",
+        hmkit     : "2.0.3",
         autoApi   : "3.11.1",
         compileSdk: 28
 ]

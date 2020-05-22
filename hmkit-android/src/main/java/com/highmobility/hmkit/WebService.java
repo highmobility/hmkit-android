@@ -81,7 +81,7 @@ class WebService {
                                   String clientId, String jwt,
                                   final WebRequestListener response) {
         Uri uri = Uri.parse(url).buildUpon().build();
-        Map<String, String> params = new HashMap();
+        Map<String, String> params = new HashMap<>();
 
         // payload
         params.put("grant_type", "authorization_code");
@@ -101,7 +101,7 @@ class WebService {
                                  String refreshToken,
                                  WebRequestListener response) {
         Uri uri = Uri.parse(url).buildUpon().build();
-        Map<String, String> params = new HashMap();
+        Map<String, String> params = new HashMap<>();
 
         params.put("grant_type", "refresh_token");
         params.put("client_id", clientId);
