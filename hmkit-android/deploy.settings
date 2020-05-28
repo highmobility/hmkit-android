@@ -1,7 +1,6 @@
 siteUrl = https://github.com/highmobility/hmkit-android
 gitUrl = https://github.com/highmobility/hmkit-android
-version = 2.0.2
+version = 2.0.3
 groupId = com.highmobility
-licenses = ['MIT']
+licenses = MIT
 id = hmkit-android
-repo = gradle-dev-local

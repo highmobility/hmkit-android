@@ -10,6 +10,8 @@ buildscript {
         classpath 'com.android.tools.build:gradle:3.5.0'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.13.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        // otherwise bintrayUpload fails because autoApi doesn't have this plugin
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
     }
 }
 
@@ -35,17 +37,9 @@ allprojects {
 }
 
 ext {
-    // 0 no release, local dependencies
-    // 1 dev release, remote dependencies
-    // 2 prod release, remote dependencies
-    releaseType = 0
-
-    // override deploy.settings repos
-    if (releaseType == 1) {
-        repo = "gradle-dev-local"
-    } else if (releaseType == 2) {
-        repo = "gradle-release-local"
-    }
+    // 0 local dependencies
+    // 1 remote dependencies
+    depLocation = 1
 }
 
 // these are not release numbers. release numbers are in deploy.settings files.
@@ -53,7 +47,7 @@ ext.ver = [
         corejni   : "1.0.1",
         crypto    : "1.4.5",
         utils     : "1.4.4",
-        hmkit     : "2.0.2",
+        hmkit     : "2.0.3",
         autoApi   : "3.11.1",
         compileSdk: 28
 ]
@@ -64,6 +58,7 @@ ext.deps = [
         "utils"   : "com.highmobility:hmkit-utils:${ver.utils}",
         "corejni" : "com.highmobility:hmkit-core-jni:${ver.corejni}",
         "autoApi" : "com.highmobility:hmkit-auto-api:${ver.autoApi}",
+        "commandQueue" : "com.highmobility:command-queue:1.0",
         "timber"  : "com.jakewharton.timber:timber:4.7.1",
         "volley"  : "com.android.volley:volley:1.1.1",
         "findBugs": 'com.google.code.findbugs:jsr305:3.0.2'

@@ -12,20 +12,15 @@ buildscript {
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 apply plugin: "kotlin-android-extensions"
-// deploy
-apply plugin: "maven"
-apply plugin: "com.jfrog.artifactory"
-apply plugin: 'com.jfrog.bintray'
-apply plugin: 'digital.wup.android-maven-publish'
 
 repositories {
     jcenter()
 }
 
-def artifact = new Properties()
-artifact.load(new FileInputStream("$projectDir/deploy.settings"))
+def deploy = new Properties()
+deploy.load(new FileInputStream("$projectDir/deploy.settings"))
 
-version artifact.version
+version deploy.version
 
 android {
     compileSdkVersion ver.compileSdk
@@ -79,7 +74,7 @@ android {
 }
 
 dependencies {
-    if (project.releaseType == 0) {
+    if (project.depLocation == 0) {
         api project(':hmkit-core-jni')
         implementation project(':hmkit-crypto')
         implementation project(':hmkit-utils')
@@ -107,43 +102,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-intents:3.1.0'
 }
 
-if (project.releaseType > 0) {
-    // deploy
-    def repo = project.hasProperty("repo") ? project.property("repo") : artifact.repo
-
-    task sourcesJar(type: Jar) {
-        archiveClassifier.set('sources')
-        from android.sourceSets.main.java.srcDirs
-    }
-
-    publishing {
-        publications {
-            aar(MavenPublication) {
-                from components.android
-                groupId artifact.groupId
-                // for bintray: https://github.com/bintray/gradle-bintray-plugin
-            }
-        }
-    }
-
-// artifactory
-    artifactory {
-        contextUrl = hmArtifactoryUrl
-
-        publish {
-            repository {
-                repoKey = repo
-                username = hmArtifactoryPublishUser
-                password = hmArtifactoryPublishPassword
-                maven = true
-            }
-
-            defaults {
-                publishArtifacts = true
-                publications('aar')
-                publishIvy = false
-                publishPom = true
-            }
-        }
-    }
-}
+// deploy script
+apply from: "https://raw.githubusercontent.com/tonisives/tools/master/scripts/deploy-android.gradle"
