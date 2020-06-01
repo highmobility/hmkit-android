@@ -39,7 +39,7 @@ allprojects {
 ext {
     // 0 local dependencies
     // 1 remote dependencies
-    depLocation = 1
+    depLocation = 0
 }
 
 // these are not release numbers. release numbers are in deploy.settings files.

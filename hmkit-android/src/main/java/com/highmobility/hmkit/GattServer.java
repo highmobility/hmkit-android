@@ -432,9 +432,6 @@ class GattServer extends BluetoothGattServerCallback {
                     // add mtu if doesn't exist
                     infoCharacteristic.setValue(infoCharValue + mtuSuffix);
                 }
-
-                d("onMtuChanged(): \n%s\n%s\n%s\n%s", mtu, coreMtu, mtuSuffix,
-                        infoCharacteristic.getStringValue(0));
             }
         });
     }
