@@ -64,7 +64,6 @@ internal class OAuthActivity : FragmentActivity(), IOAuthView, IWebView, IInfoVi
     }
 
     override fun closeActivity() {
-        // TODO: 2018-12-05 test memory
         finish()
     }
 
