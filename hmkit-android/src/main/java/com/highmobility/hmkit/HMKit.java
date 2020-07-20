@@ -141,9 +141,7 @@ public class HMKit {
     }
 
     /**
-     * The Storage can be accessed before setting the device certificate.
-     *
-     * @return The storage for Access Certificates.
+     * @return The storage for Access Certificates. Available without {@link #initialise(Context)}
      */
     public Storage getStorage() {
         throwIfContextNotSet();
@@ -151,7 +149,7 @@ public class HMKit {
     }
 
     /**
-     * @return The HM crypto.
+     * @return The HM crypto. Available without {@link #initialise(Context)}
      */
     public Crypto getCrypto() {
         return crypto;
