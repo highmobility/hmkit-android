@@ -57,6 +57,7 @@ internal class WebViewFragment : Fragment() {
         webView.webViewClient = webViewClient
         webView.webChromeClient = webChromeClient
         webView.loadUrl(url)
+        d("oauth: load oauth url: %s", url)
     }
 
     private val webChromeClient: WebChromeClient = object : WebChromeClient() {
@@ -70,6 +71,7 @@ internal class WebViewFragment : Fragment() {
         @SuppressWarnings("deprecation")
         override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
             if (url == null) return false
+            d("oauth: shouldOverrideUrlLoading: %s", url)
             return shouldOverrideUrlLoading(url)
         }
 

@@ -35,6 +35,7 @@ import com.highmobility.utils.Base64
 import com.highmobility.value.Bytes
 import org.json.JSONException
 import org.json.JSONObject
+import timber.log.Timber.d
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.*
@@ -152,6 +153,7 @@ class OAuth internal constructor(private val webService: WebService,
     }
 
     internal fun onStartLoadingUrl(url: String?): UrlLoadResult {
+        d("OAuth: onStartLoadingUrl: $url")
         if (url != null && url.startsWith(redirectScheme)) {
             val uri = Uri.parse(url)
             code = uri?.getQueryParameter("code")
