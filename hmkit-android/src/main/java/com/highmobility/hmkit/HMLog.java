@@ -36,7 +36,7 @@ public class HMLog {
     private static final Pattern ANONYMOUS_CLASS = Pattern.compile("(\\$\\d+)+$");
     private static final String LOG_PREFIX = "hmkit-";
 
-    protected static Level level = Level.ALL;
+    protected static Level level = Level.DEBUG;
 
     static void init() {
 
@@ -54,7 +54,7 @@ public class HMLog {
     }
 
     static void w(String message, Object... args) {
-        if (level.getValue() >= Level.NONE.getValue()) {
+        if (level.getValue() >= Level.DEBUG.getValue()) {
             Timber.tag(getTag());
             try {
                 Timber.w(String.format(message, args));
@@ -65,7 +65,7 @@ public class HMLog {
     }
 
     static void i(String message, Object... args) {
-        if (level.getValue() >= Level.ALL.getValue()) {
+        if (level.getValue() >= Level.INFO.getValue()) {
             Timber.tag(getTag());
             try {
                 Timber.i(String.format(message, args));
@@ -76,7 +76,7 @@ public class HMLog {
     }
 
     static void e(String message, Object... args) {
-        if (level.getValue() >= Level.NONE.getValue()) {
+        if (level.getValue() >= Level.INFO.getValue()) {
             Timber.tag(getTag());
             try {
                 Timber.e(String.format(message, args));
@@ -113,7 +113,22 @@ public class HMLog {
      * The possible logging levels.
      */
     public enum Level {
-        NONE(0), DEBUG(1), ALL(2);
+        /**
+         * No log messages
+         */
+        OFF(0),
+        /**
+         * Informational messages only
+         */
+        INFO(1),
+        /**
+         * Debug messages
+         */
+        DEBUG(2),
+        /**
+         * All messages, including fine traces from core
+         */
+        ALL(3);
 
         private final Integer level;
 

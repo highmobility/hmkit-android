@@ -251,7 +251,7 @@ class Core implements HMBTCoreInterface {
 
     @Override
     public int HMBTHalLog(int level, byte[] string) {
-        if (HMLog.level.getValue() >= level) d(new String(string));
+        if (HMLog.level == HMLog.Level.ALL) d(new String(string));
         return 0;
     }
 
