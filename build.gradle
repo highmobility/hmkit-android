@@ -7,7 +7,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.android.tools.build:gradle:3.6.0-rc01'
         classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.13.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // otherwise bintrayUpload fails because autoApi doesn't have this plugin
@@ -20,11 +20,13 @@ allprojects {
         google()
         jcenter()
         maven { url "http://jfrog.high-mobility.com/artifactory/gradle-release-local/" }
-        maven {
-            url "http://jfrog.high-mobility.com/artifactory/gradle-dev-local/"
-            credentials {
-                username devReadUser
-                password devReadPassword
+        if (project.hasProperty('devReadUser')) {
+            maven {
+                url "http://jfrog.high-mobility.com/artifactory/gradle-dev-local/"
+                credentials {
+                    username devReadUser
+                    password devReadPassword
+                }
             }
         }
     }
