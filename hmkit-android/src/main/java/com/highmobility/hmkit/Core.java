@@ -238,8 +238,8 @@ class Core implements HMBTCoreInterface {
         core.HMBTCoreSendRevoke(this, serial);
     }
 
-    void HMBTCoreSetMTU(byte[] mac, int mtu) {
-        core.HMBTCoreSetMTU(this, mac, mtu);
+    int HMBTCoreSetMTU(byte[] mac, int mtu) {
+        return core.HMBTCoreSetMTU(this, mac, mtu);
     }
 
     // MARK: HMBTCoreInterface

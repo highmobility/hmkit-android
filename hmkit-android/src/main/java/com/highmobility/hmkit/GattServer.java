@@ -282,8 +282,11 @@ class GattServer extends BluetoothGattServerCallback {
                     e("connecting failed with status" + status);
                 }
 
+                byte[] deviceMac = ByteUtils.bytesFromMacString(device.getAddress());
                 if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                    core.HMBTCorelinkDisconnect(ByteUtils.bytesFromMacString(device.getAddress()));
+                    core.HMBTCorelinkDisconnect(deviceMac);
+                } else if (newState == BluetoothProfile.STATE_CONNECTED) {
+                    core.HMBTCorelinkConnect(deviceMac);
                 }
             }
         });
@@ -399,22 +402,12 @@ class GattServer extends BluetoothGattServerCallback {
 
             // if notifications don't start, try restarting bluetooth on android / other device
 
-            threadManager.postToWork(new Runnable() {
-                @Override
-                public void run() {
-                    final byte[] deviceMac = ByteUtils.bytesFromMacString(device.getAddress());
-                    // check if broadcaster already has this device as a link because according to
-                    // BLE spec a new descriptor write can come in any time and this would
-                    // create a duplicate link
-
-                    if (broadcaster.onNotificationsStartedForReadCharacteristic(device,
-                            deviceMac)) {
-                        // this is not authenticated but connected state. Can call
-                        // HMBTCorelinkConnect after dispatching new link from Broadcaster.
-                        core.HMBTCorelinkConnect(deviceMac);
-                    }
-                }
-            });
+            // read characteristic notifications have started. this is not authenticated but
+            // connected state.
+            // According to BLE spec a new descriptor write can come in any time, so in
+            // broadcaster we create the link only 1 time.
+            final byte[] deviceMac = ByteUtils.bytesFromMacString(device.getAddress());
+            broadcaster.onNotificationsStartedForReadCharacteristic(device, deviceMac);
         }
     }
 
@@ -423,17 +416,24 @@ class GattServer extends BluetoothGattServerCallback {
         d("onNotificationSent: %s", (status == BluetoothGatt.GATT_SUCCESS ? "success" : "failed"));
     }
 
-    @Override public void onMtuChanged(BluetoothDevice device, int mtu) {
-        core.HMBTCoreSetMTU(ByteUtils.bytesFromMacString(device.getAddress()), mtu);
+    @Override public void onMtuChanged(final BluetoothDevice device, final int mtu) {
+        threadManager.postToWork(new Runnable() {
+            @Override public void run() {
+                int coreMtu =
+                        core.HMBTCoreSetMTU(ByteUtils.bytesFromMacString(device.getAddress()), mtu);
 
-        String mtuCharValue = " MTU" + String.format("%03d", mtu);
-        String currentCharValue = infoCharacteristic.getStringValue(0);
+                String mtuSuffix = " MTU" + String.format("%03d", coreMtu);
+                String infoCharValue = infoCharacteristic.getStringValue(0);
 
-        if (currentCharValue.contains("MTU")) {
-            infoCharacteristic.setValue(currentCharValue.split("MTU")[0] + mtuCharValue);
-        } else {
-            infoCharacteristic.setValue(currentCharValue + mtuCharValue);
-        }
+                if (infoCharValue.contains("MTU")) {
+                    // replace old mtu
+                    infoCharacteristic.setValue(infoCharValue.split("MTU")[0] + mtuSuffix);
+                } else {
+                    // add mtu if doesn't exist
+                    infoCharacteristic.setValue(infoCharValue + mtuSuffix);
+                }
+            }
+        });
     }
 
     private int getCharacteristicIdForCharacteristic(BluetoothGattCharacteristic characteristic) {
