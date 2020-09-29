@@ -58,7 +58,7 @@ All of the HMKit Android packages can be released from this project. This includ
 
 **Pre checks**
 
-* Run the unit and instrumentation tests: `./gradlew test && ./gradlew cAT`
+* Run the unit and instrumentation tests: `./gradlew cleanTest test && ./gradlew cAT`
 
 **Release**
 
