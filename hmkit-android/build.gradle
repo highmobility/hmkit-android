@@ -104,3 +104,4 @@ dependencies {
 
 // deploy script
 apply from: "https://raw.githubusercontent.com/tonisives/tools/master/scripts/deploy-android.gradle"
+apply from: "https://raw.githubusercontent.com/tonisives/tools/master/scripts/test-shell-logging.gradle"

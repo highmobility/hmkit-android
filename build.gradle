@@ -15,10 +15,6 @@ buildscript {
     }
 }
 
-plugins {
-    id 'com.adarshr.test-logger' version '2.1.0'
-}
-
 allprojects {
     repositories {
         google()
@@ -40,10 +36,6 @@ allprojects {
             options.compilerArgs << "-Xlint:unchecked"
         }
     }*/
-}
-
-subprojects {
-    apply plugin: 'com.adarshr.test-logger'
 }
 
 ext {
