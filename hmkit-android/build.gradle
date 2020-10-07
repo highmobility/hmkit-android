@@ -87,7 +87,7 @@ dependencies {
     api deps.timber
     implementation deps.volley
     implementation deps.findBugs
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     // its not easy to use ndk with junit(should build separate binary)

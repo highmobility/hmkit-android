@@ -11,5 +11,5 @@ include ':hmkit-android',
 project(':basic-oauth').projectDir = new File('hm-android-basic-oauth/basic-oauth')
 project(':sandboxui').projectDir = new File('hm-android-bluetooth-auto-api-explorer/sandboxui')
 project(':ble-explorer-app').projectDir = new File('hm-android-bluetooth-auto-api-explorer/ble-explorer-app')
-project(':hmkit-auto-api').projectDir = new File('hm-android-bluetooth-auto-api-explorer/auto-api-java')
+project(':hmkit-auto-api').projectDir = new File('hm-android-bluetooth-auto-api-explorer/auto-api-java/auto-api-java')
 project(':command-queue').projectDir = new File('hm-android-bluetooth-auto-api-explorer/command-queue-android')
