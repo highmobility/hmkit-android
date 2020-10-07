@@ -92,7 +92,7 @@ dependencies {
 
     // its not easy to use ndk with junit(should build separate binary)
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.robolectric:robolectric:4.0.2'
+    testImplementation 'org.robolectric:robolectric:4.4'
     testImplementation 'androidx.test:core:1.1.0'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'
