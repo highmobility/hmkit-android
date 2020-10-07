@@ -29,7 +29,7 @@ Get started with HMKit Android 📘[browse the documentation](https://high-mobil
 * Build HMKit Core:  
   * Install NDK through Android SDK Manager(Tools tab)
   * `cd hmkit-android/src/main/jni && ndk-build && cd -`
-* Run the unit tests: `./gradlew test`
+* Run the unit tests: `./gradlew clean test`
 * If there are errors: Try `Gradle clean`, `File > Invalidate caches and restart`.
 * Now **hm-android-basic-oauth** or **hm-android-bluetooth-auto-api-explorer** targets can be run with local code.
 
@@ -58,7 +58,8 @@ All of the HMKit Android packages can be released from this project. This includ
 
 **Pre checks**
 
-* Run the unit and instrumentation tests: `./gradlew cleanTest test && ./gradlew cAT`
+* Run the unit and instrumentation tests: `./gradlew clean test && ./gradlew cAT`. Refer to [ble explorer app](https://github.com/highmobility/hm-android-bluetooth-auto-api-explorer)
+for instrumentation test setup.
 
 **Release**
 
