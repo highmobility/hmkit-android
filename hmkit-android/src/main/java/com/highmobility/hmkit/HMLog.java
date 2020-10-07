@@ -118,7 +118,7 @@ public class HMLog {
          */
         OFF(0),
         /**
-         * Informational messages only
+         * Informational messages and errors only
          */
         INFO(1),
         /**
