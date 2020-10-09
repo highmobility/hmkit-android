@@ -58,7 +58,7 @@ All of the HMKit Android packages can be released from this project. This includ
 
 **Pre checks**
 
-* Run the unit and instrumentation tests: `./gradlew clean test && ./gradlew cAT`. Refer to [ble explorer app](https://github.com/highmobility/hm-android-bluetooth-auto-api-explorer)
+* Run the unit and instrumentation tests: `./gradlew test && ./gradlew cAT`. Refer to [ble explorer app](https://github.com/highmobility/hm-android-bluetooth-auto-api-explorer)
 for instrumentation test setup.
 
 **Release**
