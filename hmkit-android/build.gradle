@@ -17,11 +17,6 @@ repositories {
     jcenter()
 }
 
-def deploy = new Properties()
-deploy.load(new FileInputStream("$projectDir/deploy.settings"))
-
-version deploy.version
-
 android {
     compileSdkVersion ver.compileSdk
     ndkVersion '20.1.5948944'
