@@ -400,7 +400,6 @@ public class HMKit {
 
                         if (certificate != null)
                             callback.onDownloaded(certificate.getGainerSerial());
-
                     }
 
                     @Override public void onError(VolleyError error) {
