@@ -23,10 +23,6 @@
  */
 package com.highmobility.hmkit.error;
 
-/**
- * Created by root on 6/22/17.
- */
-
 public class DownloadAccessCertificateError {
     public enum Type {
         /// Internal error
