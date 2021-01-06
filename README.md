@@ -74,5 +74,11 @@ See *release-script* folder for release script examples, or
 
 If pushing the same version number, the package will be overwritten in dev, rejected in release.
 
+For example, publish utils to dev-local and bintray, using the ext.ver value
+```
+./gradlew :hmkit-utils:publish -Prepo=gradle-dev-local -PdepLocation=1
+./gradlew :hmkit-utils:bintrayUpload
+```
+
 ### Licence
 This repository is using the MIT licence. See more in 📘[LICENCE](LICENCE.md)
