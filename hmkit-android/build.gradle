@@ -14,10 +14,6 @@ apply from: "deploy.gradle"
 
 version ver."${deploy.id}"
 
-repositories {
-    jcenter()
-}
-
 android {
     compileSdkVersion ver.compileSdk
     ndkVersion '20.1.5948944'
