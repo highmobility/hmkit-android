@@ -70,14 +70,16 @@ See *release-script* folder for release script examples, or
 * Call `./gradlew publish` to release all the packages to dev repo.
 * Call `./gradlew :hmkit-utils:publish` to release a specific package.
 * Call `./gradlew :hmkit-utils:publish -Prepo=gradle-release-local` to specify the repo.
-* If releasing to bintray, also call `./gradlew bintrayUpload`.
+
+If releasing to bintray, first test the release with scaffold from release-local, then
+call `./gradlew bintrayUpload -PdepLocation=1`.
 
 If pushing the same version number, the package will be overwritten in dev, rejected in release.
 
 For example, publish utils to dev-local and bintray, using the ext.ver value
 ```
 ./gradlew :hmkit-utils:publish -Prepo=gradle-dev-local -PdepLocation=1
-./gradlew :hmkit-utils:bintrayUpload
+./gradlew :hmkit-utils:bintrayUpload -PdepLocation=1
 ```
 
 ### Licence
