@@ -65,7 +65,7 @@ for instrumentation test setup.
 
 See *release-script* folder for release script examples, or
 
-* update ext.ver values in build.gradle or use -Pversion property
+* update ext.ver values in *all* build.gradle or use -Pversion property
 * set ext.depLocation to 1 or use -PdepLocation=1 property
 * Call `./gradlew publish` to release all the packages to dev repo.
 * Call `./gradlew :hmkit-utils:publish` to release a specific package.
