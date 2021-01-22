@@ -11,6 +11,8 @@ apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 apply plugin: "kotlin-android-extensions"
 apply from: "deploy.gradle"
+apply from: "https://raw.githubusercontent.com/tonisives/tools/master/gradle/deploy-android-v2.gradle"
+apply from: "https://raw.githubusercontent.com/tonisives/tools/master/gradle/test-shell-logging.gradle"
 
 version ver."${deploy.id}"
 
@@ -94,7 +96,3 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
     androidTestImplementation 'androidx.test.espresso:espresso-intents:3.1.0'
 }
-
-// deploy script
-apply from: "https://raw.githubusercontent.com/tonisives/tools/master/gradle/deploy-android-v2.gradle"
-apply from: "https://raw.githubusercontent.com/tonisives/tools/master/gradle/test-shell-logging.gradle"
