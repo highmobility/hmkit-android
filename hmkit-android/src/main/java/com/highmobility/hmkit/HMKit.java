@@ -84,7 +84,7 @@ public class HMKit {
     @Nullable public Broadcaster getBroadcaster() {
         throwIfDeviceCertificateNotSet();
 
-        if (ble == null) return null;
+//        if (ble == null) return null;
 
         if (broadcaster == null) {
             broadcaster = new Broadcaster(core, storage, threadManager, ble);
@@ -341,9 +341,9 @@ public class HMKit {
 
         if (oauth != null) oauth.setDeviceCertificate(privateKey, certificate.getSerial());
 
-        if (webService == null)
-            webService = new WebService(context, crypto, certificate.getIssuer(), webUrl);
-        else webService.setIssuer(certificate.getIssuer(), webUrl);
+//        if (webService == null)
+//            webService = new WebService(context, crypto, certificate.getIssuer(), webUrl);
+//        else webService.setIssuer(certificate.getIssuer(), webUrl);
 
         i("Set certificate: %s", certificate.toString());
     }
@@ -367,6 +367,7 @@ public class HMKit {
         // this terminates telematics as well because that uses the same web service.
         if (webService != null) webService.cancelAllRequests();
         core.stop();
+//        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     /**

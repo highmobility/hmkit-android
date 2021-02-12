@@ -29,6 +29,7 @@ import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.os.ParcelUuid;
+import android.util.Log;
 
 import com.highmobility.btcore.HMDevice;
 import com.highmobility.crypto.AccessCertificate;
@@ -80,12 +81,20 @@ public class Broadcaster extends Core.Broadcaster {
 
     Broadcaster(Core core, Storage storage, ThreadManager threadManager, SharedBle ble) {
         this.core = core;
+        if (core == null) {
+            Log.e("test123", "core is null");
+
+        } else {
+            Log.d("test123", "core " + core);
+        }
+
+        core.start(); // TODO: delete
         this.storage = storage;
         this.ble = ble;
         this.threadManager = threadManager;
         core.broadcaster = this;
         gattServer = new GattServer(core, threadManager, ble, gattServerCallback);
-        startBle(); // start listening for ble on/off
+//        startBle(); // start listening for ble on/off
     }
 
     /**

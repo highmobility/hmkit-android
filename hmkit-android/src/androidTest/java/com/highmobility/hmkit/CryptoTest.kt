@@ -29,6 +29,7 @@ import com.highmobility.crypto.value.PrivateKey
 import com.highmobility.crypto.value.PublicKey
 import com.highmobility.value.Bytes
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,6 +41,12 @@ import org.junit.runner.RunWith
 class CryptoTest {
 
     private lateinit var kit:HMKit
+
+    @Before
+    fun setup() {
+        kit = HMKit.getInstance()
+        kit.initialise(ApplicationProvider.getApplicationContext())
+    }
 
     @Test fun testSignatures() {
         val crypto = kit.crypto
@@ -56,11 +63,5 @@ class CryptoTest {
         publicKey =
                 PublicKey("A6A74048A85AC52A2E41DE5F9554C9CC36B6E3721EE8E8CE9169DC54192D17FD52C3BD1A4AE7F592756C083E17E54B7730965D99B238EB8D33B172DC35E32398")
         assertTrue(crypto.verify(data, sig, publicKey) == false)
-    }
-
-    @Before
-    fun setup() {
-        kit = HMKit.getInstance()
-        kit.initialise(ApplicationProvider.getApplicationContext())
     }
 }

@@ -94,7 +94,7 @@ class Core implements HMBTCoreInterface {
         this.threadManager = threadManager;
 
         // core init needs to be done once, only initialises structs(but requires device cert)
-        core.HMBTCoreInit(this);
+//        core.HMBTCoreInit(this);
     }
 
     void setDeviceCertificate(DeviceCertificate deviceCertificate, PrivateKey privateKey,
