@@ -231,7 +231,7 @@ public class HMKit {
         if (Build.DEVICE.equals("robolectric") == false)
             System.loadLibrary("hmbtcore");
 
-        crypto = new Crypto(Core.core);
+        crypto = new Crypto();
     }
 
     /**
