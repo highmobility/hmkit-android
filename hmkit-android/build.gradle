@@ -18,7 +18,6 @@ version ver."${deploy.id}"
 
 android {
     compileSdkVersion ver.compileSdk
-    ndkVersion '20.1.5948944'
 
     defaultConfig {
         minSdkVersion 21
