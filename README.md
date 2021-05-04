@@ -52,35 +52,5 @@ We happily accept your patches and contributions to this project. Before startin
 
 See more in 📘[Contributing](CONTRIBUTE.md).
 
-### Release
-
-All of the HMKit Android packages can be released from this project. This includes hmkit-android, hmkit-crypto, hmkit-utils and hmkit-auto-api.
-
-**Pre checks**
-
-* Run the unit and instrumentation tests: `./gradlew test && ./gradlew cAT`. Refer to [ble explorer app](https://github.com/highmobility/hm-android-bluetooth-auto-api-explorer)
-for instrumentation test setup.
-
-**Release**
-
-See *release-script* folder for release script examples, or
-
-* update ext.ver values in *all* build.gradle or use -Pversion property
-* set ext.depLocation to 1 or use -PdepLocation=1 property
-* Call `./gradlew publish` to release all the packages to dev repo.
-* Call `./gradlew :hmkit-utils:publish` to release a specific package.
-* Call `./gradlew :hmkit-utils:publish -Prepo=gradle-release-local` to specify the repo.
-
-If releasing to bintray, first test the release with scaffold from release-local, then
-call `./gradlew bintrayUpload -PdepLocation=1`.
-
-If pushing the same version number, the package will be overwritten in dev, rejected in release.
-
-For example, publish utils to dev-local and bintray, using the ext.ver value
-```
-./gradlew :hmkit-utils:publish -Prepo=gradle-dev-local -PdepLocation=1
-./gradlew :hmkit-utils:bintrayUpload -PdepLocation=1
-```
-
 ### Licence
 This repository is using the MIT licence. See more in 📘[LICENCE](LICENCE.md)

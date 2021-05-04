@@ -1,22 +1,17 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
-    }
-}
-
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 apply plugin: "kotlin-android-extensions"
+
+// deploy scripts need to be ordered and before `dependencies {` block. This way correct dependencies
+// are resolved
 apply from: "deploy.gradle"
+apply from: "https://raw.githubusercontent.com/tonisives/tools/master/gradle/deploy-java-mavenCentral.gradle"
+apply from: "https://raw.githubusercontent.com/tonisives/tools/master/gradle/test-shell-logging.gradle"
 
 version ver."${deploy.id}"
 
 android {
     compileSdkVersion ver.compileSdk
-    ndkVersion '20.1.5948944'
 
     defaultConfig {
         minSdkVersion 21
@@ -94,7 +89,3 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
     androidTestImplementation 'androidx.test.espresso:espresso-intents:3.1.0'
 }
-
-// deploy script
-apply from: "https://raw.githubusercontent.com/tonisives/tools/master/gradle/deploy-android-v2.gradle"
-apply from: "https://raw.githubusercontent.com/tonisives/tools/master/gradle/test-shell-logging.gradle"

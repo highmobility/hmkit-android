@@ -3,30 +3,19 @@ buildscript {
 
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.6.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
     }
 }
 
 allprojects {
     repositories {
         google()
-        jcenter()
-        maven { url "http://jfrog.high-mobility.com/artifactory/gradle-release-local/" }
-        if (project.hasProperty('devReadUser')) {
-            maven {
-                url "http://jfrog.high-mobility.com/artifactory/gradle-dev-local/"
-                credentials {
-                    username devReadUser
-                    password devReadPassword
-                }
-            }
-        } 
+        mavenCentral()
     }
 }
 
@@ -46,13 +35,13 @@ ext.ver = [
 ]
 
 ext.deps = [
-        "hmkit"   : "com.highmobility:hmkit-android:${ver."hmkit-android"}@aar",
-        "crypto"  : "com.highmobility:hmkit-crypto:${ver."hmkit-crypto"}",
-        "utils"   : "com.highmobility:hmkit-utils:${ver."hmkit-utils"}",
-        "corejni" : "com.highmobility:hmkit-core-jni:${ver."hmkit-core-jni"}",
-        "autoApi" : "com.highmobility:hmkit-auto-api:${ver."hmkit-auto-api"}",
-        "commandQueue" : "com.highmobility:command-queue:${ver."command-queue"}",
+        "hmkit"   : "com.high-mobility:hmkit-android:${ver."hmkit-android"}@aar",
+        "crypto"  : "com.high-mobility:hmkit-crypto:${ver."hmkit-crypto"}",
+        "utils"   : "com.high-mobility:hmkit-utils:${ver."hmkit-utils"}",
+        "corejni" : "com.high-mobility:hmkit-core-jni:${ver."hmkit-core-jni"}",
+        "autoApi" : "com.high-mobility:hmkit-auto-api:${ver."hmkit-auto-api"}",
+        "commandQueue" : "com.high-mobility:command-queue:${ver."command-queue"}",
         "timber"  : "com.jakewharton.timber:timber:4.7.1",
-        "volley"  : "com.android.volley:volley:1.1.1",
+        "volley"  : "com.android.volley:volley:1.2.0",
         "findBugs": 'com.google.code.findbugs:jsr305:3.0.2'
 ]
