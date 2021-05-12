@@ -52,18 +52,5 @@ We happily accept your patches and contributions to this project. Before startin
 
 See more in 📘[Contributing](CONTRIBUTE.md).
 
-### Release
-
-All of the HMKit Android packages can be released from this project. This includes hmkit-android, hmkit-crypto, hmkit-utils and hmkit-auto-api.
-
-**Pre checks**
-
-* Run the unit and instrumentation tests: `./gradlew test && ./gradlew cAT`. Refer to [ble explorer app](https://github.com/highmobility/hm-android-bluetooth-auto-api-explorer)
-for instrumentation test setup.
-
-**Release**
-
-See deploy-android-v2.gradle script
-
 ### Licence
 This repository is using the MIT licence. See more in 📘[LICENCE](LICENCE.md)
