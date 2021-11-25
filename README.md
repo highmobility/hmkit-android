@@ -20,7 +20,7 @@ In addition, the SDK provides a UI component used to initate OAuth2 for the end-
 
 ### Getting Started
 
-Get started with HMKit Android 📘[browse the documentation](https://high-mobility.com/learn/tutorials/sdk/android/).
+Get started with HMKit Android 📘[browse the documentation](https://docs.high-mobility.com/guides/getting-started/android/#framework).
 
 ### Setup
 
