@@ -12,12 +12,11 @@ version ver."${deploy.id}"
 
 android {
     compileSdkVersion ver.compileSdk
+    namespace 'com.highmobility.hmkit'
 
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion ver.compileSdk
-        versionCode 1
-        versionName "${version}"
         multiDexEnabled true
 
         ndk {
@@ -30,14 +29,15 @@ android {
 
     buildTypes {
         release {
+            buildConfigField("String", "VERSION_NAME", "\"${version}\"")
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            buildConfigField("String", "VERSION_NAME", "\"${version}\"")
+        }
     }
 
-    lintOptions {
-        abortOnError false
-    }
 
     testOptions {
         unitTests {
@@ -55,9 +55,12 @@ android {
     }
 
     sourceSets.main {
-        jni.srcDirs = [] // This prevents the auto generation of Android.mk
+        // This prevents the auto generation of Android.mk
         jniLibs.srcDir 'src/main/libs'
         // This is not necessary unless you have precompiled libraries in your project.
+    }
+    lint {
+        abortOnError false
     }
 }
 
@@ -79,13 +82,13 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     // its not easy to use ndk with junit(should build separate binary)
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.robolectric:robolectric:4.4'
-    testImplementation 'androidx.test:core:1.1.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.9.2'
+    testImplementation 'androidx.test:core:1.5.0'
 
-    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
-    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
-    androidTestImplementation 'androidx.test:rules:1.1.0-alpha4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
-    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.1.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
+    androidTestImplementation 'androidx.test:runner:1.5.1'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.5.0'
 }
