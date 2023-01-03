@@ -15,25 +15,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.11
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.11
+      - name: Set up NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r21e
+      - name: update submodules
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.GH_SSH_PRIVATE }}"
+          git submodule update --init --recursive
 
-    - name: update submodules
-      env:
-        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-      run: |
-        ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-        ssh-add - <<< "${{ secrets.GH_SSH_PRIVATE }}"
-        git submodule update --init --recursive
+      - name: build core with NDK
+        run: cd hmkit-android/src/main/jni && ndk-build && cd -
 
-    # ndk is pre installed on ubuntu-latest
-    - name: build core with NDK
-      run: cd hmkit-android/src/main/jni && /usr/local/lib/android/sdk/ndk-bundle/ndk-build && cd -
-
-    - name: Build with Gradle
-      run: |
-        chmod +x gradlew
-        ./gradlew build
+      - name: Build with Gradle
+        run: |
+          chmod +x gradlew
+          ./gradlew build
