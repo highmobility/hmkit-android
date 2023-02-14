@@ -77,6 +77,7 @@ public class HMKit {
     private Storage storage;
     private ThreadManager threadManager;
     private Crypto crypto;
+    private Configuration configuration;
 
     /**
      * @return The Broadcaster instance. Null if BLE is not supported.
@@ -87,7 +88,7 @@ public class HMKit {
         if (ble == null) return null;
 
         if (broadcaster == null) {
-            broadcaster = new Broadcaster(core, storage, threadManager, ble);
+            broadcaster = new Broadcaster(core, storage, threadManager, ble, configuration);
         }
 
         return broadcaster;
@@ -228,7 +229,7 @@ public class HMKit {
             throw new RuntimeException("Use getInstance() to get the HMKit singleton");
         }
 
-        if (Build.DEVICE.equals("robolectric") == false)
+        if (!Build.DEVICE.equals("robolectric"))
             System.loadLibrary("hmbtcore");
 
         crypto = new Crypto(Core.core);
@@ -248,6 +249,9 @@ public class HMKit {
             throw new IllegalStateException("HMKit can be initialised once. Call " +
                     "setDeviceCertificate() to set new Device Certificate.");
         }
+
+        if (this.configuration == null) this.configuration = new Configuration();
+
         setContextAndCreateStorage(context);
         i("Initialised: %s", getInfoString());
         return instance;
@@ -270,6 +274,23 @@ public class HMKit {
     }
 
     /**
+     * Initialise the SDK with a Device Certificate. This is needed before sending Commands.
+     *
+     * @param certificate     The broadcaster certificate.
+     * @param privateKey      32 byte private key with elliptic curve Prime 256v1.
+     * @param issuerPublicKey 64 byte public key of the Certificate Authority.
+     * @param configuration   The configuration.
+     * @param context         The Application Context.
+     * @return The HMKit instance.
+     */
+    public HMKit initialise(DeviceCertificate certificate, PrivateKey privateKey, PublicKey
+      issuerPublicKey, Context context, Configuration configuration) {
+        this.configuration = configuration;
+        initialise(certificate, privateKey, issuerPublicKey, context);
+        return this;
+    }
+
+    /**
      * Initialise the SDK with a Device Certificate. Call this before using the HMKit.
      *
      * @param certificate     The device certificate in Base64 or hex.
@@ -285,6 +306,23 @@ public class HMKit {
         PrivateKey decodedPrivateKey = new PrivateKey(privateKey);
         PublicKey decodedIssuerPublicKey = new PublicKey(issuerPublicKey);
         initialise(decodedCert, decodedPrivateKey, decodedIssuerPublicKey, context);
+        return this;
+    }
+
+    /**
+     * Initialise the SDK with a Device Certificate. Call this before using the HMKit.
+     *
+     * @param certificate     The device certificate in Base64 or hex.
+     * @param privateKey      32 byte private key with elliptic curve Prime 256v1 in Base64 or hex.
+     * @param issuerPublicKey 64 byte public key of the Certificate Authority in Base64 or hex.
+     * @param configuration   The configuration.
+     * @param context         The Application Context.
+     * @return The HMKit instance.
+     */
+    public HMKit initialise(String certificate, String privateKey, String
+      issuerPublicKey, Context context, Configuration configuration) {
+        this.configuration = configuration;
+        initialise(certificate, privateKey, issuerPublicKey, context);
         return this;
     }
 
@@ -533,5 +571,48 @@ public class HMKit {
          * @param error The error
          */
         void onDownloadFailed(DownloadAccessCertificateError error);
+    }
+
+    /**
+     * Different configuration values for HMKit.
+     */
+    static class Configuration {
+        private boolean bleReturnFullOffset;
+
+        boolean bleReturnFullOffset() {
+            return bleReturnFullOffset;
+        }
+
+        Configuration() {
+            bleReturnFullOffset = false;
+        }
+
+        Configuration.Builder builder() {
+            return new Configuration.Builder();
+        }
+
+        static class Builder {
+            private final Configuration configuration;
+
+            Builder() {
+                configuration = new Configuration();
+            }
+
+            /**
+             * @param bleReturnFullOffset True if the BLE bytes should be returned with the full offset.
+             *                            Keep the default (false) if the offset is to be removed.
+             *                            Default works for the majority of devices. However, for some
+             *                            devices, this needs to be set to true.
+             *
+             */
+            Configuration.Builder bleReturnFullOffset(boolean bleReturnFullOffset) {
+                configuration.bleReturnFullOffset = bleReturnFullOffset;
+                return this;
+            }
+
+            Configuration build() {
+                return configuration;
+            }
+        }
     }
 }

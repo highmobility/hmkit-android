@@ -58,12 +58,14 @@ class GattServer extends BluetoothGattServerCallback {
     private BluetoothGattCharacteristic infoCharacteristic;
     private BluetoothGattCharacteristic sensingReadCharacteristic;
     private BluetoothGattCharacteristic sensingWriteCharacteristic;
+    HMKit.Configuration configuration;
 
-    GattServer(Core core, ThreadManager threadManager, SharedBle ble, Callback broadcaster) {
+    GattServer(Core core, ThreadManager threadManager, SharedBle ble, Callback broadcaster, HMKit.Configuration configuration) {
         this.core = core;
         this.threadManager = threadManager;
         this.ble = ble;
         this.broadcaster = broadcaster;
+        this.configuration = configuration;
     }
 
     boolean isOpen() {
@@ -304,7 +306,14 @@ class GattServer extends BluetoothGattServerCallback {
                                             final BluetoothGattCharacteristic characteristic) {
         byte[] value = characteristic.getValue();
         if (value == null) value = new byte[0];
-        byte[] offsetBytes = Arrays.copyOfRange(value, offset, value.length);
+
+        byte[] offsetBytes = value;
+
+        if (!configuration.bleReturnFullOffset()) {
+            // default behaviour
+            offsetBytes = Arrays.copyOfRange(value, offset, value.length);
+        }
+
         final int characteristicId = getCharacteristicIdForCharacteristic(characteristic);
 
         boolean result = gattServer.sendResponse(device,
