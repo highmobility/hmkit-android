@@ -576,7 +576,7 @@ public class HMKit {
     /**
      * Different configuration values for HMKit.
      */
-    static class Configuration {
+    public static class Configuration {
         private boolean bleReturnFullOffset;
 
         boolean bleReturnFullOffset() {
@@ -591,10 +591,10 @@ public class HMKit {
             return new Configuration.Builder();
         }
 
-        static class Builder {
+        public static class Builder {
             private final Configuration configuration;
 
-            Builder() {
+            public Builder() {
                 configuration = new Configuration();
             }
 
@@ -605,12 +605,12 @@ public class HMKit {
              *                            devices, this needs to be set to true.
              *
              */
-            Configuration.Builder bleReturnFullOffset(boolean bleReturnFullOffset) {
+            public Configuration.Builder bleReturnFullOffset(boolean bleReturnFullOffset) {
                 configuration.bleReturnFullOffset = bleReturnFullOffset;
                 return this;
             }
 
-            Configuration build() {
+            public Configuration build() {
                 return configuration;
             }
         }
