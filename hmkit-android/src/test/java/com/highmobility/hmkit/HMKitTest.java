@@ -9,6 +9,7 @@ import com.highmobility.crypto.value.PrivateKey;
 import com.highmobility.crypto.value.PublicKey;
 import com.highmobility.value.Bytes;
 
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
@@ -37,5 +38,10 @@ public class HMKitTest {
           context,
           configuration
         );
+    }
+
+    @Test
+    public void emptyTest() {
+
     }
 }
