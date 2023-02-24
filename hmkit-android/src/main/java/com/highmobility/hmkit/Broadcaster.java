@@ -78,13 +78,13 @@ public class Broadcaster extends Core.Broadcaster {
     private final List<ConnectedLink> links = new ArrayList<>();
     private BroadcastConfiguration configuration;
 
-    Broadcaster(Core core, Storage storage, ThreadManager threadManager, SharedBle ble) {
+    Broadcaster(Core core, Storage storage, ThreadManager threadManager, SharedBle ble, HMKit.Configuration configuration) {
         this.core = core;
         this.storage = storage;
         this.ble = ble;
         this.threadManager = threadManager;
         core.broadcaster = this;
-        gattServer = new GattServer(core, threadManager, ble, gattServerCallback);
+        gattServer = new GattServer(core, threadManager, ble, gattServerCallback, configuration);
         startBle(); // start listening for ble on/off
     }
 
