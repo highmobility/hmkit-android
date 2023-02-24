@@ -240,21 +240,35 @@ public class HMKit {
      * #setDeviceCertificate (DeviceCertificate, PrivateKey, PublicKey)} later to send Commands.
      *
      * @param context The context.
+     * @param configuration The configuration.
      * @return The HMKit instance.
      */
-    public HMKit initialise(Context context) {
+    public HMKit initialise(Context context, Configuration configuration) {
         // all initialises come to here. throw to make clear how the sdk is supposed to be used -
         // initialise(cert, ctx) or initialise(ctx) + setDeviceCert(cert).
         if (this.context != null) {
             throw new IllegalStateException("HMKit can be initialised once. Call " +
-                    "setDeviceCertificate() to set new Device Certificate.");
+              "setDeviceCertificate() to set new Device Certificate.");
         }
 
-        if (this.configuration == null) this.configuration = new Configuration();
+        if (configuration == null) configuration = new Configuration();
+        this.configuration = configuration;
 
         setContextAndCreateStorage(context);
         i("Initialised: %s", getInfoString());
         return instance;
+    }
+
+    /**
+     * Initialise the SDK with context to get access to storage only. Call {@link
+     * #setDeviceCertificate (DeviceCertificate, PrivateKey, PublicKey)} later to send Commands.
+     *
+     * @param context The context.
+     * @return The HMKit instance.
+     */
+    public HMKit initialise(Context context) {
+        initialise(context, new Configuration());
+        return this;
     }
 
     /**
@@ -285,8 +299,8 @@ public class HMKit {
      */
     public HMKit initialise(DeviceCertificate certificate, PrivateKey privateKey, PublicKey
       issuerPublicKey, Context context, Configuration configuration) {
-        this.configuration = configuration;
-        initialise(certificate, privateKey, issuerPublicKey, context);
+        initialise(context, configuration);
+        setDeviceCertificate(certificate, privateKey, issuerPublicKey);
         return this;
     }
 
@@ -301,8 +315,7 @@ public class HMKit {
      */
     public HMKit initialise(String certificate, String privateKey, String
             issuerPublicKey, Context context) {
-        DeviceCertificate decodedCert = new DeviceCertificate(new Bytes(Base64.decode
-                (certificate)));
+        DeviceCertificate decodedCert = new DeviceCertificate(certificate);
         PrivateKey decodedPrivateKey = new PrivateKey(privateKey);
         PublicKey decodedIssuerPublicKey = new PublicKey(issuerPublicKey);
         initialise(decodedCert, decodedPrivateKey, decodedIssuerPublicKey, context);
@@ -321,8 +334,10 @@ public class HMKit {
      */
     public HMKit initialise(String certificate, String privateKey, String
       issuerPublicKey, Context context, Configuration configuration) {
-        this.configuration = configuration;
-        initialise(certificate, privateKey, issuerPublicKey, context);
+        DeviceCertificate decodedCert = new DeviceCertificate(certificate);
+        PrivateKey decodedPrivateKey = new PrivateKey(privateKey);
+        PublicKey decodedIssuerPublicKey = new PublicKey(issuerPublicKey);
+        initialise(decodedCert, decodedPrivateKey, decodedIssuerPublicKey, context, configuration);
         return this;
     }
 
