@@ -31,6 +31,7 @@ import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
+import android.os.Build;
 
 import com.highmobility.btcore.HMBTCoreInterface;
 import com.highmobility.utils.ByteUtils;
@@ -59,13 +60,36 @@ class GattServer extends BluetoothGattServerCallback {
     private BluetoothGattCharacteristic sensingReadCharacteristic;
     private BluetoothGattCharacteristic sensingWriteCharacteristic;
     HMKit.Configuration configuration;
+    Storage storage;
 
-    GattServer(Core core, ThreadManager threadManager, SharedBle ble, Callback broadcaster, HMKit.Configuration configuration) {
+    /**
+     * Offset fix shared preferences values
+     * sharedOffsetFixEnabled
+     * 0 menas not stored in shared prefs
+     * 1 means offset fix is enabled
+     * 2 means offset fix is not enabled
+     */
+    private static Integer sharedOffsetFixEnabled;
+    private static String sharedOffsetFixOsRelease;
+    private static int offsetFixlastOffset = 0;
+    private static int offsetFixlastOffsetCount = 0;
+
+    GattServer(Core core, ThreadManager threadManager, SharedBle ble, Callback broadcaster, HMKit.Configuration configuration, Storage storage) {
         this.core = core;
         this.threadManager = threadManager;
         this.ble = ble;
         this.broadcaster = broadcaster;
         this.configuration = configuration;
+        this.storage = storage;
+
+        /**
+         * Read offset problem values from shared preferences when
+         * ble offset problem detection is enabled
+         */
+        if (configuration.bleEnableOffsetProblemDetection()) {
+            sharedOffsetFixEnabled = storage.getIsBleOffsetFixEnabled();
+            sharedOffsetFixOsRelease = storage.getBleOffsetFixOs();
+        }
     }
 
     boolean isOpen() {
@@ -299,6 +323,72 @@ class GattServer extends BluetoothGattServerCallback {
         broadcaster.onServiceAdded(status == BluetoothGatt.GATT_SUCCESS);
     }
 
+    /**
+     * This function will detect if ble function onCharacteristicReadRequest
+     * has offset problem. In normal case only line offsetFixlastOffsetCount = 0; is called.
+     *
+     * @param offset
+     * @param value
+     */
+    private void bleOffsetProblemDetect(final int offset, byte[] value){
+        boolean detectedOffsetProblem = false;
+
+        /**
+         * If value length is reached and read request comes still in
+         * more than 5 times then set flag that problem is detected
+         */
+        offsetFixlastOffset = offset;
+        if(offsetFixlastOffset == value.length){
+            offsetFixlastOffsetCount++;
+            if(offsetFixlastOffsetCount > 5){
+                detectedOffsetProblem = true;
+            }
+        }else{
+            offsetFixlastOffsetCount = 0;
+        }
+
+        /**
+         * If problem is detected then check if preferences needs to be changed
+         */
+        if(detectedOffsetProblem == true){
+            boolean storeToShared = false;
+            Integer sharedEnableValue = 0;
+            /**
+             * If sharedOffsetFixEnabled is 0
+             * it means values are not set to shared preferences
+             * and enable offset fix logic
+             */
+            if(sharedOffsetFixEnabled == 0){
+                storeToShared = true;
+                sharedEnableValue = 1;
+            }else{
+                /**
+                 * If problem is detected and values are set to shared preferences
+                 * then change them only when os release version is changed
+                 */
+                if(sharedOffsetFixOsRelease != Build.VERSION.RELEASE){
+                    storeToShared = true;
+                    if(sharedEnableValue == 1){
+                        sharedEnableValue = 2;
+                    }else{
+                        sharedEnableValue = 1;
+                    }
+                }
+            }
+
+            /**
+             * Store offset problem detection values to shared preferences
+             */
+            if(storeToShared == true){
+                storage.setIsBleOffsetFixEnabled(sharedEnableValue);
+                storage.setBleOffsetFixOs(Build.VERSION.RELEASE);
+
+                sharedOffsetFixEnabled = sharedEnableValue;
+                sharedOffsetFixOsRelease = Build.VERSION.RELEASE;
+            }
+        }
+    }
+
     @Override
     public void onCharacteristicReadRequest(final BluetoothDevice device,
                                             final int requestId,
@@ -307,11 +397,11 @@ class GattServer extends BluetoothGattServerCallback {
         byte[] value = characteristic.getValue();
         if (value == null) value = new byte[0];
 
-        byte[] offsetBytes = value;
+        byte[] offsetBytes = Arrays.copyOfRange(value, offset, value.length);
 
-        if (!configuration.bleReturnFullOffset()) {
-            // default behaviour
-            offsetBytes = Arrays.copyOfRange(value, offset, value.length);
+        if (configuration.bleEnableOffsetProblemDetection() && sharedOffsetFixEnabled == 1) {
+            //If offset fix in enabled and detected
+            offsetBytes = value;
         }
 
         final int characteristicId = getCharacteristicIdForCharacteristic(characteristic);
@@ -321,6 +411,16 @@ class GattServer extends BluetoothGattServerCallback {
                 BluetoothGatt.GATT_SUCCESS,
                 offset,
                 offsetBytes);
+
+
+        /**
+         * Offset problem detection logic
+         *
+         * If detection is enabled
+         */
+        if (configuration.bleEnableOffsetProblemDetection()) {
+            bleOffsetProblemDetect(offset, value);
+        }
 
         if (result == false) {
             e("onCharacteristicReadRequest: failed to send response");

@@ -84,7 +84,7 @@ public class Broadcaster extends Core.Broadcaster {
         this.ble = ble;
         this.threadManager = threadManager;
         core.broadcaster = this;
-        gattServer = new GattServer(core, threadManager, ble, gattServerCallback, configuration);
+        gattServer = new GattServer(core, threadManager, ble, gattServerCallback, configuration, storage);
         startBle(); // start listening for ble on/off
     }
 

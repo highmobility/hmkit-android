@@ -28,7 +28,7 @@ public class HMKitTest {
         PublicKey publicKey = new PublicKey("865856E69C351F0F2C616FA4D101AA55D593896806C1EE3D3C1AF07BC0F999C2B2A700307F827E131DB4F63FDADB4F0A89BCE88E0E40521F08E1AC4D122BF896");
 
         HMKit.Configuration configuration = new HMKit.Configuration.Builder()
-          .bleReturnFullOffset(true)
+          .bleEnableOffsetProblemDetection(true)
           .build();
 
         HMKit.getInstance().initialise(

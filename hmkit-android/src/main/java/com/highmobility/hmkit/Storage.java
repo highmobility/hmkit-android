@@ -51,6 +51,10 @@ public class Storage {
     private static final String ACCESS_CERTIFICATE_STORAGE_KEY = "ACCESS_CERTIFICATE_STORAGE_KEY";
     private static final String device_certificate_json_object = "device_access_certificate";
 
+    //Offset fix shared preferences names
+    public static final String offsetFixEnabled = "offsetFixEnabled";
+    public static final String offsetFixOsRelease = "offsetFixOsRelease";
+
     public enum Result {
         SUCCESS(0), STORAGE_FULL(1), INTERNAL_ERROR(2);
 
@@ -335,5 +339,33 @@ public class Storage {
         if (writeCertificates(newCerts) == true) return Result.SUCCESS;
 
         return Result.STORAGE_FULL;
+    }
+
+    public int getIsBleOffsetFixEnabled(){
+        return settings.getInt(offsetFixEnabled,0);
+    }
+
+    public void setIsBleOffsetFixEnabled(int isEnabed){
+        editor.putInt(offsetFixEnabled,isEnabed).commit();
+    }
+
+    public void deleteIsBleOffsetFixEnabled(){
+        if(settings.contains(offsetFixEnabled)){
+            editor.remove(offsetFixEnabled).commit();
+        }
+    }
+
+    public String getBleOffsetFixOs(){
+        return settings.getString(offsetFixOsRelease,"");
+    }
+
+    public void setBleOffsetFixOs(String offsetFixOs){
+        editor.putString(offsetFixOsRelease, offsetFixOs).commit();
+    }
+
+    public void deleteBleOffsetFixOs(){
+        if(settings.contains(offsetFixOsRelease)) {
+            editor.remove(offsetFixOsRelease).commit();
+        }
     }
 }
