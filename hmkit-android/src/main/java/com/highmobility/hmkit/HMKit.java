@@ -342,6 +342,17 @@ public class HMKit {
     }
 
     /**
+     * Erase all shared preferences what HMKit has stored.
+     * Must be called after initialise.
+     * Otherwise context does not exist.
+     *
+     */
+    public void eraseSharedPreferences(){
+        getStorage().deleteIsBleOffsetFixEnabled();
+        getStorage().deleteBleOffsetFixOs();
+    }
+
+    /**
      * Set a new Device Certificate.
      *
      * @param certificate     The device certificate in Base64 or hex.
@@ -592,14 +603,14 @@ public class HMKit {
      * Different configuration values for HMKit.
      */
     public static class Configuration {
-        private boolean bleReturnFullOffset;
+        private boolean bleEnableOffsetProblemDetection;
 
-        boolean bleReturnFullOffset() {
-            return bleReturnFullOffset;
+        boolean bleEnableOffsetProblemDetection() {
+            return bleEnableOffsetProblemDetection;
         }
 
         Configuration() {
-            bleReturnFullOffset = false;
+            bleEnableOffsetProblemDetection = false;
         }
 
         Configuration.Builder builder() {
@@ -614,14 +625,12 @@ public class HMKit {
             }
 
             /**
-             * @param bleReturnFullOffset True if the BLE bytes should be returned with the full offset.
-             *                            Keep the default (false) if the offset is to be removed.
-             *                            Default works for the majority of devices. However, for some
-             *                            devices, this needs to be set to true.
+             * @param bleEnableOffsetProblemDetection True if BLE offset problem detection should
+             *                                        be turned on.
              *
              */
-            public Configuration.Builder bleReturnFullOffset(boolean bleReturnFullOffset) {
-                configuration.bleReturnFullOffset = bleReturnFullOffset;
+            public Configuration.Builder bleEnableOffsetProblemDetection(boolean bleEnableOffsetProblemDetection) {
+                configuration.bleEnableOffsetProblemDetection = bleEnableOffsetProblemDetection;
                 return this;
             }
 
