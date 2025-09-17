@@ -23,7 +23,7 @@ jobs:
       - name: Set up NDK
         uses: nttld/setup-ndk@v1
         with:
-          ndk-version: r21e
+          ndk-version: r28c
       - name: update submodules
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
